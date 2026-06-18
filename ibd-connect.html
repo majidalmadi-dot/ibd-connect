@@ -258,6 +258,17 @@ th{color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;
 /* confetti pieces handled in JS */
 [data-mode=light] .spin{border-color:var(--line);border-top-color:var(--accent)}
 
+/* ---- accessibility & mobile polish ---- */
+*:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+button:focus:not(:focus-visible){outline:none}
+.iconbtn{min-width:44px;min-height:44px}
+.tab{min-height:48px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.welcome{background:linear-gradient(140deg,color-mix(in srgb,var(--accent) 20%,transparent),color-mix(in srgb,var(--accent2) 8%,transparent));border:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+
 /* ---- calculators ---- */
 .tool-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:6px;transition:.15s;text-align:start}
 .tool-card:active{transform:scale(.97);background:var(--card2)}
@@ -668,6 +679,22 @@ const I18N = {
   lastDiscShort:{en:"IBD-DISC impact",ar:"أثر IBD-DISC"},
   shareReport:{en:"Share report with my doctor",ar:"مشاركة التقرير مع طبيبي"},
   dataCompleteness:{en:"Logging completeness",ar:"اكتمال التسجيل"},
+  // first-run welcome
+  welcomeT:{en:"Welcome to IBD Connect 👋",ar:"مرحبًا بك في رفيق التهاب الأمعاء 👋"},
+  welcomeBody:{en:"Tap a quick action below to log how you feel. Your dashboard, streaks and reports build up as you go — everything stays private on this device.",ar:"اضغط على إجراء سريع بالأسفل لتسجيل شعورك. تتكوّن لوحتك وتتابعك وتقاريرك مع الاستخدام — وكل شيء يبقى خاصًا على هذا الجهاز."},
+  gotIt:{en:"Got it",ar:"حسنًا"},
+  // weekly recap
+  weeklyRecap:{en:"Weekly recap",ar:"ملخّص الأسبوع"},
+  vsLastWeek:{en:"vs last week",ar:"مقارنة بالأسبوع الماضي"},
+  recapNote:{en:"A descriptive look at this week compared with last — counts only, no interpretation.",ar:"نظرة وصفية لهذا الأسبوع مقارنة بالماضي — أعداد فقط، دون تفسير."},
+  // hydration
+  hydrationT:{en:"Hydration",ar:"الترطيب"},
+  hydrationSub:{en:"Track your daily fluids",ar:"تتبّع سوائلك اليومية"},
+  glassesToday:{en:"Glasses today",ar:"أكواب اليوم"},
+  addGlass:{en:"Add a glass",ar:"أضف كوبًا"},
+  waterGoalLbl:{en:"Daily glasses goal",ar:"هدف الأكواب اليومي"},
+  glass:{en:"glass",ar:"كوب"},
+  hydrationTip:{en:"Sip steadily through the day. Oral rehydration solutions help replace salts during frequent diarrhea — ask your care team.",ar:"ارتشف بثبات طوال اليوم. محاليل الإماهة الفموية تساعد على تعويض الأملاح أثناء الإسهال المتكرّر — اسأل فريق رعايتك."},
 };
 
 const DISC = [
@@ -746,7 +773,7 @@ function blank(){return{
   lang:null, onboarded:false, authed:false,
   user:{name:'',email:'',year:'',gender:'',disease:'',diagYear:'',avatar:'🙂',country:'',countryFlag:''},
   prefs:{remindDaily:true,remindMed:false,remindContent:true,analytics:false,medTime:'20:00',theme:'midnight',
-    stepGoal:8000,activeMinGoal:30,nudges:true,nudgeDaily:true,nudgeStreak:true,nudgeHydra:true},
+    stepGoal:8000,activeMinGoal:30,waterGoal:8,nudges:true,nudgeDaily:true,nudgeStreak:true,nudgeHydra:true,seenWelcome:false},
   logs:[], disc:null, reminders:[],
   badges:[], learn:JSON.parse(JSON.stringify(DEFAULT_LEARN)), tips:JSON.parse(JSON.stringify(DEFAULT_TIPS)),
   seenDays:[], nudgeDismiss:{},
@@ -770,6 +797,7 @@ function seedDemo(s){
     if(Math.random()>.5)s.logs.push({id:rid(),type:'activity',t:iso,act:pick(['walking','gym','yoga']),mins:15+Math.floor(Math.random()*45),intensity:1+Math.floor(Math.random()*3)});
     if(Math.random()>.3)s.logs.push({id:rid(),type:'bowel',t:iso,count:1+Math.floor(Math.random()*5),bristol:1+Math.floor(Math.random()*7)});
     if(Math.random()>.2)s.logs.push({id:rid(),type:'steps',t:iso,steps:3000+Math.floor(Math.random()*8000)});
+    if(Math.random()>.3)s.logs.push({id:rid(),type:'water',t:iso,glasses:3+Math.floor(Math.random()*6)});
   }
   return s;
 }
@@ -811,6 +839,7 @@ const TYPE_META={
   steps:{icon:'👟',key:'tSteps',color:'--good'},
   weight:{icon:'⚖️',key:'tWeight',color:'--accent2'},
   activemin:{icon:'⚡',key:'tActiveMin',color:'--warn'},
+  water:{icon:'💧',key:'hydrationT',color:'--accent2'},
 };
 function logLabel(l){
   const m=TYPE_META[l.type]||{icon:'•',key:'history'};let extra='';
@@ -823,6 +852,7 @@ function logLabel(l){
   else if(l.type==='steps')extra=(l.steps||0).toLocaleString()+' '+t('steps');
   else if(l.type==='weight')extra=(l.kg||0)+' '+t('weightKg').replace(/\s*\(.*\)/,'');
   else if(l.type==='activemin')extra=(l.mins||0)+' '+t('tActiveMin').toLowerCase();
+  else if(l.type==='water')extra=(l.glasses||0)+' '+t('glass');
   return {icon:m.icon,title:t(m.key),sub:extra};
 }
 function addLog(o){o.id=rid();o.t=o.t||new Date().toISOString();S.logs.push(o);awardXp(10);checkBadges();checkQuests();save();}
@@ -867,14 +897,15 @@ function navTab(name){STACK=[];CURRENT=name;CURRENT_OPTS={};render();}
 function renderTabs(){
   const tb=$('#tabbar');
   const items=[['today','🏠','tabToday'],['track','➕','tabTrack'],['reports','📊','tabReports'],['learn','📖','tabLearn'],['more','⋯','tabMore']];
+  tb.setAttribute('role','tablist');
   tb.innerHTML=items.map(([n,ic,lab])=>
-    `<button class="tab ${CURRENT===n?'on':''}" onclick="navTab('${n}')"><span class="ic">${ic}</span>${t(lab)}</button>`).join('');
+    `<button class="tab ${CURRENT===n?'on':''}" role="tab" aria-label="${t(lab)}" aria-selected="${CURRENT===n}" onclick="navTab('${n}')"><span class="ic" aria-hidden="true">${ic}</span>${t(lab)}</button>`).join('');
 }
 
 /* small UI factories */
 function topbar(titleK,subK,opts){opts=opts||{};
   const right = opts.right||'';
-  const left = opts.back?`<button class="iconbtn" onclick="goBack()">${isAr()?'›':'‹'}</button>`:'';
+  const left = opts.back?`<button class="iconbtn" aria-label="${t('back')}" onclick="goBack()">${isAr()?'›':'‹'}</button>`:'';
   return `<div class="topbar">${left}<div style="flex:1"><h1>${opts.rawTitle||t(titleK)}</h1>${subK?`<div class="sub">${opts.rawSub||t(subK)}</div>`:''}</div>${right}</div>`;
 }
 function greeting(){const h=new Date().getHours();return h<12?t('goodMorning'):h<18?t('goodAfternoon'):t('goodEvening');}
@@ -1067,7 +1098,7 @@ window.doReset=()=>{if(!$('#rsEmail').value.trim())return toast(t('fillFields'))
 /* ============================================================
    SCREENS — Today Dashboard
    ============================================================ */
-const QUICK=[['symptom','🩺','symptoms'],['bowel','🚽','bowel'],['meal','🍽️','meals'],['sleep','😴','sleep'],['mood','🌤️','mood'],['activity','🏃','activity']];
+const QUICK=[['symptom','🩺','symptoms'],['bowel','🚽','bowel'],['meal','🍽️','meals'],['sleep','😴','sleep'],['mood','🌤️','mood'],['water','💧','hydrationT']];
 
 route('today',(n)=>{
   const today=logsOn(todayKey());
@@ -1077,8 +1108,10 @@ route('today',(n)=>{
   const right=`<button class="iconbtn" onclick="navTab('more')">${u.avatar||'🙂'}</button>`;
   const allClosed=g.every(x=>x.val>=x.goal);
   const stepGoal=S.prefs.stepGoal||8000, stepsNow=todaySteps(), stepPct=Math.min(stepsNow/stepGoal,1);
+  const waterGoal=S.prefs.waterGoal||8, waterNow=todayWater();
   n.innerHTML=`${topbar(null,null,{rawTitle:greeting()+(u.name?', '+u.name.split(' ')[0]:''),rawSub:new Date().toLocaleDateString(isAr()?'ar-SA':'en-GB',{weekday:'long',day:'numeric',month:'long'}),right})}
    <div class="content">
+     ${!S.prefs.seenWelcome?`<div class="card welcome"><div class="between" style="align-items:flex-start"><div style="flex:1"><b style="font-size:15.5px">${t('welcomeT')}</b><p class="muted" style="font-size:13px;line-height:1.55;margin:6px 0 0">${t('welcomeBody')}</p></div></div><button class="btn btn-primary" style="margin-top:12px" onclick="dismissWelcome()">${t('gotIt')}</button></div>`:''}
      ${nudgeBanner()}
      <!-- Level / XP bar -->
      <div class="card tap" onclick="go('rewards')" style="padding:15px 16px">
@@ -1110,20 +1143,27 @@ route('today',(n)=>{
        <div class="stat"><div class="v">${weekActiveDays()}/7</div><div class="l">${t('thisWeek')}</div></div>
      </div>
 
-     <!-- steps + tools row -->
+     <!-- steps + hydration rings -->
      <div class="grid2">
        <button class="card tap" style="text-align:start" onclick="go('steps')">
-         <div class="row" style="gap:12px"><div style="position:relative;width:56px;height:56px;flex-shrink:0">${dashStepRing(stepPct)}</div>
+         <div class="row" style="gap:12px"><div style="position:relative;width:56px;height:56px;flex-shrink:0">${dashStepRing(stepPct,'👟','var(--good)')}</div>
          <div style="min-width:0"><b style="font-size:14.5px">👟 ${t('tSteps')}</b><div class="muted" style="font-size:12px">${stepsNow.toLocaleString()} / ${stepGoal.toLocaleString()}</div></div></div>
        </button>
-       <button class="card tap" style="text-align:start;display:flex;flex-direction:column;justify-content:center;gap:6px" onclick="go('tools')">
-         <div style="font-size:26px">🧮</div><b style="font-size:14.5px">${t('toolsT')}</b><span class="muted" style="font-size:12px">${t('toolsSub')}</span>
-       </button>
+       <div class="card" style="text-align:start">
+         <div class="row" style="gap:12px"><div style="position:relative;width:56px;height:56px;flex-shrink:0">${dashStepRing(Math.min(waterNow/waterGoal,1),'💧','var(--accent2)')}</div>
+         <div style="flex:1;min-width:0"><b style="font-size:14.5px">💧 ${t('hydrationT')}</b><div class="muted" style="font-size:12px">${waterNow} / ${waterGoal} ${t('glass')}</div></div></div>
+         <button class="btn btn-ghost btn-sm" style="margin-top:10px;width:100%" onclick="addGlass()" aria-label="${t('addGlass')}">＋ ${t('addGlass')}</button>
+       </div>
      </div>
 
-     <button class="card tap" style="text-align:start" onclick="go('metrics')">
-       <div class="row"><div style="font-size:26px">📋</div><div style="flex:1"><b style="font-size:15px">${t('metricsT')}</b><div class="muted" style="font-size:12.5px">${t('metricsSub')}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div>
-     </button>
+     <div class="grid2">
+       <button class="card tap" style="text-align:start;display:flex;flex-direction:column;justify-content:center;gap:6px;min-height:88px" onclick="go('tools')">
+         <div style="font-size:26px">🧮</div><b style="font-size:14.5px">${t('toolsT')}</b>
+       </button>
+       <button class="card tap" style="text-align:start;display:flex;flex-direction:column;justify-content:center;gap:6px;min-height:88px" onclick="go('metrics')">
+         <div style="font-size:26px">📋</div><b style="font-size:14.5px">${t('metricsT')}</b>
+       </button>
+     </div>
 
      <!-- quick log -->
      <div class="section-title">${t('quickLog')}</div>
@@ -1163,8 +1203,8 @@ function weekActiveDays(){return lastNDays(7).filter(d=>logsOn(d).length>0).leng
 function ringSvg(val,max,size){const r=size/2-7,c=2*Math.PI*r,p=Math.min(val/max,1);
   return `<svg viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--bg2)" stroke-width="7"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--accent)" stroke-width="7" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c*(1-p)}"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;transform:rotate(0)">${val}/${max}</div>`;}
 function liRow(l){const x=logLabel(l);return `<div class="li"><div class="ic">${x.icon}</div><div class="tx"><b>${x.title}</b><small>${x.sub}</small></div><small class="faint">${fmtTime(l.t)}</small></div>`;}
-function dashStepRing(pct){const r=24,cx=28,cy=28,c=2*Math.PI*r,off=c*(1-Math.min(pct,1));
-  return `<svg viewBox="0 0 56 56" style="transform:rotate(-90deg);width:56px;height:56px"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg2)" stroke-width="6"/><circle class="ringv" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--good)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}" data-off="${off}" style="transition:stroke-dashoffset 1s cubic-bezier(.25,.8,.3,1)"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px">👟</div>`;}
+function dashStepRing(pct,emoji,color){const r=24,cx=28,cy=28,c=2*Math.PI*r,off=c*(1-Math.min(pct,1));
+  return `<svg viewBox="0 0 56 56" style="transform:rotate(-90deg);width:56px;height:56px"><circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--bg2)" stroke-width="6"/><circle class="ringv" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color||'var(--good)'}" stroke-width="6" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c}" data-off="${off}" style="transition:stroke-dashoffset 1s cubic-bezier(.25,.8,.3,1)"/></svg><div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px">${emoji||'👟'}</div>`;}
 
 route('badges',(n)=>{go('rewards',{replace:true});});
 
@@ -1432,7 +1472,11 @@ route('track',(n)=>{
 
      <div class="grid2">
        <button class="card tap" style="text-align:start" onclick="go('steps')"><div style="font-size:26px">👟</div><b style="font-size:14.5px;display:block;margin-top:8px">${t('tSteps')}</b><span class="muted" style="font-size:12px">${todaySteps().toLocaleString()} ${t('steps')}</span></button>
+       <button class="card tap" style="text-align:start" onclick="openLogger('water')"><div style="font-size:26px">💧</div><b style="font-size:14.5px;display:block;margin-top:8px">${t('hydrationT')}</b><span class="muted" style="font-size:12px">${todayWater()} / ${S.prefs.waterGoal||8} ${t('glass')}</span></button>
+     </div>
+     <div class="grid2">
        <button class="card tap" style="text-align:start" onclick="go('weightTrend')"><div style="font-size:26px">⚖️</div><b style="font-size:14.5px;display:block;margin-top:8px">${t('tWeight')}</b><span class="muted" style="font-size:12px">${countType('weight')} ${isAr()?'سجل':'logs'}</span></button>
+       <button class="card tap" style="text-align:start" onclick="openLogger('activity')"><div style="font-size:26px">🏃</div><b style="font-size:14.5px;display:block;margin-top:8px">${t('activity')}</b><span class="muted" style="font-size:12px">${countType('activity')} ${isAr()?'سجل':'logs'}</span></button>
      </div>
 
      <button class="card tap" style="text-align:start" onclick="go('meds')">
@@ -1454,7 +1498,7 @@ function countType(ty){return S.logs.filter(l=>l.type===ty).length;}
 /* ---------- Loggers (bottom sheets) ---------- */
 window.openLogger=function(ty){
   if(ty==='disc')return go('disc');
-  const builders={symptom:lgSymptom,meal:lgMeal,sleep:lgSleep,mood:lgMood,activity:lgActivity,bowel:lgBowel};
+  const builders={symptom:lgSymptom,meal:lgMeal,sleep:lgSleep,mood:lgMood,activity:lgActivity,bowel:lgBowel,water:lgWater};
   openSheet(builders[ty]());
 };
 function sheetHead(icon,key){return `<div class="row" style="margin-bottom:16px"><div style="font-size:26px">${icon}</div><h2 style="font-size:19px;margin:0;font-weight:800">${t(key)}</h2></div>`;}
@@ -1532,6 +1576,18 @@ function lgBowel(){
 window.pickBristol=function(elm){const w=$('#bwBristol');[...w.children].forEach(c=>c.classList.remove('on'));elm.classList.add('on');w.dataset.val=elm.dataset.v;};
 window.saveBowel=()=>{const bristol=+($('#bwBristol').dataset.val||0);if(!bristol)return toast(t('selectOne'));
   addLog({type:'bowel',count:+$('#bwRange').value,bristol});closeSheet();toast(t('loggedOk'));refreshIfMain();};
+
+function lgWater(){const goal=S.prefs.waterGoal||8;const now=todayWater();
+  return sheetHead('💧','hydrationT')+`
+    <div class="center" style="margin:6px 0 14px"><div style="font-size:40px;font-weight:800;color:var(--accent2)">${now} <span style="font-size:18px;color:var(--muted)">/ ${goal} ${t('glass')}</span></div></div>
+    <div class="field"><label>${t('glassesToday')}: <b id="wgC">${now}</b></label>
+      <input type="range" min="0" max="20" value="${now}" oninput="$('#wgC').textContent=this.value" id="wgRange" style="width:100%"></div>
+    <button class="btn btn-primary" onclick="saveWater()">${t('logNow')}</button>
+    <div class="card" style="background:var(--bg2);margin-top:12px"><p class="muted" style="font-size:12px;margin:0;line-height:1.55">💧 ${t('hydrationTip')}</p></div>`;
+}
+window.saveWater=()=>{const g=+$('#wgRange').value;const cur=logsOn(todayKey()).find(l=>l.type==='water');
+  if(cur){cur.glasses=g;cur.t=new Date().toISOString();save();}else{addLog({type:'water',glasses:g});}
+  closeSheet();toast(t('loggedOk'));refreshIfMain();};
 
 function refreshIfMain(){if(MAIN_TABS.includes(CURRENT))render();}
 
@@ -1674,6 +1730,22 @@ route('compare',(n)=>{
 let repRange=7;
 let CHARTS=[];
 function destroyCharts(){CHARTS.forEach(c=>{try{c.destroy();}catch(e){}});CHARTS=[];}
+function weekRecapCard(){
+  const A=lastNDays(7), B=lastNDays(14).slice(0,7);
+  const sumField=(days,type,f)=>S.logs.filter(l=>l.type===type&&days.includes(l.t.slice(0,10))).reduce((s,l)=>s+(l[f]||0),0);
+  const cnt=(days,type)=>S.logs.filter(l=>l.type===type&&days.includes(l.t.slice(0,10))).length;
+  const avgField=(days,type,f)=>{const a=S.logs.filter(l=>l.type===type&&days.includes(l.t.slice(0,10))).map(l=>l[f]);return a.length?a.reduce((x,y)=>x+y,0)/a.length:0;};
+  const rows=[
+    {lab:t('totalLogs'), a:A.reduce((s,d)=>s+logsOn(d).length,0), b:B.reduce((s,d)=>s+logsOn(d).length,0)},
+    {lab:t('symFreq'), a:cnt(A,'symptom'), b:cnt(B,'symptom')},
+    {lab:t('bmFreq'), a:sumField(A,'bowel','count'), b:sumField(B,'bowel','count')},
+    {lab:t('hydrationT'), a:sumField(A,'water','glasses'), b:sumField(B,'water','glasses')},
+    {lab:t('avgMood'), a:+avgField(A,'mood','mood').toFixed(1), b:+avgField(B,'mood','mood').toFixed(1)},
+  ];
+  return `<div class="card"><div class="between" style="margin-bottom:6px"><div class="section-title" style="margin:0">${t('weeklyRecap')}</div><span class="faint" style="font-size:11px">${t('vsLastWeek')}</span></div>
+    ${rows.map(r=>{const d=+(r.a-r.b).toFixed(1);const arrow=d>0?'▲':d<0?'▼':'■';return `<div class="between" style="padding:8px 2px;border-bottom:1px solid var(--line)"><span style="font-size:13px">${r.lab}</span><span class="row" style="gap:9px"><b style="font-size:13.5px">${r.a}</b><span style="font-size:11px;color:${d===0?'var(--muted)':'var(--accent)'};min-width:42px;text-align:end">${arrow} ${Math.abs(d)}</span></span></div>`;}).join('')}
+    <p class="muted" style="font-size:11px;margin:10px 0 0;line-height:1.5">ℹ️ ${t('recapNote')}</p></div>`;
+}
 route('reports',(n)=>{
   destroyCharts();
   const days=lastNDays(repRange);
@@ -1703,6 +1775,7 @@ route('reports',(n)=>{
        <div class="stat"><div class="v">${avgSleep}h</div><div class="l">${t('avgSleepH')}</div></div>
        <div class="stat"><div class="v">${avgMood}/5</div><div class="l">${t('avgMood')}</div></div>
      </div>
+     ${weekRecapCard()}
      <!-- logging heatmap -->
      <div class="card"><div class="section-title" style="margin:0 0 10px">${t('activityMap')}</div>${heatmap(repRange===7?15:30)}
        <div class="row" style="gap:6px;justify-content:flex-end;margin-top:10px;font-size:10.5px;color:var(--faint)">${isAr()?'أقل':'Less'} ${[0,1,2,3,4].map(i=>`<span style="width:13px;height:13px;border-radius:4px;background:${heatColor(i)}"></span>`).join('')} ${isAr()?'أكثر':'More'}</div></div>
@@ -1849,6 +1922,7 @@ function dailyAgg(type,mode,days){days=days||14;return lastNDays(days).map(d=>{c
   if(mode==='avgMood')return ls.reduce((s,l)=>s+(l.mood||0),0)/ls.length;
   if(mode==='avgSev')return ls.reduce((s,l)=>s+(l.sev||0),0)/ls.length;
   if(mode==='lastWeight')return ls[ls.length-1].kg;
+  if(mode==='sumGlasses')return ls.reduce((s,l)=>s+(l.glasses||0),0);
   return ls.length;});}
 function lastLog(type){const ls=S.logs.filter(l=>l.type===type);return ls.length?ls.sort((a,b)=>new Date(b.t)-new Date(a.t))[0]:null;}
 function spark(vals,color){const w=120,h=32,n=vals.length;if(!n)return '';
@@ -1883,6 +1957,9 @@ route('metrics',(n)=>{
     {icon:'🍽️',label:t('meals'),color:'var(--coral)',today:logsOn(todayKey()).filter(l=>l.type==='meal').length,
      latest:(()=>{const l=lastLog('meal');return l?t(l.mealType||'meals')+(l.photo?' · 📷':''):t('noneYet');})(),
      series:dailyAgg('meal','count')},
+    {icon:'💧',label:t('hydrationT'),color:'var(--accent2)',today:todayWater()+' / '+(S.prefs.waterGoal||8),
+     latest:(()=>{const v=todayWater();return v?v+' '+t('glass'):t('noneYet');})(),
+     series:dailyAgg('water','sumGlasses')},
   ];
   const completeness=Math.round(lastNDays(14).filter(d=>logsOn(d).length>0).length/14*100);
   n.innerHTML=`${topbar('metricsT','metricsSub',{back:true})}
@@ -2309,6 +2386,9 @@ window.doBurn=()=>{const s=num('buS'),w=num('buW')||70;if(!s)return toast(t('fil
    ============================================================ */
 function todaySteps(){return logsOn(todayKey()).filter(l=>l.type==='steps').reduce((s,l)=>s+(l.steps||0),0);}
 function todayActiveMin(){return logsOn(todayKey()).filter(l=>l.type==='activemin').reduce((s,l)=>s+(l.mins||0),0);}
+function todayWater(){return logsOn(todayKey()).filter(l=>l.type==='water').reduce((s,l)=>s+(l.glasses||0),0);}
+window.addGlass=function(){const cur=logsOn(todayKey()).find(l=>l.type==='water');if(cur){cur.glasses=(cur.glasses||0)+1;cur.t=new Date().toISOString();awardXp(2);checkBadges();save();}else{addLog({type:'water',glasses:1});}toast('💧 +1 '+t('glass'));if(MAIN_TABS.includes(CURRENT))render();};
+window.dismissWelcome=function(){S.prefs.seenWelcome=true;save();render();};
 route('steps',(n)=>{
   const goal=S.prefs.stepGoal||8000;const cur=todaySteps();const pct=Math.min(cur/goal,1);
   const week=lastNDays(7).map(d=>S.logs.filter(l=>l.type==='steps'&&l.t.slice(0,10)===d).reduce((s,l)=>s+(l.steps||0),0));
