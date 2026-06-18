@@ -1,0 +1,37 @@
+{
+  "expo": {
+    "name": "IBD Connect",
+    "slug": "ibd-connect",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "ibdconnect",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0F14"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sga.ibdconnect",
+      "infoPlist": { "CFBundleAllowMixedLocalizations": true }
+    },
+    "android": {
+      "package": "com.sga.ibdconnect",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0F14"
+      }
+    },
+    "web": { "bundler": "metro", "favicon": "./assets/favicon.png" },
+    "plugins": ["expo-notifications"],
+    "extra": {
+      "nonMedical": true,
+      "supabaseUrl": "",
+      "supabaseAnonKey": ""
+    }
+  }
+}

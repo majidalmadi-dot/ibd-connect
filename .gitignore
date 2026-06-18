@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+ibd-connect-rn/node_modules/
+
+# Vercel / Netlify / Expo build + link artifacts
+.vercel/
+.vercel-web/
+.netlify/
+.expo/
+dist/
+web-build/
+
+# OS / editor
+.DS_Store
+*.log
+
+# Large source deck (not code)
+*.pptx
+*.pptx.pdf
