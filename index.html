@@ -1958,13 +1958,16 @@ function lgMeal(){
     <div class="field"><label>${t('mealType')}</label>
       <div class="chips" id="mlType">${['breakfast','lunch','dinner','snack'].map(k=>`<button class="chip" data-v="${k}" onclick="pickChip('mlType',this)">${t(k)}</button>`).join('')}</div></div>
     <div class="field"><label>${t('mealDesc')}</label><textarea class="input" id="mlDesc" placeholder="${t('mealPh')}"></textarea></div>
+    <div class="field"><label>${isAr()?'أطعمة قد تكون محفِّزات (اختياري)':'Possible trigger foods (optional)'}</label>
+      <div class="chips" id="mlTags">${FOOD_TAGS.map(ft=>`<button type="button" class="chip" data-v="${ft.id}" onclick="this.classList.toggle('on')">${dietLX(ft.n)}</button>`).join('')}</div></div>
     <div class="field"><label>${t('addPhoto')}</label>
       <button class="btn btn-ghost" id="mlPhotoBtn" onclick="this.dataset.on='1';this.innerHTML='${svgIcon('check',16)} ${t('photoAdded')}'">${svgIcon('camera',16)} ${t('addPhoto')}</button></div>
     <button class="btn btn-primary" onclick="saveMeal()">${t('logNow')}</button>`;
 }
 window.saveMeal=()=>{const mealType=$('#mlType').dataset.val,desc=$('#mlDesc').value.trim();
   if(!mealType||!desc)return toast(t('fillFields'));
-  addLog({type:'meal',mealType,desc,photo:$('#mlPhotoBtn').dataset.on==='1'});closeSheet();toast(t('loggedOk'));refreshIfMain();};
+  const tags=[...document.querySelectorAll('#mlTags .chip.on')].map(c=>c.dataset.v);
+  addLog({type:'meal',mealType,desc,tags,photo:$('#mlPhotoBtn').dataset.on==='1'});closeSheet();toast(t('loggedOk'));refreshIfMain();};
 
 function lgSleep(){
   return sheetHead('😴','sleep')+`
@@ -2636,6 +2639,7 @@ route('reports',(n)=>{
        <div class="card"><div class="section-title" style="margin:0 0 10px">${t('moodTrend')}</div><canvas id="cMood" height="120"></canvas></div>
        <div class="card"><div class="section-title" style="margin:0 0 10px">${t('sleepTrend')}</div><canvas id="cSleep" height="120"></canvas></div>
      </div>
+     <div class="card tap" onclick="go('triggers')" style="display:flex;gap:12px;align-items:center"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon('chart',22)}</span><div style="flex:1"><b style="font-size:14.5px">${isAr()?'مكتشف المحفّزات':'Trigger finder'}</b><div class="muted" style="font-size:12px">${isAr()?'ما الذي يرتبط بأيامك الأصعب':'what links to your tougher days'}</div></div><span class="chev">${isAr()?'‹':'›'}</span></div>
      <button class="btn btn-primary" onclick="exportPDF()">${svgIcon('share',18)} ${t('exportPdf')}</button>
      <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12.5px;margin:0;line-height:1.6">ℹ️ ${t('reportNote')}</p></div>`}
    </div>`;
@@ -3151,7 +3155,8 @@ route('diet',(n)=>{
      ${order.map(id=>{const d=DIET_DATA[id];return `<div class="dcard" onclick="go('dietDetail',{id:'${id}'})"><div class="dt" style="background:linear-gradient(135deg,${d.hue[0]},${d.hue[1]})"><img src="${d.hero}" alt="" loading="lazy" onerror="this.style.display='none'"></div><div class="dx"><b>${dietLX(d.title)}</b><small>${dietLX(d.tag)}</small></div><span class="chev">${ar?'‹':'›'}</span></div>`;}).join('')}
      <div class="dsec">${ar?'دليل الأطعمة السعودية':'Saudi food guide'}</div>
      <div class="card tap" onclick="go('dietSaudi')" style="display:flex;gap:12px;align-items:center"><div class="dt" style="width:62px;height:62px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#C96442,#e0a07a)"><img src="${FP.kabsa}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div><div class="dx" style="flex:1"><b style="font-size:14.5px">${ar?'أطباقنا المحلية والتهاب الأمعاء':'Our local dishes & IBD'}</b><small style="font-size:11.5px;color:var(--muted)">${ar?'كبسة، مندي، جريش، فول، تمر… ماذا تختار':'kabsa, mandi, jareesh, foul, dates… what to choose'}</small></div><span class="chev">${ar?'‹':'›'}</span></div>
-     <div class="dsec">${ar?'وصفات وقائمة تسوّق':'Recipes & grocery'}</div>
+     <div class="dsec">${ar?'أدوات الطعام':'Food tools'}</div>
+     <div class="card tap" onclick="go('fodmapcheck')" style="display:flex;gap:12px;align-items:center"><div class="dt" style="width:62px;height:62px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#7C5CFF,#a98bff);display:flex;align-items:center;justify-content:center;color:#fff">${svgIcon('camera',26)}</div><div class="dx" style="flex:1"><b style="font-size:14.5px">${ar?'فاحص الفودماب + باركود':'FODMAP checker + barcode'}</b><small style="font-size:11.5px;color:var(--muted)">${ar?'ابحث عن طعام أو امسح منتجًا':'search a food or scan a product'}</small></div><span class="chev">${ar?'‹':'›'}</span></div>
      <div class="card tap" onclick="go('recipes')" style="display:flex;gap:12px;align-items:center"><div class="dt" style="width:62px;height:62px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#0f9b8e,#1ec8b0)"><img src="${FP.fish}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div><div class="dx" style="flex:1"><b style="font-size:14.5px">${ar?'وصفات لطيفة على الأمعاء':'Gut-friendly recipes'}</b><small style="font-size:11.5px;color:var(--muted)">${ar?'أطباق سعودية + قائمة تسوّق تلقائية':'Saudi dishes + auto grocery list'}</small></div><span class="chev">${ar?'‹':'›'}</span></div>
      <button class="btn btn-ghost" style="margin-top:6px" onclick="go('labs')">${svgIcon('pulse',18)} ${ar?'تتبّع تحاليلك':'Track your labs'}</button>
      <button class="btn btn-ghost" onclick="navTab('track')">${svgIcon('edit',18)} ${ar?'سجّل وجباتك لاكتشاف محفزاتك':'Log meals to find your triggers'}</button>
@@ -3455,6 +3460,153 @@ route('grocery',(n)=>{
 });
 
 /* ============================================================
+   SCREENS — Trigger finder, FODMAP checker, Health import
+   ============================================================ */
+const FOOD_TAGS=[
+ {id:'dairy',n:{en:'Dairy',ar:'ألبان'}},{id:'spicy',n:{en:'Spicy',ar:'حار'}},{id:'fried',n:{en:'Fried / fatty',ar:'مقلي / دسم'}},
+ {id:'caffeine',n:{en:'Caffeine',ar:'كافيين'}},{id:'wheat',n:{en:'Wheat / gluten',ar:'قمح / غلوتين'}},{id:'legumes',n:{en:'Legumes',ar:'بقوليات'}},
+ {id:'rawveg',n:{en:'Raw veg / high-fibre',ar:'خضار نيئة / ألياف'}},{id:'carbonated',n:{en:'Carbonated',ar:'غازية'}},{id:'sweets',n:{en:'Sweets / sugar',ar:'حلويات / سكر'}},
+ {id:'redmeat',n:{en:'Red meat',ar:'لحم أحمر'}},{id:'oniongarlic',n:{en:'Onion / garlic',ar:'بصل / ثوم'}},{id:'processed',n:{en:'Processed',ar:'مصنّع'}}
+];
+/* ---- Trigger finder: descriptive associations only (not causation/diagnosis) ---- */
+route('triggers',(n)=>{
+  const ar=isAr();const days=lastNDays(90);
+  const loggedDays=days.filter(d=>logsOn(d).length>0).length;
+  // symptom load per day (avg severity 0–3)
+  const load={};days.forEach(d=>{const s=S.logs.filter(l=>l.type==='symptom'&&l.t.slice(0,10)===d).map(l=>l.sev);load[d]=s.length?s.reduce((a,b)=>a+b,0)/s.length:0;});
+  function assoc(present){const w=days.filter(present),wo=days.filter(d=>!present(d));
+    if(w.length<3||wo.length<3)return null;
+    const av=a=>a.reduce((s,d)=>s+load[d],0)/a.length;
+    return {with:av(w),without:av(wo),n:w.length,diff:av(w)-av(wo)};}
+  const rows=[];
+  FOOD_TAGS.forEach(ft=>{const a=assoc(d=>S.logs.some(l=>l.type==='meal'&&l.t.slice(0,10)===d&&(l.tags||[]).includes(ft.id)));if(a)rows.push({lab:dietLX(ft.n),...a});});
+  const factors=[
+    {lab:ar?'نوم أقل من ٦ ساعات':'Short sleep (<6h)',f:d=>S.logs.some(l=>l.type==='sleep'&&l.t.slice(0,10)===d&&l.hours<6)},
+    {lab:ar?'مزاج منخفض (≤٢/٥)':'Low mood (≤2/5)',f:d=>S.logs.some(l=>l.type==='mood'&&l.t.slice(0,10)===d&&l.mood<=2)},
+    {lab:ar?'نشاط قليل (<٤٠٠٠ خطوة)':'Low activity (<4000 steps)',f:d=>{const st=S.logs.filter(l=>l.type==='steps'&&l.t.slice(0,10)===d);return st.length&&st[st.length-1].steps<4000;}}
+  ];
+  factors.forEach(fc=>{const a=assoc(fc.f);if(a)rows.push({lab:fc.lab,...a});});
+  rows.sort((a,b)=>b.diff-a.diff);
+  const worse=rows.filter(r=>r.diff>0.15);const better=rows.filter(r=>r.diff<-0.15);
+  const bar=(v,col)=>`<div style="flex:1;height:8px;border-radius:6px;background:var(--line);overflow:hidden"><i style="display:block;height:100%;width:${Math.round(v/3*100)}%;background:${col}"></i></div>`;
+  const rowHTML=r=>`<div class="card" style="padding:12px"><div class="between" style="margin-bottom:7px"><b style="font-size:13.5px">${r.lab}</b><span style="font-size:11.5px;color:${r.diff>0?'var(--bad)':'var(--good)'}">${r.diff>0?'▲':'▼'} ${Math.abs(r.diff).toFixed(1)} ${ar?'نقطة':'pts'}</span></div>
+    <div class="row" style="gap:8px;align-items:center;margin-bottom:4px"><span class="muted" style="font-size:10.5px;width:54px">${ar?'مع':'with'}</span>${bar(r.with,'var(--bad)')}<b style="font-size:11px;width:28px;text-align:end">${r.with.toFixed(1)}</b></div>
+    <div class="row" style="gap:8px;align-items:center"><span class="muted" style="font-size:10.5px;width:54px">${ar?'بدون':'without'}</span>${bar(r.without,'var(--good)')}<b style="font-size:11px;width:28px;text-align:end">${r.without.toFixed(1)}</b></div>
+    <div class="faint" style="font-size:10.5px;margin-top:5px">${r.n} ${ar?'يوم':'days'}</div></div>`;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'مكتشف المحفّزات':'Trigger finder',rawSub:ar?'أنماط في بياناتك أنت':'patterns in your own data'})}
+   <div class="content">
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.55">ℹ️ ${ar?'يقارن متوسط شدّة الأعراض في الأيام التي سجّلت فيها كل عامل مقابل الأيام الأخرى. ارتباط وصفي فقط — ليس سببًا ولا تشخيصًا. أضف وسوم الطعام عند تسجيل وجباتك لإثراء النتائج.':'Compares your average symptom severity on days you logged each factor vs other days. Descriptive association only — not causation or diagnosis. Tag foods when logging meals to enrich this.'}</p></div>
+     ${loggedDays<10?`<div class="card center" style="padding:28px"><div style="color:var(--muted)">${svgIcon('compass',34)}</div><p class="muted" style="margin-top:8px;font-size:13px">${ar?`سجّل لأيام أكثر لفتح الأنماط (${loggedDays}/10 يوم حتى الآن)`:`Log a few more days to unlock patterns (${loggedDays}/10 so far)`}</p></div>`
+       :`${worse.length?`<div class="dsec" style="color:var(--bad)">${ar?'مرتبط بأيام أصعب':'Linked to tougher days'}</div>${worse.map(rowHTML).join('')}`:''}
+         ${better.length?`<div class="dsec" style="color:var(--good)">${ar?'مرتبط بأيام أفضل':'Linked to better days'}</div>${better.map(rowHTML).join('')}`:''}
+         ${(!worse.length&&!better.length)?`<div class="card center" style="padding:24px"><p class="muted" style="font-size:13px">${ar?'لا أنماط واضحة بعد — واصل التسجيل ووسم الأطعمة.':'No clear patterns yet — keep logging and tagging foods.'}</p></div>`:''}`}
+     <button class="btn btn-ghost" onclick="navTab('track')">${svgIcon('edit',18)} ${ar?'سجّل وجبة ووسم محفّزاتها':'Log a meal & tag its foods'}</button>
+     <div class="card" style="background:#fff7ee;border:1px solid #ffe2bf"><p style="font-size:11px;color:#7a5a2a;margin:0;line-height:1.5">⚠️ ${ar?'الارتباط لا يعني السببية. ناقش أي تغييرات غذائية مع فريقك أو اختصاصي تغذية.':'Association is not causation. Discuss any diet changes with your team or a dietitian.'}</p></div>
+     <div style="height:8px"></div>
+   </div>`;
+});
+/* ---- FODMAP checker + barcode scanner (educational food reference) ---- */
+const FODMAP_DB=[
+ {n:{en:'White rice',ar:'أرز أبيض'},lvl:'low'},{n:{en:'Oats',ar:'شوفان'},lvl:'low'},{n:{en:'Potato',ar:'بطاطس'},lvl:'low'},{n:{en:'Carrot',ar:'جزر'},lvl:'low'},
+ {n:{en:'Cucumber',ar:'خيار'},lvl:'low'},{n:{en:'Tomato',ar:'طماطم'},lvl:'low'},{n:{en:'Zucchini',ar:'كوسا'},lvl:'low'},{n:{en:'Eggplant',ar:'باذنجان'},lvl:'low'},
+ {n:{en:'Bell pepper',ar:'فلفل رومي'},lvl:'low'},{n:{en:'Spinach',ar:'سبانخ'},lvl:'low'},{n:{en:'Lettuce',ar:'خس'},lvl:'low'},{n:{en:'Orange',ar:'برتقال'},lvl:'low'},
+ {n:{en:'Strawberry',ar:'فراولة'},lvl:'low'},{n:{en:'Kiwi',ar:'كيوي'},lvl:'low'},{n:{en:'Grapes',ar:'عنب'},lvl:'low'},{n:{en:'Pineapple',ar:'أناناس'},lvl:'low'},
+ {n:{en:'Chicken',ar:'دجاج'},lvl:'low'},{n:{en:'Fish',ar:'سمك'},lvl:'low'},{n:{en:'Eggs',ar:'بيض'},lvl:'low'},{n:{en:'Firm tofu',ar:'توفو صلب'},lvl:'low'},
+ {n:{en:'Hard cheese',ar:'جبن صلب'},lvl:'low'},{n:{en:'Lactose-free milk',ar:'حليب خالٍ من اللاكتوز'},lvl:'low'},{n:{en:'Olive oil',ar:'زيت زيتون'},lvl:'low'},
+ {n:{en:'Peanuts',ar:'فول سوداني'},lvl:'low'},{n:{en:'Walnuts',ar:'جوز'},lvl:'low'},{n:{en:'Quinoa',ar:'كينوا'},lvl:'low'},
+ {n:{en:'Banana (firm)',ar:'موز (غير ناضج)'},lvl:'mod',swap:{en:'ripe banana is higher — keep portions small',ar:'الموز الناضج أعلى — اجعل الحصة صغيرة'}},
+ {n:{en:'Avocado',ar:'أفوكادو'},lvl:'mod',swap:{en:'small amount only',ar:'كمية صغيرة فقط'}},
+ {n:{en:'Sweet potato',ar:'بطاطا حلوة'},lvl:'mod',swap:{en:'½ cup is fine; more is high',ar:'نصف كوب مناسب؛ أكثر يصبح عاليًا'}},
+ {n:{en:'Sweet corn',ar:'ذرة'},lvl:'mod'},{n:{en:'Almonds',ar:'لوز'},lvl:'mod',swap:{en:'≤10 nuts',ar:'١٠ حبات أو أقل'}},
+ {n:{en:'Dates',ar:'تمر'},lvl:'high',swap:{en:'try 1–2 only; or firm banana',ar:'جرّب تمرة أو اثنتين؛ أو موزة غير ناضجة'}},
+ {n:{en:'Onion',ar:'بصل'},lvl:'high',swap:{en:'use green spring-onion tops',ar:'استخدم أطراف البصل الأخضر'}},
+ {n:{en:'Garlic',ar:'ثوم'},lvl:'high',swap:{en:'use garlic-infused oil',ar:'استخدم زيتًا منكّهًا بالثوم'}},
+ {n:{en:'Wheat bread',ar:'خبز القمح'},lvl:'high',swap:{en:'sourdough or low-FODMAP bread',ar:'خبز مخمّر أو منخفض الفودماب'}},
+ {n:{en:'Regular milk',ar:'حليب عادي'},lvl:'high',swap:{en:'lactose-free milk',ar:'حليب خالٍ من اللاكتوز'}},
+ {n:{en:'Yogurt (regular)',ar:'لبن عادي'},lvl:'high',swap:{en:'lactose-free yoghurt',ar:'لبن خالٍ من اللاكتوز'}},
+ {n:{en:'Honey',ar:'عسل'},lvl:'high',swap:{en:'maple syrup or table sugar',ar:'شراب القيقب أو السكر العادي'}},
+ {n:{en:'Apple',ar:'تفاح'},lvl:'high',swap:{en:'orange or kiwi',ar:'برتقال أو كيوي'}},
+ {n:{en:'Pear',ar:'كمثرى'},lvl:'high'},{n:{en:'Watermelon',ar:'بطيخ'},lvl:'high',swap:{en:'cantaloupe (small)',ar:'شمام (كمية صغيرة)'}},
+ {n:{en:'Mango',ar:'مانجو'},lvl:'high',swap:{en:'small portion',ar:'حصة صغيرة'}},
+ {n:{en:'Chickpeas / hummus',ar:'حمص'},lvl:'high',swap:{en:'¼ cup canned & rinsed',ar:'ربع كوب معلّب ومغسول'}},
+ {n:{en:'Lentils',ar:'عدس'},lvl:'high',swap:{en:'¼ cup canned & rinsed',ar:'ربع كوب معلّب ومغسول'}},
+ {n:{en:'Foul (fava beans)',ar:'فول'},lvl:'high',swap:{en:'small portions only',ar:'حصص صغيرة فقط'}},
+ {n:{en:'Cashews',ar:'كاجو'},lvl:'high'},{n:{en:'Cauliflower',ar:'قرنبيط'},lvl:'high'},{n:{en:'Mushroom',ar:'فطر'},lvl:'high',swap:{en:'canned mushrooms are lower',ar:'الفطر المعلّب أقل'}}
+];
+const FLVL={low:{en:'Low',ar:'منخفض',c:'var(--good)'},mod:{en:'Moderate',ar:'متوسط',c:'var(--warn)'},high:{en:'High',ar:'عالٍ',c:'var(--bad)'}};
+function fodmapRow(it){const ar=isAr();const L=FLVL[it.lvl];return `<div class="card" style="padding:11px 13px"><div class="between"><b style="font-size:13.5px">${dietLX(it.n)}</b><span class="sbadge" style="background:${L.c}22;color:${L.c}">${ar?L.ar:L.en}</span></div>${it.swap?`<div class="muted" style="font-size:11.5px;margin-top:4px">↪ ${dietLX(it.swap)}</div>`:''}</div>`;}
+window.fodmapSearch=function(){const q=($('#fmQ').value||'').trim().toLowerCase();const out=$('#fmList');if(!out)return;
+  const res=FODMAP_DB.filter(it=>!q||it.n.en.toLowerCase().includes(q)||(it.n.ar||'').includes(q));
+  out.innerHTML=res.length?res.map(fodmapRow).join(''):`<p class="muted" style="font-size:12.5px;padding:8px">${isAr()?'غير موجود في قائمتنا — تحقّق من المكوّنات أو اسأل اختصاصي تغذية.':'Not in our list — check the ingredients or ask a dietitian.'}</p>`;};
+route('fodmapcheck',(n)=>{
+  const ar=isAr();
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'فاحص الفودماب':'FODMAP checker',rawSub:ar?'مرجع غذائي تعليمي':'an educational food reference'})}
+   <div class="content">
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.55">ℹ️ ${ar?'مستويات فودماب عامة للتثقيف فقط — تحمّلك الشخصي قد يختلف. ليست نصيحة غذائية فردية.':'General FODMAP levels for education only — your personal tolerance may differ. Not individual dietary advice.'}</p></div>
+     <button class="btn btn-primary" onclick="startBarcode()">${svgIcon('camera',18)} ${ar?'مسح الباركود':'Scan a barcode'}</button>
+     <div id="bcOut"></div>
+     <div class="field" style="margin-top:10px"><input class="input" id="fmQ" placeholder="${ar?'ابحث عن طعام…':'Search a food…'}" oninput="fodmapSearch()"></div>
+     <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:11px">${Object.keys(FLVL).map(k=>`<span class="sbadge" style="background:${FLVL[k].c}22;color:${FLVL[k].c}">${ar?FLVL[k].ar:FLVL[k].en}</span>`).join('')}</div>
+     <div id="fmList"></div>
+     <div style="height:8px"></div>
+   </div>`;
+  setTimeout(fodmapSearch,30);
+});
+let _zxingP=null;
+function ensureZXing(){if(window.ZXing)return Promise.resolve(window.ZXing);if(_zxingP)return _zxingP;
+  _zxingP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js';s.onload=()=>res(window.ZXing);s.onerror=()=>{_zxingP=null;rej(new Error('load'));};document.head.appendChild(s);});
+  return _zxingP;}
+window.startBarcode=async function(){const ar=isAr();
+  const ov=document.createElement('div');ov.id='bcOv';ov.style.cssText='position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px';
+  ov.innerHTML=`<video id="bcVid" playsinline style="width:92%;max-width:420px;border-radius:14px;background:#111"></video><div style="color:#cfe;font-size:13px">${ar?'وجّه الكاميرا نحو الباركود':'Point the camera at a barcode'}</div><div class="row" style="gap:8px"><input class="input" id="bcManual" placeholder="${ar?'أو أدخل الرقم':'or type the number'}" style="width:160px"><button class="btn-sm btn-primary" onclick="lookupBarcode(document.getElementById('bcManual').value)">${svgIcon('check',15)}</button></div><button class="btn btn-ghost" style="color:#fff;border:1px solid #456" onclick="stopBarcode()">${ar?'إلغاء':'Cancel'}</button>`;
+  document.body.appendChild(ov);
+  let Z;try{Z=await ensureZXing();}catch(e){toast(ar?'تعذّر تحميل الماسح — أدخل الرقم يدويًا':'Scanner unavailable — type the number');return;}
+  try{const reader=new Z.BrowserMultiFormatReader();window.__bcReader=reader;
+    reader.decodeFromVideoDevice(null,'bcVid',(result)=>{if(result){const code=result.getText();stopBarcode();lookupBarcode(code);}});
+  }catch(e){toast(ar?'تعذّر فتح الكاميرا — أدخل الرقم يدويًا':'Camera unavailable — type the number');}
+};
+window.stopBarcode=function(){try{window.__bcReader&&window.__bcReader.reset();}catch(e){}const o=document.getElementById('bcOv');if(o)o.remove();};
+window.lookupBarcode=async function(code){const ar=isAr();code=(code||'').trim();if(!code)return;const out=$('#bcOut');
+  if(out)out.innerHTML=`<div class="card"><p class="muted" style="font-size:12.5px;margin:0">${ar?'جارٍ البحث…':'Looking up…'}</p></div>`;
+  let name='';try{const r=await fetch('https://world.openfoodfacts.org/api/v0/product/'+encodeURIComponent(code)+'.json');const j=await r.json();if(j&&j.status===1)name=j.product.product_name||j.product.generic_name||'';}catch(e){}
+  if(!out)return;
+  const low=name.toLowerCase();
+  const match=name?FODMAP_DB.find(it=>low.includes(it.n.en.toLowerCase().split(' ')[0])||(it.n.ar&&name.includes(it.n.ar.split(' ')[0]))):null;
+  out.innerHTML=`<div class="card"><b style="font-size:14px">${name||(ar?'منتج غير معروف':'Unknown product')}</b><div class="muted" style="font-size:11px;margin-top:2px">${ar?'الباركود':'barcode'}: ${code}</div>
+    ${match?`<div style="margin-top:8px">${fodmapRow(match)}</div>`:`<p class="muted" style="font-size:12px;margin:8px 0 0">${ar?'لا تطابق في قائمتنا — راجِع مكوّناته (ابحث عن البصل/الثوم/القمح/اللاكتوز).':'No match in our list — check its ingredients (look for onion/garlic/wheat/lactose).'}</p>`}</div>`;};
+/* ---- Health data import (CSV) — live wearable sync needs the native app ---- */
+route('healthimport',(n)=>{
+  const ar=isAr();
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'استيراد بيانات الصحة':'Import health data',rawSub:ar?'من ملف CSV — بخصوصية على جهازك':'from a CSV file — privately on your device'})}
+   <div class="content">
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.55">ℹ️ ${ar?'استورد الخطوات أو الوزن أو النوم دفعةً واحدة من ملف CSV (عمودان: التاريخ، القيمة). يعمل مع تطبيقات التصدير مثل «Health Auto Export».':'Bulk-import steps, weight or sleep from a CSV (two columns: date, value). Works with export apps like “Health Auto Export”.'}</p></div>
+     <div class="field"><label>${ar?'النوع':'Metric'}</label><select class="input" id="hiMetric"><option value="steps">${ar?'الخطوات':'Steps'}</option><option value="weight">${ar?'الوزن (كجم)':'Weight (kg)'}</option><option value="sleep">${ar?'النوم (ساعات)':'Sleep (hours)'}</option></select></div>
+     <div class="field"><label>${ar?'ملف CSV':'CSV file'}</label><input class="input" type="file" id="hiFile" accept=".csv,text/csv"></div>
+     <button class="btn btn-primary" onclick="importHealthCSV()">${svgIcon('check',18)} ${ar?'استيراد':'Import'}</button>
+     <div id="hiOut"></div>
+     <div class="card" style="background:#fff7ee;border:1px solid #ffe2bf"><p style="font-size:11.5px;color:#7a5a2a;margin:0;line-height:1.55">⚠️ ${ar?'المزامنة التلقائية المباشرة مع Apple Health / Google Fit تتطلب تطبيق الهاتف الأصلي (لا تتيحها متصفّحات الويب). هنا الاستيراد يدوي وخاص بالكامل.':'Live auto-sync with Apple Health / Google Fit needs the native phone app (web browsers don’t allow it). Here, import is manual and fully private.'}</p></div>
+     <div style="height:8px"></div>
+   </div>`;
+});
+window.importHealthCSV=function(){const ar=isAr();const f=($('#hiFile').files||[])[0];const metric=$('#hiMetric').value;const out=$('#hiOut');
+  if(!f){toast(ar?'اختر ملفًا':'Choose a file');return;}
+  const rd=new FileReader();
+  rd.onload=()=>{const txt=rd.result||'';const lines=txt.split(/\r?\n/).filter(Boolean);let added=0,skipped=0;
+    lines.forEach(ln=>{const parts=ln.split(/[,;\t]/);if(parts.length<2)return;const ds=parts[0].trim().replace(/"/g,'');const vs=parts[1].trim().replace(/"/g,'');const val=parseFloat(vs);const dt=new Date(ds);
+      if(isNaN(val)||isNaN(dt.getTime()))return; // skip header/invalid
+      const key=dt.toISOString().slice(0,10);
+      if(S.logs.some(l=>l.type===metric&&l.t.slice(0,10)===key)){skipped++;return;}
+      const t=key+'T12:00:00.000Z';
+      if(metric==='steps')S.logs.push({id:rid(),type:'steps',t,steps:Math.round(val)});
+      else if(metric==='weight')S.logs.push({id:rid(),type:'weight',t,kg:val});
+      else if(metric==='sleep')S.logs.push({id:rid(),type:'sleep',t,hours:val,qual:3});
+      added++;});
+    save();if(out)out.innerHTML=`<div class="card"><b style="font-size:14px;color:var(--good)">${svgIcon('check',16)} ${ar?`أُضيف ${added}`:`Imported ${added}`}</b><div class="muted" style="font-size:12px;margin-top:3px">${skipped?(ar?`تم تخطّي ${skipped} (موجودة مسبقًا)`:`${skipped} skipped (already had that day)`):''}</div></div>`;
+    awardXp(5);toast(ar?'تم الاستيراد':'Imported');};
+  rd.onerror=()=>toast(ar?'تعذّر قراءة الملف':'Could not read file');
+  rd.readAsText(f);};
+
+/* ============================================================
    SCREENS — Learn
    ============================================================ */
 let learnCat='all';
@@ -3646,6 +3798,9 @@ route('more',(n)=>{
        ${mLi('pill',isAr()?'الأدوية والعلاجات':'Medications & treatments','',"go('meds')")}
        ${mLi('pulse',isAr()?'نتائج التحاليل':'Lab results','',"go('labs')")}
        ${mLi('utensils',isAr()?'الغذاء والتغذية':'Diet & Nutrition',isAr()?'فودماب · متوسطي · داش · صيام':'FODMAP · Med · DASH · fasting',"go('diet')")}
+       ${mLi('leaf',isAr()?'فاحص الفودماب + باركود':'FODMAP checker + barcode',isAr()?'ابحث أو امسح طعامًا':'search or scan a food',"go('fodmapcheck')")}
+       ${mLi('chart',isAr()?'مكتشف المحفّزات':'Trigger finder',isAr()?'أنماط في بياناتك':'patterns in your data',"go('triggers')")}
+       ${mLi('download',isAr()?'استيراد بيانات الصحة':'Import health data',isAr()?'خطوات · وزن · نوم (CSV)':'steps · weight · sleep (CSV)',"go('healthimport')")}
        ${mLi('leaf',isAr()?'المكمّلات ونقص الفيتامينات':'Supplements & deficiencies',isAr()?'حديد · ب12 · فيتامين د':'iron · B12 · vit D',"go('supps')")}
        ${mLi('syringe',isAr()?'اللقاحات والوقاية':'Vaccines & prevention',isAr()?'قائمة مهمة':'key checklist',"go('vaccines')")}
        ${mLi('heart',isAr()?'الإرهاق والتوتر':'Fatigue & stress',isAr()?'تنفّس وأدوات هدوء':'breathing & calm tools',"go('fatiguekit')")}
