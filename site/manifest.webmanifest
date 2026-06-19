@@ -1,7 +1,7 @@
 {
-  "name": "IBD Connect",
-  "short_name": "IBD Connect",
-  "description": "A bilingual, non-medical companion for living with inflammatory bowel disease.",
+  "name": "Rafeeq — your IBD companion",
+  "short_name": "Rafeeq",
+  "description": "Rafeeq (رفيق) — a bilingual, non-medical companion for living with inflammatory bowel disease, made for Saudi Arabia & the Gulf.",
   "start_url": "./",
   "scope": "./",
   "id": "/",
