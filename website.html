@@ -14,7 +14,7 @@
 <style>
 :root{
   --bg:#0B0F14;--bg2:#0F151D;--card:#141C26;--card2:#1B2530;--line:#243140;
-  --txt:#EAF2F8;--muted:#8DA0B2;--faint:#5A6B7B;--accent:#00E0B8;--accent2:#19A0FF;--purple:#9B7CFF;--warn:#FFB23E;--bad:#FF5C72;
+  --txt:#EAF2F8;--muted:#8DA0B2;--faint:#5A6B7B;--accent:#00E0B8;--accent2:#19A0FF;--purple:#9B7CFF;--warn:#FFB23E;--bad:#FF5C72;--good:#2BD67B;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -25,24 +25,36 @@ img{max-width:100%}
 .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
 .btn{display:inline-flex;align-items:center;gap:8px;padding:14px 24px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;border:none;transition:.18s;font-family:inherit}
 .btn:active{transform:translateY(1px)}
-.btn-primary{background:linear-gradient(135deg,var(--accent),#00b89b);color:#04221d;box-shadow:0 12px 30px -10px rgba(0,224,184,.6)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#00b89b);color:#04221d;box-shadow:0 12px 30px -10px color-mix(in srgb, var(--accent) 60%, transparent)}
 .btn-ghost{background:var(--card);border:1px solid var(--line);color:var(--txt)}
 .svgi{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
 /* nav */
-.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:rgba(11,15,20,.78);border-bottom:1px solid var(--line)}
+.nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb, var(--bg) 82%, transparent);border-bottom:1px solid var(--line)}
 .nav .wrap{display:flex;align-items:center;gap:24px;padding:14px 24px}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;letter-spacing:-.4px}
 .brand .m{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:linear-gradient(140deg,var(--accent),var(--accent2));font-size:19px}
 .navlinks{display:flex;gap:26px;margin-inline-start:auto}
 .navlinks a{color:var(--muted);font-weight:600;font-size:14.5px}
 .navlinks a:hover{color:var(--txt)}
-.langbtn{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.langbtn,.themebtn{background:var(--card);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:8px 13px;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit}
+.themebtn{display:flex;align-items:center;gap:6px}
+.themebtn .dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.theme-pop{position:fixed;top:64px;inset-inline-end:18px;z-index:90;background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:16px;width:300px;max-width:calc(100vw - 24px);box-shadow:0 30px 70px -20px rgba(0,0,0,.6);display:none}
+.theme-pop.open{display:block;animation:exin .2s ease}
+.theme-pop h4{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+.theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.theme-card{border:2px solid var(--line);border-radius:13px;overflow:hidden;cursor:pointer;background:var(--card);transition:.15s}
+.theme-card.on{border-color:var(--accent)}
+.theme-card .sw{height:46px;display:flex}
+.theme-card .sw span{flex:1}
+.theme-card .nm{padding:7px 9px;font-size:11.5px;font-weight:700;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.theme-card .nm small{color:var(--faint);font-weight:600;font-size:9.5px}
 @media(max-width:840px){.navlinks{display:none}}
 
 /* hero */
 .hero{display:grid;grid-template-columns:1fr 420px;gap:56px;align-items:center;padding:72px 0 48px}
-.pill{display:inline-block;padding:7px 14px;border-radius:30px;font-size:12.5px;font-weight:700;background:rgba(0,224,184,.12);color:var(--accent);border:1px solid rgba(0,224,184,.3);margin-bottom:22px}
+.pill{display:inline-block;padding:7px 14px;border-radius:30px;font-size:12.5px;font-weight:700;background:color-mix(in srgb, var(--accent) 12%, transparent);color:var(--accent);border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);margin-bottom:22px}
 .hero h1{font-size:56px;line-height:1.03;letter-spacing:-2px;font-weight:900}
 .hero .ar{font-size:22px;color:var(--muted);margin-top:10px;font-weight:600}
 .hero p.sub{font-size:18px;color:var(--muted);max-width:540px;margin:22px 0 30px;line-height:1.6}
@@ -60,7 +72,7 @@ section{padding:64px 0}
 .lead{color:var(--muted);text-align:center;max-width:620px;margin:0 auto 40px;font-size:16px}
 
 /* stats */
-.stats{background:linear-gradient(180deg,transparent,rgba(0,224,184,.04),transparent)}
+.stats{background:linear-gradient(180deg,transparent,color-mix(in srgb, var(--accent) 4%, transparent),transparent)}
 .statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
 .statcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 22px;text-align:center}
 .statcard .num{font-size:40px;font-weight:900;letter-spacing:-1.5px;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
@@ -71,7 +83,7 @@ section{padding:64px 0}
 /* features tabs */
 .tabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:30px}
 .tab{background:var(--card);border:1px solid var(--line);color:var(--muted);padding:11px 18px;border-radius:12px;font-weight:700;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;font-family:inherit;transition:.15s}
-.tab.on{background:rgba(0,224,184,.14);border-color:var(--accent);color:var(--accent)}
+.tab.on{background:color-mix(in srgb, var(--accent) 14%, transparent);border-color:var(--accent);color:var(--accent)}
 .tab .svgi{width:18px;height:18px}
 .tabpanel{display:none;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:36px;align-items:center;gap:40px;grid-template-columns:1fr 1fr}
 .tabpanel.on{display:grid}
@@ -80,7 +92,7 @@ section{padding:64px 0}
 .tabpanel ul{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:10px}
 .tabpanel li{display:flex;gap:10px;align-items:flex-start;color:var(--txt);font-size:14.5px}
 .tabpanel li .svgi{width:20px;height:20px;color:var(--accent);margin-top:1px}
-.tabvis{background:linear-gradient(150deg,rgba(0,224,184,.14),rgba(25,160,255,.06));border:1px solid rgba(0,224,184,.2);border-radius:18px;min-height:240px;display:flex;align-items:center;justify-content:center;font-size:96px}
+.tabvis{background:linear-gradient(150deg,color-mix(in srgb, var(--accent) 14%, transparent),color-mix(in srgb, var(--accent2) 6%, transparent));border:1px solid color-mix(in srgb, var(--accent) 20%, transparent);border-radius:18px;min-height:240px;display:flex;align-items:center;justify-content:center;font-size:96px}
 @media(max-width:840px){.tabpanel{grid-template-columns:1fr;padding:24px}.tabvis{min-height:160px;font-size:64px}}
 
 /* interactive DISC */
@@ -95,7 +107,7 @@ section{padding:64px 0}
 /* learn cards */
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .lcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;transition:.18s;display:block}
-.lcard:hover{transform:translateY(-3px);border-color:rgba(0,224,184,.4)}
+.lcard:hover{transform:translateY(-3px);border-color:color-mix(in srgb, var(--accent) 40%, transparent)}
 .lcard .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--card2);margin-bottom:14px}
 .lcard h4{font-size:16px;font-weight:700;margin-bottom:6px}
 .lcard p{color:var(--muted);font-size:13px;line-height:1.5}
@@ -113,7 +125,7 @@ section{padding:64px 0}
 .qa.open .chev{transform:rotate(180deg)}
 
 /* cta band */
-.ctaband{background:linear-gradient(135deg,rgba(0,224,184,.16),rgba(25,160,255,.1));border:1px solid rgba(0,224,184,.3);border-radius:26px;padding:50px;text-align:center}
+.ctaband{background:linear-gradient(135deg,color-mix(in srgb, var(--accent) 16%, transparent),color-mix(in srgb, var(--accent2) 10%, transparent));border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);border-radius:26px;padding:50px;text-align:center}
 .ctaband h2{font-size:32px;font-weight:800;letter-spacing:-1px}
 .ctaband p{color:var(--muted);margin:12px 0 26px;font-size:16px}
 
@@ -132,7 +144,7 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
 .ex-step{flex:none;display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);color:var(--muted);
   padding:11px 16px;border-radius:13px;font-weight:700;font-size:13.5px;cursor:pointer;transition:.15s}
 .ex-step .n{width:22px;height:22px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
-.ex-step.on{background:rgba(0,224,184,.14);border-color:var(--accent);color:var(--accent)}
+.ex-step.on{background:color-mix(in srgb, var(--accent) 14%, transparent);border-color:var(--accent);color:var(--accent)}
 .ex-step.on .n{background:var(--accent);color:#04221d}
 .ex-panel{display:none;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:34px}
 .ex-panel.on{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;animation:exin .4s ease}
@@ -140,7 +152,7 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
 .ex-panel h3{font-size:26px;font-weight:800;letter-spacing:-.6px;margin-bottom:6px}
 .ex-panel .ex-tag{display:inline-block;font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
 .ex-panel p{color:var(--muted);font-size:16px;line-height:1.7}
-.ex-vis{display:flex;align-items:center;justify-content:center;min-height:300px;background:linear-gradient(160deg,rgba(0,224,184,.08),rgba(25,160,255,.04));border:1px solid var(--line);border-radius:18px;padding:20px}
+.ex-vis{display:flex;align-items:center;justify-content:center;min-height:300px;background:linear-gradient(160deg,color-mix(in srgb, var(--accent) 8%, transparent),color-mix(in srgb, var(--accent2) 4%, transparent));border:1px solid var(--line);border-radius:18px;padding:20px}
 @media(max-width:860px){.ex-panel.on{grid-template-columns:1fr;padding:22px}.ex-vis{min-height:240px;order:-1}}
 .ex-nav{display:flex;justify-content:space-between;margin-top:20px}
 .ex-arrow{background:var(--card);border:1px solid var(--line);color:var(--txt);padding:11px 18px;border-radius:12px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px}
@@ -156,7 +168,7 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
 .fact .fi{font-size:30px}
 .fact b{display:block;font-size:14px;margin:8px 0 4px}
 .fact span{color:var(--muted);font-size:12px;line-height:1.4}
-.reassure{grid-column:1/-1;background:rgba(0,224,184,.1);border:1px solid rgba(0,224,184,.3);border-radius:12px;padding:12px 14px;color:var(--accent);font-weight:700;font-size:13.5px;text-align:center}
+.reassure{grid-column:1/-1;background:color-mix(in srgb, var(--accent) 10%, transparent);border:1px solid color-mix(in srgb, var(--accent) 30%, transparent);border-radius:12px;padding:12px 14px;color:var(--accent);font-weight:700;font-size:13.5px;text-align:center}
 /* trigger chips */
 .trigs{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
 .trig{background:var(--card2);border:1px solid var(--line);border-radius:30px;padding:10px 16px;font-weight:700;font-size:13.5px;cursor:pointer;display:flex;gap:8px;align-items:center;transition:.15s}
@@ -201,9 +213,11 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
     <a href="#learn" data-i18n="navLearn">Learn</a>
     <a href="#faq" data-i18n="navFaq">FAQ</a>
   </div>
+  <button class="themebtn" id="themebtn" onclick="toggleThemePop()" aria-label="Theme"><span class="dot"></span><span data-i18n="theme">Theme</span></button>
   <button class="langbtn" id="langbtn" onclick="toggleLang()">العربية</button>
   <a class="btn btn-primary" style="padding:10px 18px" href="index.html" data-i18n="openApp">Open the app</a>
 </div></nav>
+<div class="theme-pop" id="themePop"><h4 data-i18n="themeTitle">Choose a theme</h4><div class="theme-grid" id="themeGrid"></div></div>
 
 <header class="hero wrap" id="top">
   <div>
@@ -311,6 +325,7 @@ const ic=(n,s)=>`<svg class="svgi" viewBox="0 0 24 24" width="${s||24}" height="
 
 /* ---------- i18n ---------- */
 const T={
+ theme:['Theme','السمة'],themeTitle:['Choose a theme','اختر سمة'],
  navWhy:['Why','لماذا'],navExplained:['IBD explained','شرح المرض'],navFeatures:['Features','المزايا'],navExplore:['Explore','استكشف'],navLearn:['Learn','تعلّم'],navFaq:['FAQ','الأسئلة'],
  exEye:['Understand it','افهمه'],exH2:['IBD, explained simply','المرض بشرح بسيط'],exLead:['Seven short, visual chapters — what it is, why it happens, and what to expect. Tap through at your own pace.','سبعة فصول قصيرة ومصوّرة — ما هو، ولماذا يحدث، وماذا تتوقّع. تنقّل بالوتيرة التي تناسبك.'],exBack:['← Back','رجوع'],exNext:['Next →','التالي'],
  openApp:['Open the app','افتح التطبيق'],launchApp:['Launch the app','ابدأ التطبيق'],launchApp2:['Launch the app','ابدأ التطبيق'],exploreFeatures:['Explore features','استكشف المزايا'],
@@ -342,7 +357,7 @@ function setText(){document.querySelectorAll('[data-i18n]').forEach(el=>{const k
   // preserve trailing year span in footSrc
   if(k==='footSrc'){el.innerHTML=T[k][LANG==='ar'?1:0]+' © <span id="yr">'+(new Date().getFullYear())+'</span> IBD Connect.';}
   else el.textContent=T[k][LANG==='ar'?1:0];}});}
-function toggleLang(){LANG=LANG==='ar'?'en':'ar';document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';document.getElementById('langbtn').textContent=LANG==='ar'?'English':'العربية';setText();buildFeatures();buildLearn();buildFaq();buildDisc();buildExplained();}
+function toggleLang(){LANG=LANG==='ar'?'en':'ar';document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';document.getElementById('langbtn').textContent=LANG==='ar'?'English':'العربية';try{localStorage.setItem('ibdweb_lang',LANG);}catch(e){}setText();buildFeatures();buildLearn();buildFaq();buildDisc();buildExplained();buildThemePicker();}
 
 /* ---------- features tabs ---------- */
 const FEATURES=[
@@ -426,8 +441,8 @@ function giSet(type){giType=type;
   const uc=document.getElementById('giUC'),cd=document.getElementById('giCD');
   if(uc)uc.classList.toggle('on',type==='uc'); if(uc)uc.style.background=type==='uc'?'var(--accent)':'';
   if(cd)cd.classList.toggle('on',type==='cd'); if(cd)cd.style.background=type==='cd'?'var(--warn)':'';
-  if(type==='uc'){set('gi-colon','#00E0B8');set('gi-rectum','#00E0B8');}
-  else{set('gi-ileum','#FFB23E');set('gi-si','#FFB23E');}
+  if(type==='uc'){set('gi-colon','var(--accent)');set('gi-rectum','var(--accent)');}
+  else{set('gi-ileum','var(--warn)');set('gi-si','var(--warn)');}
 }
 function factorsHTML(){const f=[['🧬',['Genes','الجينات'],['A tendency you can inherit','قابلية قد تورّثها']],['🛡️',['Immune system','جهاز المناعة'],['Overreacts inside the gut','يبالغ في ردّ فعله داخل الأمعاء']],['🌍',['Environment','البيئة'],['Diet, smoking, where you live','الغذاء، التدخين، مكان العيش']],['🦠',['Gut bacteria','بكتيريا الأمعاء'],['Their balance gets disturbed','يختلّ توازنها']]];
   return `<div class="facts">${f.map(x=>`<div class="fact"><div class="fi">${x[0]}</div><b>${x[1][L()]}</b><span>${x[2][L()]}</span></div>`).join('')}<div class="reassure">${LANG==='ar'?'لم تتسبّب أنت في هذا — ليس بسبب التوتّر أو الطعام.':"You didn't cause this — it isn't from stress or food."}</div></div>`;}
@@ -498,9 +513,36 @@ function buildExplained(){
 function exShow(i){exCur=Math.max(0,Math.min(EXP.length-1,i));buildExplained();const s=document.getElementById('explained');if(s&&s.scrollIntoView)s.scrollIntoView({behavior:'smooth',block:'start'});}
 function exGo(d){exShow(exCur+d);}
 
+/* ===== themes (inspired by leading health & wellness apps) ===== */
+const THEMES=[
+ {id:'whoop',mode:'dark',name:['Midnight','منتصف الليل'],like:'WHOOP',vars:{'--bg':'#0B0F14','--bg2':'#0F151D','--card':'#141C26','--card2':'#1B2530','--line':'#243140','--txt':'#EAF2F8','--muted':'#8DA0B2','--faint':'#5A6B7B','--accent':'#00E0B8','--accent2':'#19A0FF','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#2BD67B'}},
+ {id:'oura',mode:'dark',name:['Aura','الهالة'],like:'Oura',vars:{'--bg':'#0E0D12','--bg2':'#15131C','--card':'#1C1926','--card2':'#262232','--line':'#332D42','--txt':'#F1ECF6','--muted':'#A89CB8','--faint':'#6E6480','--accent':'#E8B07A','--accent2':'#C58BF2','--purple':'#C58BF2','--warn':'#F2C24B','--bad':'#FF6B8A','--good':'#7FD1A6'}},
+ {id:'calm',mode:'dark',name:['Deep Calm','هدوء عميق'],like:'Calm',vars:{'--bg':'#0A1730','--bg2':'#0E1F40','--card':'#13294F','--card2':'#1B3361','--line':'#274377','--txt':'#E7F0FF','--muted':'#93AAD0','--faint':'#5E769E','--accent':'#4FA8FF','--accent2':'#7BD8FF','--purple':'#9BA8FF','--warn':'#FFC061','--bad':'#FF7C92','--good':'#5FD0C0'}},
+ {id:'forest',mode:'dark',name:['Forest','الغابة'],like:'Fitbit',vars:{'--bg':'#0A1410','--bg2':'#0F1D17','--card':'#14271E','--card2':'#1D3528','--line':'#274A37','--txt':'#E8F5EC','--muted':'#8FB6A0','--faint':'#5C7E6A','--accent':'#46D08A','--accent2':'#8FD14F','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#46D08A'}},
+ {id:'apple',mode:'light',name:['Clean','نظيف'],like:'Apple Health',vars:{'--bg':'#F2F4F8','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EDF1F6','--line':'#DCE3EC','--txt':'#0F1722','--muted':'#5C6B7D','--faint':'#93A1B1','--accent':'#0A84FF','--accent2':'#30C758','--purple':'#7C5CFF','--warn':'#FF9F0A','--bad':'#FF3B30','--good':'#30C758'}},
+ {id:'headspace',mode:'light',name:['Sunshine','إشراق'],like:'Headspace',vars:{'--bg':'#FFF7EC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FBEFDD','--line':'#F0E2CC','--txt':'#2A2014','--muted':'#8A765C','--faint':'#B8A488','--accent':'#FF8A3D','--accent2':'#4F86FF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984'}},
+ {id:'flo',mode:'light',name:['Blossom','زهر'],like:'Flo',vars:{'--bg':'#FFF0F5','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCE6EF','--line':'#F3D7E3','--txt':'#2A1620','--muted':'#9B7385','--faint':'#C3A3B2','--accent':'#F0468A','--accent2':'#9B7CFF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984'}},
+ {id:'mint',mode:'light',name:['Fresh Mint','نعناع'],like:'Clue',vars:{'--bg':'#ECF7F0','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E3F2E9','--line':'#D3EADC','--txt':'#0F2418','--muted':'#5C7A68','--faint':'#9BBBA8','--accent':'#1FA85F','--accent2':'#0AAFA0','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#1FA85F'}},
+];
+function applyTheme(id,silent){const th=THEMES.find(t=>t.id===id)||THEMES[0];const r=document.documentElement;
+ Object.entries(th.vars).forEach(([k,v])=>r.style.setProperty(k,v));
+ const meta=document.querySelector('meta[name=theme-color]');if(meta)meta.setAttribute('content',th.vars['--bg']);
+ r.setAttribute('data-mode',th.mode);
+ try{localStorage.setItem('ibdweb_theme',id);}catch(e){}
+ CURTHEME=id; if(!silent){buildThemePicker();}}
+let CURTHEME='whoop';
+function buildThemePicker(){const g=document.getElementById('themeGrid');if(!g)return;
+ g.innerHTML=THEMES.map(th=>`<div class="theme-card ${th.id===CURTHEME?'on':''}" onclick="applyTheme('${th.id}');buildThemePicker()">
+   <div class="sw"><span style="background:${th.vars['--bg']}"></span><span style="background:${th.vars['--card']}"></span><span style="background:${th.vars['--accent']}"></span><span style="background:${th.vars['--accent2']}"></span></div>
+   <div class="nm"><span>${th.name[L()]}</span><small>${th.like}</small></div></div>`).join('');}
+function toggleThemePop(){document.getElementById('themePop').classList.toggle('open');buildThemePicker();}
+document.addEventListener('click',e=>{const pop=document.getElementById('themePop'),btn=document.getElementById('themebtn');
+ if(pop&&pop.classList.contains('open')&&!pop.contains(e.target)&&btn&&!btn.contains(e.target))pop.classList.remove('open');});
+
 /* init */
+(function(){try{const tm=localStorage.getItem('ibdweb_theme');if(tm)applyTheme(tm,true);const lg=localStorage.getItem('ibdweb_lang');if(lg==='ar'){LANG='ar';document.documentElement.lang='ar';document.documentElement.dir='rtl';document.getElementById('langbtn').textContent='English';}}catch(e){}})();
 document.getElementById('yr').textContent=new Date().getFullYear();
-buildFeatures();buildLearn();buildFaq();buildDisc();buildExplained();initReveal();initCounters();
+setText();buildFeatures();buildLearn();buildFaq();buildDisc();buildExplained();buildThemePicker();initReveal();initCounters();
 window.addEventListener('load',loadApp);
 </script>
 </body>
