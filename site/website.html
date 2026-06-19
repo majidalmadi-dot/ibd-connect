@@ -92,8 +92,9 @@ section{padding:64px 0}
 .tabpanel ul{list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:10px}
 .tabpanel li{display:flex;gap:10px;align-items:flex-start;color:var(--txt);font-size:14.5px}
 .tabpanel li .svgi{width:20px;height:20px;color:var(--accent);margin-top:1px}
-.tabvis{background:linear-gradient(150deg,color-mix(in srgb, var(--accent) 14%, transparent),color-mix(in srgb, var(--accent2) 6%, transparent));border:1px solid color-mix(in srgb, var(--accent) 20%, transparent);border-radius:18px;min-height:240px;display:flex;align-items:center;justify-content:center;font-size:96px}
-@media(max-width:840px){.tabpanel{grid-template-columns:1fr;padding:24px}.tabvis{min-height:160px;font-size:64px}}
+.tabvis{background:linear-gradient(150deg,color-mix(in srgb, var(--accent) 14%, transparent),color-mix(in srgb, var(--accent2) 6%, transparent));border:1px solid color-mix(in srgb, var(--accent) 20%, transparent);border-radius:18px;min-height:240px;display:flex;align-items:center;justify-content:center;font-size:96px;overflow:hidden}
+.tabvis img{width:100%;height:100%;min-height:240px;object-fit:cover;display:block}
+@media(max-width:840px){.tabpanel{grid-template-columns:1fr;padding:24px}.tabvis{min-height:160px;font-size:64px}.tabvis img{min-height:160px}}
 
 /* interactive DISC */
 .disc{display:grid;grid-template-columns:380px 1fr;gap:48px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:40px}
@@ -152,8 +153,10 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
 .ex-panel h3{font-size:26px;font-weight:800;letter-spacing:-.6px;margin-bottom:6px}
 .ex-panel .ex-tag{display:inline-block;font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
 .ex-panel p{color:var(--muted);font-size:16px;line-height:1.7}
-.ex-vis{display:flex;align-items:center;justify-content:center;min-height:300px;background:linear-gradient(160deg,color-mix(in srgb, var(--accent) 8%, transparent),color-mix(in srgb, var(--accent2) 4%, transparent));border:1px solid var(--line);border-radius:18px;padding:20px}
-@media(max-width:860px){.ex-panel.on{grid-template-columns:1fr;padding:22px}.ex-vis{min-height:240px;order:-1}}
+.ex-vis{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;min-height:300px;background:linear-gradient(160deg,color-mix(in srgb, var(--accent) 8%, transparent),color-mix(in srgb, var(--accent2) 4%, transparent));border:1px solid var(--line);border-radius:18px;padding:18px}
+.ex-photo{width:100%;height:200px;object-fit:cover;border-radius:14px;box-shadow:0 12px 28px -16px rgba(0,0,0,.5)}
+.gi-cap{font-size:13.5px;line-height:1.6;color:var(--muted);text-align:center;max-width:340px}
+@media(max-width:860px){.ex-panel.on{grid-template-columns:1fr;padding:22px}.ex-vis{min-height:0;order:-1}.ex-photo{height:170px}}
 .ex-nav{display:flex;justify-content:space-between;margin-top:20px}
 .ex-arrow{background:var(--card);border:1px solid var(--line);color:var(--txt);padding:11px 18px;border-radius:12px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px}
 .ex-arrow:disabled{opacity:.35;cursor:default}
@@ -342,6 +345,7 @@ const ICONS={
  baby:'<circle cx="12" cy="6" r="2.5"/><path d="M12 9v5M7 12h10M9 21l3-4 3 4"/>'
 };
 const ic=(n,s)=>`<svg class="svgi" viewBox="0 0 24 24" width="${s||24}" height="${s||24}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;
+const UNSPLASH=(id,w)=>`https://images.unsplash.com/${id}?w=${w||900}&q=80&auto=format&fit=crop`;
 
 /* ---------- i18n ---------- */
 const T={
@@ -381,17 +385,17 @@ function toggleLang(){LANG=LANG==='ar'?'en':'ar';document.documentElement.lang=L
 
 /* ---------- features tabs ---------- */
 const FEATURES=[
- {ic:'pulse',emoji:'🩺',en:['Track everything','Symptoms, bowel movements (Bristol scale), meals with photos, sleep, mood, activity, hydration, steps and weight — each logged in seconds with smart reminders.',['Bristol stool scale & symptom severity','Meal photos & history','Medication reminders (no drug names stored)']],ar:['تتبّع كل شيء','الأعراض وحركة الأمعاء (مقياس بريستول) والوجبات بالصور والنوم والمزاج والنشاط والترطيب والخطوات والوزن — كل ذلك في ثوانٍ مع تذكيرات ذكية.',['مقياس بريستول وشدّة الأعراض','صور الوجبات والسجل','تذكيرات الدواء (دون حفظ أسماء)']]},
- {ic:'chart',emoji:'📊',en:['See your patterns','Clean weekly & monthly reports, an activity heatmap, a consistency score and a weekly recap — descriptive only, made to support your conversations, never to diagnose.',['Symptom, bowel, mood & sleep trends','Activity heatmap & consistency score','Shareable summary for your doctor']],ar:['اكتشف أنماطك','تقارير أسبوعية وشهرية واضحة وخريطة نشاط ودرجة انتظام وملخّص أسبوعي — وصفية فقط لدعم نقاشك، لا للتشخيص.',['اتجاهات الأعراض والأمعاء والمزاج والنوم','خريطة النشاط ودرجة الانتظام','ملخّص قابل للمشاركة مع طبيبك']]},
- {ic:'book',emoji:'📖',en:['Learn from experts','A bilingual library featuring the Saudi Gastroenterology Association IBD Guide — flares, nutrition, biologics, pregnancy, smoking and more, authored by clinicians.',['11 expert-authored articles','Disease-specific suggestions','Wellness & lifestyle tips']],ar:['تعلّم من الخبراء','مكتبة ثنائية اللغة تضم دليل IBD من الجمعية السعودية — النوبات والتغذية والعلاجات الحيوية والحمل والتدخين والمزيد، بأقلام أطباء.',['11 مقالًا بأقلام خبراء','اقتراحات حسب نوع المرض','نصائح العافية ونمط الحياة']]},
- {ic:'share',emoji:'🤝',en:['Stay connected & motivated','Share a clean summary with your care team, and stay engaged with gentle nudges, streaks, levels and goal rings — proven techniques from leading health apps.',['One-tap clinician summary via QR','Streaks, XP & daily goal rings','Smart, dismissible reminders']],ar:['ابقَ متّصلًا ومتحفّزًا','شارك ملخصًا أنيقًا مع فريق رعايتك، وابقَ متفاعلًا عبر تنبيهات لطيفة وتتابعات ومستويات وحلقات أهداف — أساليب مثبتة من أبرز التطبيقات الصحية.',['ملخّص للطبيب عبر رمز QR','تتابعات ونقاط وحلقات أهداف','تذكيرات ذكية قابلة للإخفاء']]},
- {ic:'moon',emoji:'🌙',en:['Made for Saudi & the Gulf','Guidance the global apps don\'t have: how to approach Ramadan fasting, plan Hajj & Umrah, and navigate Gulf cuisine with IBD — in Arabic and English.',['Ramadan fasting & medication timing','Hajj & Umrah travel planning','Gulf-food trigger guide (kabsa, dates, laban…)']],ar:['مصمّم للسعودية والخليج','إرشاد لا تجده في التطبيقات العالمية: كيف تتعامل مع صيام رمضان، وتخطّط للحج والعمرة، وتتنقّل بين أطعمة الخليج مع التهاب الأمعاء — بالعربية والإنجليزية.',['الصيام في رمضان وتوقيت الدواء','تخطيط الحج والعمرة','دليل أطعمة الخليج (الكبسة، التمر، اللبن…)']]},
- {ic:'pill',emoji:'💊',en:['Medications, labs & insights','Track biologic injection cycles and daily medication adherence, log your lab results over time, and see private on-device observations about your own patterns.',['Biologic & infusion scheduling','Calprotectin, CRP & Hb trends','Private, descriptive pattern insights']],ar:['الأدوية والتحاليل والملاحظات','تابع دورات الحقن الحيوية والالتزام اليومي بالدواء، وسجّل نتائج تحاليلك عبر الوقت، واطّلع على ملاحظات خاصة على جهازك عن أنماطك.',['جدولة العلاجات الحيوية والتسريب','اتجاهات الكالبروتكتين وCRP والهيموغلوبين','ملاحظات وصفية خاصة عن أنماطك']]},
+ {ic:'pulse',img:'photo-1707344088547-3cf7cea5ca49',emoji:'🩺',en:['Track everything','Symptoms, bowel movements (Bristol scale), meals with photos, sleep, mood, activity, hydration, steps and weight — each logged in seconds with smart reminders.',['Bristol stool scale & symptom severity','Meal photos & history','Medication reminders (no drug names stored)']],ar:['تتبّع كل شيء','الأعراض وحركة الأمعاء (مقياس بريستول) والوجبات بالصور والنوم والمزاج والنشاط والترطيب والخطوات والوزن — كل ذلك في ثوانٍ مع تذكيرات ذكية.',['مقياس بريستول وشدّة الأعراض','صور الوجبات والسجل','تذكيرات الدواء (دون حفظ أسماء)']]},
+ {ic:'chart',img:'photo-1707343844007-d1aaa490e960',emoji:'📊',en:['See your patterns','Clean weekly & monthly reports, an activity heatmap, a consistency score and a weekly recap — descriptive only, made to support your conversations, never to diagnose.',['Symptom, bowel, mood & sleep trends','Activity heatmap & consistency score','Shareable summary for your doctor']],ar:['اكتشف أنماطك','تقارير أسبوعية وشهرية واضحة وخريطة نشاط ودرجة انتظام وملخّص أسبوعي — وصفية فقط لدعم نقاشك، لا للتشخيص.',['اتجاهات الأعراض والأمعاء والمزاج والنوم','خريطة النشاط ودرجة الانتظام','ملخّص قابل للمشاركة مع طبيبك']]},
+ {ic:'book',img:'photo-1682685796852-aa311b46f50d',emoji:'📖',en:['Learn from experts','A bilingual library featuring the Saudi Gastroenterology Association IBD Guide — flares, nutrition, biologics, pregnancy, smoking and more, authored by clinicians.',['11 expert-authored articles','Disease-specific suggestions','Wellness & lifestyle tips']],ar:['تعلّم من الخبراء','مكتبة ثنائية اللغة تضم دليل IBD من الجمعية السعودية — النوبات والتغذية والعلاجات الحيوية والحمل والتدخين والمزيد، بأقلام أطباء.',['11 مقالًا بأقلام خبراء','اقتراحات حسب نوع المرض','نصائح العافية ونمط الحياة']]},
+ {ic:'share',img:'photo-1625236466493-72842ceec47b',emoji:'🤝',en:['Stay connected & motivated','Share a clean summary with your care team, and stay engaged with gentle nudges, streaks, levels and goal rings — proven techniques from leading health apps.',['One-tap clinician summary via QR','Streaks, XP & daily goal rings','Smart, dismissible reminders']],ar:['ابقَ متّصلًا ومتحفّزًا','شارك ملخصًا أنيقًا مع فريق رعايتك، وابقَ متفاعلًا عبر تنبيهات لطيفة وتتابعات ومستويات وحلقات أهداف — أساليب مثبتة من أبرز التطبيقات الصحية.',['ملخّص للطبيب عبر رمز QR','تتابعات ونقاط وحلقات أهداف','تذكيرات ذكية قابلة للإخفاء']]},
+ {ic:'moon',img:'photo-1734572410061-7823529c93f7',emoji:'🌙',en:['Made for Saudi & the Gulf','Guidance the global apps don\'t have: how to approach Ramadan fasting, plan Hajj & Umrah, and navigate Gulf cuisine with IBD — in Arabic and English.',['Ramadan fasting & medication timing','Hajj & Umrah travel planning','Gulf-food trigger guide (kabsa, dates, laban…)']],ar:['مصمّم للسعودية والخليج','إرشاد لا تجده في التطبيقات العالمية: كيف تتعامل مع صيام رمضان، وتخطّط للحج والعمرة، وتتنقّل بين أطعمة الخليج مع التهاب الأمعاء — بالعربية والإنجليزية.',['الصيام في رمضان وتوقيت الدواء','تخطيط الحج والعمرة','دليل أطعمة الخليج (الكبسة، التمر، اللبن…)']]},
+ {ic:'pill',img:'photo-1629738601425-494c3d6ba3e2',emoji:'💊',en:['Medications, labs & insights','Track biologic injection cycles and daily medication adherence, log your lab results over time, and see private on-device observations about your own patterns.',['Biologic & infusion scheduling','Calprotectin, CRP & Hb trends','Private, descriptive pattern insights']],ar:['الأدوية والتحاليل والملاحظات','تابع دورات الحقن الحيوية والالتزام اليومي بالدواء، وسجّل نتائج تحاليلك عبر الوقت، واطّلع على ملاحظات خاصة على جهازك عن أنماطك.',['جدولة العلاجات الحيوية والتسريب','اتجاهات الكالبروتكتين وCRP والهيموغلوبين','ملاحظات وصفية خاصة عن أنماطك']]},
 ];
 function buildFeatures(){
  const t=document.getElementById('ftabs'),p=document.getElementById('fpanels');const i18=LANG==='ar'?1:0;
  t.innerHTML=FEATURES.map((f,idx)=>`<button class="tab ${idx===curTab?'on':''}" onclick="setTab(${idx})">${ic(f.ic,18)}${f[i18?'ar':'en'][0]}</button>`).join('');
- p.innerHTML=FEATURES.map((f,idx)=>{const c=f[i18?'ar':'en'];return `<div class="tabpanel ${idx===curTab?'on':''}"><div><h3>${c[0]}</h3><p>${c[1]}</p><ul>${c[2].map(x=>`<li>${ic('check',20)}<span>${x}</span></li>`).join('')}</ul></div><div class="tabvis" style="color:var(--accent)">${ic(f.ic,76)}</div></div>`;}).join('');
+ p.innerHTML=FEATURES.map((f,idx)=>{const c=f[i18?'ar':'en'];return `<div class="tabpanel ${idx===curTab?'on':''}"><div><h3>${c[0]}</h3><p>${c[1]}</p><ul>${c[2].map(x=>`<li>${ic('check',20)}<span>${x}</span></li>`).join('')}</ul></div><div class="tabvis">${f.img?`<img loading="lazy" src="${UNSPLASH(f.img,900)}" alt="">`:`<span style="color:var(--accent)">${ic(f.ic,76)}</span>`}</div></div>`;}).join('');
 }
 let curTab=0;function setTab(i){curTab=i;buildFeatures();}
 
@@ -445,26 +449,19 @@ function animateNum(el){const to=parseFloat(el.getAttribute('data-count')),dec=+
 /* ===== IBD explained module ===== */
 const L=()=>LANG==='ar'?1:0;
 function giDiagram(){return `
- <svg viewBox="0 0 220 285" width="100%" style="max-width:300px" aria-label="digestive tract">
-  <path id="gi-stomach" class="gi-seg" d="M58 62 q26 -22 50 -6 q14 9 6 26 q-8 16 -28 12 q-22 -4 -28 -18 q-4 -10 0 -14z" fill="#243140" stroke="#36485c" stroke-width="2"/>
-  <path id="gi-colon" class="gi-seg" d="M70 246 C62 226 50 226 50 208 L50 122 Q50 102 70 102 L150 102 Q170 102 170 122 L170 202 Q170 222 152 222 L122 224" fill="none" stroke="#3a4a5e" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
-  <path id="gi-si" class="gi-seg" d="M88 202 c0 -12 22 -8 22 -20 c0 -12 -22 -8 -22 -20 c0 -12 22 -8 22 -20 c0 -12 -22 -8 -22 -18" fill="none" stroke="#54677d" stroke-width="9" stroke-linecap="round"/>
-  <path id="gi-ileum" class="gi-seg" d="M110 202 q18 6 30 16" fill="none" stroke="#54677d" stroke-width="9" stroke-linecap="round"/>
-  <path id="gi-rectum" class="gi-seg" d="M70 246 l0 18" fill="none" stroke="#3a4a5e" stroke-width="17" stroke-linecap="round"/>
- </svg>
  <div class="gi-toggle">
   <button class="gi-btn" id="giUC" onclick="giSet('uc')">${LANG==='ar'?'القولون التقرّحي':'Ulcerative Colitis'}</button>
   <button class="gi-btn" id="giCD" onclick="giSet('cd')">${LANG==='ar'?'داء كرون':"Crohn's"}</button>
- </div>`;}
+ </div>
+ <div class="gi-cap" id="giCap"></div>`;}
 let giType='uc';
 function giSet(type){giType=type;
-  const set=(id,c)=>{const e=document.getElementById(id);if(e)e.setAttribute('stroke',c);};
-  set('gi-stomach','#36485c');set('gi-colon','#3a4a5e');set('gi-si','#54677d');set('gi-ileum','#54677d');set('gi-rectum','#3a4a5e');
-  const uc=document.getElementById('giUC'),cd=document.getElementById('giCD');
-  if(uc)uc.classList.toggle('on',type==='uc'); if(uc)uc.style.background=type==='uc'?'var(--accent)':'';
-  if(cd)cd.classList.toggle('on',type==='cd'); if(cd)cd.style.background=type==='cd'?'var(--warn)':'';
-  if(type==='uc'){set('gi-colon','var(--accent)');set('gi-rectum','var(--accent)');}
-  else{set('gi-ileum','var(--warn)');set('gi-si','var(--warn)');}
+  const uc=document.getElementById('giUC'),cd=document.getElementById('giCD'),cap=document.getElementById('giCap');
+  if(uc){uc.classList.toggle('on',type==='uc');uc.style.background=type==='uc'?'var(--accent)':'';uc.style.color=type==='uc'?'#fff':'';}
+  if(cd){cd.classList.toggle('on',type==='cd');cd.style.background=type==='cd'?'var(--warn)':'';cd.style.color=type==='cd'?'#fff':'';}
+  if(cap)cap.innerHTML = type==='uc'
+    ? (LANG==='ar'?'<b>التهاب القولون التقرّحي</b> يصيب الأمعاء الغليظة (القولون والمستقيم) بشكل متّصل ومستمر، في البطانة الداخلية.':'<b>Ulcerative Colitis</b> affects the large intestine (colon &amp; rectum) in one continuous stretch, along the inner lining.')
+    : (LANG==='ar'?'<b>داء كرون</b> قد يظهر في أي مكان من الفم حتى الشرج، وغالبًا بشكل متقطّع وعبر كامل سماكة جدار الأمعاء.':"<b>Crohn's</b> can appear anywhere from mouth to anus, often in patches and through the full thickness of the bowel wall.");
 }
 function factorsHTML(){const f=[['dna',['Genes','الجينات'],['A tendency you can inherit','قابلية قد تورّثها']],['shield',['Immune system','جهاز المناعة'],['Overreacts inside the gut','يبالغ في ردّ فعله داخل الأمعاء']],['globe',['Environment','البيئة'],['Diet, smoking, where you live','الغذاء، التدخين، مكان العيش']],['germ',['Gut bacteria','بكتيريا الأمعاء'],['Their balance gets disturbed','يختلّ توازنها']]];
   return `<div class="facts">${f.map(x=>`<div class="fact"><div class="fi" style="color:var(--accent)">${ic(x[0],26)}</div><b>${x[1][L()]}</b><span>${x[2][L()]}</span></div>`).join('')}<div class="reassure">${LANG==='ar'?'لم تتسبّب أنت في هذا — ليس بسبب التوتّر أو الطعام.':"You didn't cause this — it isn't from stress or food."}</div></div>`;}
@@ -504,31 +501,31 @@ function mythsHTML(){return `<div class="myths">${MYTHS.map((m,i)=>`<div class="
 const EXP=[
  {tag:['The basics','الأساسيات'],t:['What is IBD?','ما هو التهاب الأمعاء؟'],
   b:['IBD stands for <b>Inflammatory Bowel Disease</b>. It means the body\'s immune system causes ongoing inflammation in the gut (your digestive tract).<br><br>There are two main types. <b>Ulcerative Colitis</b> affects the large intestine (colon) in one continuous stretch. <b>Crohn\'s disease</b> can appear anywhere from mouth to bottom, often in patches.<br><br>Tap the buttons to see where each one shows up.',
-     'يرمز IBD إلى <b>داء الأمعاء الالتهابي</b>. ويعني أن جهاز المناعة يسبّب التهابًا مستمرًا في الأمعاء (الجهاز الهضمي).<br><br>هناك نوعان رئيسيان. <b>التهاب القولون التقرّحي</b> يصيب الأمعاء الغليظة بشكل متّصل. أما <b>داء كرون</b> فقد يظهر في أي مكان من الفم حتى الشرج، وغالبًا بشكل متقطّع.<br><br>اضغط الأزرار لرؤية مكان كل نوع.'], vis:giDiagram, after:()=>giSet(giType)},
+     'يرمز IBD إلى <b>داء الأمعاء الالتهابي</b>. ويعني أن جهاز المناعة يسبّب التهابًا مستمرًا في الأمعاء (الجهاز الهضمي).<br><br>هناك نوعان رئيسيان. <b>التهاب القولون التقرّحي</b> يصيب الأمعاء الغليظة بشكل متّصل. أما <b>داء كرون</b> فقد يظهر في أي مكان من الفم حتى الشرج، وغالبًا بشكل متقطّع.<br><br>اضغط الأزرار لرؤية مكان كل نوع.'], img:'photo-1682685796852-aa311b46f50d', vis:giDiagram, after:()=>giSet(giType)},
  {tag:['The cause','السبب'],t:['Why does it happen?','لماذا يحدث؟'],
   b:['No one chose this, and it isn\'t caused by something you did.<br><br>IBD happens when a few things line up: your <b>genes</b>, an <b>overactive immune system</b>, the <b>environment</b> around you, and the balance of <b>bacteria</b> living in your gut. The immune system mistakes the gut for a threat and keeps it inflamed.',
-     'لم يختر أحد هذا، وهو ليس بسبب شيء فعلته.<br><br>يحدث المرض عندما تجتمع عدة عوامل: <b>الجينات</b>، و<b>جهاز مناعة مفرط النشاط</b>، و<b>البيئة</b> المحيطة، وتوازن <b>البكتيريا</b> في الأمعاء. يظنّ جهاز المناعة أن الأمعاء تهديد فيُبقيها ملتهبة.'], vis:factorsHTML},
+     'لم يختر أحد هذا، وهو ليس بسبب شيء فعلته.<br><br>يحدث المرض عندما تجتمع عدة عوامل: <b>الجينات</b>، و<b>جهاز مناعة مفرط النشاط</b>، و<b>البيئة</b> المحيطة، وتوازن <b>البكتيريا</b> في الأمعاء. يظنّ جهاز المناعة أن الأمعاء تهديد فيُبقيها ملتهبة.'], img:'photo-1707343844007-d1aaa490e960', vis:factorsHTML},
  {tag:['Triggers','المثيرات'],t:['What can provoke it?','ما الذي قد يُثيره؟'],
   b:['Flares can sometimes be set off by certain things — and these are <b>different for everyone</b>. What bothers one person may not bother another.<br><br>Tap each one to learn more.',
-     'قد تُشعَل النوبات بعوامل معيّنة — وهي <b>مختلفة بين شخص وآخر</b>. ما يزعج أحدهم قد لا يزعج غيره.<br><br>اضغط على كل عامل لمعرفة المزيد.'], vis:triggersHTML},
+     'قد تُشعَل النوبات بعوامل معيّنة — وهي <b>مختلفة بين شخص وآخر</b>. ما يزعج أحدهم قد لا يزعج غيره.<br><br>اضغط على كل عامل لمعرفة المزيد.'], img:'photo-1629738601425-494c3d6ba3e2', vis:triggersHTML},
  {tag:['Watch out','احذر'],t:['What makes it worse?','ما الذي يزيدها سوءًا؟'],
   b:['Some things tend to make IBD more active or harder to control. The biggest, most controllable one is <b>not taking your treatment</b> — and, for Crohn\'s, <b>smoking</b>.',
-     'بعض الأمور تجعل المرض أكثر نشاطًا أو أصعب في السيطرة. وأكبرها وأكثرها قابلية للتحكّم هو <b>عدم أخذ العلاج</b> — و<b>التدخين</b> في داء كرون.'], vis:worseHTML},
+     'بعض الأمور تجعل المرض أكثر نشاطًا أو أصعب في السيطرة. وأكبرها وأكثرها قابلية للتحكّم هو <b>عدم أخذ العلاج</b> — و<b>التدخين</b> في داء كرون.'], img:'photo-1707344088547-3cf7cea5ca49', vis:worseHTML},
  {tag:['Helps','يساعد'],t:['What makes it better?','ما الذي يجعلها أفضل؟'],
   b:['The good news: a lot is in your hands. Steady habits and staying on treatment give you the best chance of feeling well and staying in remission.',
-     'الخبر الجيّد: الكثير بين يديك. العادات الثابتة والاستمرار على العلاج تمنحك أفضل فرصة للشعور بالعافية والبقاء في هدأة.'], vis:betterHTML},
+     'الخبر الجيّد: الكثير بين يديك. العادات الثابتة والاستمرار على العلاج تمنحك أفضل فرصة للشعور بالعافية والبقاء في هدأة.'], img:'photo-1625236466493-72842ceec47b', vis:betterHTML},
  {tag:['Over time','مع الوقت'],t:['What\'s the natural history?','ما المسار الطبيعي؟'],
   b:['IBD is usually <b>long-term (chronic)</b>. It often comes in waves: times when it\'s active (a <b>flare</b>) and times when it settles down (called <b>remission</b>).<br><br>The goal of treatment is to reach and stay in remission — and to <b>heal the gut lining</b>, not just hide the symptoms.',
-     'المرض عادةً <b>مزمن (طويل الأمد)</b>. وغالبًا يأتي على شكل موجات: فترات نشاط (<b>نوبة</b>) وفترات هدوء (<b>هدأة</b>).<br><br>هدف العلاج هو الوصول للهدأة والبقاء فيها — و<b>التئام بطانة الأمعاء</b>، وليس مجرّد إخفاء الأعراض.'], vis:waveHTML},
+     'المرض عادةً <b>مزمن (طويل الأمد)</b>. وغالبًا يأتي على شكل موجات: فترات نشاط (<b>نوبة</b>) وفترات هدوء (<b>هدأة</b>).<br><br>هدف العلاج هو الوصول للهدأة والبقاء فيها — و<b>التئام بطانة الأمعاء</b>، وليس مجرّد إخفاء الأعراض.'], img:'photo-1734572410061-7823529c93f7', vis:waveHTML},
  {tag:['Looking ahead','نظرة للأمام'],t:['What to expect','ماذا تتوقّع'],
   b:['IBD is manageable. Most people live full lives — work, travel, study, and have families. Your care team will follow you with check-ups, labs, and sometimes a camera test (endoscopy), and adjust treatment over time.<br><br>You\'re not alone. Tap the cards below.',
-     'المرض قابل للإدارة. معظم المرضى يعيشون حياة كاملة — عمل وسفر ودراسة وأسرة. سيتابعك فريق رعايتك بالفحوصات والتحاليل وأحيانًا التنظير، ويعدّل العلاج مع الوقت.<br><br>لست وحدك. اضغط البطاقات بالأسفل.'], vis:mythsHTML},
+     'المرض قابل للإدارة. معظم المرضى يعيشون حياة كاملة — عمل وسفر ودراسة وأسرة. سيتابعك فريق رعايتك بالفحوصات والتحاليل وأحيانًا التنظير، ويعدّل العلاج مع الوقت.<br><br>لست وحدك. اضغط البطاقات بالأسفل.'], img:'photo-1682685796852-aa311b46f50d', vis:mythsHTML},
 ];
 let exCur=0;
 function buildExplained(){
   const steps=document.getElementById('exSteps'),panels=document.getElementById('exPanels');if(!steps)return;
   steps.innerHTML=EXP.map((c,i)=>`<button class="ex-step ${i===exCur?'on':''}" onclick="exShow(${i})"><span class="n">${i+1}</span>${c.t[L()].replace(/<[^>]+>/g,'')}</button>`).join('');
-  panels.innerHTML=EXP.map((c,i)=>`<div class="ex-panel ${i===exCur?'on':''}"><div><span class="ex-tag">${c.tag[L()]}</span><h3>${c.t[L()]}</h3><p>${c.b[L()]}</p></div><div class="ex-vis">${c.vis()}</div></div>`).join('');
+  panels.innerHTML=EXP.map((c,i)=>`<div class="ex-panel ${i===exCur?'on':''}"><div><span class="ex-tag">${c.tag[L()]}</span><h3>${c.t[L()]}</h3><p>${c.b[L()]}</p></div><div class="ex-vis">${c.img?`<img class="ex-photo" loading="lazy" src="${UNSPLASH(c.img,900)}" alt="">`:''}${c.vis()}</div></div>`).join('');
   const pv=document.getElementById('exPrev'),nx=document.getElementById('exNext');if(pv)pv.disabled=exCur===0;if(nx)nx.disabled=exCur===EXP.length-1;
   if(EXP[exCur].after)EXP[exCur].after();
 }
