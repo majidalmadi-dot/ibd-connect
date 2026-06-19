@@ -9,6 +9,8 @@ ibd-connect-rn/node_modules/
 .expo/
 dist/
 web-build/
+site/deploy-*.zip
+deploy-*.zip
 
 # OS / editor
 .DS_Store

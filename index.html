@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0B0F14">
 <title>Rafeeq رفيق — your IBD companion</title>
 <!-- PWA: installable web app -->
@@ -376,7 +376,7 @@ input[type=range]{accent-color:var(--accent)}
    ============================================================ */
 @media (max-width:1023px){
   .lnav,.lhero-copy,.lsection,.lfoot{display:none!important}
-  #site,.lhero,.lhero-device,.ldevice{display:contents}
+  #site,#appMain,.lhero,.lhero-device,.ldevice{display:contents}
 }
 @media (min-width:1024px){
   html,body{height:auto;min-height:100%}
@@ -514,6 +514,13 @@ input[type=range]{accent-color:var(--accent)}
   @media (max-width:1180px){ .lx-gal{grid-template-columns:1fr 1fr;grid-auto-rows:180px} .lx-statgrid{grid-template-columns:repeat(2,1fr);gap:18px} .lx-quote{grid-template-columns:1fr} }
 }
 </style>
+<style>
+/* WCAG 2.2 AA — visible keyboard focus (2.4.7/2.4.11) + reduced motion (2.3.3) */
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+</style>
 </head>
 <body>
 <!-- Desktop website shell (hidden on phones; app goes full-screen there) -->
@@ -530,6 +537,7 @@ input[type=range]{accent-color:var(--accent)}
     <a class="lcta llink-site" href="website.html" data-en="Explore the site ↗" data-ar="استكشف الموقع ↗">Explore the site ↗</a>
   </header>
 
+  <main id="appMain">
   <section class="lhero" id="top">
     <div class="lhero-bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
     <div class="lhero-copy">
@@ -612,6 +620,7 @@ input[type=range]{accent-color:var(--accent)}
     </div>
   </section>
 
+  </main>
   <footer class="lfoot" id="about">
     <div class="lfoot-in">
       <div><span class="lbrand-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg></span> <b>Rafeeq</b></div>
@@ -1756,16 +1765,16 @@ const THEMES=[
    vars:{'--bg':'#0A1410','--bg2':'#0F1D17','--card':'#14271E','--card2':'#1D3528','--line':'#274A37','--txt':'#E8F5EC','--muted':'#8FB6A0','--faint':'#5C7E6A','--accent':'#46D08A','--accent2':'#8FD14F','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#46D08A','--accent-d':'#12271C','--nav':'rgba(15,29,23,.92)'},
    wall:'radial-gradient(120% 90% at 50% -10%,#103a26 0%,#0A1410 55%)'},
   {id:'apple',en:'Clean',ar:'نظيف',like:'Apple Health',mode:'light',
-   vars:{'--bg':'#F2F4F8','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EDF1F6','--line':'#DCE3EC','--txt':'#0F1722','--muted':'#5C6B7D','--faint':'#93A1B1','--accent':'#0A84FF','--accent2':'#30C758','--purple':'#7C5CFF','--warn':'#FF9F0A','--bad':'#FF3B30','--good':'#30C758','--accent-d':'#DCEBFF','--nav':'rgba(255,255,255,.82)'},
+   vars:{'--bg':'#F2F4F8','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EDF1F6','--line':'#DCE3EC','--txt':'#0F1722','--muted':'#5C6B7D','--faint':'#6E7A88','--accent':'#0A84FF','--accent2':'#30C758','--purple':'#7C5CFF','--warn':'#FF9F0A','--bad':'#FF3B30','--good':'#30C758','--accent-d':'#DCEBFF','--nav':'rgba(255,255,255,.82)'},
    wall:'linear-gradient(180deg,#E4EEFB 0%,#F2F4F8 40%)'},
   {id:'headspace',en:'Sunshine',ar:'إشراق',like:'Headspace',mode:'light',
-   vars:{'--bg':'#FFF7EC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FBEFDD','--line':'#F0E2CC','--txt':'#2A2014','--muted':'#8A765C','--faint':'#B8A488','--accent':'#FF8A3D','--accent2':'#4F86FF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FFE6D2','--nav':'rgba(255,255,255,.82)'},
+   vars:{'--bg':'#FFF7EC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FBEFDD','--line':'#F0E2CC','--txt':'#2A2014','--muted':'#6E5C44','--faint':'#897962','--accent':'#E0691E','--accent2':'#4F86FF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FFE6D2','--nav':'rgba(255,255,255,.82)'},
    wall:'linear-gradient(180deg,#FFEAD2 0%,#FFF7EC 40%)'},
   {id:'flo',en:'Blossom',ar:'زهر',like:'Flo',mode:'light',
-   vars:{'--bg':'#FFF0F5','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCE6EF','--line':'#F3D7E3','--txt':'#2A1620','--muted':'#9B7385','--faint':'#C3A3B2','--accent':'#F0468A','--accent2':'#9B7CFF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FCE0EC','--nav':'rgba(255,255,255,.82)'},
+   vars:{'--bg':'#FFF0F5','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCE6EF','--line':'#F3D7E3','--txt':'#2A1620','--muted':'#7E5868','--faint':'#9A7A8A','--accent':'#F0468A','--accent2':'#9B7CFF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FCE0EC','--nav':'rgba(255,255,255,.82)'},
    wall:'radial-gradient(120% 80% at 80% -10%,#ffd6e6 0%,#FFF0F5 55%)'},
   {id:'mint',en:'Fresh Mint',ar:'نعناع',like:'Clue',mode:'light',
-   vars:{'--bg':'#ECF7F0','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E3F2E9','--line':'#D3EADC','--txt':'#0F2418','--muted':'#5C7A68','--faint':'#9BBBA8','--accent':'#1FA85F','--accent2':'#0AAFA0','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#1FA85F','--accent-d':'#D6F1E1','--nav':'rgba(255,255,255,.82)'},
+   vars:{'--bg':'#ECF7F0','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E3F2E9','--line':'#D3EADC','--txt':'#0F2418','--muted':'#4E6B5A','--faint':'#6E9080','--accent':'#1FA85F','--accent2':'#0AAFA0','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#1FA85F','--accent-d':'#D6F1E1','--nav':'rgba(255,255,255,.82)'},
    wall:'linear-gradient(180deg,#D9F2E3 0%,#ECF7F0 40%)'},
 ];
 function applyTheme(){const th=THEMES.find(x=>x.id===(S.prefs.theme||'whoop'))||THEMES[0];

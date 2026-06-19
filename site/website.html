@@ -42,7 +42,7 @@ img{max-width:100%}
 .themebtn .dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2))}
 .theme-pop{position:fixed;top:64px;inset-inline-end:18px;z-index:90;background:var(--bg2);border:1px solid var(--line);border-radius:18px;padding:16px;width:300px;max-width:calc(100vw - 24px);box-shadow:0 30px 70px -20px rgba(0,0,0,.6);display:none}
 .theme-pop.open{display:block;animation:exin .2s ease}
-.theme-pop h4{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px}
+.theme-pop .pop-title{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px;font-weight:700}
 .theme-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .theme-card{border:2px solid var(--line);border-radius:13px;overflow:hidden;cursor:pointer;background:var(--card);transition:.15s}
 .theme-card.on{border-color:var(--accent)}
@@ -110,7 +110,10 @@ section{padding:64px 0}
 .lcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;transition:.18s;display:block}
 .lcard:hover{transform:translateY(-3px);border-color:color-mix(in srgb, var(--accent) 40%, transparent)}
 .lcard .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;background:var(--card2);margin-bottom:14px}
-.lcard h4{font-size:16px;font-weight:700;margin-bottom:6px}
+.lcard .lc-photo{height:150px;border-radius:13px;overflow:hidden;margin-bottom:14px;background:var(--card2)}
+.lcard .lc-photo img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
+.lcard:hover .lc-photo img{transform:scale(1.05)}
+.lcard h4,.lcard .lc-h{font-size:16px;font-weight:700;margin-bottom:6px}
 .lcard p{color:var(--muted);font-size:13px;line-height:1.5}
 .lcard .by{color:var(--faint);font-size:12px;margin-top:10px}
 @media(max-width:840px){.cards{grid-template-columns:1fr}}
@@ -203,6 +206,13 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
 .myth.open .tap{display:none}
 @media(max-width:520px){.myths{grid-template-columns:1fr}}
 </style>
+<style>
+/* WCAG 2.2 AA — visible keyboard focus (2.4.7/2.4.11) + reduced motion (2.3.3) */
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
+</style>
 </head>
 <body>
 
@@ -220,8 +230,9 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
   <button class="langbtn" id="langbtn" onclick="toggleLang()">العربية</button>
   <a class="btn btn-primary" style="padding:10px 18px" href="index.html" data-i18n="openApp">Open the app</a>
 </div></nav>
-<div class="theme-pop" id="themePop"><h4 data-i18n="themeTitle">Choose a theme</h4><div class="theme-grid" id="themeGrid"></div></div>
+<div class="theme-pop" id="themePop"><div class="pop-title" data-i18n="themeTitle">Choose a theme</div><div class="theme-grid" id="themeGrid"></div></div>
 
+<main>
 <header class="hero wrap" id="top">
   <div>
     <span class="pill" data-i18n="heroPill">Saudi Gastroenterology Association · IBD Guide</span>
@@ -302,6 +313,7 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
   <div class="faq" id="faqList"></div>
 </div></section>
 
+</main>
 <footer><div class="wrap cols">
   <div>
     <div class="brand" style="margin-bottom:12px"><span class="m" style="color:var(--accent)"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg></span><span>Rafeeq</span></div>
@@ -385,12 +397,12 @@ function toggleLang(){LANG=LANG==='ar'?'en':'ar';document.documentElement.lang=L
 
 /* ---------- features tabs ---------- */
 const FEATURES=[
- {ic:'pulse',img:'photo-1707344088547-3cf7cea5ca49',emoji:'🩺',en:['Track everything','Symptoms, bowel movements (Bristol scale), meals with photos, sleep, mood, activity, hydration, steps and weight — each logged in seconds with smart reminders.',['Bristol stool scale & symptom severity','Meal photos & history','Medication reminders (no drug names stored)']],ar:['تتبّع كل شيء','الأعراض وحركة الأمعاء (مقياس بريستول) والوجبات بالصور والنوم والمزاج والنشاط والترطيب والخطوات والوزن — كل ذلك في ثوانٍ مع تذكيرات ذكية.',['مقياس بريستول وشدّة الأعراض','صور الوجبات والسجل','تذكيرات الدواء (دون حفظ أسماء)']]},
- {ic:'chart',img:'photo-1707343844007-d1aaa490e960',emoji:'📊',en:['See your patterns','Clean weekly & monthly reports, an activity heatmap, a consistency score and a weekly recap — descriptive only, made to support your conversations, never to diagnose.',['Symptom, bowel, mood & sleep trends','Activity heatmap & consistency score','Shareable summary for your doctor']],ar:['اكتشف أنماطك','تقارير أسبوعية وشهرية واضحة وخريطة نشاط ودرجة انتظام وملخّص أسبوعي — وصفية فقط لدعم نقاشك، لا للتشخيص.',['اتجاهات الأعراض والأمعاء والمزاج والنوم','خريطة النشاط ودرجة الانتظام','ملخّص قابل للمشاركة مع طبيبك']]},
- {ic:'book',img:'photo-1682685796852-aa311b46f50d',emoji:'📖',en:['Learn from experts','A bilingual library featuring the Saudi Gastroenterology Association IBD Guide — flares, nutrition, biologics, pregnancy, smoking and more, authored by clinicians.',['11 expert-authored articles','Disease-specific suggestions','Wellness & lifestyle tips']],ar:['تعلّم من الخبراء','مكتبة ثنائية اللغة تضم دليل IBD من الجمعية السعودية — النوبات والتغذية والعلاجات الحيوية والحمل والتدخين والمزيد، بأقلام أطباء.',['11 مقالًا بأقلام خبراء','اقتراحات حسب نوع المرض','نصائح العافية ونمط الحياة']]},
+ {ic:'pulse',img:'photo-1456324504439-367cee3b3c32',emoji:'🩺',en:['Track everything','Symptoms, bowel movements (Bristol scale), meals with photos, sleep, mood, activity, hydration, steps and weight — each logged in seconds with smart reminders.',['Bristol stool scale & symptom severity','Meal photos & history','Medication reminders (no drug names stored)']],ar:['تتبّع كل شيء','الأعراض وحركة الأمعاء (مقياس بريستول) والوجبات بالصور والنوم والمزاج والنشاط والترطيب والخطوات والوزن — كل ذلك في ثوانٍ مع تذكيرات ذكية.',['مقياس بريستول وشدّة الأعراض','صور الوجبات والسجل','تذكيرات الدواء (دون حفظ أسماء)']]},
+ {ic:'chart',img:'photo-1504868584819-f8e8b4b6d7e3',emoji:'📊',en:['See your patterns','Clean weekly & monthly reports, an activity heatmap, a consistency score and a weekly recap — descriptive only, made to support your conversations, never to diagnose.',['Symptom, bowel, mood & sleep trends','Activity heatmap & consistency score','Shareable summary for your doctor']],ar:['اكتشف أنماطك','تقارير أسبوعية وشهرية واضحة وخريطة نشاط ودرجة انتظام وملخّص أسبوعي — وصفية فقط لدعم نقاشك، لا للتشخيص.',['اتجاهات الأعراض والأمعاء والمزاج والنوم','خريطة النشاط ودرجة الانتظام','ملخّص قابل للمشاركة مع طبيبك']]},
+ {ic:'book',img:'photo-1576091160550-2173dba999ef',emoji:'📖',en:['Learn from experts','A bilingual library featuring the Saudi Gastroenterology Association IBD Guide — flares, nutrition, biologics, pregnancy, smoking and more, authored by clinicians.',['11 expert-authored articles','Disease-specific suggestions','Wellness & lifestyle tips']],ar:['تعلّم من الخبراء','مكتبة ثنائية اللغة تضم دليل IBD من الجمعية السعودية — النوبات والتغذية والعلاجات الحيوية والحمل والتدخين والمزيد، بأقلام أطباء.',['11 مقالًا بأقلام خبراء','اقتراحات حسب نوع المرض','نصائح العافية ونمط الحياة']]},
  {ic:'share',img:'photo-1625236466493-72842ceec47b',emoji:'🤝',en:['Stay connected & motivated','Share a clean summary with your care team, and stay engaged with gentle nudges, streaks, levels and goal rings — proven techniques from leading health apps.',['One-tap clinician summary via QR','Streaks, XP & daily goal rings','Smart, dismissible reminders']],ar:['ابقَ متّصلًا ومتحفّزًا','شارك ملخصًا أنيقًا مع فريق رعايتك، وابقَ متفاعلًا عبر تنبيهات لطيفة وتتابعات ومستويات وحلقات أهداف — أساليب مثبتة من أبرز التطبيقات الصحية.',['ملخّص للطبيب عبر رمز QR','تتابعات ونقاط وحلقات أهداف','تذكيرات ذكية قابلة للإخفاء']]},
  {ic:'moon',img:'photo-1734572410061-7823529c93f7',emoji:'🌙',en:['Made for Saudi & the Gulf','Guidance the global apps don\'t have: how to approach Ramadan fasting, plan Hajj & Umrah, and navigate Gulf cuisine with IBD — in Arabic and English.',['Ramadan fasting & medication timing','Hajj & Umrah travel planning','Gulf-food trigger guide (kabsa, dates, laban…)']],ar:['مصمّم للسعودية والخليج','إرشاد لا تجده في التطبيقات العالمية: كيف تتعامل مع صيام رمضان، وتخطّط للحج والعمرة، وتتنقّل بين أطعمة الخليج مع التهاب الأمعاء — بالعربية والإنجليزية.',['الصيام في رمضان وتوقيت الدواء','تخطيط الحج والعمرة','دليل أطعمة الخليج (الكبسة، التمر، اللبن…)']]},
- {ic:'pill',img:'photo-1629738601425-494c3d6ba3e2',emoji:'💊',en:['Medications, labs & insights','Track biologic injection cycles and daily medication adherence, log your lab results over time, and see private on-device observations about your own patterns.',['Biologic & infusion scheduling','Calprotectin, CRP & Hb trends','Private, descriptive pattern insights']],ar:['الأدوية والتحاليل والملاحظات','تابع دورات الحقن الحيوية والالتزام اليومي بالدواء، وسجّل نتائج تحاليلك عبر الوقت، واطّلع على ملاحظات خاصة على جهازك عن أنماطك.',['جدولة العلاجات الحيوية والتسريب','اتجاهات الكالبروتكتين وCRP والهيموغلوبين','ملاحظات وصفية خاصة عن أنماطك']]},
+ {ic:'pill',img:'photo-1563213126-a4273aed2016',emoji:'💊',en:['Medications, labs & insights','Track biologic injection cycles and daily medication adherence, log your lab results over time, and see private on-device observations about your own patterns.',['Biologic & infusion scheduling','Calprotectin, CRP & Hb trends','Private, descriptive pattern insights']],ar:['الأدوية والتحاليل والملاحظات','تابع دورات الحقن الحيوية والالتزام اليومي بالدواء، وسجّل نتائج تحاليلك عبر الوقت، واطّلع على ملاحظات خاصة على جهازك عن أنماطك.',['جدولة العلاجات الحيوية والتسريب','اتجاهات الكالبروتكتين وCRP والهيموغلوبين','ملاحظات وصفية خاصة عن أنماطك']]},
 ];
 function buildFeatures(){
  const t=document.getElementById('ftabs'),p=document.getElementById('fpanels');const i18=LANG==='ar'?1:0;
@@ -401,14 +413,14 @@ let curTab=0;function setTab(i){curTab=i;buildFeatures();}
 
 /* ---------- learn cards ---------- */
 const ARTS=[
- {icon:'flame',slug:'acute-flares',en:['Managing acute flare-ups','Recognise a flare early and know when to seek care.','Prof. Majid Al-Madi'],ar:['التعامل مع الهجمات الحادة','تعرّف على النوبة مبكرًا ومتى تطلب الرعاية.','أ.د. ماجد الماضي']},
- {icon:'utensils',slug:'nutrition-and-ibd',en:['Nutrition and IBD','Eating well through flares and remission.','Dr. Mahdi Al-Sahhaf'],ar:['التغذية والمرض','الأكل الجيّد خلال النوبات والهدأة.','د. مهدي الصحاف']},
- {icon:'pill',slug:'biological-therapies',en:['Biological therapies','How advanced biologics target inflammation.','IBD Guide Team'],ar:['العلاجات البيولوجية','كيف تستهدف العلاجات الحيوية الالتهاب.','فريق دليل IBD']},
- {icon:'baby',slug:'pregnancy-and-ibd',en:['Pregnancy and IBD','Planning and managing IBD during pregnancy.','Dr. Al-Sharif & Dr. Bawarth'],ar:['الحمل والمرض','التخطيط وإدارة المرض أثناء الحمل.','د. الشريف ود. باوارث']},
- {icon:'smoking',slug:'smoking-and-ibd',en:['Smoking and IBD','Its opposite effects on Crohn’s and UC.','Dr. Al-Adwani & Dr. Qutub'],ar:['التدخين والمرض','تأثيره المتعاكس على كرون والتقرحي.','د. العدواني ود. قطب']},
- {icon:'microscope',slug:'endoscopy-and-ibd',en:['Endoscopy and IBD','What to expect and how to prepare.','Dr. Abdullah Al-Bishi'],ar:['التنظير والمرض','ماذا تتوقّع وكيف تستعد.','د. عبدالله البيشي']},
+ {icon:'flame',img:'photo-1519494080410-f9aa76cb4283',slug:'acute-flares',en:['Managing acute flare-ups','Recognise a flare early and know when to seek care.','Prof. Majid Al-Madi'],ar:['التعامل مع الهجمات الحادة','تعرّف على النوبة مبكرًا ومتى تطلب الرعاية.','أ.د. ماجد الماضي']},
+ {icon:'utensils',img:'photo-1467453678174-768ec283a940',slug:'nutrition-and-ibd',en:['Nutrition and IBD','Eating well through flares and remission.','Dr. Mahdi Al-Sahhaf'],ar:['التغذية والمرض','الأكل الجيّد خلال النوبات والهدأة.','د. مهدي الصحاف']},
+ {icon:'pill',img:'photo-1578308175085-444a1fbea0fe',slug:'biological-therapies',en:['Biological therapies','How advanced biologics target inflammation.','IBD Guide Team'],ar:['العلاجات البيولوجية','كيف تستهدف العلاجات الحيوية الالتهاب.','فريق دليل IBD']},
+ {icon:'baby',img:'photo-1538678867871-8a43e7487746',slug:'pregnancy-and-ibd',en:['Pregnancy and IBD','Planning and managing IBD during pregnancy.','Dr. Al-Sharif & Dr. Bawarth'],ar:['الحمل والمرض','التخطيط وإدارة المرض أثناء الحمل.','د. الشريف ود. باوارث']},
+ {icon:'smoking',img:'photo-1531233860166-39482c9fe3e6',slug:'smoking-and-ibd',en:['Smoking and IBD','Its opposite effects on Crohn’s and UC.','Dr. Al-Adwani & Dr. Qutub'],ar:['التدخين والمرض','تأثيره المتعاكس على كرون والتقرحي.','د. العدواني ود. قطب']},
+ {icon:'microscope',img:'photo-1550831107-1553da8c8464',slug:'endoscopy-and-ibd',en:['Endoscopy and IBD','What to expect and how to prepare.','Dr. Abdullah Al-Bishi'],ar:['التنظير والمرض','ماذا تتوقّع وكيف تستعد.','د. عبدالله البيشي']},
 ];
-function buildLearn(){const i18=LANG==='ar'?1:0;document.getElementById('learnCards').innerHTML=ARTS.map(a=>{const c=a[i18?'ar':'en'];return `<a class="lcard" href="https://www.saudigastro.com/ibd-guide/${a.slug}" target="_blank" rel="noopener"><div class="ic" style="color:var(--accent)">${ic(a.icon,24)}</div><h4>${c[0]}</h4><p>${c[1]}</p><div class="by">${c[2]} · SGA ↗</div></a>`;}).join('');}
+function buildLearn(){const i18=LANG==='ar'?1:0;document.getElementById('learnCards').innerHTML=ARTS.map(a=>{const c=a[i18?'ar':'en'];return `<a class="lcard" href="https://www.saudigastro.com/ibd-guide/${a.slug}" target="_blank" rel="noopener"><div class="lc-photo"><img loading="lazy" src="${UNSPLASH(a.img,600)}" alt=""></div><h3 class="lc-h">${c[0]}</h3><p>${c[1]}</p><div class="by">${c[2]} · SGA ↗</div></a>`;}).join('');}
 
 /* ---------- FAQ ---------- */
 const FAQS=[
@@ -433,7 +445,7 @@ function drawRadar(){
  const labels=DISC.map((d,i)=>{const[x,y]=pt(i,max+1.6);return `<text x="${x}" y="${y}" fill="#8DA0B2" font-size="9" text-anchor="middle" dominant-baseline="middle">${d[LANG==='ar'?1:0]}</text>`;}).join('');
  document.getElementById('radar').innerHTML=grid+spokes+poly+dots+labels;
 }
-function buildDisc(){const i18=LANG==='ar'?1:0;document.getElementById('discControls').innerHTML=DISC.map((d,i)=>`<div class="disc-row"><label>${d[i18?1:0]}</label><input type="range" min="0" max="10" value="${discVals[i]}" oninput="discVals[${i}]=+this.value;this.nextElementSibling.textContent=this.value;drawRadar()"><b>${discVals[i]}</b></div>`).join('');drawRadar();}
+function buildDisc(){const i18=LANG==='ar'?1:0;document.getElementById('discControls').innerHTML=DISC.map((d,i)=>`<div class="disc-row"><label>${d[i18?1:0]}</label><input type="range" min="0" max="10" aria-label="${d[i18?1:0]}" value="${discVals[i]}" oninput="discVals[${i}]=+this.value;this.nextElementSibling.textContent=this.value;drawRadar()"><b>${discVals[i]}</b></div>`).join('');drawRadar();}
 
 /* ---------- live app preview (iframe) ---------- */
 function loadApp(){const f=document.getElementById('appframe');if(f)f.src='index.html?lang='+LANG;}
@@ -501,25 +513,25 @@ function mythsHTML(){return `<div class="myths">${MYTHS.map((m,i)=>`<div class="
 const EXP=[
  {tag:['The basics','الأساسيات'],t:['What is IBD?','ما هو التهاب الأمعاء؟'],
   b:['IBD stands for <b>Inflammatory Bowel Disease</b>. It means the body\'s immune system causes ongoing inflammation in the gut (your digestive tract).<br><br>There are two main types. <b>Ulcerative Colitis</b> affects the large intestine (colon) in one continuous stretch. <b>Crohn\'s disease</b> can appear anywhere from mouth to bottom, often in patches.<br><br>Tap the buttons to see where each one shows up.',
-     'يرمز IBD إلى <b>داء الأمعاء الالتهابي</b>. ويعني أن جهاز المناعة يسبّب التهابًا مستمرًا في الأمعاء (الجهاز الهضمي).<br><br>هناك نوعان رئيسيان. <b>التهاب القولون التقرّحي</b> يصيب الأمعاء الغليظة بشكل متّصل. أما <b>داء كرون</b> فقد يظهر في أي مكان من الفم حتى الشرج، وغالبًا بشكل متقطّع.<br><br>اضغط الأزرار لرؤية مكان كل نوع.'], img:'photo-1682685796852-aa311b46f50d', vis:giDiagram, after:()=>giSet(giType)},
+     'يرمز IBD إلى <b>داء الأمعاء الالتهابي</b>. ويعني أن جهاز المناعة يسبّب التهابًا مستمرًا في الأمعاء (الجهاز الهضمي).<br><br>هناك نوعان رئيسيان. <b>التهاب القولون التقرّحي</b> يصيب الأمعاء الغليظة بشكل متّصل. أما <b>داء كرون</b> فقد يظهر في أي مكان من الفم حتى الشرج، وغالبًا بشكل متقطّع.<br><br>اضغط الأزرار لرؤية مكان كل نوع.'], img:'photo-1512678080530-7760d81faba6', vis:giDiagram, after:()=>giSet(giType)},
  {tag:['The cause','السبب'],t:['Why does it happen?','لماذا يحدث؟'],
   b:['No one chose this, and it isn\'t caused by something you did.<br><br>IBD happens when a few things line up: your <b>genes</b>, an <b>overactive immune system</b>, the <b>environment</b> around you, and the balance of <b>bacteria</b> living in your gut. The immune system mistakes the gut for a threat and keeps it inflamed.',
-     'لم يختر أحد هذا، وهو ليس بسبب شيء فعلته.<br><br>يحدث المرض عندما تجتمع عدة عوامل: <b>الجينات</b>، و<b>جهاز مناعة مفرط النشاط</b>، و<b>البيئة</b> المحيطة، وتوازن <b>البكتيريا</b> في الأمعاء. يظنّ جهاز المناعة أن الأمعاء تهديد فيُبقيها ملتهبة.'], img:'photo-1707343844007-d1aaa490e960', vis:factorsHTML},
+     'لم يختر أحد هذا، وهو ليس بسبب شيء فعلته.<br><br>يحدث المرض عندما تجتمع عدة عوامل: <b>الجينات</b>، و<b>جهاز مناعة مفرط النشاط</b>، و<b>البيئة</b> المحيطة، وتوازن <b>البكتيريا</b> في الأمعاء. يظنّ جهاز المناعة أن الأمعاء تهديد فيُبقيها ملتهبة.'], img:'photo-1633167606207-d840b5070fc2', vis:factorsHTML},
  {tag:['Triggers','المثيرات'],t:['What can provoke it?','ما الذي قد يُثيره؟'],
   b:['Flares can sometimes be set off by certain things — and these are <b>different for everyone</b>. What bothers one person may not bother another.<br><br>Tap each one to learn more.',
-     'قد تُشعَل النوبات بعوامل معيّنة — وهي <b>مختلفة بين شخص وآخر</b>. ما يزعج أحدهم قد لا يزعج غيره.<br><br>اضغط على كل عامل لمعرفة المزيد.'], img:'photo-1629738601425-494c3d6ba3e2', vis:triggersHTML},
+     'قد تُشعَل النوبات بعوامل معيّنة — وهي <b>مختلفة بين شخص وآخر</b>. ما يزعج أحدهم قد لا يزعج غيره.<br><br>اضغط على كل عامل لمعرفة المزيد.'], img:'photo-1490645935967-10de6ba17061', vis:triggersHTML},
  {tag:['Watch out','احذر'],t:['What makes it worse?','ما الذي يزيدها سوءًا؟'],
   b:['Some things tend to make IBD more active or harder to control. The biggest, most controllable one is <b>not taking your treatment</b> — and, for Crohn\'s, <b>smoking</b>.',
-     'بعض الأمور تجعل المرض أكثر نشاطًا أو أصعب في السيطرة. وأكبرها وأكثرها قابلية للتحكّم هو <b>عدم أخذ العلاج</b> — و<b>التدخين</b> في داء كرون.'], img:'photo-1707344088547-3cf7cea5ca49', vis:worseHTML},
+     'بعض الأمور تجعل المرض أكثر نشاطًا أو أصعب في السيطرة. وأكبرها وأكثرها قابلية للتحكّم هو <b>عدم أخذ العلاج</b> — و<b>التدخين</b> في داء كرون.'], img:'photo-1531233860166-39482c9fe3e6', vis:worseHTML},
  {tag:['Helps','يساعد'],t:['What makes it better?','ما الذي يجعلها أفضل؟'],
   b:['The good news: a lot is in your hands. Steady habits and staying on treatment give you the best chance of feeling well and staying in remission.',
-     'الخبر الجيّد: الكثير بين يديك. العادات الثابتة والاستمرار على العلاج تمنحك أفضل فرصة للشعور بالعافية والبقاء في هدأة.'], img:'photo-1625236466493-72842ceec47b', vis:betterHTML},
+     'الخبر الجيّد: الكثير بين يديك. العادات الثابتة والاستمرار على العلاج تمنحك أفضل فرصة للشعور بالعافية والبقاء في هدأة.'], img:'photo-1682685796852-aa311b46f50d', vis:betterHTML},
  {tag:['Over time','مع الوقت'],t:['What\'s the natural history?','ما المسار الطبيعي؟'],
   b:['IBD is usually <b>long-term (chronic)</b>. It often comes in waves: times when it\'s active (a <b>flare</b>) and times when it settles down (called <b>remission</b>).<br><br>The goal of treatment is to reach and stay in remission — and to <b>heal the gut lining</b>, not just hide the symptoms.',
      'المرض عادةً <b>مزمن (طويل الأمد)</b>. وغالبًا يأتي على شكل موجات: فترات نشاط (<b>نوبة</b>) وفترات هدوء (<b>هدأة</b>).<br><br>هدف العلاج هو الوصول للهدأة والبقاء فيها — و<b>التئام بطانة الأمعاء</b>، وليس مجرّد إخفاء الأعراض.'], img:'photo-1734572410061-7823529c93f7', vis:waveHTML},
  {tag:['Looking ahead','نظرة للأمام'],t:['What to expect','ماذا تتوقّع'],
   b:['IBD is manageable. Most people live full lives — work, travel, study, and have families. Your care team will follow you with check-ups, labs, and sometimes a camera test (endoscopy), and adjust treatment over time.<br><br>You\'re not alone. Tap the cards below.',
-     'المرض قابل للإدارة. معظم المرضى يعيشون حياة كاملة — عمل وسفر ودراسة وأسرة. سيتابعك فريق رعايتك بالفحوصات والتحاليل وأحيانًا التنظير، ويعدّل العلاج مع الوقت.<br><br>لست وحدك. اضغط البطاقات بالأسفل.'], img:'photo-1682685796852-aa311b46f50d', vis:mythsHTML},
+     'المرض قابل للإدارة. معظم المرضى يعيشون حياة كاملة — عمل وسفر ودراسة وأسرة. سيتابعك فريق رعايتك بالفحوصات والتحاليل وأحيانًا التنظير، ويعدّل العلاج مع الوقت.<br><br>لست وحدك. اضغط البطاقات بالأسفل.'], img:'photo-1707344088547-3cf7cea5ca49', vis:mythsHTML},
 ];
 let exCur=0;
 function buildExplained(){
@@ -538,10 +550,10 @@ const THEMES=[
  {id:'oura',mode:'dark',name:['Aura','الهالة'],like:'Oura',vars:{'--bg':'#0E0D12','--bg2':'#15131C','--card':'#1C1926','--card2':'#262232','--line':'#332D42','--txt':'#F1ECF6','--muted':'#A89CB8','--faint':'#6E6480','--accent':'#E8B07A','--accent2':'#C58BF2','--purple':'#C58BF2','--warn':'#F2C24B','--bad':'#FF6B8A','--good':'#7FD1A6'}},
  {id:'calm',mode:'dark',name:['Deep Calm','هدوء عميق'],like:'Calm',vars:{'--bg':'#0A1730','--bg2':'#0E1F40','--card':'#13294F','--card2':'#1B3361','--line':'#274377','--txt':'#E7F0FF','--muted':'#93AAD0','--faint':'#5E769E','--accent':'#4FA8FF','--accent2':'#7BD8FF','--purple':'#9BA8FF','--warn':'#FFC061','--bad':'#FF7C92','--good':'#5FD0C0'}},
  {id:'forest',mode:'dark',name:['Forest','الغابة'],like:'Fitbit',vars:{'--bg':'#0A1410','--bg2':'#0F1D17','--card':'#14271E','--card2':'#1D3528','--line':'#274A37','--txt':'#E8F5EC','--muted':'#8FB6A0','--faint':'#5C7E6A','--accent':'#46D08A','--accent2':'#8FD14F','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#46D08A'}},
- {id:'apple',mode:'light',name:['Clean','نظيف'],like:'Apple Health',vars:{'--bg':'#F2F4F8','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EDF1F6','--line':'#DCE3EC','--txt':'#0F1722','--muted':'#5C6B7D','--faint':'#93A1B1','--accent':'#0A84FF','--accent2':'#30C758','--purple':'#7C5CFF','--warn':'#FF9F0A','--bad':'#FF3B30','--good':'#30C758'}},
- {id:'headspace',mode:'light',name:['Sunshine','إشراق'],like:'Headspace',vars:{'--bg':'#FFF7EC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FBEFDD','--line':'#F0E2CC','--txt':'#2A2014','--muted':'#8A765C','--faint':'#B8A488','--accent':'#FF8A3D','--accent2':'#4F86FF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984'}},
- {id:'flo',mode:'light',name:['Blossom','زهر'],like:'Flo',vars:{'--bg':'#FFF0F5','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCE6EF','--line':'#F3D7E3','--txt':'#2A1620','--muted':'#9B7385','--faint':'#C3A3B2','--accent':'#F0468A','--accent2':'#9B7CFF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984'}},
- {id:'mint',mode:'light',name:['Fresh Mint','نعناع'],like:'Clue',vars:{'--bg':'#ECF7F0','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E3F2E9','--line':'#D3EADC','--txt':'#0F2418','--muted':'#5C7A68','--faint':'#9BBBA8','--accent':'#1FA85F','--accent2':'#0AAFA0','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#1FA85F'}},
+ {id:'apple',mode:'light',name:['Clean','نظيف'],like:'Apple Health',vars:{'--bg':'#F2F4F8','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EDF1F6','--line':'#DCE3EC','--txt':'#0F1722','--muted':'#5C6B7D','--faint':'#6E7A88','--accent':'#0A84FF','--accent2':'#30C758','--purple':'#7C5CFF','--warn':'#FF9F0A','--bad':'#FF3B30','--good':'#30C758'}},
+ {id:'headspace',mode:'light',name:['Sunshine','إشراق'],like:'Headspace',vars:{'--bg':'#FFF7EC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FBEFDD','--line':'#F0E2CC','--txt':'#2A2014','--muted':'#6E5C44','--faint':'#897962','--accent':'#E0691E','--accent2':'#4F86FF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984'}},
+ {id:'flo',mode:'light',name:['Blossom','زهر'],like:'Flo',vars:{'--bg':'#FFF0F5','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCE6EF','--line':'#F3D7E3','--txt':'#2A1620','--muted':'#7E5868','--faint':'#9A7A8A','--accent':'#F0468A','--accent2':'#9B7CFF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984'}},
+ {id:'mint',mode:'light',name:['Fresh Mint','نعناع'],like:'Clue',vars:{'--bg':'#ECF7F0','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E3F2E9','--line':'#D3EADC','--txt':'#0F2418','--muted':'#4E6B5A','--faint':'#6E9080','--accent':'#1FA85F','--accent2':'#0AAFA0','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#1FA85F'}},
 ];
 function applyTheme(id,silent){const th=THEMES.find(t=>t.id===id)||THEMES[0];const r=document.documentElement;
  Object.entries(th.vars).forEach(([k,v])=>r.style.setProperty(k,v));
