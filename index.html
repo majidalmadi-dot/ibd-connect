@@ -446,10 +446,10 @@ input[type=range]{accent-color:var(--accent)}
     <a class="lbrand" href="#top"><span class="lbrand-mark">🌿</span><span>IBD&nbsp;Connect</span></a>
     <nav class="llinks">
       <a href="#features">Features</a>
-      <a href="#learn">IBD Guide</a>
+      <a href="website.html">Learn more</a>
       <a href="#about">About</a>
     </nav>
-    <a class="lcta" href="#app-anchor">Open the app</a>
+    <a class="lcta" href="website.html">Explore the website ↗</a>
   </header>
 
   <section class="lhero" id="top">
@@ -947,6 +947,8 @@ const I18N = {
   installAndroid:{en:"In Chrome: open the ⋮ menu and choose “Install app” / “Add to Home screen”.",ar:"في Chrome: افتح قائمة ⋮ واختر «تثبيت التطبيق» / «الإضافة إلى الشاشة الرئيسية»."},
   updateAvailable:{en:"A new version is available",ar:"يتوفّر إصدار جديد"},
   refresh:{en:"Refresh",ar:"تحديث"},
+  visitWebsite:{en:"Explore our website",ar:"استكشف موقعنا"},
+  visitWebsiteSub:{en:"Interactive guide & more details",ar:"دليل تفاعلي وتفاصيل أكثر"},
 };
 
 const DISC = [
@@ -2321,6 +2323,8 @@ route('more',(n)=>{
        ${mLi('🧭',t('insightsWellness'),'',"go('insights')")}
        ${mLi('🔑',t('changePw'),'',"go('changePw')")}
      </div>
+
+     <div class="card tap" onclick="location.href='website.html'"><div class="row"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center">${svgIcon('globe',22)}</span><div style="flex:1"><b style="font-size:14.5px">${t('visitWebsite')}</b><div class="muted" style="font-size:12.5px">${t('visitWebsiteSub')}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></div>
 
      <div class="section-title">${t('legal')}</div>
      <div class="card">
