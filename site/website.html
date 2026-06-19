@@ -125,6 +125,68 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease, transform .6s ease}
 .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+
+/* ===== IBD explained module ===== */
+.ex-steps{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:26px;scrollbar-width:none}
+.ex-steps::-webkit-scrollbar{display:none}
+.ex-step{flex:none;display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--line);color:var(--muted);
+  padding:11px 16px;border-radius:13px;font-weight:700;font-size:13.5px;cursor:pointer;transition:.15s}
+.ex-step .n{width:22px;height:22px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted)}
+.ex-step.on{background:rgba(0,224,184,.14);border-color:var(--accent);color:var(--accent)}
+.ex-step.on .n{background:var(--accent);color:#04221d}
+.ex-panel{display:none;background:var(--card);border:1px solid var(--line);border-radius:24px;padding:34px}
+.ex-panel.on{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;animation:exin .4s ease}
+@keyframes exin{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.ex-panel h3{font-size:26px;font-weight:800;letter-spacing:-.6px;margin-bottom:6px}
+.ex-panel .ex-tag{display:inline-block;font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.6px;text-transform:uppercase;margin-bottom:10px}
+.ex-panel p{color:var(--muted);font-size:16px;line-height:1.7}
+.ex-vis{display:flex;align-items:center;justify-content:center;min-height:300px;background:linear-gradient(160deg,rgba(0,224,184,.08),rgba(25,160,255,.04));border:1px solid var(--line);border-radius:18px;padding:20px}
+@media(max-width:860px){.ex-panel.on{grid-template-columns:1fr;padding:22px}.ex-vis{min-height:240px;order:-1}}
+.ex-nav{display:flex;justify-content:space-between;margin-top:20px}
+.ex-arrow{background:var(--card);border:1px solid var(--line);color:var(--txt);padding:11px 18px;border-radius:12px;font-weight:700;cursor:pointer;font-family:inherit;font-size:14px}
+.ex-arrow:disabled{opacity:.35;cursor:default}
+/* GI toggle */
+.gi-toggle{display:flex;gap:8px;justify-content:center;margin-top:14px}
+.gi-btn{padding:9px 16px;border-radius:11px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:700;font-size:13.5px;cursor:pointer;font-family:inherit}
+.gi-btn.on{color:#fff}
+.gi-seg{transition:fill .3s, opacity .3s}
+/* factor tiles */
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.fact{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+.fact .fi{font-size:30px}
+.fact b{display:block;font-size:14px;margin:8px 0 4px}
+.fact span{color:var(--muted);font-size:12px;line-height:1.4}
+.reassure{grid-column:1/-1;background:rgba(0,224,184,.1);border:1px solid rgba(0,224,184,.3);border-radius:12px;padding:12px 14px;color:var(--accent);font-weight:700;font-size:13.5px;text-align:center}
+/* trigger chips */
+.trigs{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+.trig{background:var(--card2);border:1px solid var(--line);border-radius:30px;padding:10px 16px;font-weight:700;font-size:13.5px;cursor:pointer;display:flex;gap:8px;align-items:center;transition:.15s}
+.trig.on{background:rgba(255,178,62,.16);border-color:var(--warn);color:var(--warn)}
+.trig-detail{margin-top:16px;background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:16px;color:var(--muted);font-size:14px;line-height:1.6;min-height:60px}
+/* worse / better columns */
+.wb{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%}
+.wb-col{border-radius:16px;padding:18px}
+.wb-col.worse{background:rgba(255,92,114,.08);border:1px solid rgba(255,92,114,.3)}
+.wb-col.better{background:rgba(43,214,123,.08);border:1px solid rgba(43,214,123,.3)}
+.wb-col h4{font-size:15px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.wb-col.worse h4{color:var(--bad)} .wb-col.better h4{color:#2BD67B}
+.wb-col li{list-style:none;display:flex;gap:8px;align-items:flex-start;font-size:13.5px;margin-bottom:9px;line-height:1.45}
+@media(max-width:520px){.wb,.facts{grid-template-columns:1fr}}
+/* natural history wave */
+.wave-wrap{width:100%}
+.wave-legend{display:flex;gap:18px;justify-content:center;margin-top:12px;font-size:12.5px;color:var(--muted)}
+.wave-legend span{display:flex;align-items:center;gap:6px}
+.wave-dot{width:11px;height:11px;border-radius:3px}
+/* myth/fact flip */
+.myths{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%}
+.myth{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:16px;cursor:pointer;min-height:120px;position:relative;transition:.2s}
+.myth:hover{border-color:var(--accent)}
+.myth .mq{font-weight:700;font-size:14px}
+.myth .ma{margin-top:10px;font-size:13px;line-height:1.5;display:none}
+.myth.open .ma{display:block}
+.myth .badge-m{position:absolute;top:12px;inset-inline-end:12px;font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px}
+.myth .tap{color:var(--faint);font-size:11.5px;margin-top:8px}
+.myth.open .tap{display:none}
+@media(max-width:520px){.myths{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -133,6 +195,7 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
   <a class="brand" href="#top"><span class="m">🌿</span><span>IBD Connect</span></a>
   <div class="navlinks">
     <a href="#why" data-i18n="navWhy">Why</a>
+    <a href="#explained" data-i18n="navExplained">IBD explained</a>
     <a href="#features" data-i18n="navFeatures">Features</a>
     <a href="#explore" data-i18n="navExplore">Explore</a>
     <a href="#learn" data-i18n="navLearn">Learn</a>
@@ -168,6 +231,18 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
     <div class="statcard reveal"><div class="num" data-count="28.92" data-dec="2">0</div><div class="lab" data-i18n="stat2">per 100,000 estimated prevalence in Saudi Arabia (2021)</div><div class="src">Alsaif AK, et al. 2025</div></div>
     <div class="statcard reveal"><div class="num" data-count="80" data-suffix="%+">0</div><div class="lab" data-i18n="stat3">of patients report impact on daily life, anxiety or depression</div><div class="src">Charabaty A, et al. 2022</div></div>
     <div class="statcard reveal"><div class="num" data-count="72" data-suffix="%">0</div><div class="lab" data-i18n="stat4">medication non-adherence (refill rates, systematic review)</div><div class="src">King K, et al. 2025</div></div>
+  </div>
+</div></section>
+
+<section id="explained"><div class="wrap">
+  <div class="eyebrow reveal" data-i18n="exEye">Understand it</div>
+  <h2 class="h2 reveal" data-i18n="exH2">IBD, explained simply</h2>
+  <p class="lead reveal" data-i18n="exLead">Seven short, visual chapters — what it is, why it happens, and what to expect. Tap through at your own pace.</p>
+  <div class="ex-steps" id="exSteps"></div>
+  <div id="exPanels"></div>
+  <div class="ex-nav">
+    <button class="ex-arrow" id="exPrev" onclick="exGo(-1)" data-i18n="exBack">← Back</button>
+    <button class="ex-arrow" id="exNext" onclick="exGo(1)" data-i18n="exNext">Next →</button>
   </div>
 </div></section>
 
@@ -236,7 +311,8 @@ const ic=(n,s)=>`<svg class="svgi" viewBox="0 0 24 24" width="${s||24}" height="
 
 /* ---------- i18n ---------- */
 const T={
- navWhy:['Why','لماذا'],navFeatures:['Features','المزايا'],navExplore:['Explore','استكشف'],navLearn:['Learn','تعلّم'],navFaq:['FAQ','الأسئلة'],
+ navWhy:['Why','لماذا'],navExplained:['IBD explained','شرح المرض'],navFeatures:['Features','المزايا'],navExplore:['Explore','استكشف'],navLearn:['Learn','تعلّم'],navFaq:['FAQ','الأسئلة'],
+ exEye:['Understand it','افهمه'],exH2:['IBD, explained simply','المرض بشرح بسيط'],exLead:['Seven short, visual chapters — what it is, why it happens, and what to expect. Tap through at your own pace.','سبعة فصول قصيرة ومصوّرة — ما هو، ولماذا يحدث، وماذا تتوقّع. تنقّل بالوتيرة التي تناسبك.'],exBack:['← Back','رجوع'],exNext:['Next →','التالي'],
  openApp:['Open the app','افتح التطبيق'],launchApp:['Launch the app','ابدأ التطبيق'],launchApp2:['Launch the app','ابدأ التطبيق'],exploreFeatures:['Explore features','استكشف المزايا'],
  heroPill:['Saudi Gastroenterology Association · IBD Guide','الجمعية السعودية للجهاز الهضمي · دليل IBD'],
  heroH1:['Live well with IBD — one day at a time.','عِش بصحة مع التهاب الأمعاء، يومًا بيوم.'],
@@ -266,7 +342,7 @@ function setText(){document.querySelectorAll('[data-i18n]').forEach(el=>{const k
   // preserve trailing year span in footSrc
   if(k==='footSrc'){el.innerHTML=T[k][LANG==='ar'?1:0]+' © <span id="yr">'+(new Date().getFullYear())+'</span> IBD Connect.';}
   else el.textContent=T[k][LANG==='ar'?1:0];}});}
-function toggleLang(){LANG=LANG==='ar'?'en':'ar';document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';document.getElementById('langbtn').textContent=LANG==='ar'?'English':'العربية';setText();buildFeatures();buildLearn();buildFaq();buildDisc();}
+function toggleLang(){LANG=LANG==='ar'?'en':'ar';document.documentElement.lang=LANG;document.documentElement.dir=LANG==='ar'?'rtl':'ltr';document.getElementById('langbtn').textContent=LANG==='ar'?'English':'العربية';setText();buildFeatures();buildLearn();buildFaq();buildDisc();buildExplained();}
 
 /* ---------- features tabs ---------- */
 const FEATURES=[
@@ -322,16 +398,109 @@ function buildDisc(){const i18=LANG==='ar'?1:0;document.getElementById('discCont
 function loadApp(){const f=document.getElementById('appframe');if(f)f.src='index.html';}
 
 /* ---------- reveal on scroll ---------- */
-function initReveal(){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.15});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));}
+function initReveal(){if(!('IntersectionObserver' in window)){document.querySelectorAll('.reveal').forEach(el=>el.classList.add('in'));return;}const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.15});document.querySelectorAll('.reveal').forEach(el=>io.observe(el));}
 
 /* ---------- animated counters ---------- */
-function initCounters(){const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){animateNum(e.target);io.unobserve(e.target);}}),{threshold:.4});document.querySelectorAll('[data-count]').forEach(el=>io.observe(el));}
+function initCounters(){if(!('IntersectionObserver' in window)){document.querySelectorAll('[data-count]').forEach(el=>{const to=parseFloat(el.getAttribute('data-count')),dec=+(el.getAttribute('data-dec')||0),suf=el.getAttribute('data-suffix')||'';el.textContent=to.toFixed(dec)+suf;});return;}const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){animateNum(e.target);io.unobserve(e.target);}}),{threshold:.4});document.querySelectorAll('[data-count]').forEach(el=>io.observe(el));}
 function animateNum(el){const to=parseFloat(el.getAttribute('data-count')),dec=+(el.getAttribute('data-dec')||0),suf=el.getAttribute('data-suffix')||'';const t0=performance.now(),dur=1100;
  function step(t){const k=Math.min((t-t0)/dur,1);const e=1-Math.pow(1-k,3);el.textContent=(to*e).toFixed(dec)+suf;if(k<1)requestAnimationFrame(step);else el.textContent=to.toFixed(dec)+suf;}requestAnimationFrame(step);}
 
+/* ===== IBD explained module ===== */
+const L=()=>LANG==='ar'?1:0;
+function giDiagram(){return `
+ <svg viewBox="0 0 220 285" width="100%" style="max-width:300px" aria-label="digestive tract">
+  <path id="gi-stomach" class="gi-seg" d="M58 62 q26 -22 50 -6 q14 9 6 26 q-8 16 -28 12 q-22 -4 -28 -18 q-4 -10 0 -14z" fill="#243140" stroke="#36485c" stroke-width="2"/>
+  <path id="gi-colon" class="gi-seg" d="M70 246 C62 226 50 226 50 208 L50 122 Q50 102 70 102 L150 102 Q170 102 170 122 L170 202 Q170 222 152 222 L122 224" fill="none" stroke="#3a4a5e" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+  <path id="gi-si" class="gi-seg" d="M88 202 c0 -12 22 -8 22 -20 c0 -12 -22 -8 -22 -20 c0 -12 22 -8 22 -20 c0 -12 -22 -8 -22 -18" fill="none" stroke="#54677d" stroke-width="9" stroke-linecap="round"/>
+  <path id="gi-ileum" class="gi-seg" d="M110 202 q18 6 30 16" fill="none" stroke="#54677d" stroke-width="9" stroke-linecap="round"/>
+  <path id="gi-rectum" class="gi-seg" d="M70 246 l0 18" fill="none" stroke="#3a4a5e" stroke-width="17" stroke-linecap="round"/>
+ </svg>
+ <div class="gi-toggle">
+  <button class="gi-btn" id="giUC" onclick="giSet('uc')">${LANG==='ar'?'القولون التقرّحي':'Ulcerative Colitis'}</button>
+  <button class="gi-btn" id="giCD" onclick="giSet('cd')">${LANG==='ar'?'داء كرون':"Crohn's"}</button>
+ </div>`;}
+let giType='uc';
+function giSet(type){giType=type;
+  const set=(id,c)=>{const e=document.getElementById(id);if(e)e.setAttribute('stroke',c);};
+  set('gi-stomach','#36485c');set('gi-colon','#3a4a5e');set('gi-si','#54677d');set('gi-ileum','#54677d');set('gi-rectum','#3a4a5e');
+  const uc=document.getElementById('giUC'),cd=document.getElementById('giCD');
+  if(uc)uc.classList.toggle('on',type==='uc'); if(uc)uc.style.background=type==='uc'?'var(--accent)':'';
+  if(cd)cd.classList.toggle('on',type==='cd'); if(cd)cd.style.background=type==='cd'?'var(--warn)':'';
+  if(type==='uc'){set('gi-colon','#00E0B8');set('gi-rectum','#00E0B8');}
+  else{set('gi-ileum','#FFB23E');set('gi-si','#FFB23E');}
+}
+function factorsHTML(){const f=[['🧬',['Genes','الجينات'],['A tendency you can inherit','قابلية قد تورّثها']],['🛡️',['Immune system','جهاز المناعة'],['Overreacts inside the gut','يبالغ في ردّ فعله داخل الأمعاء']],['🌍',['Environment','البيئة'],['Diet, smoking, where you live','الغذاء، التدخين، مكان العيش']],['🦠',['Gut bacteria','بكتيريا الأمعاء'],['Their balance gets disturbed','يختلّ توازنها']]];
+  return `<div class="facts">${f.map(x=>`<div class="fact"><div class="fi">${x[0]}</div><b>${x[1][L()]}</b><span>${x[2][L()]}</span></div>`).join('')}<div class="reassure">${LANG==='ar'?'لم تتسبّب أنت في هذا — ليس بسبب التوتّر أو الطعام.':"You didn't cause this — it isn't from stress or food."}</div></div>`;}
+const TRIGS=[
+ ['🦠',['Infections','العدوى'],['A stomach bug can sometimes set off a flare.','نزلة معوية قد تُشعل النوبة أحيانًا.']],
+ ['💊',['Some painkillers (NSAIDs)','بعض المسكّنات'],['Anti-inflammatory painkillers like ibuprofen can irritate the gut.','مسكّنات مثل الإيبوبروفين قد تهيّج الأمعاء.']],
+ ['🚬',['Smoking','التدخين'],['Smoking makes Crohn\'s worse. Quitting helps a lot.','التدخين يفاقم كرون، والإقلاع يساعد كثيرًا.']],
+ ['⏸️',['Stopping medicine','إيقاف الدواء'],['Skipping or stopping treatment is a common trigger.','تخطّي العلاج أو إيقافه من أكثر المثيرات شيوعًا.']],
+ ['😣',['Stress','التوتّر'],['Stress doesn\'t cause IBD, but many feel it affects flares.','التوتّر لا يسبّب المرض، لكنه قد يؤثّر على الشعور.']],
+ ['🍽️',['Certain foods','بعض الأطعمة'],['Triggers are personal — what bothers one person may not bother another.','المثيرات شخصية — ما يزعج أحدهم قد لا يزعج غيره.']],
+];
+function triggersHTML(){return `<div style="width:100%"><div class="trigs" id="trigChips">${TRIGS.map((t,i)=>`<button class="trig" onclick="trigPick(${i})">${t[0]} ${t[1][L()]}</button>`).join('')}</div><div class="trig-detail" id="trigDetail">${LANG==='ar'?'اضغط على أي عامل لمعرفة المزيد.':'Tap any item to learn more.'}</div></div>`;}
+function trigPick(i){document.querySelectorAll('#trigChips .trig').forEach((c,k)=>c.classList.toggle('on',k===i));document.getElementById('trigDetail').textContent=TRIGS[i][2][L()];}
+function worseHTML(){const w=[['🚬',['Smoking (especially in Crohn\'s)','التدخين (خاصة في كرون)']],['⏸️',['Stopping your medicine','إيقاف دوائك']],['🔥',['Leaving inflammation untreated','ترك الالتهاب دون علاج']],['🦠',['Gut infections','عدوى الأمعاء']],['😴',['Poor sleep & high stress','قلّة النوم والتوتّر الشديد']]];
+  return `<div style="width:100%"><div class="wb-col worse"><h4>⚠️ ${LANG==='ar'?'يزيد الأمور سوءًا':'Makes it worse'}</h4><ul>${w.map(x=>`<li><span>${x[0]}</span><span>${x[1][L()]}</span></li>`).join('')}</ul></div></div>`;}
+function betterHTML(){const b=[['💊',['Taking medicine as prescribed','أخذ الدواء كما وُصف']],['🚭',['Not smoking','عدم التدخين']],['🥗',['Balanced nutrition','تغذية متوازنة']],['😴',['Good sleep & less stress','نوم جيّد وتوتّر أقل']],['🩺',['Regular check-ups & vaccines','متابعة دورية ولقاحات']],['📝',['Tracking your symptoms','تتبّع أعراضك']]];
+  return `<div style="width:100%"><div class="wb-col better"><h4>✅ ${LANG==='ar'?'يجعلها أفضل':'Makes it better'}</h4><ul>${b.map(x=>`<li><span>${x[0]}</span><span>${x[1][L()]}</span></li>`).join('')}</ul></div></div>`;}
+function waveHTML(){return `<div class="wave-wrap">
+  <svg viewBox="0 0 320 160" width="100%">
+   <defs><linearGradient id="wv" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF5C72" stop-opacity=".25"/><stop offset="1" stop-color="#FF5C72" stop-opacity="0"/></linearGradient></defs>
+   <line x1="0" y1="95" x2="320" y2="95" stroke="#243140" stroke-dasharray="4 4"/>
+   <path d="M0 95 Q30 40 60 95 T120 95 Q150 25 180 95 T240 95 Q270 55 300 95 L320 95" fill="none" stroke="#FF5C72" stroke-width="3" stroke-linecap="round"/>
+   <circle class="wv-dot" r="5" fill="#00E0B8"><animateMotion dur="6s" repeatCount="indefinite" path="M0 95 Q30 40 60 95 T120 95 Q150 25 180 95 T240 95 Q270 55 300 95 L320 95"/></circle>
+   <text x="60" y="30" fill="#FF5C72" font-size="11" text-anchor="middle">${LANG==='ar'?'نوبة':'Flare'}</text>
+   <text x="100" y="120" fill="#2BD67B" font-size="11" text-anchor="middle">${LANG==='ar'?'هدأة':'Remission'}</text>
+  </svg>
+  <div class="wave-legend"><span><i class="wave-dot" style="background:#FF5C72"></i>${LANG==='ar'?'نشاط المرض (نوبة)':'Disease active (flare)'}</span><span><i class="wave-dot" style="background:#2BD67B"></i>${LANG==='ar'?'هادئ (هدأة)':'Calm (remission)'}</span></div>
+ </div>`;}
+const MYTHS=[
+ [['Myth: IBD is caused by stress or bad food.','خرافة: التوتّر أو الطعام يسبّب المرض.'],['It isn\'t. Genes, the immune system, environment and gut bacteria all play a part.','ليس كذلك. الجينات والمناعة والبيئة وبكتيريا الأمعاء كلها تلعب دورًا.'],'MYTH','var(--bad)'],
+ [['Myth: IBD is the same as IBS.','خرافة: IBD مثل القولون العصبي.'],['Different. IBD causes real inflammation and damage; IBS does not.','مختلفان. IBD يسبّب التهابًا وضررًا حقيقيًا؛ القولون العصبي لا.'],'MYTH','var(--bad)'],
+ [['Myth: Needing surgery means you failed.','خرافة: الحاجة للجراحة تعني الفشل.'],['Surgery is a normal, sometimes very helpful part of care for some people.','الجراحة جزء طبيعي ومفيد أحيانًا من الرعاية لبعض المرضى.'],'MYTH','var(--bad)'],
+ [['Fact: You can live a full life.','حقيقة: يمكنك أن تعيش حياة كاملة.'],['With the right treatment and follow-up, most people reach remission and do what they love.','مع العلاج المناسب والمتابعة، يصل معظم المرضى للهدأة ويمارسون ما يحبّون.'],'FACT','#2BD67B'],
+];
+function mythsHTML(){return `<div class="myths">${MYTHS.map((m,i)=>`<div class="myth" id="myth${i}" onclick="document.getElementById('myth${i}').classList.toggle('open')"><span class="badge-m" style="background:${m[3]}22;color:${m[3]}">${m[2]}</span><div class="mq">${m[0][L()]}</div><div class="ma">${m[1][L()]}</div><div class="tap">${LANG==='ar'?'اضغط للكشف':'Tap to reveal'}</div></div>`).join('')}</div>`;}
+
+const EXP=[
+ {tag:['The basics','الأساسيات'],t:['What is IBD?','ما هو التهاب الأمعاء؟'],
+  b:['IBD stands for <b>Inflammatory Bowel Disease</b>. It means the body\'s immune system causes ongoing inflammation in the gut (your digestive tract).<br><br>There are two main types. <b>Ulcerative Colitis</b> affects the large intestine (colon) in one continuous stretch. <b>Crohn\'s disease</b> can appear anywhere from mouth to bottom, often in patches.<br><br>Tap the buttons to see where each one shows up.',
+     'يرمز IBD إلى <b>داء الأمعاء الالتهابي</b>. ويعني أن جهاز المناعة يسبّب التهابًا مستمرًا في الأمعاء (الجهاز الهضمي).<br><br>هناك نوعان رئيسيان. <b>التهاب القولون التقرّحي</b> يصيب الأمعاء الغليظة بشكل متّصل. أما <b>داء كرون</b> فقد يظهر في أي مكان من الفم حتى الشرج، وغالبًا بشكل متقطّع.<br><br>اضغط الأزرار لرؤية مكان كل نوع.'], vis:giDiagram, after:()=>giSet(giType)},
+ {tag:['The cause','السبب'],t:['Why does it happen?','لماذا يحدث؟'],
+  b:['No one chose this, and it isn\'t caused by something you did.<br><br>IBD happens when a few things line up: your <b>genes</b>, an <b>overactive immune system</b>, the <b>environment</b> around you, and the balance of <b>bacteria</b> living in your gut. The immune system mistakes the gut for a threat and keeps it inflamed.',
+     'لم يختر أحد هذا، وهو ليس بسبب شيء فعلته.<br><br>يحدث المرض عندما تجتمع عدة عوامل: <b>الجينات</b>، و<b>جهاز مناعة مفرط النشاط</b>، و<b>البيئة</b> المحيطة، وتوازن <b>البكتيريا</b> في الأمعاء. يظنّ جهاز المناعة أن الأمعاء تهديد فيُبقيها ملتهبة.'], vis:factorsHTML},
+ {tag:['Triggers','المثيرات'],t:['What can provoke it?','ما الذي قد يُثيره؟'],
+  b:['Flares can sometimes be set off by certain things — and these are <b>different for everyone</b>. What bothers one person may not bother another.<br><br>Tap each one to learn more.',
+     'قد تُشعَل النوبات بعوامل معيّنة — وهي <b>مختلفة بين شخص وآخر</b>. ما يزعج أحدهم قد لا يزعج غيره.<br><br>اضغط على كل عامل لمعرفة المزيد.'], vis:triggersHTML},
+ {tag:['Watch out','احذر'],t:['What makes it worse?','ما الذي يزيدها سوءًا؟'],
+  b:['Some things tend to make IBD more active or harder to control. The biggest, most controllable one is <b>not taking your treatment</b> — and, for Crohn\'s, <b>smoking</b>.',
+     'بعض الأمور تجعل المرض أكثر نشاطًا أو أصعب في السيطرة. وأكبرها وأكثرها قابلية للتحكّم هو <b>عدم أخذ العلاج</b> — و<b>التدخين</b> في داء كرون.'], vis:worseHTML},
+ {tag:['Helps','يساعد'],t:['What makes it better?','ما الذي يجعلها أفضل؟'],
+  b:['The good news: a lot is in your hands. Steady habits and staying on treatment give you the best chance of feeling well and staying in remission.',
+     'الخبر الجيّد: الكثير بين يديك. العادات الثابتة والاستمرار على العلاج تمنحك أفضل فرصة للشعور بالعافية والبقاء في هدأة.'], vis:betterHTML},
+ {tag:['Over time','مع الوقت'],t:['What\'s the natural history?','ما المسار الطبيعي؟'],
+  b:['IBD is usually <b>long-term (chronic)</b>. It often comes in waves: times when it\'s active (a <b>flare</b>) and times when it settles down (called <b>remission</b>).<br><br>The goal of treatment is to reach and stay in remission — and to <b>heal the gut lining</b>, not just hide the symptoms.',
+     'المرض عادةً <b>مزمن (طويل الأمد)</b>. وغالبًا يأتي على شكل موجات: فترات نشاط (<b>نوبة</b>) وفترات هدوء (<b>هدأة</b>).<br><br>هدف العلاج هو الوصول للهدأة والبقاء فيها — و<b>التئام بطانة الأمعاء</b>، وليس مجرّد إخفاء الأعراض.'], vis:waveHTML},
+ {tag:['Looking ahead','نظرة للأمام'],t:['What to expect','ماذا تتوقّع'],
+  b:['IBD is manageable. Most people live full lives — work, travel, study, and have families. Your care team will follow you with check-ups, labs, and sometimes a camera test (endoscopy), and adjust treatment over time.<br><br>You\'re not alone. Tap the cards below.',
+     'المرض قابل للإدارة. معظم المرضى يعيشون حياة كاملة — عمل وسفر ودراسة وأسرة. سيتابعك فريق رعايتك بالفحوصات والتحاليل وأحيانًا التنظير، ويعدّل العلاج مع الوقت.<br><br>لست وحدك. اضغط البطاقات بالأسفل.'], vis:mythsHTML},
+];
+let exCur=0;
+function buildExplained(){
+  const steps=document.getElementById('exSteps'),panels=document.getElementById('exPanels');if(!steps)return;
+  steps.innerHTML=EXP.map((c,i)=>`<button class="ex-step ${i===exCur?'on':''}" onclick="exShow(${i})"><span class="n">${i+1}</span>${c.t[L()].replace(/<[^>]+>/g,'')}</button>`).join('');
+  panels.innerHTML=EXP.map((c,i)=>`<div class="ex-panel ${i===exCur?'on':''}"><div><span class="ex-tag">${c.tag[L()]}</span><h3>${c.t[L()]}</h3><p>${c.b[L()]}</p></div><div class="ex-vis">${c.vis()}</div></div>`).join('');
+  const pv=document.getElementById('exPrev'),nx=document.getElementById('exNext');if(pv)pv.disabled=exCur===0;if(nx)nx.disabled=exCur===EXP.length-1;
+  if(EXP[exCur].after)EXP[exCur].after();
+}
+function exShow(i){exCur=Math.max(0,Math.min(EXP.length-1,i));buildExplained();const s=document.getElementById('explained');if(s&&s.scrollIntoView)s.scrollIntoView({behavior:'smooth',block:'start'});}
+function exGo(d){exShow(exCur+d);}
+
 /* init */
 document.getElementById('yr').textContent=new Date().getFullYear();
-buildFeatures();buildLearn();buildFaq();buildDisc();initReveal();initCounters();
+buildFeatures();buildLearn();buildFaq();buildDisc();buildExplained();initReveal();initCounters();
 window.addEventListener('load',loadApp);
 </script>
 </body>

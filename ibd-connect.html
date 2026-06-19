@@ -949,6 +949,11 @@ const I18N = {
   refresh:{en:"Refresh",ar:"تحديث"},
   visitWebsite:{en:"Explore our website",ar:"استكشف موقعنا"},
   visitWebsiteSub:{en:"Interactive guide & more details",ar:"دليل تفاعلي وتفاصيل أكثر"},
+  explainedT:{en:"IBD explained",ar:"شرح التهاب الأمعاء"},
+  explainedCardT:{en:"IBD explained — simple & visual",ar:"شرح المرض — ببساطة وبالصور"},
+  explainedCardSub:{en:"7 quick interactive chapters for everyone",ar:"٧ فصول تفاعلية سريعة للجميع"},
+  exBack:{en:"Back",ar:"رجوع"},exNextC:{en:"Next",ar:"التالي"},exDone:{en:"Done",ar:"تم"},
+  exTapReveal:{en:"Tap to reveal",ar:"اضغط للكشف"},exTapLearn:{en:"Tap any item to learn more.",ar:"اضغط على أي عامل لمعرفة المزيد."},
 };
 
 const DISC = [
@@ -2249,6 +2254,8 @@ route('learn',(n)=>{
   const sgaCount=S.learn.filter(a=>a.source==='SGA').length;
   n.innerHTML=`${topbar('learnT','learnSub')}
    <div class="content">
+     <button class="card tap" onclick="exShowA(0)" style="text-align:start;background:linear-gradient(135deg,color-mix(in srgb,var(--accent2) 20%,transparent),color-mix(in srgb,var(--purple) 10%,transparent));border-color:color-mix(in srgb,var(--accent2) 32%,transparent)">
+       <div class="row"><span class="ic" style="width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center">${svgIcon('sparkles',24)}</span><div style="flex:1"><b style="font-size:15.5px">${t('explainedCardT')}</b><div class="muted" style="font-size:12.5px">${t('explainedCardSub')}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>
      ${learnCat==='all'?`<button class="card tap" onclick="setLearnCat('sga')" style="text-align:start;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 18%,transparent),color-mix(in srgb,var(--accent2) 8%,transparent));border-color:color-mix(in srgb,var(--accent) 30%,transparent)">
        <div class="row"><div style="font-size:30px">📗</div><div style="flex:1"><b style="font-size:15.5px">${isAr()?'دليل IBD — الجمعية السعودية للجهاز الهضمي':'IBD Guide — Saudi Gastroenterology Association'}</b><div class="muted" style="font-size:12.5px">${sgaCount} ${isAr()?'مقالات موثّقة من خبراء':'expert-authored articles'} · IBDguide.net</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>`:''}
      <div class="chips" style="overflow-x:auto;flex-wrap:nowrap">${cats.map(c=>`<button class="chip ${learnCat===c?'on':''}" style="white-space:nowrap" onclick="setLearnCat('${c}')">${CAT_LABEL[c][S.lang]}</button>`).join('')}</div>
@@ -2272,6 +2279,75 @@ window.openArticle=function(id){const a=S.learn.find(x=>x.id===id);if(!a)return;
    ${a.link?`<a href="${a.link}" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-top:6px;text-decoration:none">🔗 ${isAr()?'اقرأ المصدر على موقع الجمعية':'Read source on SGA website'}</a>`:''}
    <div class="card" style="background:var(--bg2);margin-top:12px"><p class="muted" style="font-size:12px;margin:0;line-height:1.55">${a.source==='SGA'?(isAr()?'✓ من مبادرة IBDguide.net التابعة للجمعية السعودية للجهاز الهضمي — محتوى علمي مُراجَع.':'✓ From the IBDguide.net initiative of the Saudi Gastroenterology Association — scientifically reviewed content.'):(isAr()?'✓ تمت مراجعة هذا المحتوى من قِبل خبراء سريريين':'✓ Content validated by clinical experts')}</p></div>`);
 };
+
+/* ============================================================
+   SCREENS — "IBD explained" interactive public guide
+   ============================================================ */
+const EL=()=>isAr()?1:0;
+function exGiDiagram(){return `
+ <svg viewBox="0 0 220 285" width="100%" style="max-width:230px;display:block;margin:0 auto" aria-label="digestive tract">
+  <path id="gi-stomach" d="M58 62 q26 -22 50 -6 q14 9 6 26 q-8 16 -28 12 q-22 -4 -28 -18 q-4 -10 0 -14z" fill="var(--card2)" stroke="var(--line)" stroke-width="2"/>
+  <path id="gi-colon" d="M70 246 C62 226 50 226 50 208 L50 122 Q50 102 70 102 L150 102 Q170 102 170 122 L170 202 Q170 222 152 222 L122 224" fill="none" stroke="var(--faint)" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"/>
+  <path id="gi-si" d="M88 202 c0 -12 22 -8 22 -20 c0 -12 -22 -8 -22 -20 c0 -12 22 -8 22 -20 c0 -12 -22 -8 -22 -18" fill="none" stroke="var(--muted)" stroke-width="9" stroke-linecap="round"/>
+  <path id="gi-ileum" d="M110 202 q18 6 30 16" fill="none" stroke="var(--muted)" stroke-width="9" stroke-linecap="round"/>
+  <path id="gi-rectum" d="M70 246 l0 18" fill="none" stroke="var(--faint)" stroke-width="17" stroke-linecap="round"/>
+ </svg>
+ <div class="chips" style="justify-content:center;margin-top:12px">
+  <button class="chip" id="giUC" onclick="exGiSet('uc')">${isAr()?'القولون التقرّحي':'Ulcerative Colitis'}</button>
+  <button class="chip" id="giCD" onclick="exGiSet('cd')">${isAr()?'داء كرون':"Crohn's"}</button>
+ </div>`;}
+let exGiType='uc';
+function exGiSet(type){exGiType=type;const set=(id,c)=>{const e=$('#'+id);if(e)e.setAttribute('stroke',c);};
+  set('gi-colon','var(--faint)');set('gi-si','var(--muted)');set('gi-ileum','var(--muted)');set('gi-rectum','var(--faint)');
+  const uc=$('#giUC'),cd=$('#giCD');if(uc)uc.classList.toggle('on',type==='uc');if(cd)cd.classList.toggle('on',type==='cd');
+  if(type==='uc'){set('gi-colon','var(--accent)');set('gi-rectum','var(--accent)');}else{set('gi-ileum','var(--warn)');set('gi-si','var(--warn)');}}
+function exFactors(){const f=[['🧬',['Genes','الجينات']],['🛡️',['Immune system','جهاز المناعة']],['🌍',['Environment','البيئة']],['🦠',['Gut bacteria','بكتيريا الأمعاء']]];
+  return `<div class="grid2" style="gap:10px">${f.map(x=>`<div class="tile" style="align-items:center;text-align:center;padding:14px"><div style="font-size:28px">${x[0]}</div><div class="lab" style="font-size:13px">${x[1][EL()]}</div></div>`).join('')}</div><div class="card" style="background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);margin-top:10px"><p style="margin:0;color:var(--accent);font-weight:700;font-size:13px;text-align:center">${isAr()?'لم تتسبّب أنت في هذا — ليس بسبب التوتّر أو الطعام.':"You didn't cause this — it isn't from stress or food."}</p></div>`;}
+const EX_TRIGS=[['🦠',['Infections','العدوى'],['A stomach bug can sometimes set off a flare.','نزلة معوية قد تُشعل النوبة أحيانًا.']],['💊',['Painkillers (NSAIDs)','المسكّنات'],['Anti-inflammatory painkillers can irritate the gut.','مسكّنات الالتهاب قد تهيّج الأمعاء.']],['🚬',['Smoking','التدخين'],["Smoking makes Crohn's worse. Quitting helps a lot.",'التدخين يفاقم كرون، والإقلاع يساعد كثيرًا.']],['⏸️',['Stopping medicine','إيقاف الدواء'],['Skipping or stopping treatment is a common trigger.','تخطّي العلاج من أكثر المثيرات شيوعًا.']],['😣',['Stress','التوتّر'],["Stress doesn't cause IBD, but many feel it affects flares.",'التوتّر لا يسبّب المرض لكنه قد يؤثّر على الشعور.']],['🍽️',['Certain foods','بعض الأطعمة'],['Triggers are personal — they differ for everyone.','المثيرات شخصية وتختلف بين الناس.']]];
+function exTriggers(){return `<div class="chips" id="exTrigs">${EX_TRIGS.map((x,i)=>`<button class="chip" onclick="exTrigPick(${i})">${x[0]} ${x[1][EL()]}</button>`).join('')}</div><div class="card" id="exTrigDetail" style="background:var(--bg2);margin-top:12px;min-height:54px"><p class="muted" style="margin:0;font-size:13.5px;line-height:1.55">${t('exTapLearn')}</p></div>`;}
+function exTrigPick(i){document.querySelectorAll('#exTrigs .chip').forEach((c,k)=>c.classList.toggle('on',k===i));$('#exTrigDetail').innerHTML=`<p class="muted" style="margin:0;font-size:13.5px;line-height:1.55">${EX_TRIGS[i][2][EL()]}</p>`;}
+function exWorse(){const w=[['🚬',['Smoking (especially in Crohn\'s)','التدخين (خاصة في كرون)']],['⏸️',['Stopping your medicine','إيقاف دوائك']],['🔥',['Untreated inflammation','التهاب دون علاج']],['🦠',['Gut infections','عدوى الأمعاء']],['😴',['Poor sleep & high stress','قلّة النوم والتوتّر']]];
+  return `<div class="card" style="background:color-mix(in srgb,var(--bad) 9%,transparent);border-color:color-mix(in srgb,var(--bad) 30%,transparent)"><b style="color:var(--bad);font-size:14px">⚠️ ${isAr()?'يزيدها سوءًا':'Makes it worse'}</b>${w.map(x=>`<div class="row" style="gap:10px;margin-top:11px"><span style="font-size:18px">${x[0]}</span><span style="font-size:13.5px">${x[1][EL()]}</span></div>`).join('')}</div>`;}
+function exBetter(){const b=[['💊',['Taking medicine as prescribed','أخذ الدواء كما وُصف']],['🚭',['Not smoking','عدم التدخين']],['🥗',['Balanced nutrition','تغذية متوازنة']],['😴',['Good sleep & less stress','نوم جيّد وتوتّر أقل']],['🩺',['Check-ups & vaccines','المتابعة واللقاحات']],['📝',['Tracking your symptoms','تتبّع أعراضك']]];
+  return `<div class="card" style="background:color-mix(in srgb,var(--good) 9%,transparent);border-color:color-mix(in srgb,var(--good) 30%,transparent)"><b style="color:var(--good);font-size:14px">✅ ${isAr()?'يجعلها أفضل':'Makes it better'}</b>${b.map(x=>`<div class="row" style="gap:10px;margin-top:11px"><span style="font-size:18px">${x[0]}</span><span style="font-size:13.5px">${x[1][EL()]}</span></div>`).join('')}</div>`;}
+function exWave(){return `<div class="card" style="background:var(--bg2)"><svg viewBox="0 0 320 150" width="100%"><line x1="0" y1="90" x2="320" y2="90" stroke="var(--line)" stroke-dasharray="4 4"/><path d="M0 90 Q30 38 60 90 T120 90 Q150 24 180 90 T240 90 Q270 52 300 90 L320 90" fill="none" stroke="var(--bad)" stroke-width="3" stroke-linecap="round"/><circle r="5" fill="var(--accent)"><animateMotion dur="6s" repeatCount="indefinite" path="M0 90 Q30 38 60 90 T120 90 Q150 24 180 90 T240 90 Q270 52 300 90 L320 90"/></circle><text x="60" y="26" fill="var(--bad)" font-size="11" text-anchor="middle">${isAr()?'نوبة':'Flare'}</text><text x="100" y="116" fill="var(--good)" font-size="11" text-anchor="middle">${isAr()?'هدأة':'Remission'}</text></svg></div>`;}
+const EX_MYTH=[[['Myth: IBD is caused by stress or food.','خرافة: التوتّر أو الطعام يسبّب المرض.'],['It isn\'t. Genes, immune system, environment & gut bacteria all play a part.','ليس كذلك. الجينات والمناعة والبيئة والبكتيريا تلعب دورًا.'],'var(--bad)'],[['Myth: IBD is the same as IBS.','خرافة: IBD مثل القولون العصبي.'],['Different. IBD causes real inflammation; IBS does not.','مختلفان. IBD يسبّب التهابًا حقيقيًا؛ القولون العصبي لا.'],'var(--bad)'],[['Myth: Surgery means you failed.','خرافة: الجراحة تعني الفشل.'],['Surgery is a normal, often very helpful part of care.','الجراحة جزء طبيعي ومفيد من الرعاية.'],'var(--bad)'],[['Fact: You can live a full life.','حقيقة: يمكنك أن تعيش حياة كاملة.'],['With treatment and follow-up, most reach remission and thrive.','مع العلاج والمتابعة يصل الأغلب للهدأة ويزدهرون.'],'var(--good)']];
+function exMyths(){return `<div class="grid2" style="gap:10px">${EX_MYTH.map((m,i)=>`<div class="tile" id="exMyth${i}" onclick="exMythTog(${i})" style="text-align:start;cursor:pointer;min-height:96px"><div style="font-size:12.5px;font-weight:700;line-height:1.4">${m[0][EL()]}</div><div id="exMa${i}" style="display:none;font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45">${m[1][EL()]}</div><div id="exTp${i}" class="faint" style="font-size:11px;margin-top:6px">${t('exTapReveal')}</div></div>`).join('')}</div>`;}
+function exMythTog(i){const a=$('#exMa'+i),tp=$('#exTp'+i);if(a)a.style.display=a.style.display==='none'?'block':'none';if(tp)tp.style.display='none';}
+
+const EXP_APP=[
+ {tag:['The basics','الأساسيات'],t:['What is IBD?','ما هو التهاب الأمعاء؟'],b:['<b>IBD</b> means Inflammatory Bowel Disease — the immune system causes ongoing inflammation in your gut.<br><br><b>Ulcerative Colitis</b> affects the colon in one continuous stretch. <b>Crohn\'s</b> can appear anywhere from mouth to bottom, in patches. Tap to see where.','<b>IBD</b> هو داء الأمعاء الالتهابي — يسبّب جهاز المناعة التهابًا مستمرًا في الأمعاء.<br><br><b>التهاب القولون التقرّحي</b> يصيب القولون بشكل متّصل. و<b>داء كرون</b> قد يظهر في أي مكان من الفم حتى الشرج بشكل متقطّع. اضغط لترى.'],vis:exGiDiagram,after:()=>exGiSet(exGiType)},
+ {tag:['The cause','السبب'],t:['Why does it happen?','لماذا يحدث؟'],b:['No one chose this — it isn\'t from something you did. It happens when several things line up: your <b>genes</b>, an <b>overactive immune system</b>, the <b>environment</b>, and your <b>gut bacteria</b>.','لم يختر أحد هذا — وليس بسبب شيء فعلته. يحدث عند اجتماع عدة عوامل: <b>الجينات</b>، و<b>مناعة مفرطة النشاط</b>، و<b>البيئة</b>، و<b>بكتيريا الأمعاء</b>.'],vis:exFactors},
+ {tag:['Triggers','المثيرات'],t:['What can provoke it?','ما الذي قد يُثيره؟'],b:['Flares can be set off by certain things — and they\'re <b>different for everyone</b>. Tap each to learn more.','قد تُشعَل النوبات بعوامل معيّنة — وهي <b>مختلفة بين الناس</b>. اضغط على كل عامل.'],vis:exTriggers},
+ {tag:['Watch out','احذر'],t:['What makes it worse?','ما الذي يزيدها سوءًا؟'],b:['The biggest, most controllable factor is <b>not taking treatment</b> — and, for Crohn\'s, <b>smoking</b>.','أكبر عامل يمكن التحكّم به هو <b>عدم أخذ العلاج</b> — و<b>التدخين</b> في كرون.'],vis:exWorse},
+ {tag:['Helps','يساعد'],t:['What makes it better?','ما الذي يجعلها أفضل؟'],b:['A lot is in your hands. Steady habits and staying on treatment give the best chance of feeling well.','الكثير بين يديك. العادات الثابتة والاستمرار على العلاج يمنحانك أفضل فرصة للعافية.'],vis:exBetter},
+ {tag:['Over time','مع الوقت'],t:['What\'s the natural history?','ما المسار الطبيعي؟'],b:['IBD is usually <b>long-term</b>. It comes in waves — active times (<b>flares</b>) and calm times (<b>remission</b>). The goal is to reach remission and <b>heal the gut lining</b>.','المرض عادةً <b>مزمن</b>. يأتي على موجات — فترات نشاط (<b>نوبات</b>) وفترات هدوء (<b>هدأة</b>). الهدف الوصول للهدأة و<b>التئام بطانة الأمعاء</b>.'],vis:exWave},
+ {tag:['Looking ahead','نظرة للأمام'],t:['What to expect','ماذا تتوقّع'],b:['IBD is manageable. Most people live full lives. Your care team follows you and adjusts treatment over time. You\'re not alone — tap the cards.','المرض قابل للإدارة. معظم المرضى يعيشون حياة كاملة. يتابعك فريق رعايتك ويعدّل العلاج مع الوقت. لست وحدك — اضغط البطاقات.'],vis:exMyths},
+];
+let exCurA=0;
+route('explained',(n)=>{
+  const c=EXP_APP[exCurA];const pct=((exCurA+1)/EXP_APP.length)*100;
+  n.innerHTML=`${topbar('explainedT',null,{back:true,rawSub:`${exCurA+1} / ${EXP_APP.length}`})}
+   <div class="content">
+     <div class="pbar"><i style="width:${pct}%"></i></div>
+     <div class="chips" style="overflow-x:auto;flex-wrap:nowrap">${EXP_APP.map((x,i)=>`<button class="chip ${i===exCurA?'on':''}" style="white-space:nowrap" onclick="exShowA(${i})">${i+1}</button>`).join('')}</div>
+     <div class="card">
+       <div class="badge accent" style="margin-bottom:8px">${c.tag[EL()]}</div>
+       <h2 style="font-size:22px;font-weight:800;margin:0 0 8px;letter-spacing:-.5px">${c.t[EL()]}</h2>
+       <p style="color:var(--txt);font-size:15px;line-height:1.7">${c.b[EL()]}</p>
+     </div>
+     <div>${c.vis()}</div>
+     <div class="row" style="gap:12px;margin-top:4px">
+       <button class="btn btn-ghost" style="flex:1;${exCurA===0?'opacity:.4':''}" ${exCurA===0?'disabled':''} onclick="exGoA(-1)">${isAr()?'›':'‹'} ${t('exBack')}</button>
+       <button class="btn btn-primary" style="flex:1" onclick="${exCurA===EXP_APP.length-1?"navTab('learn')":'exGoA(1)'}">${exCurA===EXP_APP.length-1?t('exDone'):t('exNextC')+' '+(isAr()?'‹':'›')}</button>
+     </div>
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.5">ℹ️ ${isAr()?'معلومات عامة للتثقيف فقط، وليست نصيحة طبية. استشر فريق رعايتك.':'General education only — not medical advice. Talk to your care team.'}</p></div>
+   </div>`;
+  if(c.after)setTimeout(c.after,20);
+});
+window.exShowA=function(i){exCurA=Math.max(0,Math.min(EXP_APP.length-1,i));if(CURRENT==='explained')render();else go('explained');};
+window.exGoA=function(d){exShowA(exCurA+d);};
+window.exGiSet=exGiSet;window.exTrigPick=exTrigPick;window.exMythTog=exMythTog;
 
 /* ============================================================
    SCREENS — Insights & Wellness
