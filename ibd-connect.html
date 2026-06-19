@@ -1196,12 +1196,13 @@ const KEY='ibdconnect_v1';
 let S = load();
 function blank(){return{
   lang:null, onboarded:false, authed:false,
-  user:{name:'',email:'',year:'',gender:'',disease:'',diagYear:'',avatar:'🙂',country:'',countryFlag:''},
+  user:{name:'',email:'',year:'',gender:'',disease:'',diagYear:'',avatar:'🙂',country:'',countryFlag:'',heightCm:''},
   prefs:{remindDaily:true,remindMed:false,remindContent:true,analytics:false,medTime:'20:00',theme:'whoop',
     stepGoal:8000,activeMinGoal:30,waterGoal:8,nudges:true,nudgeDaily:true,nudgeStreak:true,nudgeHydra:true,seenWelcome:false,
     bigText:false},
-  logs:[], disc:null, reminders:[],
+  logs:[], disc:null, discHistory:[], reminders:[],
   meds:[], labs:[], control:null, registry:{optedIn:false, lastSync:null},
+  supplements:[], grocery:[], vaccines:{},
   badges:[], learn:JSON.parse(JSON.stringify(DEFAULT_LEARN)), tips:JSON.parse(JSON.stringify(DEFAULT_TIPS)),
   seenDays:[], nudgeDismiss:{},
   game:{xp:0, quests:{}, goalDays:[], lastLevel:1}
@@ -1303,7 +1304,7 @@ let CURRENT='splash', STACK=[];
 function route(name,fn){ROUTES[name]=fn;}
 function go(name,opts){opts=opts||{};
   if(!opts.replace&&CURRENT&&CURRENT!==name)STACK.push(CURRENT);
-  CURRENT=name;render();
+  CURRENT=name;CURRENT_OPTS=opts;render();
 }
 function goBack(){if(STACK.length){CURRENT=STACK.pop();render();}}
 const MAIN_TABS=['today','track','reports','learn','more'];
@@ -1593,6 +1594,15 @@ route('today',(n)=>{
          <span class="ic" style="width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center">${svgIcon('clipboard',22)}</span><b style="font-size:14.5px">${t('metricsT')}</b>
        </button>
      </div>
+
+     <!-- Diet & nutrition feature -->
+     <button class="card tap" style="text-align:start;padding:0;overflow:hidden;position:relative;min-height:96px;display:flex;align-items:stretch" onclick="go('diet')">
+       <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center">
+         <div class="row" style="gap:8px;align-items:center"><span style="color:var(--accent)">${svgIcon('utensils',20)}</span><b style="font-size:15px">${isAr()?'الغذاء والتغذية':'Diet & Nutrition'}</b></div>
+         <div class="muted" style="font-size:12px;margin-top:4px;line-height:1.4">${isAr()?'فودماب · متوسطي · داش · صيام — بأطعمة سعودية':'FODMAP · Mediterranean · DASH · fasting — with Saudi foods'}</div>
+       </div>
+       <div style="width:104px;flex:0 0 auto;background:linear-gradient(135deg,#C96442,#e0a07a)"><img src="${FP.kabsa}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div>
+     </button>
 
      <!-- quick log -->
      <div class="section-title">${t('quickLog')}</div>
@@ -2040,8 +2050,13 @@ route('disc',(n)=>{
 window.discAnswer=()=>{const v=getScale('discScale');if(!v)return toast(t('selectOne'));
   discAns[DISC[discIdx].k]=v;discIdx++;render();};
 function renderDiscResult(n){
-  S.disc={date:new Date().toISOString(),answers:{...discAns}};checkBadges();save();
-  const items=DISC.map(q=>({q,v:discAns[q.k]||0})).sort((a,b)=>b.v-a.v);
+  S.disc={date:new Date().toISOString(),answers:{...discAns}};
+  S.discHistory=S.discHistory||[];const _sig=JSON.stringify(discAns);const _lh=S.discHistory[S.discHistory.length-1];
+  if(!_lh||JSON.stringify(_lh.answers)!==_sig)S.discHistory.push({date:S.disc.date,answers:{...discAns}});
+  if(S.discHistory.length>12)S.discHistory=S.discHistory.slice(-12);
+  checkBadges();save();
+  const hist=S.discHistory.slice();const prevH=hist.length>1?hist[hist.length-2]:null;
+  const items=DISC.map(q=>({q,v:discAns[q.k]||0,pv:prevH?(prevH.answers[q.k]||0):null})).sort((a,b)=>b.v-a.v);
   const total=items.reduce((s,i)=>s+i.v,0);
   n.innerHTML=`${topbar('discResult',null,{back:true})}
    <div class="content">
@@ -2053,7 +2068,9 @@ function renderDiscResult(n){
        <div style="position:relative;height:300px"><canvas id="discRadar"></canvas></div>
      </div>
      <div class="card">${items.map(i=>{const lab=isAr()?i.q.ar[0]:i.q.en[0];const pct=i.v/10*100;
-       return `<div style="margin-bottom:13px"><div class="between" style="margin-bottom:5px"><span style="font-size:13.5px;font-weight:600">${lab}</span><span class="muted" style="font-size:13px">${i.v}/10</span></div><div class="pbar"><i style="width:${pct}%;background:${i.v>=7?'var(--bad)':i.v>=4?'var(--warn)':'var(--good)'}"></i></div></div>`;}).join('')}</div>
+       let tr='';if(i.pv!=null){const d=i.v-i.pv;const up=d>0;const col=d===0?'var(--muted)':(up?'var(--bad)':'var(--good)');const ar2=d>0?'▲':d<0?'▼':'■';tr=`<span style="font-size:11px;color:${col};margin-${isAr()?'right':'left'}:6px">${ar2} ${d>0?'+':''}${d}</span>`;}
+       return `<div style="margin-bottom:13px"><div class="between" style="margin-bottom:5px"><span style="font-size:13.5px;font-weight:600">${lab}</span><span class="muted" style="font-size:13px">${i.v}/10${tr}</span></div><div class="pbar"><i style="width:${pct}%;background:${i.v>=7?'var(--bad)':i.v>=4?'var(--warn)':'var(--good)'}"></i></div></div>`;}).join('')}</div>
+     ${hist.length>1?`<div class="card" style="background:var(--bg2)"><div class="section-title" style="margin:0 0 4px">${isAr()?'الاتجاه منذ آخر تقييم':'Change since last assessment'}</div><p class="muted" style="font-size:12px;margin:0">${isAr()?`مقارنةً بتقييم ${fmtDate(prevH.date)}. السهم لكل مجال يوضّح التغيّر.`:`Compared with your ${fmtDate(prevH.date)} assessment. The arrow on each domain shows the change.`}</p></div>`:''}
      <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:13px;line-height:1.6;margin:0">ℹ️ ${t('discNote')}</p></div>
      <button class="btn btn-ghost" onclick="discIdx=0;discAns={};go('disc',{replace:true})">${t('retake')}</button>
    </div>`;
@@ -2097,25 +2114,30 @@ route('meds',(n)=>{
         if(m.kind==='biologic'){const due=medNextDue(m);const days=due?Math.round((due-new Date().setHours(0,0,0,0))/864e5):null;
           return `<div class="card"><div class="between"><div class="row" style="gap:11px"><span class="ic" style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon('syringe',22)}</span><div><b style="font-size:14.5px">${name}</b><div class="muted" style="font-size:12px">${isAr()?'كل':'every'} ${m.interval} ${isAr()?'يوم':'days'}</div></div></div><button class="btn-sm btn-ghost" onclick="delMed('${m.id}')">${svgIcon('trash',15)}</button></div>
             <div class="card" style="background:color-mix(in srgb,var(--accent) 10%,transparent);border:none;margin:10px 0 0"><div class="between"><span style="font-size:13px;font-weight:600">${isAr()?'الجرعة القادمة':'Next dose'}</span><b style="color:var(--accent)">${due?due.toLocaleDateString(isAr()?'ar':'en',{day:'numeric',month:'short'}):'—'}</b></div><div class="muted" style="font-size:12px;margin-top:3px">${days!=null?(days===0?(isAr()?'اليوم':'today'):days===1?(isAr()?'غدًا':'tomorrow'):(isAr()?`بعد ${days} يومًا`:`in ${days} days`)):''}</div></div>
-            <button class="btn btn-ghost" style="margin-top:8px" onclick="medGiven('${m.id}')">${svgIcon('check',16)} ${isAr()?'سجّل أنني أخذتها':'Log this dose'}</button></div>`;
+            <button class="btn btn-ghost" style="margin-top:8px" onclick="medGiven('${m.id}')">${svgIcon('check',16)} ${isAr()?'سجّل أنني أخذتها':'Log this dose'}</button>${medExtra(m)}</div>`;
         }
         const adh=medAdherence(m),took=medTakenToday(m);
         return `<div class="card"><div class="between"><div class="row" style="gap:11px"><span class="ic" style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon('pill',22)}</span><div><b style="font-size:14.5px">${name}</b><div class="muted" style="font-size:12px">${m.time||''} ${m.freq?'· '+m.freq:''}</div></div></div><button class="btn-sm btn-ghost" onclick="delMed('${m.id}')">${svgIcon('trash',15)}</button></div>
           <div class="between" style="margin-top:10px"><span class="muted" style="font-size:12px">${isAr()?'الالتزام (٣٠ يومًا)':'Adherence (30d)'}</span><b style="font-size:13px;color:${adh>=80?'var(--good)':adh>=50?'var(--warn)':'var(--bad)'}">${adh}%</b></div>
           <div class="pbar" style="margin-top:6px"><i style="width:${adh}%"></i></div>
-          <button class="btn ${took?'btn-ghost':'btn-primary'}" style="margin-top:10px" onclick="medTake('${m.id}')">${took?svgIcon('check',16)+' '+(isAr()?'تم اليوم':'Taken today'):(isAr()?'سجّل جرعة اليوم':'Mark today taken')}</button></div>`;
+          <button class="btn ${took?'btn-ghost':'btn-primary'}" style="margin-top:10px" onclick="medTake('${m.id}')">${took?svgIcon('check',16)+' '+(isAr()?'تم اليوم':'Taken today'):(isAr()?'سجّل جرعة اليوم':'Mark today taken')}</button>${medExtra(m)}</div>`;
       }).join('')
       : `<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('pill',36)}</div><p class="muted" style="margin-top:8px">${isAr()?'لم تُضِف أي دواء بعد':'No medications added yet'}</p></div>`}
    </div>`;
 });
+const IBD_DRUGS=['Mesalazine (5-ASA)','Sulfasalazine','Prednisolone','Budesonide','Hydrocortisone','Azathioprine','6-Mercaptopurine','Methotrexate','Infliximab (Remicade)','Adalimumab (Humira)','Vedolizumab (Entyvio)','Ustekinumab (Stelara)','Golimumab (Simponi)','Risankizumab (Skyrizi)','Certolizumab (Cimzia)','Tofacitinib (Xeljanz)','Upadacitinib (Rinvoq)','Filgotinib (Jyseleca)','Ozanimod (Zeposia)','Metronidazole','Ciprofloxacin'];
+function drugDatalist(){return `<datalist id="drugList">${IBD_DRUGS.map(d=>`<option value="${d}">`).join('')}</datalist>`;}
 window.openAddMed=function(){
   openSheet(`<div class="row" style="gap:10px;margin-bottom:14px"><span style="color:var(--accent)">${svgIcon('pill',26)}</span><h2 style="font-size:19px;margin:0;font-weight:800">${isAr()?'إضافة دواء':'Add medication'}</h2></div>
-   <div class="field"><label>${isAr()?'الاسم (اختياري)':'Name (optional)'}</label><input class="input" id="mName" placeholder="${isAr()?'مثال: أزاثيوبرين':'e.g. Azathioprine'}"></div>
+   ${drugDatalist()}
+   <div class="field"><label>${isAr()?'اسم الدواء (اختر أو اكتب)':'Medication (pick or type)'}</label><input class="input" id="mName" list="drugList" placeholder="${isAr()?'مثال: أزاثيوبرين':'e.g. Azathioprine'}"></div>
+   <div class="field"><label>${isAr()?'الجرعة':'Dose'}</label><input class="input" id="mDose" placeholder="${isAr()?'مثال: ٤٠ ملغ / حبتان':'e.g. 40 mg / 2 tablets'}"></div>
    <div class="field"><label>${isAr()?'النوع':'Type'}</label>
      <select class="input" id="mKind" onchange="window.__medKind(this.value)">
        <option value="oral">${isAr()?'دواء يومي (فموي)':'Daily medication (oral)'}</option>
        <option value="biologic">${isAr()?'علاج حيوي (حقن/تسريب دوري)':'Biologic (scheduled injection/infusion)'}</option>
      </select></div>
+   <div class="field"><label>${isAr()?'بدأت العلاج في':'Started this treatment on'}</label><input class="input" type="date" id="mSince" value="${todayKey()}"></div>
    <div id="mOral"><div class="field"><label>${isAr()?'وقت التذكير':'Reminder time'}</label><input class="input" type="time" id="mTime" value="20:00"></div></div>
    <div id="mBio" style="display:none"><div class="field"><label>${isAr()?'كل كم يوم؟':'Every how many days?'}</label><input class="input" id="mInt" inputmode="numeric" placeholder="${isAr()?'مثال: 56 (كل ٨ أسابيع)':'e.g. 56 (every 8 weeks)'}"></div>
      <div class="field"><label>${isAr()?'تاريخ آخر جرعة':'Date of last dose'}</label><input class="input" type="date" id="mStart" value="${todayKey()}"></div></div>
@@ -2123,10 +2145,36 @@ window.openAddMed=function(){
 };
 window.__medKind=(v)=>{$('#mOral').style.display=v==='oral'?'':'none';$('#mBio').style.display=v==='biologic'?'':'none';};
 window.saveMed=function(){const kind=$('#mKind').value;const name=($('#mName').value||'').trim();
-  const m={id:rid(),name,kind,log:[]};
+  const dose=($('#mDose').value||'').trim();const since=$('#mSince').value||todayKey();
+  const m={id:rid(),name,kind,dose,since,log:[],history:[{date:since,type:'start',dose,note:(isAr()?'بدء العلاج':'Started treatment')}]};
   if(kind==='biologic'){m.interval=parseInt($('#mInt').value)||56;m.start=$('#mStart').value||todayKey();}
   else{m.time=$('#mTime').value||'20:00';}
   S.meds=S.meds||[];S.meds.push(m);save();closeSheet();toast(isAr()?'تمت الإضافة':'Added');render();};
+window.openMedChange=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;
+  openSheet(`<div class="row" style="gap:10px;margin-bottom:14px"><span style="color:var(--accent)">${svgIcon('edit',24)}</span><h2 style="font-size:18px;margin:0;font-weight:800">${isAr()?'تسجيل تغيير':'Log a change'}</h2></div>
+   <p class="muted" style="font-size:12.5px;margin:-6px 0 12px">${m.name||(isAr()?'الدواء':'Medication')}</p>
+   <div class="field"><label>${isAr()?'الجرعة الجديدة (اختياري)':'New dose (optional)'}</label><input class="input" id="mcDose" value="${m.dose||''}"></div>
+   <div class="field"><label>${isAr()?'ماذا تغيّر؟':'What changed?'}</label>
+     <select class="input" id="mcType">
+       <option value="dose">${isAr()?'تعديل الجرعة':'Dose change'}</option>
+       <option value="stop">${isAr()?'إيقاف الدواء':'Stopped'}</option>
+       <option value="restart">${isAr()?'استئناف':'Restarted'}</option>
+       <option value="switch">${isAr()?'تبديل دواء':'Switched medication'}</option>
+       <option value="note">${isAr()?'ملاحظة':'Note'}</option>
+     </select></div>
+   <div class="field"><label>${isAr()?'ملاحظة (اختياري)':'Note (optional)'}</label><input class="input" id="mcNote" placeholder="${isAr()?'مثال: بسبب الأعراض':'e.g. due to symptoms'}"></div>
+   <div class="field"><label>${isAr()?'التاريخ':'Date'}</label><input class="input" type="date" id="mcDate" value="${todayKey()}"></div>
+   <button class="btn btn-primary" onclick="saveMedChange('${id}')">${isAr()?'حفظ':'Save'}</button>`);
+};
+window.saveMedChange=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;
+  const dose=($('#mcDose').value||'').trim();const type=$('#mcType').value;const note=($('#mcNote').value||'').trim();const date=$('#mcDate').value||todayKey();
+  m.history=m.history||[];m.history.push({date,type,dose,note});
+  if(dose)m.dose=dose;
+  save();closeSheet();awardXp(2);toast(isAr()?'تم تسجيل التغيير':'Change logged');render();};
+function medChangeLabel(t){const m={start:{en:'Started',ar:'بدء'},dose:{en:'Dose change',ar:'تعديل جرعة'},stop:{en:'Stopped',ar:'إيقاف'},restart:{en:'Restarted',ar:'استئناف'},switch:{en:'Switched',ar:'تبديل'},note:{en:'Note',ar:'ملاحظة'}};return m[t]?(isAr()?m[t].ar:m[t].en):t;}
+function medExtra(m){const hist=(m.history||[]);const ds=m.dose?`${isAr()?'الجرعة':'Dose'}: ${m.dose}`:'';const since=m.since?`${isAr()?'منذ':'since'} ${fmtDate(m.since)}`:'';
+  return `<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:9px"><div class="between" style="align-items:center"><span class="muted" style="font-size:12px">${[ds,since].filter(Boolean).join(' · ')||(isAr()?'لا تفاصيل':'no details')}</span><button class="btn-sm btn-ghost" onclick="openMedChange('${m.id}')">${svgIcon('edit',14)} ${isAr()?'تسجيل تغيير':'Log change'}</button></div>
+  ${hist.length>1?`<div style="margin-top:8px">${hist.slice().reverse().map(h=>`<div class="row" style="gap:8px;align-items:flex-start;margin-bottom:6px"><span class="dot" style="background:var(--accent);margin-top:5px;flex:none"></span><div style="flex:1;min-width:0"><div style="font-size:12.5px"><b>${medChangeLabel(h.type)}</b>${h.dose?` · ${h.dose}`:''}</div><div class="muted" style="font-size:11px">${fmtDate(h.date)}${h.note?' · '+h.note:''}</div></div></div>`).join('')}</div>`:''}</div>`;}
 window.medTake=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;m.log=m.log||[];const k=todayKey();const i=m.log.indexOf(k);if(i>=0)m.log.splice(i,1);else{m.log.push(k);awardXp(3);}save();render();};
 window.medGiven=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;m.start=todayKey();m.log=m.log||[];m.log.push(todayKey());awardXp(5);save();toast(isAr()?'سُجّلت الجرعة':'Dose logged');render();};
 window.delMed=function(id){S.meds=(S.meds||[]).filter(x=>x.id!==id);save();render();};
@@ -2144,6 +2192,7 @@ const LAB_TYPES=[
   {id:'plt',en:'Platelets',ar:'الصفائح',unit:'×10⁹/L'},
   {id:'wbc',en:'White cells (WBC)',ar:'كريات الدم البيضاء',unit:'×10⁹/L'},
 ];
+const LAB_KW={calpro:['calprotectin','calpro','f-cal','fcp'],crp:['crp','c-reactive','c reactive','creactive'],hb:['hemoglobin','haemoglobin','hgb','hb'],ferritin:['ferritin','ferr'],albumin:['albumin','alb'],esr:['esr','sed rate','sedimentation'],plt:['platelet','platelets','plt'],wbc:['wbc','white cell','white blood','leucocyte','leukocyte']};
 function labName(id){const l=LAB_TYPES.find(x=>x.id===id);return l?(isAr()?l.ar:l.en):id;}
 function labUnit(id){const l=LAB_TYPES.find(x=>x.id===id);return l?l.unit:'';}
 route('labs',(n)=>{
@@ -2158,7 +2207,7 @@ route('labs',(n)=>{
         const prev=arr.length>1?arr[arr.length-2]:null;
         const delta=prev?(+last.value-+prev.value):null;
         return `<div class="card"><div class="between" style="margin-bottom:6px"><div><b style="font-size:14.5px">${labName(tp)}</b><div class="muted" style="font-size:12px">${fmtDate(last.date)}</div></div><div style="text-align:end"><b style="font-size:19px;color:var(--accent)">${last.value}</b> <span class="muted" style="font-size:11px">${labUnit(tp)}</span>${delta!=null?`<div class="faint" style="font-size:11px;color:${delta>0?'var(--warn)':delta<0?'var(--good)':'var(--muted)'}">${delta>0?'▲':delta<0?'▼':''} ${Math.abs(delta).toFixed(1)}</div>`:''}</div></div>
-          ${series.length>1?spark(series,'var(--accent)'):''}
+          ${series.length>1?sparkAxis(series,arr.map(x=>x.date),'var(--accent)'):''}
           <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">${arr.slice().reverse().slice(0,6).map(x=>`<span class="badge" style="background:var(--bg2);color:var(--muted);font-size:10.5px">${x.value} · ${fmtDate(x.date).split(',')[0]}</span>`).join('')}</div></div>`;
       }).join('')
       : `<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('pulse',36)}</div><p class="muted" style="margin-top:8px">${isAr()?'لا نتائج بعد — أضف أول قيمة':'No results yet — add your first value'}</p></div>`}
@@ -2168,9 +2217,60 @@ route('labs',(n)=>{
 window.openAddLab=function(){
   openSheet(`<div class="row" style="gap:10px;margin-bottom:14px"><span style="color:var(--accent)">${svgIcon('pulse',26)}</span><h2 style="font-size:19px;margin:0;font-weight:800">${isAr()?'إضافة نتيجة':'Add result'}</h2></div>
    <div class="field"><label>${isAr()?'التحليل':'Test'}</label><select class="input" id="lbType">${LAB_TYPES.map(l=>`<option value="${l.id}">${isAr()?l.ar:l.en} (${l.unit})</option>`).join('')}</select></div>
+   <input type="file" id="lbPhoto" accept="image/*" capture="environment" style="display:none" onchange="scanLabFile(this)">
+   <button class="btn btn-ghost" style="margin-bottom:6px" onclick="document.getElementById('lbPhoto').click()">${svgIcon('camera',18)} ${isAr()?'مسح من صورة التحليل':'Scan from a photo'}</button>
+   <div id="lbScan"></div>
    <div class="field"><label>${isAr()?'القيمة':'Value'}</label><input class="input" id="lbVal" inputmode="decimal" placeholder="${isAr()?'الرقم':'number'}"></div>
    <div class="field"><label>${isAr()?'التاريخ':'Date'}</label><input class="input" type="date" id="lbDate" value="${todayKey()}"></div>
+   <p class="muted" style="font-size:11px;margin:-4px 0 10px;line-height:1.5">${isAr()?'تتم القراءة على جهازك ولا تغادر الصورة الهاتف. راجِع الرقم دائمًا قبل الحفظ.':'Reading happens on your device — the photo never leaves your phone. Always check the number before saving.'}</p>
    <button class="btn btn-primary" onclick="saveLab()">${isAr()?'حفظ':'Save'}</button>`);
+};
+/* On-device OCR (Tesseract.js, WASM) — lazy-loaded only when scanning */
+let _tessP=null;
+function ensureTesseract(){
+  if(window.Tesseract)return Promise.resolve(window.Tesseract);
+  if(_tessP)return _tessP;
+  _tessP=new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';s.onload=()=>res(window.Tesseract);s.onerror=()=>{_tessP=null;rej(new Error('load'));};document.head.appendChild(s);});
+  return _tessP;
+}
+function _pad2(x){x=+x;return (x<10?'0':'')+x;}
+function findLabDate(text){
+  let m=text.match(/(20\d{2})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+  if(m)return `${m[1]}-${_pad2(m[2])}-${_pad2(m[3])}`;
+  m=text.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](20\d{2})/);
+  if(m){let d=+m[1],mo=+m[2];if(mo>12&&d<=12){const t=d;d=mo;mo=t;}if(mo>=1&&mo<=12&&d>=1&&d<=31)return `${m[3]}-${_pad2(mo)}-${_pad2(d)}`;}
+  const mon={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+  m=text.toLowerCase().match(/(\d{1,2})\s*([a-z]{3,9})\s*(20\d{2})/);
+  if(m&&mon[m[2].slice(0,3)])return `${m[3]}-${_pad2(mon[m[2].slice(0,3)])}-${_pad2(+m[1])}`;
+  return null;
+}
+function parseLabOCR(text,box,url){
+  const ar=isAr();const type=$('#lbType').value;const kws=(LAB_KW[type]||[]);
+  const lines=text.split(/\n/).map(l=>l.trim()).filter(Boolean);
+  const numRe=/-?\d{1,5}(?:[.,]\d{1,2})?/;
+  let best=null;
+  for(const ln of lines){const low=ln.toLowerCase();const ks=kws.map(k=>low.indexOf(k)).filter(i=>i>=0).sort((a,b)=>a-b);
+    if(ks.length){const after=ln.slice(ks[0]);const m=after.match(numRe);if(m){best=m[0].replace(',','.');break;}}}
+  const allNums=[...new Set((text.match(/-?\d{1,5}(?:[.,]\d{1,2})?/g)||[]).map(s=>s.replace(',','.')))]
+    .filter(s=>{const n=parseFloat(s);return !isNaN(n)&&n>0&&n<1000000;}).slice(0,12);
+  if(best){const vi=$('#lbVal');if(vi)vi.value=best;}
+  const dt=findLabDate(text);if(dt){const di=$('#lbDate');if(di)di.value=dt;}
+  const head=(best||dt)?(ar?'تم الالتقاط — راجِع القيمة وعدّلها ثم احفظ':'Captured — review the value, edit if needed, then Save')
+                       :(ar?'لم يُعثر على رقم واضح — اختر من القيم أو أدخله يدويًا':'No clear number found — pick a value or type it');
+  box.innerHTML=`<div class="row" style="gap:10px;align-items:flex-start;background:var(--bg2);border-radius:10px;padding:10px;margin-bottom:8px">
+    <img src="${url}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px">
+    <div style="flex:1"><b style="font-size:12px;color:var(--accent)">${head}</b>
+    ${allNums.length?`<div class="muted" style="font-size:10.5px;margin-top:4px">${ar?'أرقام مكتشفة:':'Detected numbers:'}</div><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:4px">${allNums.map(nv=>`<button type="button" class="chip" onclick="document.getElementById('lbVal').value='${nv}'">${nv}</button>`).join('')}</div>`:''}
+    </div></div>`;
+}
+window.scanLabFile=async function(inp){
+  const f=inp.files&&inp.files[0];if(!f)return;const box=$('#lbScan');if(!box)return;const ar=isAr();
+  const url=URL.createObjectURL(f);
+  box.innerHTML=`<div class="row" style="gap:10px;align-items:center;background:var(--bg2);border-radius:10px;padding:10px;margin-bottom:8px"><img src="${url}" alt="" style="width:48px;height:48px;object-fit:cover;border-radius:8px"><div><b style="font-size:12.5px">${ar?'جارٍ القراءة على جهازك…':'Reading on your device…'}</b><div class="muted" style="font-size:11px" id="lbScanPct">0%</div></div></div>`;
+  let T;try{T=await ensureTesseract();}catch(e){box.innerHTML=`<div class="muted" style="font-size:11.5px;padding:8px">${ar?'تعذّر تحميل أداة المسح (تحتاج اتصالاً بالإنترنت أول مرة). أدخل القيمة يدويًا.':'Couldn’t load the scanner (needs internet the first time). Please enter the value manually.'}</div>`;return;}
+  try{const {data}=await T.recognize(f,'eng',{logger:m=>{if(m.status==='recognizing text'){const p=$('#lbScanPct');if(p)p.textContent=Math.round((m.progress||0)*100)+'%';}}});
+    parseLabOCR(data.text||'',box,url);awardXp(2);
+  }catch(e){box.innerHTML=`<div class="muted" style="font-size:11.5px;padding:8px">${ar?'تعذّرت القراءة. جرّب صورة أوضح أو أدخل القيمة يدويًا.':'Couldn’t read it. Try a clearer photo or enter the value manually.'}</div>`;}
 };
 window.saveLab=function(){const v=parseFloat($('#lbVal').value);if(isNaN(v))return toast(isAr()?'أدخل قيمة':'Enter a value');
   S.labs=S.labs||[];S.labs.push({id:rid(),type:$('#lbType').value,value:v,date:$('#lbDate').value||todayKey()});save();closeSheet();awardXp(4);toast(isAr()?'تم الحفظ':'Saved');render();};
@@ -2558,94 +2658,251 @@ function chartBase(){const tick=cssVar('--muted')||'#8DA0B2',grid=cssVar('--line
     y:{ticks:{color:tick,font:{size:10},precision:0,maxTicksLimit:6},grid:{color:grid},beginAtZero:true}}};}
 function areaFill(hex){return (c)=>{const{ctx,chartArea}=c.chart;if(!chartArea)return hex+'20';const g=ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);g.addColorStop(0,hex+'66');g.addColorStop(1,hex+'08');return g;};}
 function barFill(hex){return (c)=>{const{ctx,chartArea}=c.chart;if(!chartArea)return hex;const g=ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);g.addColorStop(0,hex);g.addColorStop(1,hex+'55');return g;};}
+/* descriptive stats helper (ignores missing days) for "typical range" bands + aria summaries */
+function _stat(a){const v=a.filter(x=>x!=null);if(!v.length)return null;const m=v.reduce((x,y)=>x+y,0)/v.length;
+  const sd=Math.sqrt(v.reduce((s,x)=>s+(x-m)*(x-m),0)/v.length);return{mean:m,sd,min:Math.min.apply(0,v),max:Math.max.apply(0,v),last:v[v.length-1],n:v.length};}
+function setAria(id,text){const c=$('#'+id);if(c){c.setAttribute('role','img');c.setAttribute('aria-label',text);}}
 function drawReportCharts(days,ls){
   const C=window.Chart;if(!C)return;
   const ACC=cssVar('--accent')||'#00E0B8', ACC2=cssVar('--accent2')||'#19A0FF';
   const BAD='#FF5C72',PUR='#9B7CFF',WARN='#FFB23E';
-  // symptom frequency by type
+  const ar=isAr();
+  // symptom frequency by type (bar, zero-based)
   const symCounts={};ls.filter(l=>l.type==='symptom').forEach(l=>symCounts[l.sym]=(symCounts[l.sym]||0)+1);
   const symEntries=Object.entries(symCounts).sort((a,b)=>b[1]-a[1]).slice(0,6);
   CHARTS.push(new C($('#cSym'),{type:'bar',data:{labels:symEntries.map(([k])=>t(k)),datasets:[{data:symEntries.map(([,v])=>v),backgroundColor:barFill(BAD),borderRadius:8,maxBarThickness:34}]},options:chartBase()}));
+  setAria('cSym',(ar?'تكرار الأعراض: ':'Symptom frequency: ')+symEntries.map(([k,v])=>t(k)+' '+v).join(', '));
   // labels for day-based charts
-  const dlabels=days.map(d=>{const dd=new Date(d+'T00:00');return dd.toLocaleDateString(isAr()?'ar-SA':'en-GB',{day:'numeric',month:'short'});});
+  const dlabels=days.map(d=>{const dd=new Date(d+'T00:00');return dd.toLocaleDateString(ar?'ar-SA':'en-GB',{day:'numeric',month:'short'});});
   const everyN=Math.ceil(days.length/7);
   const opt=()=>{const o=chartBase();o.scales.x.ticks.callback=function(v,i){return i%everyN===0?dlabels[i]:'';};return o;};
-  // bowel frequency per day
+  // bowel frequency per day (bar, zero = no movements that day)
   const bm=days.map(d=>S.logs.filter(l=>l.type==='bowel'&&l.t.slice(0,10)===d).reduce((s,l)=>s+(l.count||0),0));
   CHARTS.push(new C($('#cBm'),{type:'bar',data:{labels:dlabels,datasets:[{data:bm,backgroundColor:barFill(PUR),borderRadius:6,maxBarThickness:22}]},options:opt()}));
-  // avg severity per day
-  const sev=days.map(d=>{const s=S.logs.filter(l=>l.type==='symptom'&&l.t.slice(0,10)===d).map(l=>l.sev);return s.length?(s.reduce((a,b)=>a+b,0)/s.length):0;});
-  const o2=opt();o2.scales.y.max=3;
-  CHARTS.push(new C($('#cSev'),{type:'line',data:{labels:dlabels,datasets:[{data:sev,borderColor:WARN,backgroundColor:areaFill(WARN),fill:true,tension:.4,pointRadius:0,borderWidth:3}]},options:o2}));
-  // mood
-  const md=days.map(d=>{const s=S.logs.filter(l=>l.type==='mood'&&l.t.slice(0,10)===d).map(l=>l.mood);return s.length?(s.reduce((a,b)=>a+b,0)/s.length):null;});
-  const o3=opt();o3.scales.y.max=5;
-  CHARTS.push(new C($('#cMood'),{type:'line',data:{labels:dlabels,datasets:[{data:md,borderColor:ACC,backgroundColor:areaFill(ACC),fill:true,tension:.4,pointRadius:0,borderWidth:3,spanGaps:true}]},options:o3}));
-  // sleep
-  const sl=days.map(d=>{const s=S.logs.filter(l=>l.type==='sleep'&&l.t.slice(0,10)===d).map(l=>l.hours);return s.length?(s.reduce((a,b)=>a+b,0)/s.length):null;});
-  const o4=opt();o4.scales.y.max=12;
-  CHARTS.push(new C($('#cSleep'),{type:'line',data:{labels:dlabels,datasets:[{data:sl,borderColor:ACC2,backgroundColor:areaFill(ACC2),fill:true,tension:.4,pointRadius:0,borderWidth:3,spanGaps:true}]},options:o4}));
+  const bst=_stat(bm);if(bst)setAria('cBm',(ar?'تكرار التبرّز اليومي. الأحدث ':'Daily bowel frequency. Latest ')+bst.last+(ar?'، المعدّل ':', average ')+bst.mean.toFixed(1));
+  // gap-aware daily averages: null on unlogged days (never plot 0 where there is no data)
+  const dayAvg=(type,key)=>days.map(d=>{const s=S.logs.filter(l=>l.type===type&&l.t.slice(0,10)===d).map(l=>l[key]);return s.length?(s.reduce((a,b)=>a+b,0)/s.length):null;});
+  // line chart with personal "typical range" band (mean ± 1 SD), gap-aware
+  const lineBand=(id,data,color,ymax,labEN,labAR)=>{
+    const st=_stat(data);const ds=[];
+    if(st){const lo=Math.max(0,st.mean-st.sd),hi=Math.min(ymax,st.mean+st.sd);
+      ds.push({label:'_u',data:days.map(()=>hi),borderColor:'rgba(0,0,0,0)',pointRadius:0,fill:'+1',backgroundColor:color+'1f'});
+      ds.push({label:'_l',data:days.map(()=>lo),borderColor:'rgba(0,0,0,0)',pointRadius:0,fill:false});}
+    ds.push({data,borderColor:color,backgroundColor:'rgba(0,0,0,0)',fill:false,tension:.4,pointRadius:0,borderWidth:3,spanGaps:false});
+    const o=opt();o.scales.y.max=ymax;
+    CHARTS.push(new C($('#'+id),{type:'line',data:{labels:dlabels,datasets:ds},options:o}));
+    if(st)setAria(id,(ar?labAR:labEN)+': '+(ar?'الأحدث ':'latest ')+(st.last!=null?st.last.toFixed(1):'—')+(ar?'، النطاق ':', range ')+st.min.toFixed(1)+'–'+st.max.toFixed(1)+(ar?'، النطاق المعتاد ':', typical ')+Math.max(0,st.mean-st.sd).toFixed(1)+'–'+Math.min(ymax,st.mean+st.sd).toFixed(1));
+  };
+  lineBand('cSev',dayAvg('symptom','sev'),WARN,3,'Average symptom severity','متوسط شدّة الأعراض');
+  lineBand('cMood',dayAvg('mood','mood'),ACC,5,'Mood trend','اتجاه المزاج');
+  lineBand('cSleep',dayAvg('sleep','hours'),ACC2,12,'Sleep trend','اتجاه النوم');
 }
 
 /* Clinician report — comprehensive, descriptive-only summary the patient can share.
    Opens a print-ready window (print → Save as PDF); falls back to file download if popups are blocked. */
+/* ===== Inline-SVG chart helpers for the printable clinician report (no JS needed at print time) ===== */
+const RPT={ink:'#16202b',teal:'#00897b',grid:'#e6edec',mut:'#8794a0',line:'#eef2f5',
+  sev:'#E8833A',bowel:'#7C5CFF',mood:'#00A88E',sleep:'#2C7BE5',lab:'#00897b'};
+function _gapPath(vals,X,Y){let d='',pen=false;vals.forEach((v,i)=>{if(v==null){pen=false;return;}const px=X(i),py=Y(v);d+=(pen?'L':'M')+px.toFixed(1)+' '+py.toFixed(1)+' ';pen=true;});return d;}
+function _yTicks(ymax,n,intOnly){const out=[];for(let i=0;i<=n;i++){let v=ymax*i/n;v=intOnly?Math.round(v):Math.round(v*10)/10;out.push(v);}return [...new Set(out)];}
+function _xTickIdx(n,want){const idx=[];const m=Math.min(want,n);for(let i=0;i<m;i++)idx.push(Math.round((n-1)*i/((m-1)||1)));return [...new Set(idx)];}
+function rptTrend(vals,color,ymax,days,sd){
+  const W=360,H=144,L=30,R=10,Tp=10,B=26,iw=W-L-R,ih=H-Tp-B;
+  const X=i=>L+(vals.length<2?iw/2:iw*i/(vals.length-1));const Y=v=>Tp+ih*(1-Math.max(0,Math.min(ymax,v))/ymax);
+  const obs=vals.filter(v=>v!=null);let band='';
+  if(obs.length>1){const m=obs.reduce((a,b)=>a+b,0)/obs.length;const sd2=Math.sqrt(obs.reduce((s,x)=>s+(x-m)*(x-m),0)/obs.length);
+    const hi=Y(Math.min(ymax,m+sd2)),lo=Y(Math.max(0,m-sd2));band=`<rect x="${L}" y="${hi.toFixed(1)}" width="${iw}" height="${Math.max(0,lo-hi).toFixed(1)}" fill="${color}" opacity="0.10"/>`;}
+  const gy=_yTicks(ymax,4,false).map(v=>`<line x1="${L}" y1="${Y(v).toFixed(1)}" x2="${W-R}" y2="${Y(v).toFixed(1)}" stroke="${RPT.grid}" stroke-width="0.7"/><text x="${L-5}" y="${(Y(v)+3).toFixed(1)}" text-anchor="end" font-size="8.5" fill="${RPT.mut}">${v}</text>`).join('');
+  const gx=_xTickIdx(vals.length,5).map(i=>`<line x1="${X(i).toFixed(1)}" y1="${Tp}" x2="${X(i).toFixed(1)}" y2="${Tp+ih}" stroke="${RPT.grid}" stroke-width="0.5"/><text x="${X(i).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="8.5" fill="${RPT.mut}">${sd(days[i])}</text>`).join('');
+  const axis=`<line x1="${L}" y1="${Tp}" x2="${L}" y2="${Tp+ih}" stroke="${RPT.mut}" stroke-width="0.8"/><line x1="${L}" y1="${Tp+ih}" x2="${W-R}" y2="${Tp+ih}" stroke="${RPT.mut}" stroke-width="0.8"/>`;
+  const dots=vals.map((v,i)=>v==null?'':`<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="1.5" fill="${color}"/>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" font-family="Arial">${gy}${gx}${band}${axis}<path d="${_gapPath(vals,X,Y)}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>${dots}</svg>`;
+}
+function rptBarsDaily(vals,color,days,sd){
+  const W=360,H=144,L=30,R=10,Tp=10,B=26,iw=W-L-R,ih=H-Tp-B;const ymax=Math.max(1,Math.max.apply(0,vals));
+  const bw=Math.max(1.5,iw/vals.length*0.7);const X=i=>L+iw*(i+0.5)/vals.length;const Y=v=>Tp+ih*(1-v/ymax);
+  const gy=_yTicks(ymax,Math.min(4,ymax),true).map(v=>`<line x1="${L}" y1="${Y(v).toFixed(1)}" x2="${W-R}" y2="${Y(v).toFixed(1)}" stroke="${RPT.grid}" stroke-width="0.7"/><text x="${L-5}" y="${(Y(v)+3).toFixed(1)}" text-anchor="end" font-size="8.5" fill="${RPT.mut}">${v}</text>`).join('');
+  const gx=_xTickIdx(vals.length,5).map(i=>`<text x="${X(i).toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="8.5" fill="${RPT.mut}">${sd(days[i])}</text>`).join('');
+  const axis=`<line x1="${L}" y1="${Tp}" x2="${L}" y2="${Tp+ih}" stroke="${RPT.mut}" stroke-width="0.8"/><line x1="${L}" y1="${Tp+ih}" x2="${W-R}" y2="${Tp+ih}" stroke="${RPT.mut}" stroke-width="0.8"/>`;
+  const bars=vals.map((v,i)=>v?`<rect x="${(X(i)-bw/2).toFixed(1)}" y="${Y(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(ih-(Y(v)-Tp)).toFixed(1)}" rx="1" fill="${color}"/>`:'').join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" font-family="Arial">${gy}${gx}${axis}${bars}</svg>`;
+}
+function rptLabChart(vals,dates,color,sd){
+  const W=210,H=78,L=32,R=8,Tp=8,B=18,iw=W-L-R,ih=H-Tp-B;
+  const mn=Math.min.apply(0,vals),mx=Math.max.apply(0,vals);const pad=(mx-mn)*0.15||Math.max(1,mx*0.1)||1;const lo=mn-pad,hi=mx+pad;
+  const X=i=>L+iw*i/((vals.length-1)||1);const Y=v=>Tp+ih*(1-(v-lo)/((hi-lo)||1));
+  const rnd=v=>Math.abs(v)>=10?Math.round(v):Math.round(v*10)/10;
+  const gy=[hi,(hi+lo)/2,lo].map(v=>`<line x1="${L}" y1="${Y(v).toFixed(1)}" x2="${W-R}" y2="${Y(v).toFixed(1)}" stroke="${RPT.grid}" stroke-width="0.6"/><text x="${L-4}" y="${(Y(v)+3).toFixed(1)}" text-anchor="end" font-size="8" fill="${RPT.mut}">${rnd(v)}</text>`).join('');
+  const axis=`<line x1="${L}" y1="${Tp}" x2="${L}" y2="${Tp+ih}" stroke="${RPT.mut}" stroke-width="0.7"/><line x1="${L}" y1="${Tp+ih}" x2="${W-R}" y2="${Tp+ih}" stroke="${RPT.mut}" stroke-width="0.7"/>`;
+  let d='';vals.forEach((v,i)=>d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ');
+  const dots=vals.map((v,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="1.6" fill="${color}"/>`).join('');
+  const xl=`<text x="${L}" y="${H-4}" font-size="8" fill="${RPT.mut}">${sd(dates[0])}</text><text x="${W-R}" y="${H-4}" text-anchor="end" font-size="8" fill="${RPT.mut}">${sd(dates[dates.length-1])}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="200" preserveAspectRatio="xMidYMid meet" font-family="Arial">${gy}${axis}<path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${dots}${xl}</svg>`;
+}
+function rptHBars(entries,color){
+  const W=340,rowH=26,H=entries.length*rowH+6,L=110,R=34,iw=W-L-R;const mx=Math.max(1,Math.max.apply(0,entries.map(e=>e[1])));
+  const rows=entries.map((e,i)=>{const y=i*rowH+4;const bw=iw*e[1]/mx;
+    return `<text x="${L-8}" y="${y+15}" text-anchor="end" font-size="11" fill="${RPT.ink}">${e[0]}</text><rect x="${L}" y="${y+5}" width="${iw}" height="13" rx="6" fill="${RPT.line}"/><rect x="${L}" y="${y+5}" width="${bw.toFixed(1)}" height="13" rx="6" fill="${color}"/><text x="${L+iw+6}" y="${y+15}" font-size="11" font-weight="700" fill="${RPT.ink}">${e[1]}</text>`;}).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" font-family="Arial">${rows}</svg>`;
+}
+function rptSpark(vals,color){
+  const W=120,H=30,p=2,iw=W-2*p,ih=H-2*p;const mn=Math.min.apply(0,vals),mx=Math.max.apply(0,vals),rg=(mx-mn)||1;
+  const X=i=>p+iw*i/(vals.length-1);const Y=v=>p+ih*(1-(v-mn)/rg);
+  let d='';vals.forEach((v,i)=>d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ');
+  return `<svg viewBox="0 0 ${W} ${H}" width="120" height="30"><path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${X(vals.length-1).toFixed(1)}" cy="${Y(vals[vals.length-1]).toFixed(1)}" r="2.4" fill="${color}"/></svg>`;
+}
+function rptRadar(labels,vals,max){
+  const S2=300,c=S2/2,R=98,N=labels.length;const ang=i=>Math.PI*2*i/N-Math.PI/2;
+  const pt=(i,v)=>[c+Math.cos(ang(i))*R*(v/max),c+Math.sin(ang(i))*R*(v/max)];
+  const grid=[max*0.33,max*0.66,max].map(rv=>`<polygon points="${labels.map((_,i)=>pt(i,rv).join(',')).join(' ')}" fill="none" stroke="${RPT.grid}"/>`).join('');
+  const spokes=labels.map((_,i)=>{const[x,y]=pt(i,max);return `<line x1="${c}" y1="${c}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${RPT.grid}"/>`;}).join('');
+  const poly=`<polygon points="${vals.map((v,i)=>pt(i,v).join(',')).join(' ')}" fill="${RPT.teal}" fill-opacity="0.18" stroke="${RPT.teal}" stroke-width="2"/>`;
+  const dots=vals.map((v,i)=>{const[x,y]=pt(i,v);return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.4" fill="${RPT.teal}"/>`;}).join('');
+  const labs=labels.map((d,i)=>{const[x,y]=pt(i,max+1.25);const an=(x<c-6)?'end':(x>c+6)?'start':'middle';return `<text x="${x.toFixed(1)}" y="${(y+3).toFixed(1)}" text-anchor="${an}" font-size="9" fill="${RPT.mut}">${d}</text>`;}).join('');
+  const P=52;return `<svg viewBox="${-P} -8 ${S2+2*P} ${S2+16}" width="100%" style="max-width:330px" font-family="Arial">${grid}${spokes}${poly}${dots}${labs}</svg>`;
+}
+function rptDonut(pct,color){
+  const r=27,c=2*Math.PI*r,off=c*(1-pct/100);
+  return `<svg viewBox="0 0 72 72" width="64" height="64"><circle cx="36" cy="36" r="${r}" fill="none" stroke="${RPT.line}" stroke-width="8"/><circle cx="36" cy="36" r="${r}" fill="none" stroke="${color}" stroke-width="8" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 36 36)"/><text x="36" y="41" text-anchor="middle" font-size="17" font-weight="800" fill="${RPT.ink}" font-family="Arial">${pct}%</text></svg>`;
+}
 function buildReportHTML(){
   const days=lastNDays(repRange);
   const ls=S.logs.filter(l=>days.includes(l.t.slice(0,10)));
-  const u=S.user;
-  const T=k=>t(k);
+  const u=S.user;const T=k=>t(k);const ar=isAr();
   const avg=a=>a.length?(a.reduce((x,y)=>x+y,0)/a.length).toFixed(1):'—';
+  const fmtD=d=>new Date(d+'T00:00').toLocaleDateString(ar?'ar-SA':'en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const rangeStr=fmtD(days[0])+' – '+fmtD(days[days.length-1]);
+  const totalMeas=ls.length;
   const daysLogged=days.filter(d=>logsOn(d).length>0).length;
+  const pctLogged=Math.round(daysLogged/repRange*100);
   const symEps=ls.filter(l=>l.type==='symptom');
   const symCounts={};symEps.forEach(l=>symCounts[l.sym]=(symCounts[l.sym]||0)+1);
   const sevAll=symEps.map(l=>l.sev);
+  const daysSym=days.filter(d=>symEps.some(l=>l.t.slice(0,10)===d)).length;
+  const pctSym=Math.round(daysSym/repRange*100);
   const bmTotal=ls.filter(l=>l.type==='bowel').reduce((s,l)=>s+(l.count||0),0);
   const bristol={};ls.filter(l=>l.type==='bowel').forEach(l=>{if(l.bristol)bristol[l.bristol]=(bristol[l.bristol]||0)+1;});
   const sleeps=ls.filter(l=>l.type==='sleep').map(l=>l.hours);
   const moods=ls.filter(l=>l.type==='mood').map(l=>l.mood);
   const stepsArr=ls.filter(l=>l.type==='steps').map(l=>l.steps);
-  const actMin=ls.filter(l=>l.type==='activity').reduce((s,l)=>s+(l.mins||0),0);
   const weights=S.logs.filter(l=>l.type==='weight').sort((a,b)=>new Date(a.t)-new Date(b.t));
   const wLatest=weights.length?weights[weights.length-1].kg:null;
-  const dir=isAr()?'rtl':'ltr';const al=isAr()?'right':'left';
+  const dir=ar?'rtl':'ltr';const al=ar?'right':'left';
   const dz={uc:T('uc'),cd:T('cd'),ibdu:T('ibdu'),notsure:T('notsure')}[u.disease]||'—';
-  const ctry=u.country?((isAr()?(COUNTRIES.find(x=>x.c===u.country)||{}).ar:(COUNTRIES.find(x=>x.c===u.country)||{}).en)||''):'';
+  const ctry=u.country?((ar?(COUNTRIES.find(x=>x.c===u.country)||{}).ar:(COUNTRIES.find(x=>x.c===u.country)||{}).en)||''):'';
   const age=(()=>{const y=+u.year;const cy=new Date().getFullYear();return (y&&y>1900&&y<cy)?cy-y:'—';})();
-  const symRows=Object.entries(symCounts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<tr><td>${T(k)}</td><td>${v}</td></tr>`).join('')||`<tr><td colspan=2>—</td></tr>`;
-  const bRows=[1,2,3,4,5,6,7].filter(i=>bristol[i]).map(i=>`<tr><td>Type ${i}</td><td>${bristol[i]}</td></tr>`).join('')||`<tr><td colspan=2>—</td></tr>`;
+  // daily series (gap-aware)
+  const sevDay=days.map(d=>{const s=symEps.filter(l=>l.t.slice(0,10)===d).map(l=>l.sev);return s.length?s.reduce((a,b)=>a+b,0)/s.length:null;});
+  const bmDay=days.map(d=>ls.filter(l=>l.type==='bowel'&&l.t.slice(0,10)===d).reduce((s,l)=>s+(l.count||0),0));
+  const moodDay=days.map(d=>{const s=ls.filter(l=>l.type==='mood'&&l.t.slice(0,10)===d).map(l=>l.mood);return s.length?s.reduce((a,b)=>a+b,0)/s.length:null;});
+  const sleepDay=days.map(d=>{const s=ls.filter(l=>l.type==='sleep'&&l.t.slice(0,10)===d).map(l=>l.hours);return s.length?s.reduce((a,b)=>a+b,0)/s.length:null;});
+  const sd=iso=>new Date(iso+'T00:00').toLocaleDateString(ar?'ar-SA':'en-GB',{day:'numeric',month:'short'});
+  // BMI from height + latest weight
+  const hCm=parseFloat(u.heightCm)||0;
+  const bmi=(hCm&&wLatest)?(wLatest/Math.pow(hCm/100,2)):null;
+  const bmiCat=bmi==null?'':(bmi<18.5?(ar?'نقص وزن':'underweight'):bmi<25?(ar?'طبيعي':'normal'):bmi<30?(ar?'زيادة':'overweight'):(ar?'سمنة':'obese'));
+  // bowel: avg per day over the period
+  const bmPerDay=(bmTotal/repRange).toFixed(1);
+  // KPI cards (with percentages / context)
+  const kpis=[
+    [`${daysLogged}/${repRange}`,T('daysLogged'),`${pctLogged}%`],
+    [`${totalMeas}`,ar?'إجمالي القياسات':'Total measurements',''],
+    [`${avg(sevAll)}/3`,T('avgSev'),''],
+    [`${pctSym}%`,ar?'أيام بأعراض':'Days with symptoms',''],
+    [`${bmPerDay}`,`${ar?'متوسط التبرّز/يوم':'Avg bowel movements/day'}`,`${bmTotal} ${ar?'إجمالاً':'total'}`],
+    [`${bmi?bmi.toFixed(1):'—'}`,ar?'مؤشر الكتلة BMI':'BMI (kg/m²)',bmiCat],
+    [`${avg(sleeps)}h`,T('avgSleepH'),''],
+    [`${avg(moods)}/5`,T('avgMood'),''],
+    [`${wLatest?wLatest+'kg':'—'}`,ar?'آخر وزن':'Latest weight','']
+  ].map(k=>`<div class="box"><div class="v">${k[0]}</div><div class="l">${k[1]}${k[2]?` · <b style="color:${RPT.teal}">${k[2]}</b>`:''}</div></div>`).join('');
+  // symptom breakdown bars
+  const symEntries=Object.entries(symCounts).sort((a,b)=>b[1]-a[1]).slice(0,7).map(([k,v])=>[T(k),v]);
+  const symChart=symEntries.length?rptHBars(symEntries,RPT.sev):`<p class="mut">—</p>`;
+  // bristol table
+  const bRows=[1,2,3,4,5,6,7].filter(i=>bristol[i]).map(i=>`<tr><td>${ar?'النوع':'Type'} ${i}</td><td>${bristol[i]}</td></tr>`).join('')||`<tr><td colspan=2>—</td></tr>`;
+  // labs
+  let labsBlock='';const labs=S.labs||[];
+  if(labs.length){const byType={};labs.forEach(l=>{(byType[l.type]=byType[l.type]||[]).push(l);});
+    const rows=Object.keys(byType).map(tp=>{const a=byType[tp].slice().sort((x,y)=>new Date(x.date)-new Date(y.date));const fst=a[0],lst=a[a.length-1];const series=a.map(x=>+x.value);
+      const d=a.length>1?(+lst.value-+fst.value):0;const pc=a.length>1&&+fst.value?Math.round(d/+fst.value*100):0;const arw=d>0?'▲':d<0?'▼':'■';const col=d===0?RPT.mut:((tp==='hb'||tp==='ferritin'||tp==='albumin')===(d>0)?'#0a8f5b':'#d1604a');
+      return `<tr><td>${labName(tp)}</td><td><b>${lst.value}</b> <span class="u">${labUnit(tp)}</span></td><td>${a.length>1?rptLabChart(series,a.map(x=>x.date),RPT.lab,sd):'—'}</td><td style="color:${col};white-space:nowrap">${a.length>1?arw+' '+(pc>0?'+':'')+pc+'%':'—'}</td></tr>`;}).join('');
+    labsBlock=`<h3>${ar?'نتائج التحاليل (مُدخلة ذاتيًا)':'Lab results (self-entered)'}</h3><table class="lab"><thead><tr><th>${ar?'التحليل':'Test'}</th><th>${ar?'الأحدث':'Latest'}</th><th>${ar?'الاتجاه':'Trend'}</th><th>${ar?'التغيّر':'Change'}</th></tr></thead><tbody>${rows}</tbody></table>`;}
+  // meds + adherence donut
+  let medsBlock='';const meds=S.meds||[];
+  if(meds.length){const orals=meds.filter(m=>m.kind!=='biologic');const adhAvg=orals.length?Math.round(orals.reduce((s,m)=>s+(medAdherence(m)||0),0)/orals.length):null;
+    const rows=meds.map(m=>{
+      if(m.kind==='biologic'){const due=medNextDue(m);const dd=due?Math.round((due-new Date().setHours(0,0,0,0))/864e5):null;
+        return `<tr><td>${m.name||(ar?'علاج حيوي':'Biologic')}</td><td>${ar?'حيوي · كل':'Biologic · q'} ${m.interval} ${ar?'يوم':'d'}</td><td>${due?(ar?'القادمة ':'next ')+due.toLocaleDateString():'—'}${dd!=null?` · ${dd} ${ar?'يوم':'d'}`:''}</td></tr>`;}
+      const adh=medAdherence(m);return `<tr><td>${m.name||(ar?'دواء يومي':'Daily med')}</td><td>${ar?'يومي':'Daily'} ${m.time||''}</td><td><b>${adh}%</b> ${ar?'(٣٠ يوم)':'(30d)'}</td></tr>`;}).join('');
+    medsBlock=`<h3>${ar?'الأدوية والالتزام (مُدخل ذاتيًا)':'Medications & adherence (self-entered)'}</h3>
+      <div class="row2"><div style="flex:1"><table><thead><tr><th>${ar?'الدواء':'Medication'}</th><th>${ar?'النظام':'Regimen'}</th><th>${ar?'الالتزام / الجرعة':'Adherence / dose'}</th></tr></thead><tbody>${rows}</tbody></table></div>
+      ${adhAvg!=null?`<div class="donut"><div>${rptDonut(adhAvg,RPT.teal)}</div><div class="dl">${ar?'الالتزام (٣٠ يوم)':'Adherence (30d)'}</div></div>`:''}</div>`;}
+  // IBD-DISC radar + average + per-domain trends
   let discBlock='';
-  if(S.disc){const ans=S.disc.answers;const top=DISC.map(q=>({lab:isAr()?q.ar[0]:q.en[0],v:ans[q.k]||0})).sort((a,b)=>b.v-a.v);
-    const tot=Object.values(ans).reduce((a,b)=>a+b,0);
-    discBlock=`<h3>${isAr()?'مقياس IBD-DISC (تقييم ذاتي)':'IBD-DISC self-assessment'} — ${tot}/100 <span style="font-weight:400;color:#889;font-size:12px">(${new Date(S.disc.date).toLocaleDateString()})</span></h3>
-      <table><thead><tr><th>${isAr()?'المجال':'Domain'}</th><th>0–10</th></tr></thead><tbody>${top.map(d=>`<tr><td>${d.lab}</td><td>${d.v}</td></tr>`).join('')}</tbody></table>`;}
+  if(S.disc){
+    const dh=(S.discHistory||[]).slice().filter(h=>h&&h.answers).sort((a,b)=>new Date(a.date)-new Date(b.date));
+    if(!dh.length||dh[dh.length-1].date!==S.disc.date)dh.push(S.disc);
+    const multi=dh.length>1;
+    const vals=DISC.map(q=>S.disc.answers[q.k]||0);const tot=vals.reduce((a,b)=>a+b,0);const avgD=(tot/DISC.length).toFixed(1);
+    const labels=DISC.map(q=>(typeof DISC_SHORT!=='undefined'&&DISC_SHORT[q.k])?(ar?DISC_SHORT[q.k].ar:DISC_SHORT[q.k].en):(ar?q.ar[0]:q.en[0]));
+    const rows=DISC.map(q=>{const ser=dh.map(h=>h.answers[q.k]||0);const lat=ser[ser.length-1],first=ser[0];const d=lat-first;
+      const arw=d>0?'▲':d<0?'▼':'■';const col=d===0?RPT.mut:(d>0?'#d1604a':'#0a8f5b');const lab=ar?q.ar[0]:q.en[0];
+      return `<tr><td>${lab}</td><td><b>${lat}</b>/10</td><td>${multi?rptSpark(ser,RPT.teal):'—'}</td><td style="color:${col};white-space:nowrap">${multi?arw+' '+(d>0?'+':'')+d:'—'}</td></tr>`;}).join('');
+    const rangeCap=multi?(ar?`${dh.length} تقييمات · ${sd(dh[0].date.slice(0,10))} ← ${sd(dh[dh.length-1].date.slice(0,10))}`:`${dh.length} assessments · ${sd(dh[0].date.slice(0,10))} → ${sd(dh[dh.length-1].date.slice(0,10))}`):(ar?`بتاريخ ${new Date(S.disc.date).toLocaleDateString()}`:`as of ${new Date(S.disc.date).toLocaleDateString()}`);
+    discBlock=`<h3>${ar?'مقياس IBD-DISC — «قرص IBD»':'IBD-DISC — “the IBD Disk”'}</h3>
+      <div class="row2"><div style="flex:0 0 330px">${rptRadar(labels,vals,10)}</div>
+      <div style="flex:1;min-width:200px"><div class="grid" style="grid-template-columns:1fr 1fr;margin:0 0 8px"><div class="box"><div class="v">${tot}/100</div><div class="l">${ar?'إجمالي الأثر':'Total impact'}</div></div><div class="box"><div class="v">${avgD}/10</div><div class="l">${ar?'متوسط المجال':'Average domain'}</div></div></div>
+      <div class="cap">${rangeCap}</div></div></div>
+      <table class="lab" style="margin-top:8px"><thead><tr><th>${ar?'المجال':'Domain'}</th><th>${ar?'الأحدث':'Latest'}</th><th>${ar?'الاتجاه':'Trend'}</th><th>${ar?'التغيّر':'Change'}</th></tr></thead><tbody>${rows}</tbody></table>
+      ${multi?`<p class="cap">${ar?'كل خط صغير يوضّح تغيّر المجال عبر التقييمات المتتالية؛ السهم = الأحدث مقابل الأول.':'Each mini-line shows the domain across successive assessments; arrow = latest vs first.'}</p>`:''}`;}
+  // wellbeing + descriptive trend
+  let controlBlock='';
+  if(S.control)controlBlock=`<div class="well"><b>${ar?'مؤشّر الشعور العام (تأمّل ذاتي)':'Wellbeing check-in (self-reflection)'}:</b> ${S.control.score}/100 <span class="cap">(${new Date(S.control.date).toLocaleDateString()})</span></div>`;
+  let trendTxt='';
+  const rct=symEps.filter(l=>daysAgo(l.t.slice(0,10))<=7).map(l=>l.sev);
+  const erl=symEps.filter(l=>daysAgo(l.t.slice(0,10))>7).map(l=>l.sev);
+  if(rct.length>=2&&erl.length>=2){const r=rct.reduce((a,b)=>a+b,0)/rct.length,e=erl.reduce((a,b)=>a+b,0)/erl.length;const diff=r-e;
+    const word=diff<-0.3?(ar?'أقل من':'lower than'):diff>0.3?(ar?'أعلى من':'higher than'):(ar?'مماثل لـ':'similar to');
+    trendTxt=ar?`متوسط شدّة الأعراض في آخر ٧ أيام (${r.toFixed(1)}/3) ${word} الفترة السابقة (${e.toFixed(1)}/3).`:`Average symptom severity in the last 7 days (${r.toFixed(1)}/3) is ${word} the earlier period (${e.toFixed(1)}/3).`;}
+  const chartCard=(title,svg)=>`<div class="ch"><h4>${title}</h4>${svg}</div>`;
   return `<!DOCTYPE html><html dir="${dir}"><head><meta charset="utf-8"><title>Rafeeq — Clinician Summary</title>
-  <style>body{font-family:${isAr()?"'Segoe UI',Tahoma":'Arial'},sans-serif;color:#1a2530;padding:38px;max-width:780px;margin:auto;line-height:1.5}
-  h1{color:#00897b;margin:0;font-size:24px}h3{color:#0a5;border-bottom:1px solid #e3eceb;padding-bottom:5px;margin-top:26px;font-size:15px}
-  .sub{color:#667;margin:4px 0 0;font-size:13px}.grid{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
-  .box{flex:1;min-width:110px;border:1px solid #dde7e6;border-radius:10px;padding:12px 14px}.box .v{font-size:22px;font-weight:800;color:#00897b}.box .l{font-size:11.5px;color:#667}
-  table{width:100%;border-collapse:collapse;margin:8px 0;font-size:13px}td,th{border-bottom:1px solid #eef;padding:7px 8px;text-align:${al}}th{color:#557;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
-  .pt{display:flex;flex-wrap:wrap;gap:6px 26px;background:#f6faf9;border-radius:10px;padding:14px 16px;margin:6px 0 4px;font-size:13.5px}
-  .note{background:#fff7ee;border:1px solid #ffe2bf;border-radius:10px;padding:13px 15px;font-size:12px;color:#7a5a2a;margin-top:24px}
-  .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #00897b;padding-bottom:14px}
-  @media print{.noprint{display:none}}</style></head><body>
-  <div class="hd"><div><h1 style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent)">${svgIcon('brand',22)}</span> Rafeeq</h1><div class="sub">${isAr()?'ملخّص للطبيب — وصفي فقط':'Clinician summary — descriptive only'}</div></div>
-    <div style="text-align:${isAr()?'left':'right'};font-size:12px;color:#667">${isAr()?'الفترة:':'Period:'} ${isAr()?'آخر':'last'} ${repRange} ${isAr()?'يوم':'days'}<br>${new Date().toLocaleDateString()}</div></div>
-  <div class="pt"><span><b>${T('fullName')}:</b> ${u.name||'—'}</span><span><b>${T('diseaseType')}:</b> ${dz}</span><span><b>${isAr()?'العمر':'Age'}:</b> ${age}</span>${ctry?`<span><b>${T('joinFrom')}:</b> ${u.countryFlag||''} ${ctry}</span>`:''}</div>
-  <div class="grid">
-    <div class="box"><div class="v">${daysLogged}/${repRange}</div><div class="l">${T('daysLogged')}</div></div>
-    <div class="box"><div class="v">${symEps.length}</div><div class="l">${isAr()?'نوبات أعراض':'Symptom episodes'}</div></div>
-    <div class="box"><div class="v">${avg(sevAll)}/3</div><div class="l">${T('avgSev')}</div></div>
-    <div class="box"><div class="v">${bmTotal}</div><div class="l">${T('bmFreq')}</div></div>
-    <div class="box"><div class="v">${avg(sleeps)}h</div><div class="l">${T('avgSleepH')}</div></div>
-    <div class="box"><div class="v">${avg(moods)}/5</div><div class="l">${T('avgMood')}</div></div>
-    <div class="box"><div class="v">${stepsArr.length?Math.round(stepsArr.reduce((a,b)=>a+b,0)/stepsArr.length).toLocaleString():'—'}</div><div class="l">${isAr()?'متوسط الخطوات':'Avg steps'}</div></div>
-    <div class="box"><div class="v">${wLatest?wLatest+'kg':'—'}</div><div class="l">${isAr()?'آخر وزن':'Latest weight'}</div></div>
+  <style>*{box-sizing:border-box}body{font-family:${ar?"'Segoe UI',Tahoma":'Arial'},sans-serif;color:${RPT.ink};padding:34px;max-width:800px;margin:auto;line-height:1.5}
+  h1{color:${RPT.teal};margin:0;font-size:23px}h3{color:${RPT.teal};margin:24px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.5px}
+  .sub{color:#667;margin:3px 0 0;font-size:12.5px}
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+  .box{border:1px solid #dde7e6;border-radius:11px;padding:11px 13px;background:#fbfdfc}.box .v{font-size:21px;font-weight:800;color:${RPT.teal};letter-spacing:-.5px}.box .l{font-size:11px;color:#667;margin-top:2px}
+  table{width:100%;border-collapse:collapse;margin:4px 0;font-size:13px}td,th{border-bottom:1px solid #eef1f4;padding:7px 8px;text-align:${al};vertical-align:middle}th{color:#667;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
+  table.lab td{padding:5px 8px} .u{color:#8794a0;font-size:11px}
+  .pt{display:flex;flex-wrap:wrap;gap:6px 24px;background:#f4faf8;border-radius:11px;padding:13px 16px;margin:14px 0 2px;font-size:13px}
+  .chgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  .ch{border:1px solid #e6edec;border-radius:12px;padding:10px 12px 6px;background:#fff}.ch h4{margin:0 0 4px;font-size:12px;color:#556;font-weight:700}
+  .row2{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .donut{text-align:center}.donut .dl{font-size:10.5px;color:#667;margin-top:2px}
+  .cap{color:#99a;font-size:11px;margin-top:4px}.mut{color:#99a}
+  .well{background:#f4faf8;border-radius:10px;padding:11px 14px;font-size:13px;margin-top:8px}
+  .note{background:#fff7ee;border:1px solid #ffe2bf;border-radius:10px;padding:12px 15px;font-size:11.5px;color:#7a5a2a;margin-top:22px}
+  .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid ${RPT.teal};padding-bottom:13px}
+  @media print{body{padding:18px}.ch,.box{break-inside:avoid}}</style></head><body>
+  <div class="hd"><div><h1 style="display:flex;align-items:center;gap:8px"><span style="color:${RPT.teal}">${svgIcon('brand',22)}</span> Rafeeq</h1><div class="sub">${ar?'ملخّص للطبيب — وصفي فقط':'Clinician summary — descriptive only'}</div></div>
+    <div style="text-align:${ar?'left':'right'};font-size:12px;color:#667"><b>${rangeStr}</b><br>${repRange} ${ar?'يوم':'days'} · ${totalMeas} ${ar?'قياس':'entries'}<br><span class="cap">${ar?'حُرّر':'generated'} ${new Date().toLocaleDateString()}</span></div></div>
+  <div class="pt"><span><b>${T('fullName')}:</b> ${u.name||'—'}</span><span><b>${T('diseaseType')}:</b> ${dz}</span><span><b>${ar?'العمر':'Age'}:</b> ${age}</span>${ctry?`<span><b>${T('joinFrom')}:</b> ${u.countryFlag||''} ${ctry}</span>`:''}</div>
+  <div class="grid">${kpis}</div>
+  <h3>${ar?'الاتجاهات خلال الفترة':'Trends over the period'}</h3>
+  <div class="chgrid">
+    ${chartCard(ar?'متوسط شدّة الأعراض (0–3)':'Avg symptom severity (0–3)',rptTrend(sevDay,RPT.sev,3,days,sd))}
+    ${chartCard(ar?'تكرار التبرّز اليومي':'Bowel movements / day',rptBarsDaily(bmDay,RPT.bowel,days,sd))}
+    ${chartCard(ar?'اتجاه المزاج (1–5)':'Mood trend (1–5)',rptTrend(moodDay,RPT.mood,5,days,sd))}
+    ${chartCard(ar?'اتجاه النوم (ساعات)':'Sleep trend (hours)',rptTrend(sleepDay,RPT.sleep,12,days,sd))}
   </div>
-  <h3>${T('symFreq')}</h3><table><thead><tr><th>${T('symType')}</th><th>${isAr()?'العدد':'Count'}</th></tr></thead><tbody>${symRows}</tbody></table>
-  <h3>${isAr()?'توزيع بريستول':'Bristol stool distribution'}</h3><table><thead><tr><th>${isAr()?'النوع':'Type'}</th><th>${isAr()?'العدد':'Count'}</th></tr></thead><tbody>${bRows}</tbody></table>
+  <p class="cap">${ar?'تُظهر الخطوط فجوات في الأيام غير المُسجّلة، والظل = النطاق المعتاد للمريض (متوسط ± انحراف معياري).':'Lines break on unlogged days; shaded band = the typical range (mean ± 1 SD).'}</p>
+  <h3>${ar?'تفصيل الأعراض':'Symptom breakdown'}</h3>${symChart}
+  <h3>${ar?'توزيع بريستول':'Bristol stool distribution'}</h3><table><thead><tr><th>${ar?'النوع':'Type'}</th><th>${ar?'العدد':'Count'}</th></tr></thead><tbody>${bRows}</tbody></table>
+  ${labsBlock}
+  ${medsBlock}
   ${discBlock}
-  <div class="note">⚠️ ${isAr()?'هذا التقرير وصفي فقط ويعرض ما سجّله المريض ذاتيًا. ليس أداة تشخيص أو دعم قرار سريري، ولا يحتوي أسماء أدوية أو جرعات.':'This report is descriptive only and reflects patient self-logged data. It is not a diagnostic or clinical-decision tool and contains no medication names or doses.'}</div>
-  <p style="text-align:center;color:#99a;font-size:11px;margin-top:26px">${isAr()?'تم الإنشاء بواسطة تطبيق رفيق التهاب الأمعاء — تطبيق مرافقة صحية غير طبي':'Generated by Rafeeq — a non-medical health companion app'}</p>
+  ${controlBlock}${trendTxt?`<div class="well" style="background:#fbfdfc"><b>${ar?'اتجاه الفترة (وصفي):':'Period trend (descriptive):'}</b> ${trendTxt}</div>`:''}
+  <div class="note">⚠️ ${ar?'هذا التقرير وصفي فقط ويعرض ما سجّله المريض ذاتيًا (الأعراض، التحاليل، الالتزام). ليس أداة تشخيص أو دعم قرار سريري. القيم مُدخلة ذاتيًا وقد تكون غير مكتملة.':'This report is descriptive only and reflects data the patient self-logged (symptoms, labs, adherence). It is not a diagnostic or clinical-decision tool. All values are self-entered and may be incomplete.'}</div>
+  <p style="text-align:center;color:#99a;font-size:11px;margin-top:20px">${ar?'تم الإنشاء بواسطة تطبيق رفيق — تطبيق مرافقة صحية غير طبي':'Generated by Rafeeq — a non-medical health companion app'}</p>
   </body></html>`;
 }
 window.exportPDF=function(){
@@ -2679,11 +2936,28 @@ function spark(vals,color){const w=120,h=32,n=vals.length;if(!n)return '';
   const max=Math.max(1,...vals);const pts=vals.map((v,i)=>`${(i/((n-1)||1)*w).toFixed(1)},${(h-(v/max)*(h-4)-2).toFixed(1)}`).join(' ');
   const area=`0,${h} ${pts} ${w},${h}`;
   return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none" style="display:block"><polygon points="${area}" fill="${color}" opacity="0.10"/><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;}
+/* line chart with x (date) + y (value) axis markers — used for labs */
+function sparkAxis(vals,dates,color){const n=vals.length;if(!n)return '';if(n<2)return spark(vals,color);
+  const W=300,H=88,L=36,R=8,Tp=8,B=20,iw=W-L-R,ih=H-Tp-B;
+  const grid=cssVar('--line')||'#e6edec',mut=cssVar('--muted')||'#8794a0';
+  const mn=Math.min(...vals),mx=Math.max(...vals);const pad=(mx-mn)*0.15||Math.max(1,mx*0.1)||1;const lo=mn-pad,hi=mx+pad;
+  const X=i=>L+iw*i/((n-1)||1);const Y=v=>Tp+ih*(1-(v-lo)/((hi-lo)||1));
+  const rnd=v=>Math.abs(v)>=10?Math.round(v):Math.round(v*10)/10;
+  const sdf=d=>{try{return new Date(d).toLocaleDateString(isAr()?'ar-SA':'en-GB',{day:'numeric',month:'short'});}catch(e){return '';}};
+  const gy=[hi,(hi+lo)/2,lo].map(v=>`<line x1="${L}" y1="${Y(v).toFixed(1)}" x2="${W-R}" y2="${Y(v).toFixed(1)}" stroke="${grid}" stroke-width="1"/><text x="${L-5}" y="${(Y(v)+3).toFixed(1)}" text-anchor="end" font-size="9" fill="${mut}">${rnd(v)}</text>`).join('');
+  const axis=`<line x1="${L}" y1="${Tp}" x2="${L}" y2="${Tp+ih}" stroke="${mut}" stroke-width="1"/><line x1="${L}" y1="${Tp+ih}" x2="${W-R}" y2="${Tp+ih}" stroke="${mut}" stroke-width="1"/>`;
+  let d='';vals.forEach((v,i)=>d+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ');
+  const dots=vals.map((v,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="2" fill="${color}"/>`).join('');
+  const xl=`<text x="${L}" y="${H-4}" font-size="9" fill="${mut}">${sdf(dates[0])}</text><text x="${W-R}" y="${H-4}" text-anchor="end" font-size="9" fill="${mut}">${sdf(dates[dates.length-1])}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block;margin-top:6px">${gy}${axis}<path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>${dots}${xl}</svg>`;}
 
 route('metrics',(n)=>{
   const sg=S.prefs.stepGoal||8000;
   const fmtN=x=>(x||0).toLocaleString();
   const lastW=lastLog('weight');
+  const hCm=parseFloat(S.user.heightCm)||0;
+  const bmiV=(hCm&&lastW)?(lastW.kg/Math.pow(hCm/100,2)):null;
+  const bmiCat=bmiV==null?'':(bmiV<18.5?(isAr()?'نقص وزن':'underweight'):bmiV<25?(isAr()?'طبيعي':'normal'):bmiV<30?(isAr()?'زيادة':'overweight'):(isAr()?'سمنة':'obese'));
   const M=[
     {icon:'pulse',label:t('symptoms'),color:'var(--bad)',today:logsOn(todayKey()).filter(l=>l.type==='symptom').length,
      latest:(()=>{const l=lastLog('symptom');return l?t(l.sym||'symptoms')+' · '+t(['mild','moderate','severe'][(l.sev||1)-1]):t('noneYet');})(),
@@ -2719,6 +2993,8 @@ route('metrics',(n)=>{
 
      ${S.disc?`<div class="card tap" onclick="go('disc',{replace:false})" style="background:linear-gradient(150deg,rgba(155,124,255,.14),rgba(25,160,255,.06));border-color:rgba(155,124,255,.3)"><div class="between"><div class="row" style="gap:11px"><div style="color:var(--purple)">${svgIcon('compass',24)}</div><div><b style="font-size:14px">${t('lastDiscShort')}</b><div class="muted" style="font-size:12px">${fmtDate(S.disc.date)}</div></div></div><b style="font-size:20px;color:var(--purple)">${Object.values(S.disc.answers).reduce((a,b)=>a+b,0)}/100</b></div></div>`:''}
 
+     ${bmiV?`<div class="card"><div class="between"><div class="row" style="gap:11px"><div style="width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;color:var(--accent)">${gicon('scale',21)}</div><div><b style="font-size:14.5px">${isAr()?'مؤشر كتلة الجسم':'BMI'}</b><div class="muted" style="font-size:12px">${bmiCat} · ${isAr()?'الطول':'ht'} ${hCm}cm</div></div></div><div style="text-align:end"><b style="font-size:18px;color:var(--accent)">${bmiV.toFixed(1)}</b><div class="faint" style="font-size:10.5px">kg/m²</div></div></div></div>`:`<div class="card tap" onclick="go('editProfile')" style="background:var(--bg2)"><div class="row" style="gap:10px"><span style="color:var(--accent)">${gicon('scale',20)}</span><div class="tx"><b style="font-size:13.5px">${isAr()?'أضِف طولك لحساب BMI':'Add your height to see BMI'}</b><small class="muted">${isAr()?'من تعديل الملف':'in Edit profile'}</small></div></div></div>`}
+
      ${M.map(m=>`<div class="card"><div class="between" style="margin-bottom:8px">
         <div class="row" style="gap:11px"><div style="width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;color:${m.color}">${gicon(m.icon,21)}</div>
           <div><b style="font-size:14.5px">${m.label}</b><div class="muted" style="font-size:12px">${m.latest}</div></div></div>
@@ -2729,6 +3005,452 @@ route('metrics',(n)=>{
      <button class="btn btn-primary" onclick="navTab('reports')">${svgIcon('chart',18)} ${isAr()?'فتح التقارير الكاملة':'Open full reports'}</button>
      <button class="btn btn-ghost" onclick="exportPDF()">${svgIcon('share',18)} ${t('shareReport')}</button>
      <div style="height:6px"></div>
+   </div>`;
+});
+
+/* ============================================================
+   SCREENS — Diet & Nutrition (educational, non-medical)
+   ============================================================ */
+function dietLX(o){return o?(isAr()?o.ar:o.en):'';}
+const FP={ // curated food photos (graceful fallback if any fail)
+ heroIbd:'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=640&q=70&auto=format',
+ heroFod:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=640&q=70&auto=format',
+ heroMed:'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=640&q=70&auto=format',
+ heroDash:'https://images.unsplash.com/photo-1547592180-85f173990554?w=640&q=70&auto=format',
+ heroFast:'https://images.unsplash.com/photo-1564671165093-20688ff1fffa?w=640&q=70&auto=format',
+ heroSaudi:'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=640&q=70&auto=format',
+ rice:'https://images.unsplash.com/photo-1516684732162-798a0062be99?w=300&q=70&auto=format',
+ kabsa:'https://images.unsplash.com/photo-1633945274405-b6c8069047b0?w=300&q=70&auto=format',
+ fish:'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=300&q=70&auto=format',
+ chicken:'https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=300&q=70&auto=format',
+ lamb:'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=300&q=70&auto=format',
+ eggs:'https://images.unsplash.com/photo-1518569656558-1f25e69d93d7?w=300&q=70&auto=format',
+ lentils:'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=300&q=70&auto=format',
+ hummus:'https://images.unsplash.com/photo-1577906096429-f73c2c312435?w=300&q=70&auto=format',
+ oliveoil:'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300&q=70&auto=format',
+ olives:'https://images.unsplash.com/photo-1611171711791-b34fa42e9bc8?w=300&q=70&auto=format',
+ laban:'https://images.unsplash.com/photo-1571212515416-fef01fc43637?w=300&q=70&auto=format',
+ cucumber:'https://images.unsplash.com/photo-1604977042946-1eecc30f269e?w=300&q=70&auto=format',
+ tomato:'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=300&q=70&auto=format',
+ carrot:'https://images.unsplash.com/photo-1598170845058-32b9d6a5da37?w=300&q=70&auto=format',
+ zucchini:'https://images.unsplash.com/photo-1596797038530-2c107229654b?w=300&q=70&auto=format',
+ potato:'https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=300&q=70&auto=format',
+ greens:'https://images.unsplash.com/photo-1576045057995-568f588f82fb?w=300&q=70&auto=format',
+ orange:'https://images.unsplash.com/photo-1547514701-42782101795e?w=300&q=70&auto=format',
+ strawberry:'https://images.unsplash.com/photo-1464965911861-746a04b4bca6?w=300&q=70&auto=format',
+ banana:'https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=300&q=70&auto=format',
+ nuts:'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=300&q=70&auto=format',
+ bread:'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&q=70&auto=format',
+ oats:'https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=300&q=70&auto=format',
+ salad:'https://images.unsplash.com/photo-1512852939750-1305098529bf?w=300&q=70&auto=format',
+ dates:'dates.jpg',
+ onion:'https://images.unsplash.com/photo-1518977956812-cd3dbadaaf31?w=300&q=70&auto=format',
+ honey:'https://images.unsplash.com/photo-1587049352846-4a222e784d38?w=300&q=70&auto=format',
+ milk:'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=300&q=70&auto=format',
+ fried:'https://images.unsplash.com/photo-1639024471283-03518883512d?w=300&q=70&auto=format',
+ sweets:'https://images.unsplash.com/photo-1581636625402-29b2a704ef13?w=300&q=70&auto=format',
+ pickles:'https://images.unsplash.com/photo-1589010588553-46e8e7c21788?w=300&q=70&auto=format',
+ jareesh:'https://images.unsplash.com/photo-1547592180-85f173990554?w=300&q=70&auto=format',
+ soup:'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=300&q=70&auto=format'
+};
+const DIET_CSS=`<style>
+.dh{position:relative;border-radius:16px;overflow:hidden;height:148px;display:flex;align-items:flex-end;margin-bottom:12px;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.dh img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.dh .ov{position:relative;width:100%;padding:13px 15px;background:linear-gradient(to top,rgba(8,15,22,.78),rgba(8,15,22,.05));color:#fff}
+.dh .ov h2{margin:0;font-size:19px;font-weight:800}.dh .ov p{margin:3px 0 0;font-size:12.5px;opacity:.92}
+.dcard{display:flex;gap:12px;align-items:center;padding:10px;border-radius:14px;background:var(--card);border:1px solid var(--line);margin-bottom:10px;cursor:pointer}
+.dcard .dt{width:62px;height:62px;border-radius:12px;overflow:hidden;flex:0 0 auto;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+.dcard .dt img{width:100%;height:100%;object-fit:cover}
+.dcard .dx{flex:1;min-width:0}.dcard .dx b{font-size:14.5px;display:block}.dcard .dx small{font-size:11.5px;color:var(--muted);display:block;margin-top:2px;line-height:1.4}
+.fgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin:6px 0 2px}
+.fcard .ft{aspect-ratio:1;border-radius:11px;overflow:hidden;background:linear-gradient(135deg,#cfe9e3,#bcd9f0)}
+.fcard .ft img{width:100%;height:100%;object-fit:cover}
+.fcard .fc{margin-top:4px}.fcard .fc b{font-size:11.5px;display:block;line-height:1.2}.fcard .fc small{font-size:10px;color:var(--muted);display:block;line-height:1.3}
+.dsec{font-size:13px;font-weight:800;color:var(--accent);margin:18px 0 6px;text-transform:uppercase;letter-spacing:.4px}
+.dmeal{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--line)}
+.dmeal .ml{flex:0 0 78px;font-size:11.5px;font-weight:700;color:var(--muted)}.dmeal .mv{flex:1;font-size:13px}
+.dtip{display:flex;gap:9px;align-items:flex-start;margin-bottom:8px;font-size:13px;line-height:1.5}
+.dtip .tk{color:var(--good);flex:0 0 auto;margin-top:1px}
+.sbadge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-inline-start:6px}
+</style>`;
+const DIET_DATA={
+ ibd:{hue:['#0f9b8e','#1ec8b0'],hero:FP.heroIbd,icon:'utensils',
+  title:{en:'Eating with IBD',ar:'التغذية مع التهاب الأمعاء'},
+  tag:{en:'The foundations — flares vs remission',ar:'الأساسيات — أثناء النوبة وفي الهدأة'},
+  what:{en:'There is no single “IBD diet.” The goals are simple: get enough energy and protein, stay well hydrated, avoid your own personal triggers, and eat as varied a diet as your gut can tolerate. What suits you changes between a flare and remission.',ar:'لا يوجد «حِمية واحدة» لالتهاب الأمعاء. الأهداف بسيطة: سعرات وبروتين كافٍ، ترطيب جيد، تجنّب محفزاتك الشخصية، وتنويع الطعام بقدر ما تتحمله أمعاؤك. وما يناسبك يختلف بين النوبة والهدأة.'},
+  ibd:{en:'During a flare many people feel better with smaller, more frequent meals, gentler low-insoluble-fibre foods, and plenty of fluids. In remission, gradually widen the diet toward a Mediterranean pattern. Use the app’s food log to spot your own triggers, and watch for weight loss or low iron, B12 and vitamin D.',ar:'أثناء النوبة يرتاح كثيرون لوجبات أصغر وأكثر تكرارًا، وأطعمة ألطف قليلة الألياف غير الذائبة، مع سوائل وفيرة. وفي الهدأة وسّع نظامك تدريجيًا نحو النمط المتوسطي. استخدم سجل الطعام في التطبيق لاكتشاف محفزاتك، وانتبه لفقدان الوزن أو نقص الحديد وب12 وفيتامين د.'},
+  enjoy:[{n:{en:'White rice',ar:'أرز أبيض'},img:FP.rice},{n:{en:'Skinless chicken',ar:'دجاج منزوع الجلد'},img:FP.chicken},{n:{en:'Grilled fish',ar:'سمك مشوي'},img:FP.fish},{n:{en:'Eggs',ar:'بيض'},img:FP.eggs},{n:{en:'Ripe banana',ar:'موز ناضج'},img:FP.banana},{n:{en:'Cooked carrot/zucchini',ar:'جزر/كوسا مطبوخة'},img:FP.carrot},{n:{en:'Peeled potato',ar:'بطاطس مقشّرة'},img:FP.potato},{n:{en:'Oats',ar:'شوفان'},img:FP.oats},{n:{en:'Olive oil',ar:'زيت زيتون'},img:FP.oliveoil}],
+  limit:[{n:{en:'Fried & very fatty food',ar:'المقلي والدسم جدًا'},img:FP.fried},{n:{en:'Whole nuts & seeds (flare)',ar:'مكسرات وبذور كاملة (بالنوبة)'},img:FP.nuts},{n:{en:'Very spicy dishes',ar:'الأطباق الحارة جدًا'},img:FP.kabsa},{n:{en:'Lots of dates/dried fruit',ar:'كثرة التمر/المجفف'},img:FP.dates},{n:{en:'Fizzy & sugary drinks',ar:'الغازية والسكرية'},img:FP.sweets},{n:{en:'Raw high-fibre skins',ar:'القشور النيئة عالية الألياف'},img:FP.salad}],
+  day:{b:{en:'Oats with peeled-apple compote + lactose-free laban',ar:'شوفان مع تفاح مقشّر مطبوخ + لبن خالٍ من اللاكتوز'},l:{en:'Kabsa with skinless chicken (light garlic/onion) + cooked carrots',ar:'كبسة بدجاج منزوع الجلد (ثوم/بصل خفيف) + جزر مطبوخ'},d:{en:'Grilled fish + white rice + steamed zucchini',ar:'سمك مشوي + أرز أبيض + كوسا على البخار'},s:{en:'Ripe banana + water',ar:'موز ناضج + ماء'}},
+  tips:[{en:'Eat slowly; smaller, more frequent meals are gentler.',ar:'تناول الطعام ببطء؛ الوجبات الأصغر الأكثر تكرارًا ألطف.'},{en:'Keep a food–symptom diary — log meals in the app to find patterns.',ar:'دوّن مذكرة طعام–أعراض — سجّل وجباتك في التطبيق لاكتشاف الأنماط.'},{en:'Stay hydrated; use oral rehydration salts during diarrhoea.',ar:'حافظ على الترطيب؛ استخدم محاليل الإماهة أثناء الإسهال.'},{en:'Ask your team about iron, B12 and vitamin D.',ar:'اسأل فريقك عن الحديد وب12 وفيتامين د.'}],
+  caution:{en:'Don’t restrict your diet long-term without a registered dietitian. Persistent weight loss, blood, or new severe pain → contact your IBD team.',ar:'لا تقيّد نظامك طويلًا دون اختصاصي تغذية. فقدان وزن مستمر أو دم أو ألم شديد جديد ← تواصل مع فريقك.'}},
+ fodmap:{hue:['#7C5CFF','#a98bff'],hero:FP.heroFod,icon:'leaf',
+  title:{en:'Low-FODMAP',ar:'منخفض الفودماب'},
+  tag:{en:'Calming bloating, gas & cramps',ar:'تهدئة الانتفاخ والغازات والمغص'},
+  what:{en:'FODMAPs are fermentable carbs (in onion, garlic, wheat, legumes, some fruits, lactose and sweeteners) that pull water and gas into the gut. A short low-FODMAP phase followed by structured reintroduction can ease IBS-type symptoms that many people with IBD still get even in remission. It was developed at Monash University.',ar:'الفودماب كربوهيدرات قابلة للتخمّر (في البصل والثوم والقمح والبقوليات وبعض الفواكه واللاكتوز والمحليات) تسحب الماء والغازات إلى الأمعاء. مرحلة قصيرة منخفضة الفودماب ثم إعادة إدخال منظّمة قد تخفّف أعراضًا شبيهة بالقولون العصبي تصيب كثيرين مع التهاب الأمعاء حتى في الهدأة. طُوّر في جامعة موناش.'},
+  ibd:{en:'This is a symptom-management tool — not a treatment for inflammation. It’s best done in remission for 2–6 weeks, then you reintroduce foods to find your personal triggers, ideally with a dietitian so you don’t over-restrict.',ar:'هذه أداة لإدارة الأعراض وليست علاجًا للالتهاب. يُفضّل تطبيقها في الهدأة لمدة ٢–٦ أسابيع، ثم تعيد إدخال الأطعمة لتحديد محفزاتك الشخصية، ويُستحسن بإشراف اختصاصي تغذية لتجنّب التقييد الزائد.'},
+  enjoy:[{n:{en:'Rice',ar:'أرز'},img:FP.rice},{n:{en:'Oats',ar:'شوفان'},img:FP.oats},{n:{en:'Meat / fish / eggs',ar:'لحم/سمك/بيض'},img:FP.fish},{n:{en:'Lactose-free laban',ar:'لبن خالٍ من اللاكتوز'},img:FP.laban},{n:{en:'Carrot & cucumber',ar:'جزر وخيار'},img:FP.cucumber},{n:{en:'Tomato & pepper',ar:'طماطم وفلفل'},img:FP.tomato},{n:{en:'Zucchini & potato',ar:'كوسا وبطاطس'},img:FP.zucchini},{n:{en:'Orange & strawberry',ar:'برتقال وفراولة'},img:FP.orange},{n:{en:'Garlic-infused oil',ar:'زيت منكّه بالثوم'},img:FP.oliveoil}],
+  limit:[{n:{en:'Onion & garlic',ar:'البصل والثوم'},img:FP.onion},{n:{en:'Wheat in big amounts',ar:'القمح بكميات كبيرة'},img:FP.bread},{n:{en:'Foul, hummus, lentils',ar:'الفول والحمص والعدس'},img:FP.hummus},{n:{en:'Milk & regular laban',ar:'الحليب واللبن العادي'},img:FP.milk},{n:{en:'Honey & apple',ar:'العسل والتفاح'},img:FP.honey},{n:{en:'Dried fruit & lots of dates',ar:'الفواكه المجففة وكثرة التمر'},img:FP.dates}],
+  day:{b:{en:'Oats + strawberries + lactose-free laban',ar:'شوفان + فراولة + لبن خالٍ من اللاكتوز'},l:{en:'Rice + chicken cooked in garlic-infused oil + carrot & cucumber salad',ar:'أرز + دجاج بزيت منكّه بالثوم + سلطة جزر وخيار'},d:{en:'Grilled fish + potato + zucchini',ar:'سمك مشوي + بطاطس + كوسا'},s:{en:'Orange + a few suitable nuts',ar:'برتقال + قليل من المكسرات المناسبة'}},
+  tips:[{en:'Cook with garlic-infused oil for flavour without the FODMAPs.',ar:'اطبخ بزيت منكّه بالثوم للنكهة دون الفودماب.'},{en:'Use the green tops of spring onions (low-FODMAP).',ar:'استخدم الجزء الأخضر من البصل الأخضر (منخفض الفودماب).'},{en:'It’s a learning diet — reintroduce foods, don’t stay restricted.',ar:'إنها حمية تعلّم — أعِد الإدخال ولا تبقَ مقيّدًا.'},{en:'The Monash FODMAP app lists lab-tested foods.',ar:'تطبيق موناش فودماب يسرد الأطعمة المختبَرة.'}],
+  caution:{en:'Not a long-term diet — over-restriction risks nutrient gaps and harms gut bacteria. Do the reintroduction phase with a dietitian.',ar:'ليست حمية دائمة — التقييد الزائد يهدّد بنقص المغذيات ويضرّ ببكتيريا الأمعاء. أجرِ مرحلة إعادة الإدخال مع اختصاصي تغذية.'}},
+ med:{hue:['#3a7d44','#6fb07a'],hero:FP.heroMed,icon:'heart',
+  title:{en:'Mediterranean',ar:'حمية البحر المتوسط'},
+  tag:{en:'Best long-term evidence in IBD',ar:'أقوى دليل طويل الأمد في التهاب الأمعاء'},
+  what:{en:'A pattern rich in vegetables, fruit, whole grains, legumes, nuts, olive oil and fish, with moderate poultry and dairy and little red or processed meat or sweets.',ar:'نمط غني بالخضار والفواكه والحبوب الكاملة والبقوليات والمكسرات وزيت الزيتون والسمك، مع اعتدال في الدواجن والألبان وقلّة في اللحوم الحمراء والمصنّعة والحلويات.'},
+  ibd:{en:'This is the most evidence-supported eating pattern for IBD. Trials and reviews link better adherence with lower inflammatory markers, improved quality of life and reasonable remission rates in both ulcerative colitis and Crohn’s — likely by nurturing a healthier gut microbiome. A great long-term goal once you’re out of a flare.',ar:'هو النمط الأكثر دعمًا بالأدلة في التهاب الأمعاء. تربط الدراسات الالتزام الأعلى بانخفاض علامات الالتهاب وتحسّن جودة الحياة ومعدلات هدأة جيدة في التقرّحي وكرون — غالبًا عبر تعزيز ميكروبيوم أمعاء أصح. هدف ممتاز طويل الأمد بعد انتهاء النوبة.'},
+  enjoy:[{n:{en:'Olive oil (main fat)',ar:'زيت الزيتون (الدهن الأساسي)'},img:FP.oliveoil},{n:{en:'Grilled fish (sayadiyah)',ar:'سمك مشوي (صيادية)'},img:FP.fish},{n:{en:'Vegetables & salads',ar:'خضار وسلطات'},img:FP.salad},{n:{en:'Legumes',ar:'بقوليات'},img:FP.lentils},{n:{en:'Whole-grain khubz & freekeh',ar:'خبز أسمر وفريكة'},img:FP.bread},{n:{en:'Fruit + moderate dates',ar:'فواكه + تمر باعتدال'},img:FP.dates},{n:{en:'Nuts & seeds',ar:'مكسرات وبذور'},img:FP.nuts},{n:{en:'Laban & labneh',ar:'لبن ولبنة'},img:FP.laban},{n:{en:'Olives',ar:'زيتون'},img:FP.olives}],
+  limit:[{n:{en:'Red & processed meat',ar:'اللحوم الحمراء والمصنّعة'},img:FP.lamb},{n:{en:'Fried foods',ar:'المقليات'},img:FP.fried},{n:{en:'Sweets & soft drinks',ar:'الحلويات والمشروبات الغازية'},img:FP.sweets},{n:{en:'Salty processed snacks',ar:'الوجبات المالحة المصنّعة'},img:FP.pickles},{n:{en:'Refined white bread',ar:'الخبز الأبيض المكرّر'},img:FP.bread}],
+  day:{b:{en:'Labneh with olive oil + whole-grain khubz + tomato & cucumber + a few dates',ar:'لبنة بزيت الزيتون + خبز أسمر + طماطم وخيار + بضع تمرات'},l:{en:'Grilled fish + freekeh + a big salad with olive oil & lemon',ar:'سمك مشوي + فريكة + سلطة كبيرة بزيت الزيتون والليمون'},d:{en:'Lentil soup + vegetables + whole-grain bread',ar:'شوربة عدس + خضار + خبز أسمر'},s:{en:'Fruit + a handful of almonds',ar:'فاكهة + حفنة لوز'}},
+  tips:[{en:'Make olive oil your main fat.',ar:'اجعل زيت الزيتون دهنك الأساسي.'},{en:'Aim for fish at least twice a week.',ar:'استهدف السمك مرتين أسبوعيًا على الأقل.'},{en:'Fill half your plate with vegetables.',ar:'املأ نصف طبقك بالخضار.'},{en:'Keep dates to a few; enjoy red meat only occasionally.',ar:'اجعل التمر قليلًا؛ وتناول اللحم الأحمر أحيانًا فقط.'}],
+  caution:{en:'During a flare you may need to cook vegetables well and ease back on raw salads and whole grains, then build up again.',ar:'أثناء النوبة قد تحتاج لطهي الخضار جيدًا وتقليل السلطات النيئة والحبوب الكاملة، ثم تزيدها تدريجيًا.'}},
+ dash:{hue:['#2C7BE5','#5fa3f0'],hero:FP.heroDash,icon:'pulse',
+  title:{en:'DASH',ar:'حمية داش'},
+  tag:{en:'Lower salt & blood pressure',ar:'تقليل الملح وضغط الدم'},
+  what:{en:'DASH (Dietary Approaches to Stop Hypertension) is high in vegetables, fruit, whole grains, low-fat dairy and nuts, and deliberately low in salt, red meat and sweets.',ar:'حمية داش (مقاربات غذائية لوقف ارتفاع الضغط) غنية بالخضار والفواكه والحبوب الكاملة والألبان قليلة الدسم والمكسرات، ومنخفضة عمدًا في الملح واللحوم الحمراء والحلويات.'},
+  ibd:{en:'It isn’t IBD-specific, but it helps if you also have high blood pressure or take steroids (which raise blood pressure and fluid). It overlaps heavily with the Mediterranean pattern; the main extra is cutting salt — very relevant in Saudi cooking (stock cubes, pickles, processed meats).',ar:'ليست خاصة بالتهاب الأمعاء، لكنها مفيدة إن كان لديك ارتفاع ضغط أو تتناول الكورتيزون (يرفع الضغط والسوائل). تتداخل كثيرًا مع النمط المتوسطي؛ والإضافة الأساسية هي تقليل الملح — وهو مهم في المطبخ السعودي (مكعبات المرق والمخللات واللحوم المصنّعة).'},
+  enjoy:[{n:{en:'Vegetables (4–5/day)',ar:'خضار (٤–٥ يوميًا)'},img:FP.greens},{n:{en:'Fruit (4–5/day)',ar:'فواكه (٤–٥ يوميًا)'},img:FP.orange},{n:{en:'Whole grains',ar:'حبوب كاملة'},img:FP.oats},{n:{en:'Low-fat laban/milk',ar:'لبن/حليب قليل الدسم'},img:FP.laban},{n:{en:'Fish & skinless poultry',ar:'سمك ودجاج منزوع الجلد'},img:FP.chicken},{n:{en:'Beans & lentils',ar:'فاصولياء وعدس'},img:FP.lentils},{n:{en:'Unsalted nuts',ar:'مكسرات غير مملّحة'},img:FP.nuts},{n:{en:'Herbs & spices',ar:'أعشاب وبهارات'},img:FP.salad}],
+  limit:[{n:{en:'Salt (<2,300 mg/day)',ar:'الملح (<٢٣٠٠ ملغ/يوم)'},img:FP.pickles},{n:{en:'Stock cubes & pickles',ar:'مكعبات المرق والمخللات'},img:FP.pickles},{n:{en:'Processed & red meat',ar:'اللحوم المصنّعة والحمراء'},img:FP.lamb},{n:{en:'Sweets & sugary drinks',ar:'الحلويات والمشروبات السكرية'},img:FP.sweets},{n:{en:'Fried & full-fat foods',ar:'المقلية وكاملة الدسم'},img:FP.fried}],
+  day:{b:{en:'Oats + banana + low-fat laban',ar:'شوفان + موز + لبن قليل الدسم'},l:{en:'Grilled chicken + rice (light salt) + vegetable salad',ar:'دجاج مشوي + أرز (ملح خفيف) + سلطة خضار'},d:{en:'Lentil stew + whole-grain bread + cooked greens',ar:'يخنة عدس + خبز أسمر + خضار ورقية مطبوخة'},s:{en:'Unsalted nuts + fruit',ar:'مكسرات غير مملّحة + فاكهة'}},
+  tips:[{en:'Season with lemon, garlic, herbs & spices instead of salt.',ar:'تبّل بالليمون والثوم والأعشاب والبهارات بدل الملح.'},{en:'Rinse canned beans to cut sodium.',ar:'اشطف البقوليات المعلّبة لتقليل الصوديوم.'},{en:'Choose fresh over pickled or processed.',ar:'اختر الطازج بدل المخلّل أو المصنّع.'},{en:'Read sodium on food labels.',ar:'اقرأ الصوديوم على ملصقات الأطعمة.'}],
+  caution:{en:'If you have a flare with diarrhoea you may actually need more salt and fluids — personalise this with your team.',ar:'إن كانت لديك نوبة مع إسهال فقد تحتاج فعليًا لمزيد من الملح والسوائل — خصّص ذلك مع فريقك.'}},
+ fasting:{hue:['#5b4bd6','#8c7bf0'],hero:FP.heroFast,icon:'moon',
+  title:{en:'Intermittent fasting & Ramadan',ar:'الصيام المتقطّع ورمضان'},
+  tag:{en:'When it’s reasonable — and when it isn’t',ar:'متى يكون مناسبًا ومتى لا'},
+  what:{en:'Eating within a limited window (such as Ramadan’s dawn-to-sunset fast). Some studies show fasting may lower certain inflammatory markers and benefit the gut microbiome.',ar:'تناول الطعام ضمن نافذة محدودة (مثل صيام رمضان من الفجر للمغرب). تشير بعض الدراسات إلى أن الصيام قد يخفض بعض علامات الالتهاب ويفيد ميكروبيوم الأمعاء.'},
+  ibd:{en:'The evidence is mixed and individual. Fasting is often reasonable when IBD is in remission or well controlled. But an active flare, recent surgery, strictures, a stoma with high output, malnutrition, dehydration risk, or certain medicines/steroids can make fasting unsafe — many such patients are advised not to fast or to get a plan first. Decide with your IBD team before Ramadan.',ar:'الأدلة متفاوتة وفردية. الصيام غالبًا مناسب حين يكون التهاب الأمعاء في هدأة أو مضبوطًا جيدًا. لكن نوبة نشطة أو جراحة حديثة أو تضيّقات أو فغرة عالية الإخراج أو سوء تغذية أو خطر جفاف أو بعض الأدوية/الكورتيزون قد تجعل الصيام غير آمن — ويُنصح كثير من هؤلاء بعدم الصيام أو وضع خطة أولًا. قرّر مع فريقك قبل رمضان.'},
+  enjoy:[{n:{en:'Break with water + 2–3 dates',ar:'الإفطار بماء + ٢–٣ تمرات'},img:FP.dates},{n:{en:'Lentil soup',ar:'شوربة عدس'},img:FP.soup},{n:{en:'Protein at iftar',ar:'بروتين في الإفطار'},img:FP.chicken},{n:{en:'Vegetables & salad',ar:'خضار وسلطة'},img:FP.salad},{n:{en:'Filling suhoor (oats, egg, yoghurt)',ar:'سحور مشبع (شوفان، بيض، لبن)'},img:FP.oats},{n:{en:'Plenty of water overnight',ar:'ماء وفير ليلًا'},img:FP.cucumber}],
+  limit:[{n:{en:'Greasy fried iftar spreads',ar:'موائد الإفطار المقلية الدسمة'},img:FP.fried},{n:{en:'Very sugary desserts',ar:'الحلويات شديدة السكر'},img:FP.sweets},{n:{en:'Too much caffeine',ar:'الإفراط في الكافيين'},img:FP.sweets},{n:{en:'Overeating after the fast',ar:'الإفراط في الأكل بعد الصيام'},img:FP.kabsa}],
+  day:{b:{en:'Iftar: water + 2–3 dates → lentil soup → grilled chicken + rice + salad',ar:'الإفطار: ماء + ٢–٣ تمرات ← شوربة عدس ← دجاج مشوي + أرز + سلطة'},l:{en:'Evening: fruit + laban; sip water often',ar:'المساء: فاكهة + لبن؛ اشرب الماء بانتظام'},d:{en:'Suhoor: oats + yoghurt + egg + plenty of water',ar:'السحور: شوفان + لبن + بيض + ماء وفير'},s:{en:'Aim for water between iftar and suhoor',ar:'احرص على الماء بين الإفطار والسحور'}},
+  tips:[{en:'Hydrate well across the night, not all at once.',ar:'رطّب جسمك على مدى الليل لا دفعة واحدة.'},{en:'Plan medication timing with your team — doses may shift to iftar/suhoor.',ar:'نظّم توقيت الدواء مع فريقك — قد تنتقل الجرعات للإفطار/السحور.'},{en:'Don’t “make up” a whole day’s food in one sitting.',ar:'لا تعوّض طعام اليوم كله في جلسة واحدة.'},{en:'If symptoms flare, break the fast and rehydrate.',ar:'إن اشتدّت الأعراض، أفطر وعوّض السوائل.'}],
+  caution:{en:'Do not fast during an active flare or if you’ve been advised against it. Sudden worsening, dehydration, fever or severe pain → break the fast and contact your team.',ar:'لا تصُم أثناء نوبة نشطة أو إن نُصحت بعدم الصيام. تدهور مفاجئ أو جفاف أو حمى أو ألم شديد ← أفطر وتواصل مع فريقك.'}}
+};
+const SAUDI_DISHES=[
+ {n:{en:'Kabsa',ar:'كبسة'},img:FP.kabsa,t:{en:'Low–moderate',ar:'منخفض–متوسط'},c:'var(--good)',note:{en:'Rice base is gentle. Ask for less garlic/onion & oil, choose skinless chicken, go easy on spicy versions.',ar:'قاعدة الأرز لطيفة. اطلب ثومًا/بصلًا وزيتًا أقل، واختر دجاجًا منزوع الجلد، وخفّف الحار.'}},
+ {n:{en:'Mandi',ar:'مندي'},img:FP.rice,t:{en:'Low–moderate',ar:'منخفض–متوسط'},c:'var(--good)',note:{en:'Rice + smoked meat; usually well tolerated. Trim fat and limit spicy sauces.',ar:'أرز + لحم مدخّن؛ غالبًا جيّد التحمّل. أزل الدهن وقلّل الصلصات الحارة.'}},
+ {n:{en:'Saleeg',ar:'سليق'},img:FP.rice,t:{en:'Lactose',ar:'لاكتوز'},c:'var(--warn)',note:{en:'Rice cooked in milk — comforting but contains lactose if you’re sensitive.',ar:'أرز مطبوخ بالحليب — مريح لكنه يحتوي لاكتوز إن كنت حساسًا.'}},
+ {n:{en:'Jareesh',ar:'جريش'},img:FP.jareesh,t:{en:'Moderate–high FODMAP',ar:'فودماب متوسط–عالٍ'},c:'var(--warn)',note:{en:'Crushed wheat — wholesome, but wheat (fructans) & onion; large portions may bloat.',ar:'قمح مجروش — مغذٍّ، لكنه قمح (فركتانات) وبصل؛ الكميات الكبيرة قد تنفخ.'}},
+ {n:{en:'Margoog / Matazeez',ar:'مرقوق / مطازيز'},img:FP.soup,t:{en:'Moderate',ar:'متوسط'},c:'var(--warn)',note:{en:'Vegetable & wheat-dough stew; nutritious. Wheat & onion may trigger; cook veg well.',ar:'يخنة خضار وعجين قمح؛ مغذية. القمح والبصل قد يحفّزان؛ اطبخ الخضار جيدًا.'}},
+ {n:{en:'Foul & hummus',ar:'فول وحمص'},img:FP.hummus,t:{en:'High FODMAP',ar:'فودماب عالٍ'},c:'var(--bad)',note:{en:'Legumes — great nutrition but gassy. Small, well-cooked portions.',ar:'بقوليات — تغذية ممتازة لكنها منفّخة. كميات صغيرة ومطبوخة جيدًا.'}},
+ {n:{en:'Fried samboosa',ar:'سمبوسة مقلية'},img:FP.fried,t:{en:'Limit',ar:'قلّل'},c:'var(--bad)',note:{en:'Fried pastry — limit, especially during flares.',ar:'معجّنات مقلية — قلّلها خاصة أثناء النوبات.'}},
+ {n:{en:'Dates',ar:'تمر'},img:FP.dates,t:{en:'A few, not a pile',ar:'قليل لا كثير'},c:'var(--warn)',note:{en:'Iconic & nutritious, but high in sugar and FODMAPs in quantity. A few is fine.',ar:'رمزي ومغذٍّ، لكنه عالي السكر والفودماب بالكميات. بضع تمرات مناسب.'}},
+ {n:{en:'Grilled fish (Sayadiyah)',ar:'سمك مشوي (صيادية)'},img:FP.fish,t:{en:'Enjoy',ar:'مناسب'},c:'var(--good)',note:{en:'Excellent Mediterranean choice — lean protein and healthy fats.',ar:'خيار متوسطي ممتاز — بروتين قليل الدهن ودهون صحية.'}},
+ {n:{en:'Laban & labneh',ar:'لبن ولبنة'},img:FP.laban,t:{en:'Varies',ar:'متفاوت'},c:'var(--warn)',note:{en:'Probiotic dairy; regular has lactose — try lactose-free or labneh (lower lactose).',ar:'ألبان بروبيوتيك؛ العادي يحتوي لاكتوز — جرّب الخالي من اللاكتوز أو اللبنة (أقل لاكتوز).'}},
+ {n:{en:'Pickles & processed meat',ar:'مخللات ولحوم مصنّعة'},img:FP.pickles,t:{en:'Limit (salt)',ar:'قلّل (ملح)'},c:'var(--bad)',note:{en:'Very salty — limit for blood pressure / DASH.',ar:'مالحة جدًا — قلّلها لضغط الدم/داش.'}},
+ {n:{en:'Tabbouleh / Fattoush',ar:'تبولة / فتوش'},img:FP.salad,t:{en:'Mostly enjoy',ar:'غالبًا مناسب'},c:'var(--good)',note:{en:'Veg-rich salads; fattoush has fried bread & onion — adjust if sensitive.',ar:'سلطات غنية بالخضار؛ الفتوش به خبز مقلي وبصل — عدّل إن كنت حساسًا.'}}
+];
+function dietFoodGrid(arr){return `<div class="fgrid">${arr.map(it=>`<div class="fcard"><div class="ft">${it.img?`<img src="${it.img}" alt="" loading="lazy" onerror="this.style.display='none'">`:''}</div><div class="fc"><b>${dietLX(it.n)}</b>${it.note?`<small>${dietLX(it.note)}</small>`:''}</div></div>`).join('')}</div>`;}
+const dietDisc={en:'Educational only — not medical or dietary advice. IBD nutrition is individual: needs differ between flares and remission, and no single diet cures IBD. Agree any major diet change with your IBD team or a registered dietitian.',ar:'لأغراض تعليمية فقط — ليست نصيحة طبية أو غذائية. تغذية التهاب الأمعاء فردية: تختلف الاحتياجات بين النوبة والهدأة، ولا توجد حمية واحدة تشفي المرض. ناقش أي تغيير غذائي كبير مع فريقك الطبي أو اختصاصي تغذية.'};
+route('diet',(n)=>{
+  const ar=isAr();const order=['ibd','fodmap','med','dash','fasting'];
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'الغذاء والتغذية':'Diet & Nutrition',rawSub:ar?'أنماط غذائية وأطعمة سعودية محلية':'eating patterns & local Saudi foods'})}${DIET_CSS}
+   <div class="content">
+     <div class="dh"><img src="${FP.heroSaudi}" alt="" onerror="this.style.display='none'"><div class="ov"><h2>${ar?'الأكل بثقة مع التهاب الأمعاء':'Eat with confidence'}</h2><p>${ar?'أنماط غذائية مبنية على الأدلة بأطعمة سعودية مألوفة':'evidence-informed patterns with familiar Saudi foods'}</p></div></div>
+     <div class="card" style="background:var(--bg2);border:1px solid var(--line)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">ℹ️ ${dietLX(dietDisc)}</p></div>
+     <div class="dsec">${ar?'اختر نمطًا':'Choose a pattern'}</div>
+     ${order.map(id=>{const d=DIET_DATA[id];return `<div class="dcard" onclick="go('dietDetail',{id:'${id}'})"><div class="dt" style="background:linear-gradient(135deg,${d.hue[0]},${d.hue[1]})"><img src="${d.hero}" alt="" loading="lazy" onerror="this.style.display='none'"></div><div class="dx"><b>${dietLX(d.title)}</b><small>${dietLX(d.tag)}</small></div><span class="chev">${ar?'‹':'›'}</span></div>`;}).join('')}
+     <div class="dsec">${ar?'دليل الأطعمة السعودية':'Saudi food guide'}</div>
+     <div class="card tap" onclick="go('dietSaudi')" style="display:flex;gap:12px;align-items:center"><div class="dt" style="width:62px;height:62px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#C96442,#e0a07a)"><img src="${FP.kabsa}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div><div class="dx" style="flex:1"><b style="font-size:14.5px">${ar?'أطباقنا المحلية والتهاب الأمعاء':'Our local dishes & IBD'}</b><small style="font-size:11.5px;color:var(--muted)">${ar?'كبسة، مندي، جريش، فول، تمر… ماذا تختار':'kabsa, mandi, jareesh, foul, dates… what to choose'}</small></div><span class="chev">${ar?'‹':'›'}</span></div>
+     <div class="dsec">${ar?'وصفات وقائمة تسوّق':'Recipes & grocery'}</div>
+     <div class="card tap" onclick="go('recipes')" style="display:flex;gap:12px;align-items:center"><div class="dt" style="width:62px;height:62px;border-radius:12px;overflow:hidden;background:linear-gradient(135deg,#0f9b8e,#1ec8b0)"><img src="${FP.fish}" alt="" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div><div class="dx" style="flex:1"><b style="font-size:14.5px">${ar?'وصفات لطيفة على الأمعاء':'Gut-friendly recipes'}</b><small style="font-size:11.5px;color:var(--muted)">${ar?'أطباق سعودية + قائمة تسوّق تلقائية':'Saudi dishes + auto grocery list'}</small></div><span class="chev">${ar?'‹':'›'}</span></div>
+     <button class="btn btn-ghost" style="margin-top:6px" onclick="go('labs')">${svgIcon('pulse',18)} ${ar?'تتبّع تحاليلك':'Track your labs'}</button>
+     <button class="btn btn-ghost" onclick="navTab('track')">${svgIcon('edit',18)} ${ar?'سجّل وجباتك لاكتشاف محفزاتك':'Log meals to find your triggers'}</button>
+     <div style="height:8px"></div>
+   </div>`;
+});
+route('dietDetail',(n)=>{
+  const ar=isAr();const id=(CURRENT_OPTS&&CURRENT_OPTS.id)||'ibd';const d=DIET_DATA[id]||DIET_DATA.ibd;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:dietLX(d.title),rawSub:dietLX(d.tag)})}${DIET_CSS}
+   <div class="content">
+     <div class="dh" style="background:linear-gradient(135deg,${d.hue[0]},${d.hue[1]})"><img src="${d.hero}" alt="" onerror="this.style.display='none'"><div class="ov"><h2>${dietLX(d.title)}</h2><p>${dietLX(d.tag)}</p></div></div>
+     <p style="font-size:14px;line-height:1.6;margin:4px 0">${dietLX(d.what)}</p>
+     <div class="dsec">${ar?'وعلاقته بالتهاب الأمعاء':'And IBD'}</div>
+     <div class="card" style="background:var(--bg2)"><p style="font-size:13.5px;line-height:1.6;margin:0">${dietLX(d.ibd)}</p></div>
+     <div class="dsec" style="color:var(--good)">${ar?'أطعمة مناسبة':'Foods to enjoy'}</div>${dietFoodGrid(d.enjoy)}
+     <div class="dsec" style="color:var(--warn)">${ar?'أطعمة تُقلَّل':'Foods to limit'}</div>${dietFoodGrid(d.limit)}
+     <div class="dsec">${ar?'يوم نموذجي (بنكهة سعودية)':'A sample day (Saudi-style)'}</div>
+     <div class="card"><div class="dmeal"><div class="ml">${ar?'الإفطار':'Breakfast'}</div><div class="mv">${dietLX(d.day.b)}</div></div><div class="dmeal"><div class="ml">${ar?'الغداء':'Lunch'}</div><div class="mv">${dietLX(d.day.l)}</div></div><div class="dmeal"><div class="ml">${ar?'العشاء':'Dinner'}</div><div class="mv">${dietLX(d.day.d)}</div></div><div class="dmeal" style="border:0"><div class="ml">${ar?'وجبة خفيفة':'Snack'}</div><div class="mv">${dietLX(d.day.s)}</div></div></div>
+     <div class="dsec">${ar?'نصائح عملية':'Practical tips'}</div>
+     <div class="card">${d.tips.map(tp=>`<div class="dtip"><span class="tk">${svgIcon('check',16)}</span><span>${dietLX(tp)}</span></div>`).join('')}</div>
+     <div class="card" style="background:#fff7ee;border:1px solid #ffe2bf"><p style="font-size:12.5px;color:#7a5a2a;margin:0;line-height:1.55">⚠️ ${dietLX(d.caution)}</p></div>
+     <button class="btn btn-ghost" style="margin-top:8px" onclick="navTab('track')">${svgIcon('edit',18)} ${ar?'سجّل وجبة الآن':'Log a meal now'}</button>
+     <div style="height:8px"></div>
+   </div>`;
+});
+route('dietSaudi',(n)=>{
+  const ar=isAr();
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'أطباقنا المحلية والتهاب الأمعاء':'Local dishes & IBD',rawSub:ar?'دليل سريع لما تختاره':'a quick what-to-choose guide'})}${DIET_CSS}
+   <div class="content">
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">ℹ️ ${ar?'تصنيفات عامة لإرشادك فقط — تحمّلك الشخصي هو الأهم. سجّل ما يناسبك في التطبيق.':'General guides only — your personal tolerance matters most. Log what suits you in the app.'}</p></div>
+     ${SAUDI_DISHES.map(s=>`<div class="card" style="display:flex;gap:12px;align-items:flex-start"><div class="dt" style="width:64px;height:64px;border-radius:12px;overflow:hidden;flex:0 0 auto;background:linear-gradient(135deg,#C96442,#e0a07a)"><img src="${s.img}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"></div><div style="flex:1;min-width:0"><div class="row" style="align-items:center;gap:4px;flex-wrap:wrap"><b style="font-size:14.5px">${dietLX(s.n)}</b><span class="sbadge" style="background:${s.c}22;color:${s.c}">${dietLX(s.t)}</span></div><small class="muted" style="font-size:12px;display:block;margin-top:3px;line-height:1.45">${dietLX(s.note)}</small></div></div>`).join('')}
+     <div class="card" style="background:#fff7ee;border:1px solid #ffe2bf"><p style="font-size:12px;color:#7a5a2a;margin:0;line-height:1.55">⚠️ ${dietLX(dietDisc)}</p></div>
+     <div style="height:8px"></div>
+   </div>`;
+});
+
+/* ============================================================
+   SCREENS — Supplements, Vaccines, Fatigue toolkit, Travel, Recipes
+   ============================================================ */
+/* ---- Supplement & deficiency tracker ---- */
+const SUPP_TYPES=[
+ {n:{en:'Iron',ar:'الحديد'},note:{en:'Often low in IBD from blood loss & poor absorption — pairs with ferritin.',ar:'كثيرًا ما ينخفض في التهاب الأمعاء بسبب فقد الدم وضعف الامتصاص — يرتبط بالفيريتين.'}},
+ {n:{en:'Vitamin B12',ar:'فيتامين ب12'},note:{en:'Low when the terminal ileum is inflamed or resected (common in Crohn’s).',ar:'ينخفض عند التهاب أو استئصال الدقاق (شائع في كرون).'}},
+ {n:{en:'Vitamin D',ar:'فيتامين د'},note:{en:'Very common deficiency; supports bone health and immunity.',ar:'نقص شائع جدًا؛ يدعم صحة العظام والمناعة.'}},
+ {n:{en:'Calcium',ar:'الكالسيوم'},note:{en:'Important for bones, especially if you take steroids.',ar:'مهم للعظام خاصة مع الكورتيزون.'}},
+ {n:{en:'Folic acid',ar:'حمض الفوليك'},note:{en:'Needed alongside methotrexate or sulfasalazine.',ar:'يلزم مع الميثوتركسيت أو السلفاسالازين.'}},
+ {n:{en:'Vitamin B-complex',ar:'مجموعة فيتامين ب'},note:{en:'General support if intake is limited.',ar:'دعم عام عند قلة التغذية.'}},
+ {n:{en:'Zinc',ar:'الزنك'},note:{en:'Can be lost with ongoing diarrhoea.',ar:'قد يُفقد مع الإسهال المستمر.'}},
+ {n:{en:'Magnesium',ar:'المغنيسيوم'},note:{en:'May drop with diarrhoea or poor intake.',ar:'قد ينخفض مع الإسهال أو قلة التغذية.'}},
+ {n:{en:'Omega-3',ar:'أوميغا-3'},note:{en:'Anti-inflammatory fat; food-first when possible.',ar:'دهون مضادة للالتهاب؛ يُفضّل من الغذاء.'}},
+ {n:{en:'Multivitamin',ar:'فيتامينات متعددة'},note:{en:'Broad cover during flares or restricted diets.',ar:'تغطية واسعة أثناء النوبات أو الحميات المقيّدة.'}}
+];
+function suppDatalist(){return `<datalist id="suppList">${SUPP_TYPES.map(s=>`<option value="${dietLX(s.n)}">`).join('')}</datalist>`;}
+function suppTakenToday(s){return (s.log||[]).includes(todayKey());}
+function suppAdh(s){if(s.freq==='weekly')return null;const days=lastNDays(30);const took=days.filter(d=>(s.log||[]).includes(d)).length;return Math.round(took/30*100);}
+route('supps',(n)=>{
+  const ar=isAr();const arr=S.supplements||[];
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'المكمّلات ونقص الفيتامينات':'Supplements & deficiencies',rawSub:ar?'تابع جرعاتك اليومية':'track your daily doses'})}
+   <div class="content">
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.55">ℹ️ ${ar?'نقص الحديد وب12 وفيتامين د والكالسيوم شائع في التهاب الأمعاء. هذه متابعة شخصية — لا تبدأ أو توقف مكمّلًا دون فريقك الطبي.':'Iron, B12, vitamin D and calcium deficiencies are common in IBD. This is personal tracking — don’t start or stop a supplement without your care team.'}</p></div>
+     <button class="btn btn-primary" onclick="openAddSupp()">${svgIcon('plus',18)} ${ar?'إضافة مكمّل':'Add a supplement'}</button>
+     ${arr.length?arr.map(s=>{const took=suppTakenToday(s);const adh=suppAdh(s);
+       return `<div class="card"><div class="between"><div class="row" style="gap:11px"><span class="ic" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon('leaf',20)}</span><div><b style="font-size:14.5px">${s.name}</b><div class="muted" style="font-size:12px">${[s.dose,s.freq===' weekly'?(ar?'أسبوعي':'weekly'):(ar?'يومي':'daily')].filter(Boolean).join(' · ')}</div></div></div><button class="btn-sm btn-ghost" onclick="delSupp('${s.id}')">${svgIcon('trash',15)}</button></div>
+       ${adh!=null?`<div class="between" style="margin-top:10px"><span class="muted" style="font-size:12px">${ar?'الالتزام (٣٠ يومًا)':'Adherence (30d)'}</span><b style="font-size:13px;color:${adh>=80?'var(--good)':adh>=50?'var(--warn)':'var(--bad)'}">${adh}%</b></div><div class="pbar" style="margin-top:6px"><i style="width:${adh}%"></i></div>`:''}
+       <button class="btn ${took?'btn-ghost':'btn-primary'}" style="margin-top:10px" onclick="suppTake('${s.id}')">${took?svgIcon('check',16)+' '+(ar?'تم اليوم':'Taken today'):(ar?'سجّل جرعة اليوم':'Mark today taken')}</button></div>`;}).join('')
+       :`<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('leaf',36)}</div><p class="muted" style="margin-top:8px">${ar?'لم تُضِف مكمّلات بعد':'No supplements added yet'}</p></div>`}
+     <div class="dsec" style="color:var(--accent)">${ar?'لماذا تهمّ في التهاب الأمعاء':'Why these matter in IBD'}</div>
+     <div class="card">${SUPP_TYPES.slice(0,5).map(s=>`<div class="dtip"><span class="tk" style="color:var(--accent)">${svgIcon('check',16)}</span><span><b>${dietLX(s.n)}:</b> ${dietLX(s.note)}</span></div>`).join('')}</div>
+     <button class="btn btn-ghost" onclick="go('labs')">${svgIcon('pulse',18)} ${ar?'تابع تحاليلك (الفيريتين، ب12، فيتامين د)':'Track related labs (ferritin, B12, vit D)'}</button>
+     <div style="height:8px"></div>
+   </div>`;
+});
+window.openAddSupp=function(){const ar=isAr();
+  openSheet(`<div class="row" style="gap:10px;margin-bottom:14px"><span style="color:var(--accent)">${svgIcon('leaf',24)}</span><h2 style="font-size:18px;margin:0;font-weight:800">${ar?'إضافة مكمّل':'Add a supplement'}</h2></div>
+   ${suppDatalist()}
+   <div class="field"><label>${ar?'المكمّل (اختر أو اكتب)':'Supplement (pick or type)'}</label><input class="input" id="spName" list="suppList" placeholder="${ar?'مثال: فيتامين د':'e.g. Vitamin D'}"></div>
+   <div class="field"><label>${ar?'الجرعة':'Dose'}</label><input class="input" id="spDose" placeholder="${ar?'مثال: ١٠٠٠ وحدة':'e.g. 1000 IU'}"></div>
+   <div class="field"><label>${ar?'التكرار':'Frequency'}</label><select class="input" id="spFreq"><option value="daily">${ar?'يومي':'Daily'}</option><option value="weekly">${ar?'أسبوعي':'Weekly'}</option></select></div>
+   <div class="field"><label>${ar?'وقت التذكير':'Reminder time'}</label><input class="input" type="time" id="spTime" value="09:00"></div>
+   <button class="btn btn-primary" onclick="saveSupp()">${ar?'حفظ':'Save'}</button>`);
+};
+window.saveSupp=function(){const name=($('#spName').value||'').trim();if(!name)return toast(isAr()?'اكتب اسم المكمّل':'Enter a name');
+  S.supplements=S.supplements||[];S.supplements.push({id:rid(),name,dose:($('#spDose').value||'').trim(),freq:$('#spFreq').value,time:$('#spTime').value||'09:00',remind:true,log:[]});
+  save();closeSheet();awardXp(3);toast(isAr()?'تمت الإضافة':'Added');render();};
+window.suppTake=function(id){const s=(S.supplements||[]).find(x=>x.id===id);if(!s)return;s.log=s.log||[];const k=todayKey();const i=s.log.indexOf(k);if(i>=0)s.log.splice(i,1);else{s.log.push(k);awardXp(2);}save();render();};
+window.delSupp=function(id){S.supplements=(S.supplements||[]).filter(x=>x.id!==id);save();render();};
+
+/* ---- Vaccination & health-maintenance checklist ---- */
+const VAX_REC=[
+ {id:'flu',n:{en:'Influenza (inactivated, annual)',ar:'الإنفلونزا (معطّل، سنوي)'},info:{en:'Get the inactivated shot every year — not the live nasal spray.',ar:'خذ الحقنة المعطّلة سنويًا — وليس البخاخ الأنفي الحي.'},annual:true},
+ {id:'covid',n:{en:'COVID-19',ar:'كوفيد-19'},info:{en:'Keep up to date as advised; inactivated/mRNA are not live.',ar:'حدّثها حسب التوصية؛ اللقاحات معطّلة/mRNA وليست حية.'},annual:true},
+ {id:'pcv',n:{en:'Pneumococcal (PCV + PPSV23)',ar:'المكوّرات الرئوية'},info:{en:'Recommended for people on immunosuppression.',ar:'موصى به لمن يتلقون مثبّطات المناعة.'}},
+ {id:'hepb',n:{en:'Hepatitis B (check serology)',ar:'التهاب الكبد ب (مع فحص المناعة)'},info:{en:'Check immunity and complete the series, ideally before biologics.',ar:'افحص المناعة وأكمل الجرعات، ويفضّل قبل العلاج الحيوي.'}},
+ {id:'zoster',n:{en:'Shingles — Shingrix (recombinant)',ar:'الحزام الناري — شينغريكس'},info:{en:'Recombinant (non-live) — recommended on immunosuppression, esp. JAK inhibitors.',ar:'لقاح مأشوب (غير حي) — موصى به مع تثبيط المناعة، خاصة مثبطات JAK.'}},
+ {id:'tdap',n:{en:'Tetanus/Diphtheria/Pertussis (Tdap)',ar:'الكزاز/الدفتيريا/السعال الديكي'},info:{en:'Booster every 10 years.',ar:'جرعة معزّزة كل ١٠ سنوات.'}},
+ {id:'hpv',n:{en:'HPV (if eligible by age)',ar:'فيروس الورم الحليمي (حسب العمر)'},info:{en:'Reduces cervical & other cancers; non-live.',ar:'يقلّل سرطان عنق الرحم وغيره؛ غير حي.'}}
+];
+const VAX_LIVE=[
+ {en:'MMR (measles, mumps, rubella)',ar:'الحصبة والنكاف والحصبة الألمانية'},
+ {en:'Varicella (chickenpox) & live zoster',ar:'الجدري المائي والحزام الحي'},
+ {en:'Yellow fever',ar:'الحمى الصفراء'},
+ {en:'Live nasal influenza',ar:'إنفلونزا الأنف الحية'},
+ {en:'Oral typhoid / oral polio / BCG',ar:'التيفوئيد الفموي / شلل الأطفال الفموي / BCG'}
+];
+const HEALTH_MAINT=[
+ {id:'tb',n:{en:'TB screening before biologics',ar:'فحص السل قبل العلاج الحيوي'},info:{en:'Required before starting most biologics.',ar:'مطلوب قبل بدء معظم العلاجات الحيوية.'}},
+ {id:'dexa',n:{en:'Bone density (DEXA)',ar:'كثافة العظام (DEXA)'},info:{en:'Especially if you’ve had steroids; protects against osteoporosis.',ar:'خاصة بعد الكورتيزون؛ للوقاية من هشاشة العظام.'}},
+ {id:'skin',n:{en:'Annual skin / dermatology check',ar:'فحص الجلد السنوي'},info:{en:'Higher skin-cancer risk on thiopurines & biologics — use sun protection.',ar:'خطر أعلى لسرطان الجلد مع الثيوبيورين والحيوي — استخدم الوقاية من الشمس.'}},
+ {id:'cervical',n:{en:'Cervical screening (if applicable)',ar:'مسح عنق الرحم (إن انطبق)'},info:{en:'Keep up to date on immunosuppression.',ar:'حافظ على تحديثه مع تثبيط المناعة.'}},
+ {id:'bploids',n:{en:'BP & lipids (if on JAK inhibitor)',ar:'الضغط والدهون (مع مثبطات JAK)'},info:{en:'Monitored with JAK-inhibitor therapy.',ar:'تُراقب مع علاج مثبطات JAK.'}},
+ {id:'eye',n:{en:'Eye check (if on steroids long-term)',ar:'فحص العين (مع الكورتيزون طويل الأمد)'},info:{en:'Screens for cataract/glaucoma risk.',ar:'للكشف عن خطر الماء الأبيض/الأزرق.'}}
+];
+window.vaxToggle=function(id){S.vaccines=S.vaccines||{};const cur=S.vaccines[id];
+  if(!cur||!cur.done)S.vaccines[id]={done:true,date:todayKey()};else S.vaccines[id]={done:false};save();render();};
+function vaxRow(item){const ar=isAr();const st=(S.vaccines||{})[item.id]||{};const done=st.done;
+  return `<div class="card" style="padding:12px"><div class="row" style="gap:11px;align-items:flex-start"><button onclick="vaxToggle('${item.id}')" aria-label="toggle" style="flex:none;width:26px;height:26px;border-radius:8px;border:2px solid ${done?'var(--good)':'var(--line)'};background:${done?'var(--good)':'transparent'};color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px">${done?svgIcon('check',15):''}</button>
+    <div style="flex:1;min-width:0"><b style="font-size:13.5px">${dietLX(item.n)}</b><div class="muted" style="font-size:11.5px;margin-top:2px;line-height:1.45">${dietLX(item.info)}</div>${done&&st.date?`<div class="faint" style="font-size:11px;margin-top:3px;color:var(--good)">${ar?'تم في':'done'} ${fmtDate(st.date)}${item.annual?' · '+(ar?'يُجدّد سنويًا':'renew yearly'):''}</div>`:item.annual?`<div class="faint" style="font-size:11px;margin-top:3px">${ar?'سنوي':'annual'}</div>`:''}</div></div></div>`;}
+route('vaccines',(n)=>{
+  const ar=isAr();const doneCount=Object.values(S.vaccines||{}).filter(v=>v&&v.done).length;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'اللقاحات والوقاية':'Vaccines & prevention',rawSub:ar?'قائمة مهمة لمرضى التهاب الأمعاء':'an important checklist for IBD'})}
+   <div class="content">
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.55">ℹ️ ${ar?'لأن كثيرًا من علاجات التهاب الأمعاء تُضعف المناعة، تكون اللقاحات والفحوص الوقائية أهم. هذه قائمة تعليمية — نسّق التوقيت مع فريقك.':'Because many IBD treatments lower immunity, vaccines and preventive checks matter more. This is an educational checklist — coordinate timing with your team.'}</p></div>
+     <div class="card glass"><div class="between"><b style="font-size:14px">${ar?'مكتمل':'Completed'}</b><b style="font-size:18px;color:var(--accent)">${doneCount}/${VAX_REC.length+HEALTH_MAINT.length}</b></div></div>
+     <div class="dsec" style="color:var(--good)">${ar?'لقاحات موصى بها (غير حية)':'Recommended vaccines (non-live)'}</div>
+     ${VAX_REC.map(vaxRow).join('')}
+     <div class="dsec" style="color:var(--bad)">${ar?'لقاحات حية — تُتجنّب أثناء تثبيط المناعة':'Live vaccines — avoid during immunosuppression'}</div>
+     <div class="card" style="border:1px solid color-mix(in srgb,var(--bad) 35%,transparent)"><p class="muted" style="font-size:12px;margin:0 0 8px;line-height:1.5">${ar?'تجنّب هذه أثناء العلاج المثبّط للمناعة، ويُفضّل أخذها قبل البدء بأسابيع إن لزمت:':'Avoid these while on immunosuppressive therapy; ideally given weeks before starting if needed:'}</p>${VAX_LIVE.map(v=>`<div class="dtip"><span class="tk" style="color:var(--bad)">✕</span><span>${dietLX(v)}</span></div>`).join('')}</div>
+     <div class="dsec">${ar?'فحوص وقائية دورية':'Routine health maintenance'}</div>
+     ${HEALTH_MAINT.map(vaxRow).join('')}
+     <div class="card" style="background:#fff7ee;border:1px solid #ffe2bf"><p style="font-size:11.5px;color:#7a5a2a;margin:0;line-height:1.55">⚠️ ${ar?'معلومات عامة فقط بحسب إرشادات مثل ECCO؛ تختلف التفاصيل حسب علاجك وعمرك. اعتمد توصيات فريقك.':'General information based on guidance such as ECCO; specifics vary with your therapy and age. Follow your team’s advice.'}</p></div>
+     <div style="height:8px"></div>
+   </div>`;
+});
+
+/* ---- Fatigue & stress toolkit ---- */
+const FATIGUE_TIPS=[
+ {en:'Pace yourself with the “4 P’s”: Plan, Prioritise, Pace, Position — spread tasks across the day.',ar:'وازِن طاقتك بقاعدة «خطّط، رتّب الأولويات، تمهّل، اضبط الوضعية» ووزّع المهام على اليوم.'},
+ {en:'Protect sleep: same bedtime, dark cool room, screens off an hour before.',ar:'احمِ نومك: وقت ثابت، غرفة مظلمة باردة، أوقف الشاشات قبل ساعة.'},
+ {en:'Fuel steadily: small regular meals, iron-rich foods, stay hydrated.',ar:'تغذَّ بثبات: وجبات صغيرة منتظمة، أطعمة غنية بالحديد، وترطيب جيد.'},
+ {en:'Move gently: short walks or light activity can lift energy on better days.',ar:'تحرّك بلطف: المشي القصير أو النشاط الخفيف يرفع الطاقة في الأيام الأفضل.'},
+ {en:'Tell your team: new or heavy fatigue can signal anaemia or active disease — worth checking.',ar:'أخبر فريقك: الإرهاق الجديد أو الشديد قد يدل على فقر دم أو نشاط للمرض — يستحق الفحص.'}
+];
+const CBT_CARDS=[
+ {t:{en:'Name the thought',ar:'سمِّ الفكرة'},d:{en:'Write the worry down exactly. Naming it makes it smaller and easier to question.',ar:'اكتب القلق كما هو. تسميته تصغّره وتسهّل مراجعته.'}},
+ {t:{en:'Check the evidence',ar:'افحص الأدلة'},d:{en:'What facts support this thought, and what facts argue against it? Aim for balanced, not positive.',ar:'ما الذي يؤيد هذه الفكرة وما الذي يعارضها؟ اهدف للتوازن لا للتفاؤل.'}},
+ {t:{en:'Worry window',ar:'نافذة القلق'},d:{en:'Set 10 minutes a day for worries. Outside it, park the thought for later.',ar:'خصّص ١٠ دقائق يوميًا للقلق. خارجها، أجّل الفكرة.'}},
+ {t:{en:'Do one small thing',ar:'افعل شيئًا صغيرًا'},d:{en:'Low mood shrinks activity. One tiny action (a short walk, a message) breaks the cycle.',ar:'المزاج المنخفض يقلّل النشاط. فعل صغير (مشية قصيرة، رسالة) يكسر الحلقة.'}},
+ {t:{en:'Ground with 5-4-3-2-1',ar:'التأريض ٥-٤-٣-٢-١'},d:{en:'Notice 5 things you see, 4 you feel, 3 you hear, 2 you smell, 1 you taste.',ar:'لاحظ ٥ تراها، ٤ تلمسها، ٣ تسمعها، ٢ تشمّها، ١ تتذوقها.'}}
+];
+route('fatiguekit',(n)=>{
+  const ar=isAr();
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'الإرهاق والتوتر':'Fatigue & stress',rawSub:ar?'أدوات لطيفة لطاقتك وراحتك':'gentle tools for energy & calm'})}${DIET_CSS}
+   <div class="content">
+     <div class="dh" style="background:linear-gradient(135deg,#5b4bd6,#8c7bf0)"><div class="ov" style="background:linear-gradient(to top,rgba(8,15,22,.55),transparent)"><h2>${ar?'خُذ نفسًا':'Take a breath'}</h2><p>${ar?'الإرهاق في التهاب الأمعاء حقيقي — هذه الأدوات تساعد':'IBD fatigue is real — these tools help'}</p></div></div>
+     <div class="dsec" style="color:var(--accent)">${ar?'تمارين التنفّس':'Breathing exercises'}</div>
+     <div class="grid2">
+       <button class="card tap" style="text-align:start;min-height:84px" onclick="startBreathing('box')"><div class="row" style="gap:10px"><span style="color:var(--accent)">${svgIcon('waves',22)}</span><div><b style="font-size:14px">${ar?'تنفّس الصندوق':'Box breathing'}</b><div class="muted" style="font-size:11.5px">4-4-4-4</div></div></div></button>
+       <button class="card tap" style="text-align:start;min-height:84px" onclick="startBreathing('478')"><div class="row" style="gap:10px"><span style="color:var(--accent)">${svgIcon('moon',22)}</span><div><b style="font-size:14px">${ar?'تنفّس 4-7-8':'4-7-8 breathing'}</b><div class="muted" style="font-size:11.5px">${ar?'للاسترخاء':'for calm'}</div></div></div></button>
+     </div>
+     <div class="dsec">${ar?'إدارة الإرهاق':'Managing fatigue'}</div>
+     <div class="card">${FATIGUE_TIPS.map(t=>`<div class="dtip"><span class="tk">${svgIcon('check',16)}</span><span>${dietLX(t)}</span></div>`).join('')}</div>
+     <div class="dsec">${ar?'أدوات للتوتر (بأسلوب العلاج المعرفي)':'Stress tools (CBT-style)'}</div>
+     ${CBT_CARDS.map(c=>`<div class="card" style="padding:13px"><b style="font-size:13.5px;color:var(--accent)">${dietLX(c.t)}</b><p class="muted" style="font-size:12.5px;margin:5px 0 0;line-height:1.55">${dietLX(c.d)}</p></div>`).join('')}
+     <div class="card" style="background:#fff7ee;border:1px solid #ffe2bf"><p style="font-size:11.5px;color:#7a5a2a;margin:0;line-height:1.55">⚠️ ${ar?'إن كان الإرهاق شديدًا أو المزاج منخفضًا باستمرار، تحدّث مع فريقك أو مختص نفسي. هذه أدوات دعم وليست علاجًا.':'If fatigue is severe or low mood persists, talk to your team or a mental-health professional. These are support tools, not treatment.'}</p></div>
+     <div style="height:8px"></div>
+   </div>`;
+});
+window.startBreathing=function(type){const ar=isAr();
+  const seq=type==='478'?[['in',4],['hold',7],['out',8]]:[['in',4],['hold',4],['out',4],['hold',4]];
+  const lab={in:{en:'Breathe in',ar:'شهيق'},hold:{en:'Hold',ar:'احبس'},out:{en:'Breathe out',ar:'زفير'}};
+  const ov=document.createElement('div');ov.id='breathOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(8,15,22,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center';
+  ov.innerHTML=`<div id="brCircle" style="width:170px;height:170px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#8c7bf0,#3a7bd5);transition:transform 4s ease-in-out;transform:scale(.55);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:19px"><span id="brPhase"></span></div><div id="brCount" style="color:#cfe3ff;font-size:15px;font-weight:600"></div><button class="btn btn-ghost" style="color:#fff;border:1px solid #4a5b78;max-width:180px" onclick="stopBreathing()">${ar?'إنهاء':'Finish'}</button>`;
+  document.body.appendChild(ov);let i=0;
+  function step(){const o=document.getElementById('brCircle');if(!o)return;const [ph,sec]=seq[i%seq.length];
+    document.getElementById('brPhase').textContent=ar?lab[ph].ar:lab[ph].en;
+    o.style.transitionDuration=sec+'s';if(ph==='in')o.style.transform='scale(1)';else if(ph==='out')o.style.transform='scale(.55)';
+    document.getElementById('brCount').textContent=sec+'s';i++;window.__brT=setTimeout(step,sec*1000);}
+  step();
+};
+window.stopBreathing=function(){clearTimeout(window.__brT);const o=document.getElementById('breathOv');if(o)o.remove();};
+
+/* ---- Travel mode + medication letter ---- */
+const TRAVEL_COLD=[
+ {en:'Keep biologics at 2–8 °C in an insulated cool bag with a gel pack — but never let them freeze.',ar:'احفظ العلاجات الحيوية عند ٢–٨ °م في حقيبة عازلة مع كمادة جل — دون أن تتجمّد.'},
+ {en:'Carry them in your hand luggage, never checked baggage (the hold can freeze or get lost).',ar:'احملها في حقيبة اليد لا المسجّلة (قد تتجمّد أو تُفقد).'},
+ {en:'Keep medicines in original labelled packaging with the leaflet.',ar:'أبقِ الأدوية في عبواتها الأصلية الموسومة مع النشرة.'},
+ {en:'Bring extra doses and supplies in case of delays, plus a sharps container for needles.',ar:'خذ جرعات ومستلزمات إضافية تحسّبًا للتأخير، وحاوية للإبر.'},
+ {en:'Let it reach room temperature before injecting; know the generic name in case you need a refill abroad.',ar:'اتركها تصل لحرارة الغرفة قبل الحقن؛ واعرف الاسم العلمي تحسّبًا لإعادة الصرف بالخارج.'}
+];
+const TRAVEL_CHECK=[
+ {en:'Carry a doctor’s letter listing your conditions, medicines and needles (use the letter below).',ar:'احمل خطابًا من الطبيب بأمراضك وأدويتك والإبر (استخدم الخطاب أدناه).'},
+ {en:'Update vaccinations before travel — and before starting immunosuppression if possible.',ar:'حدّث اللقاحات قبل السفر — وقبل بدء تثبيط المناعة إن أمكن.'},
+ {en:'Take more medication than the trip length, split between bags.',ar:'خذ دواءً أكثر من مدة الرحلة، ووزّعه بين الحقائب.'},
+ {en:'Travel insurance that covers your pre-existing IBD.',ar:'تأمين سفر يغطي التهاب الأمعاء المسبق.'},
+ {en:'Plan dose timing across time zones with your team.',ar:'خطّط توقيت الجرعات عبر المناطق الزمنية مع فريقك.'},
+ {en:'Find an IBD centre / pharmacy at your destination in advance.',ar:'حدّد مركز التهاب أمعاء/صيدلية في وجهتك مسبقًا.'},
+ {en:'Pack rehydration salts, spare clothing and wet wipes for urgency.',ar:'احزم محاليل الإماهة وملابس احتياطية ومناديل مبللة للطوارئ.'}
+];
+route('travel',(n)=>{
+  const ar=isAr();const meds=(S.meds||[]);
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'وضع السفر':'Travel mode',rawSub:ar?'السفر بثقة مع علاجك':'travel confidently with your treatment'})}${DIET_CSS}
+   <div class="content">
+     <div class="dh" style="background:linear-gradient(135deg,#0f9b8e,#2C7BE5)"><div class="ov" style="background:linear-gradient(to top,rgba(8,15,22,.5),transparent)"><h2>${ar?'سافر بأمان':'Travel ready'}</h2><p>${ar?'سلسلة التبريد، قائمة التحضير، وخطاب الدواء':'cold-chain, checklist & a medication letter'}</p></div></div>
+     <div class="dsec" style="color:var(--accent)">${ar?'العلاجات الحيوية وسلسلة التبريد':'Biologics & the cold chain'}</div>
+     <div class="card">${TRAVEL_COLD.map(t=>`<div class="dtip"><span class="tk" style="color:var(--accent2)">${svgIcon('droplet',16)}</span><span>${dietLX(t)}</span></div>`).join('')}</div>
+     <div class="dsec">${ar?'قائمة تحضير السفر':'Pre-travel checklist'}</div>
+     <div class="card">${TRAVEL_CHECK.map(t=>`<div class="dtip"><span class="tk">${svgIcon('check',16)}</span><span>${dietLX(t)}</span></div>`).join('')}</div>
+     <div class="dsec">${ar?'خطاب الدواء للمطار':'Airport medication letter'}</div>
+     <div class="card"><p class="muted" style="font-size:12.5px;margin:0 0 10px;line-height:1.55">${ar?`يُنشئ خطابًا قابلًا للطباعة بأدويتك (${meds.length}) لإبرازه في المطار. اطلب من طبيبك توقيعه.`:`Generates a printable letter listing your medications (${meds.length}) to show at the airport. Ask your doctor to sign it.`}</p>
+       <button class="btn btn-primary" onclick="travelLetter()">${svgIcon('share',18)} ${ar?'إنشاء خطاب الدواء':'Create medication letter'}</button>
+       ${meds.length?'':`<p class="faint" style="font-size:11.5px;margin:10px 0 0">${ar?'أضف أدويتك أولًا ليظهروا في الخطاب.':'Add your medications first so they appear in the letter.'}</p>`}
+       <button class="btn btn-ghost" style="margin-top:8px" onclick="go('meds')">${svgIcon('pill',16)} ${ar?'إدارة أدويتي':'Manage my medications'}</button></div>
+     <div class="card" style="background:#fff7ee;border:1px solid #ffe2bf"><p style="font-size:11.5px;color:#7a5a2a;margin:0;line-height:1.55">⚠️ ${ar?'الخطاب نموذج عام للمساعدة فقط، ولا يُغني عن خطاب موقّع من طبيبك أو متطلبات بلد الوجهة.':'The letter is a general template for convenience only — it does not replace a doctor-signed letter or your destination’s requirements.'}</p></div>
+     <div style="height:8px"></div>
+   </div>`;
+});
+window.travelLetter=function(){const ar=isAr();const u=S.user;const meds=(S.meds||[]);
+  const rows=meds.length?meds.map(m=>`<tr><td>${m.name||(m.kind==='biologic'?'Biologic':'Medication')}</td><td>${m.dose||'—'}</td><td>${m.kind==='biologic'?(ar?'حقن/تسريب':'injection/infusion')+' · '+(ar?'كل':'every')+' '+(m.interval||'—')+' '+(ar?'يوم':'d'):(ar?'فموي يومي':'oral daily')}</td><td>${m.since?fmtDate(m.since):'—'}</td></tr>`).join(''):`<tr><td colspan="4">—</td></tr>`;
+  const html=`<!DOCTYPE html><html dir="${ar?'rtl':'ltr'}"><head><meta charset="utf-8"><title>Medication Letter</title>
+   <style>body{font-family:${ar?"'Segoe UI',Tahoma":'Arial'},sans-serif;color:#16202b;max-width:720px;margin:auto;padding:40px;line-height:1.6}
+   h1{font-size:20px;color:#00897b;margin:0 0 4px}.muted{color:#667;font-size:13px}
+   table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}td,th{border:1px solid #dde7e6;padding:8px;text-align:${ar?'right':'left'}}th{background:#f4faf8;font-size:11px;text-transform:uppercase;color:#557}
+   .sign{margin-top:40px;display:flex;justify-content:space-between;font-size:13px}.line{border-top:1px solid #888;width:230px;padding-top:5px;color:#667}
+   .note{background:#f6faf9;border:1px solid #dce8e6;border-radius:8px;padding:12px;font-size:12px;color:#456;margin-top:18px}</style></head><body>
+   <h1>${ar?'خطاب أدوية للسفر':'Travel Medication Letter'}</h1>
+   <div class="muted">${ar?'إلى من يهمه الأمر / أمن المطار':'To whom it may concern / Airport security'} — ${new Date().toLocaleDateString()}</div>
+   <p>${ar?`يحمل المريض <b>${u.name||'__________'}</b> الأدوية التالية لعلاج مرض التهاب الأمعاء المزمن، وبعضها حقن تتطلب إبرًا وكمادات تبريد، ويلزم حملها في حقيبة اليد. يُرجى السماح بمرورها.`:`The patient <b>${u.name||'__________'}</b> carries the following medications for chronic inflammatory bowel disease. Some are injectables requiring needles and cool packs and must be carried in hand luggage. Kindly allow them through.`}</p>
+   <table><thead><tr><th>${ar?'الدواء':'Medication'}</th><th>${ar?'الجرعة':'Dose'}</th><th>${ar?'الطريقة':'Route'}</th><th>${ar?'منذ':'Since'}</th></tr></thead><tbody>${rows}</tbody></table>
+   <div class="note">${ar?'قد يحمل المريض أيضًا: إبرًا/أقلام حقن، كمادات تبريد، محاليل إماهة، ومستلزمات طبية شخصية.':'The patient may also carry: needles/injection pens, cool packs, rehydration salts, and personal medical supplies.'}</div>
+   <div class="sign"><div class="line">${ar?'اسم الطبيب والتوقيع والختم':'Doctor’s name, signature & stamp'}</div><div class="line">${ar?'تاريخ':'Date'}</div></div>
+   <p style="text-align:center;color:#99a;font-size:11px;margin-top:30px">${ar?'أُنشئ بواسطة تطبيق رفيق — يتطلب توقيع الطبيب لاعتماده':'Generated by Rafeeq — requires a doctor’s signature to be valid'}</p>
+   </body></html>`;
+  let w=null;try{w=window.open('','_blank');}catch(e){}
+  if(w&&w.document){w.document.write(html);w.document.close();setTimeout(()=>{try{w.focus();w.print();}catch(e){}},500);}
+  else{const blob=new Blob([html],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Rafeeq-Medication-Letter.html';document.body.appendChild(a);a.click();a.remove();}
+  toast(ar?'جارٍ تجهيز الخطاب…':'Preparing letter…');
+};
+
+/* ---- Recipes + auto grocery list ---- */
+const RECIPES=[
+ {id:'kabsa',title:{en:'Low-FODMAP chicken kabsa',ar:'كبسة دجاج منخفضة الفودماب'},diet:{en:'Low-FODMAP',ar:'منخفض الفودماب'},img:FP.kabsa,time:'45 min',
+  ing:[{en:'Basmati rice (1½ cups)',ar:'أرز بسمتي (كوب ونصف)'},{en:'Skinless chicken pieces',ar:'دجاج منزوع الجلد'},{en:'Garlic-infused olive oil (2 tbsp)',ar:'زيت زيتون منكّه بالثوم (م.ك)'},{en:'Carrot, diced',ar:'جزر مقطّع'},{en:'Tomato, chopped',ar:'طماطم مفرومة'},{en:'Green spring-onion tops',ar:'أطراف البصل الأخضر'},{en:'Kabsa spice mix (no onion/garlic powder)',ar:'بهارات كبسة (دون بودرة بصل/ثوم)'},{en:'Salt to taste',ar:'ملح حسب الرغبة'}],
+  steps:[{en:'Warm the garlic-infused oil; brown the chicken.',ar:'سخّن الزيت المنكّه؛ حمّر الدجاج.'},{en:'Add carrot, tomato, spices and water; simmer until chicken is tender.',ar:'أضف الجزر والطماطم والبهارات والماء؛ اطبخ حتى ينضج الدجاج.'},{en:'Lift out chicken, add rinsed rice to the broth and cook covered.',ar:'ارفع الدجاج، أضف الأرز المغسول للمرق واطبخه مغطّى.'},{en:'Return chicken, rest 5 min, top with spring-onion tops.',ar:'أعد الدجاج، اترك ٥ دقائق، وزيّن بأطراف البصل الأخضر.'}]},
+ {id:'hammour',title:{en:'Grilled hammour with rice',ar:'هامور مشوي مع أرز'},diet:{en:'Mediterranean',ar:'متوسطي'},img:FP.fish,time:'30 min',
+  ing:[{en:'Hammour (grouper) fillets',ar:'فيليه هامور'},{en:'Olive oil (2 tbsp)',ar:'زيت زيتون (م.ك)'},{en:'Lemon',ar:'ليمون'},{en:'Rice (1 cup)',ar:'أرز (كوب)'},{en:'Zucchini, sliced',ar:'كوسا شرائح'},{en:'Cumin & black pepper',ar:'كمون وفلفل أسود'}],
+  steps:[{en:'Marinate fish in olive oil, lemon, cumin and pepper for 15 min.',ar:'تبّل السمك بزيت الزيتون والليمون والكمون والفلفل ١٥ دقيقة.'},{en:'Grill 4–5 min each side until just cooked.',ar:'اشوِه ٤–٥ دقائق لكل جهة حتى ينضج.'},{en:'Steam the zucchini; serve with rice and a lemon wedge.',ar:'اطهُ الكوسا بالبخار؛ قدّم مع الأرز وشريحة ليمون.'}]},
+ {id:'lentil',title:{en:'Gentle lentil soup',ar:'شوربة عدس لطيفة'},diet:{en:'Mediterranean',ar:'متوسطي'},img:FP.soup,time:'30 min',
+  ing:[{en:'Red lentils (small portion, ¼ cup pp)',ar:'عدس أحمر (حصة صغيرة، ربع كوب للفرد)'},{en:'Carrot, diced',ar:'جزر مقطّع'},{en:'Garlic-infused olive oil',ar:'زيت زيتون منكّه بالثوم'},{en:'Cumin',ar:'كمون'},{en:'Lemon',ar:'ليمون'},{en:'Salt',ar:'ملح'}],
+  steps:[{en:'Sauté carrot in the oil; add lentils, cumin and water.',ar:'شوّح الجزر بالزيت؛ أضف العدس والكمون والماء.'},{en:'Simmer until soft, blend smooth.',ar:'اطبخ حتى ينضج، واخلطه ناعمًا.'},{en:'Finish with lemon; keep portions modest to stay low-FODMAP.',ar:'أضف الليمون؛ أبقِ الحصص معتدلة لتبقى منخفضة الفودماب.'}]},
+ {id:'labneh',title:{en:'Labneh & olive oil breakfast',ar:'فطور لبنة وزيت زيتون'},diet:{en:'Mediterranean',ar:'متوسطي'},img:FP.laban,time:'5 min',
+  ing:[{en:'Labneh (lower-lactose)',ar:'لبنة (أقل لاكتوز)'},{en:'Olive oil',ar:'زيت زيتون'},{en:'Cucumber & tomato',ar:'خيار وطماطم'},{en:'Whole-grain khubz',ar:'خبز أسمر'},{en:'A few olives',ar:'قليل من الزيتون'}],
+  steps:[{en:'Spread labneh, drizzle olive oil.',ar:'افرد اللبنة ورُشّ زيت الزيتون.'},{en:'Serve with cucumber, tomato, olives and whole-grain bread.',ar:'قدّم مع الخيار والطماطم والزيتون والخبز الأسمر.'}]},
+ {id:'oats',title:{en:'Oats with strawberries',ar:'شوفان بالفراولة'},diet:{en:'Low-FODMAP',ar:'منخفض الفودماب'},img:FP.oats,time:'10 min',
+  ing:[{en:'Rolled oats (½ cup)',ar:'شوفان (نصف كوب)'},{en:'Lactose-free milk',ar:'حليب خالٍ من اللاكتوز'},{en:'Strawberries',ar:'فراولة'},{en:'A few walnuts',ar:'قليل من الجوز'}],
+  steps:[{en:'Cook oats in the milk until creamy.',ar:'اطبخ الشوفان بالحليب حتى يصبح كريميًا.'},{en:'Top with strawberries and walnuts.',ar:'زيّن بالفراولة والجوز.'}]},
+ {id:'fattoush',title:{en:'Adjusted fattoush salad',ar:'سلطة فتوش معدّلة'},diet:{en:'Low-FODMAP',ar:'منخفض الفودماب'},img:FP.salad,time:'15 min',
+  ing:[{en:'Lettuce, cucumber, tomato, radish',ar:'خس، خيار، طماطم، فجل'},{en:'Green spring-onion tops',ar:'أطراف البصل الأخضر'},{en:'Olive oil & lemon',ar:'زيت زيتون وليمون'},{en:'Sumac',ar:'سمّاق'},{en:'Baked (not fried) bread pieces',ar:'خبز محمّص (غير مقلي)'}],
+  steps:[{en:'Chop vegetables; use spring-onion tops instead of onion.',ar:'قطّع الخضار؛ استخدم أطراف البصل الأخضر بدل البصل.'},{en:'Dress with olive oil, lemon and sumac; add baked bread last.',ar:'تبّل بالزيت والليمون والسمّاق؛ أضف الخبز المحمّص أخيرًا.'}]}
+];
+window.recipeAddGrocery=function(id){const r=RECIPES.find(x=>x.id===id);if(!r)return;S.grocery=S.grocery||[];
+  let added=0;r.ing.forEach(it=>{const label=dietLX(it);if(!S.grocery.some(g=>g.item===label)){S.grocery.push({item:label,got:false});added++;}});
+  save();toast(isAr()?`أُضيف ${added} عنصرًا للقائمة`:`Added ${added} items to your list`);render();};
+window.groceryToggle=function(i){if(S.grocery[i]){S.grocery[i].got=!S.grocery[i].got;save();render();}};
+window.groceryDel=function(i){S.grocery.splice(i,1);save();render();};
+window.groceryClear=function(){S.grocery=[];save();render();};
+window.groceryAddCustom=function(){const v=($('#gcAdd').value||'').trim();if(!v)return;S.grocery=S.grocery||[];S.grocery.push({item:v,got:false});$('#gcAdd').value='';save();render();};
+route('recipes',(n)=>{
+  const ar=isAr();
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'وصفات وقائمة تسوّق':'Recipes & grocery',rawSub:ar?'أطباق سعودية لطيفة على الأمعاء':'gut-friendly Saudi-style dishes'})}${DIET_CSS}
+   <div class="content">
+     <button class="btn btn-ghost" onclick="go('grocery')">${svgIcon('list',18)} ${ar?'قائمة التسوّق':'My grocery list'} ${(S.grocery&&S.grocery.length)?`(${S.grocery.length})`:''}</button>
+     ${RECIPES.map(r=>`<div class="dcard" onclick="go('recipeDetail',{id:'${r.id}'})"><div class="dt"><img src="${r.img}" alt="" loading="lazy" onerror="this.style.display='none'"></div><div class="dx"><b>${dietLX(r.title)}</b><small>${dietLX(r.diet)} · ${r.time}</small></div><span class="chev">${ar?'‹':'›'}</span></div>`).join('')}
+     <div style="height:8px"></div>
+   </div>`;
+});
+route('recipeDetail',(n)=>{
+  const ar=isAr();const id=(CURRENT_OPTS&&CURRENT_OPTS.id)||'kabsa';const r=RECIPES.find(x=>x.id===id)||RECIPES[0];
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:dietLX(r.title),rawSub:dietLX(r.diet)+' · '+r.time})}${DIET_CSS}
+   <div class="content">
+     <div class="dh" style="background:linear-gradient(135deg,#0f9b8e,#1ec8b0)"><img src="${r.img}" alt="" onerror="this.style.display='none'"><div class="ov"><h2>${dietLX(r.title)}</h2><p>${dietLX(r.diet)} · ${r.time}</p></div></div>
+     <button class="btn btn-primary" onclick="recipeAddGrocery('${r.id}')">${svgIcon('plus',18)} ${ar?'أضِف المكوّنات لقائمة التسوّق':'Add ingredients to grocery list'}</button>
+     <div class="dsec">${ar?'المكوّنات':'Ingredients'}</div>
+     <div class="card">${r.ing.map(it=>`<div class="dtip"><span class="tk" style="color:var(--accent)">•</span><span>${dietLX(it)}</span></div>`).join('')}</div>
+     <div class="dsec">${ar?'الطريقة':'Method'}</div>
+     <div class="card">${r.steps.map((st,i)=>`<div class="dmeal" ${i===r.steps.length-1?'style="border:0"':''}><div class="ml">${i+1}</div><div class="mv">${dietLX(st)}</div></div>`).join('')}</div>
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.5">${ar?'عدّل الحصص حسب تحمّلك، وخاصة أثناء النوبات.':'Adjust portions to your tolerance, especially during flares.'}</p></div>
+     <div style="height:8px"></div>
+   </div>`;
+});
+route('grocery',(n)=>{
+  const ar=isAr();const g=S.grocery||[];
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'قائمة التسوّق':'Grocery list',rawSub:ar?'من وصفاتك':'from your recipes'})}
+   <div class="content">
+     <div class="card"><div class="row" style="gap:8px"><input class="input" id="gcAdd" placeholder="${ar?'أضِف عنصرًا…':'Add an item…'}" style="flex:1"><button class="btn btn-primary btn-sm" onclick="groceryAddCustom()">${svgIcon('plus',16)}</button></div></div>
+     ${g.length?`<div class="card">${g.map((it,i)=>`<div class="row" style="gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><button onclick="groceryToggle(${i})" style="flex:none;width:24px;height:24px;border-radius:7px;border:2px solid ${it.got?'var(--good)':'var(--line)'};background:${it.got?'var(--good)':'transparent'};color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer">${it.got?svgIcon('check',14):''}</button><span style="flex:1;font-size:13.5px;${it.got?'text-decoration:line-through;color:var(--muted)':''}">${it.item}</span><button class="btn-sm btn-ghost" onclick="groceryDel(${i})">${svgIcon('trash',14)}</button></div>`).join('')}</div>
+       <button class="btn btn-ghost" onclick="groceryClear()">${svgIcon('trash',16)} ${ar?'إفراغ القائمة':'Clear list'}</button>`
+       :`<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('list',36)}</div><p class="muted" style="margin-top:8px">${ar?'القائمة فارغة — أضِف من الوصفات':'List is empty — add from recipes'}</p><button class="btn btn-ghost" style="margin-top:10px" onclick="go('recipes')">${ar?'تصفّح الوصفات':'Browse recipes'}</button></div>`}
+     <div style="height:8px"></div>
    </div>`;
 });
 
@@ -2923,6 +3645,11 @@ route('more',(n)=>{
      <div class="card">
        ${mLi('pill',isAr()?'الأدوية والعلاجات':'Medications & treatments','',"go('meds')")}
        ${mLi('pulse',isAr()?'نتائج التحاليل':'Lab results','',"go('labs')")}
+       ${mLi('utensils',isAr()?'الغذاء والتغذية':'Diet & Nutrition',isAr()?'فودماب · متوسطي · داش · صيام':'FODMAP · Med · DASH · fasting',"go('diet')")}
+       ${mLi('leaf',isAr()?'المكمّلات ونقص الفيتامينات':'Supplements & deficiencies',isAr()?'حديد · ب12 · فيتامين د':'iron · B12 · vit D',"go('supps')")}
+       ${mLi('syringe',isAr()?'اللقاحات والوقاية':'Vaccines & prevention',isAr()?'قائمة مهمة':'key checklist',"go('vaccines')")}
+       ${mLi('heart',isAr()?'الإرهاق والتوتر':'Fatigue & stress',isAr()?'تنفّس وأدوات هدوء':'breathing & calm tools',"go('fatiguekit')")}
+       ${mLi('globe',isAr()?'وضع السفر':'Travel mode',isAr()?'العلاج الحيوي · خطاب المطار':'biologics · airport letter',"go('travel')")}
        ${mLi('compass',isAr()?'تأمّل سريع':'Quick check-in',S.control?(S.control.score+'/100'):'',"window.__ctrlStart()")}
        ${mLi('moon',isAr()?'دليلك المحلي':'Your local guide',isAr()?'رمضان · الحج · الأطعمة':'Ramadan · Hajj · food',"go('localize')")}
        ${mLi('edit',isAr()?'تدوين صوتي':'Voice note','',"go('voicelog')")}
@@ -2986,6 +3713,7 @@ route('editProfile',(n)=>{
        <div class="field"><label>${t('yearBirth')}</label><input class="input" id="epYear" value="${u.year||''}"></div>
        <div class="field"><label>${t('gender')}</label><select class="input" id="epGender"><option value="">—</option><option value="male" ${u.gender==='male'?'selected':''}>${t('male')}</option><option value="female" ${u.gender==='female'?'selected':''}>${t('female')}</option><option value="na" ${u.gender==='na'?'selected':''}>${t('preferNot')}</option></select></div>
      </div>
+     <div class="field"><label>${t('heightCm')}</label><input class="input" id="epHeight" inputmode="decimal" value="${u.heightCm||''}" placeholder="170"></div>
      <div class="field"><label>${t('diseaseType')}</label><div class="chips" id="epDisease">${dz.map(([v,k])=>`<button class="chip ${u.disease===v?'on':''}" data-v="${v}" onclick="pickChip('epDisease',this)">${t(k)}</button>`).join('')}</div></div>
      <div class="field"><label>${t('joinFrom')}</label>
        <button class="input" style="display:flex;align-items:center;justify-content:space-between;text-align:start" onclick="stashEditGoCountry()">
@@ -2999,12 +3727,12 @@ window.stashEditGoCountry=function(){const u=S.user;const g=id=>($('#'+id)||{}).
   if(g('epName'))u.name=g('epName').trim();u.year=(g('epYear')||'').trim();u.gender=g('epGender')||u.gender;
   if($('#epDisease')&&$('#epDisease').dataset.val)u.disease=$('#epDisease').dataset.val;
   if($('#epAvatar')&&$('#epAvatar').dataset.val)u.avatar=$('#epAvatar').dataset.val;
-  if(g('epEmail'))u.email=g('epEmail').trim();save();go('country');};
+  if(g('epEmail'))u.email=g('epEmail').trim();if(g('epHeight')!=null)u.heightCm=(g('epHeight')||'').trim();save();go('country');};
 window.saveProfile=()=>{const u=S.user;
   u.name=$('#epName').value.trim()||u.name;u.year=$('#epYear').value.trim();u.gender=$('#epGender').value;
   if($('#epDisease').dataset.val)u.disease=$('#epDisease').dataset.val;
   if($('#epAvatar').dataset.val)u.avatar=$('#epAvatar').dataset.val;
-  u.email=$('#epEmail').value.trim()||u.email;save();toast(t('saved'));goBack();};
+  u.email=$('#epEmail').value.trim()||u.email;if($('#epHeight'))u.heightCm=$('#epHeight').value.trim();save();toast(t('saved'));goBack();};
 
 route('notifs',(n)=>{
   const p=S.prefs;
