@@ -5,6 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#0B0F14">
 <title>IBD Connect · رفيق التهاب الأمعاء</title>
+<!-- PWA: installable web app -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IBD Connect">
+<meta name="application-name" content="IBD Connect">
+<script>
+function __notifyUpdate(){ window.__updateReady = true; if (typeof window.showUpdate === 'function') window.showUpdate(); }
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('sw.js').then(function (reg) {
+      // If a worker is already waiting, an update is ready.
+      if (reg.waiting && navigator.serviceWorker.controller) __notifyUpdate();
+      reg.addEventListener('updatefound', function () {
+        var nw = reg.installing;
+        if (!nw) return;
+        nw.addEventListener('statechange', function () {
+          if (nw.state === 'installed' && navigator.serviceWorker.controller) __notifyUpdate();
+        });
+      });
+    }).catch(function(){});
+    // periodic update check
+    setInterval(function(){ navigator.serviceWorker.getRegistration().then(function(r){ r && r.update(); }); }, 60 * 60 * 1000);
+  });
+}
+window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__deferredInstall = e; });
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -330,18 +360,136 @@ body{font-feature-settings:"cv11","ss01";letter-spacing:-0.01em}
 
 /* ---- range input themed ---- */
 input[type=range]{accent-color:var(--accent)}
+
+/* ---- update bar ---- */
+.updatebar{position:absolute;left:14px;right:14px;bottom:calc(90px + env(safe-area-inset-bottom));z-index:60;
+  background:var(--card2);border:1px solid var(--accent);border-radius:14px;padding:12px 14px;
+  display:flex;align-items:center;gap:10px;box-shadow:var(--sh);animation:up .3s ease}
+.updatebar.hidden{display:none}
+.updatebar .ux{flex:1;font-size:13.5px;font-weight:600;color:var(--txt)}
+.updatebar .ubtn{background:var(--accent);color:#04221d;border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px}
+[data-mode=light] .updatebar .ubtn{color:#fff}
+
+/* ============================================================
+   DESKTOP WEBSITE SHELL (≥1024px). On phones, #site/.lhero/.ldevice
+   use display:contents so #app behaves exactly as the full-screen app.
+   ============================================================ */
+@media (max-width:1023px){
+  .lnav,.lhero-copy,.lsection,.lfoot{display:none!important}
+  #site,.lhero,.lhero-device,.ldevice{display:contents}
+}
+@media (min-width:1024px){
+  html,body{height:auto;min-height:100%}
+  body{display:block;background:
+    radial-gradient(60% 50% at 85% -5%, color-mix(in srgb,var(--accent) 22%, transparent) 0%, transparent 60%),
+    radial-gradient(50% 40% at 0% 100%, color-mix(in srgb,var(--accent2) 16%, transparent) 0%, transparent 60%),
+    var(--bg)}
+  #site{display:block;color:var(--txt);min-height:100vh}
+  .lnav{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:24px;
+    padding:16px 40px;backdrop-filter:blur(12px);background:color-mix(in srgb,var(--bg) 78%, transparent);
+    border-bottom:1px solid var(--line)}
+  .lbrand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;color:var(--txt);text-decoration:none;letter-spacing:-.4px}
+  .lbrand-mark{width:34px;height:34px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;
+    background:linear-gradient(140deg,var(--accent),var(--accent2));font-size:18px}
+  .llinks{display:flex;gap:26px;margin-inline-start:auto}
+  .llinks a{color:var(--muted);text-decoration:none;font-size:14.5px;font-weight:600}
+  .llinks a:hover{color:var(--txt)}
+  .lcta{background:linear-gradient(135deg,var(--accent),#00b89b);color:#04221d;text-decoration:none;
+    padding:10px 18px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:0 6px 18px -6px color-mix(in srgb,var(--accent) 70%,transparent)}
+  [data-mode=light] .lcta{color:#fff}
+  .lhero{display:grid;grid-template-columns:1fr 430px;gap:56px;align-items:center;
+    max-width:1180px;margin:0 auto;padding:72px 40px 56px}
+  .lpill{display:inline-block;padding:7px 14px;border-radius:30px;font-size:12.5px;font-weight:700;letter-spacing:.2px;
+    background:color-mix(in srgb,var(--accent) 14%, transparent);color:var(--accent);
+    border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);margin-bottom:22px}
+  .lhero-copy h1{font-size:54px;line-height:1.04;letter-spacing:-1.8px;font-weight:800;margin:0}
+  .lhero-ar{font-size:21px;color:var(--muted);margin:10px 0 0;font-weight:600}
+  .lhero-sub{font-size:17px;line-height:1.6;color:var(--muted);max-width:520px;margin:20px 0 28px}
+  .lhero-actions{display:flex;gap:14px;flex-wrap:wrap}
+  .lbtn{padding:14px 24px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;border:none;transition:.15s}
+  .lbtn:active{transform:translateY(1px)}
+  .lbtn-primary{background:linear-gradient(135deg,var(--accent),#00b89b);color:#04221d;box-shadow:0 10px 26px -8px color-mix(in srgb,var(--accent) 70%,transparent)}
+  [data-mode=light] .lbtn-primary{color:#fff}
+  .lbtn-ghost{background:var(--card);border:1px solid var(--line);color:var(--txt)}
+  .ltrust{margin-top:24px;font-size:13px;color:var(--faint)}
+  /* device frame holding the live app */
+  .lhero-device{display:flex;justify-content:center}
+  .ldevice{position:relative;width:390px;height:812px;max-height:84vh;border:13px solid #0b0d11;
+    border-radius:52px;overflow:hidden;background:#000;
+    box-shadow:0 40px 90px -30px rgba(0,0,0,.65), 0 0 0 1px rgba(255,255,255,.04) inset}
+  #app{position:relative;width:100%;height:100%;max-width:none;margin:0;border:none;border-radius:39px;box-shadow:none}
+  /* sections */
+  .lsection{max-width:1180px;margin:0 auto;padding:40px}
+  .ltitle{font-size:30px;letter-spacing:-.8px;font-weight:800;text-align:center;margin:0 0 32px}
+  .lgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+  .lcard{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;
+    box-shadow:0 1px 2px rgba(0,0,0,.18),0 16px 36px -22px rgba(0,0,0,.55)}
+  [data-mode=light] .lcard{box-shadow:0 1px 2px rgba(16,26,36,.05),0 14px 30px -18px rgba(16,26,36,.18)}
+  .lcard .lc-ic{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 18%,var(--card2)),var(--card2));
+    color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 16%,transparent);margin-bottom:14px}
+  .lcard .lc-ic svg{width:24px;height:24px}
+  .lcard h3{font-size:16.5px;font-weight:700;margin:0 0 6px;letter-spacing:-.3px}
+  .lcard p{font-size:13.5px;line-height:1.55;color:var(--muted);margin:0}
+  .lfoot{border-top:1px solid var(--line);margin-top:24px}
+  .lfoot-in{max-width:1180px;margin:0 auto;padding:36px 40px 60px;color:var(--muted)}
+  .lfoot-in p{font-size:13px;line-height:1.6;max-width:760px}
+  .lfoot-sub{color:var(--faint);font-size:12px;margin-top:14px}
+  @media (max-width:1180px){ .lhero{grid-template-columns:1fr 380px;gap:32px} .lgrid{grid-template-columns:repeat(2,1fr)} }
+}
 </style>
 </head>
 <body>
-<div id="app">
-  <!-- Screens injected/here -->
-  <div id="screens"></div>
-  <!-- Bottom tab bar -->
-  <nav class="tabbar hidden" id="tabbar"></nav>
-  <!-- Sheet -->
-  <div class="sheet-bg" id="sheetbg"><div class="sheet" id="sheet"></div></div>
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
+<!-- Desktop website shell (hidden on phones; app goes full-screen there) -->
+<div id="site">
+  <header class="lnav">
+    <a class="lbrand" href="#top"><span class="lbrand-mark">🌿</span><span>IBD&nbsp;Connect</span></a>
+    <nav class="llinks">
+      <a href="#features">Features</a>
+      <a href="#learn">IBD Guide</a>
+      <a href="#about">About</a>
+    </nav>
+    <a class="lcta" href="#app-anchor">Open the app</a>
+  </header>
+
+  <section class="lhero" id="top">
+    <div class="lhero-copy">
+      <span class="lpill">Saudi Gastroenterology Association · IBD Guide</span>
+      <h1>Your IBD journey,<br>connected.</h1>
+      <p class="lhero-ar">رحلتك مع التهاب الأمعاء، متّصلة</p>
+      <p class="lhero-sub">A bilingual, non-medical companion to track daily symptoms, understand your patterns over time, and stay connected to your care — with education reviewed by clinical experts.</p>
+      <div class="lhero-actions">
+        <a class="lbtn lbtn-primary" href="#app-anchor">Try it now</a>
+        <button class="lbtn lbtn-ghost" onclick="installApp&&installApp()">Add to home screen</button>
+      </div>
+      <div class="ltrust">Non-medical companion · Private on your device · English &amp; العربية</div>
+    </div>
+    <div class="lhero-device" id="app-anchor">
+      <div class="ldevice">
+        <div id="app">
+          <!-- Screens injected here -->
+          <div id="screens"></div>
+          <nav class="tabbar hidden" id="tabbar"></nav>
+          <div class="sheet-bg" id="sheetbg"><div class="sheet" id="sheet"></div></div>
+          <div class="toast" id="toast"></div>
+          <div class="updatebar hidden" id="updatebar"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lsection" id="features">
+    <h2 class="ltitle">Everything for living well with IBD</h2>
+    <div class="lgrid" id="lfeatures"></div>
+  </section>
+
+  <footer class="lfoot" id="about">
+    <div class="lfoot-in">
+      <div><span class="lbrand-mark">🌿</span> <b>IBD Connect</b></div>
+      <p>IBD Connect is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider.</p>
+      <p class="lfoot-sub">Educational content from the Saudi Gastroenterology Association — IBDguide.net. © <span id="lyear"></span> IBD Connect.</p>
+    </div>
+  </footer>
 </div>
 <script>
 /* ============================================================
@@ -791,6 +939,14 @@ const I18N = {
   waterGoalLbl:{en:"Daily glasses goal",ar:"هدف الأكواب اليومي"},
   glass:{en:"glass",ar:"كوب"},
   hydrationTip:{en:"Sip steadily through the day. Oral rehydration solutions help replace salts during frequent diarrhea — ask your care team.",ar:"ارتشف بثبات طوال اليوم. محاليل الإماهة الفموية تساعد على تعويض الأملاح أثناء الإسهال المتكرّر — اسأل فريق رعايتك."},
+  // PWA install
+  installApp:{en:"Install app on this device",ar:"ثبّت التطبيق على هذا الجهاز"},
+  installSub:{en:"Add to your home screen — works offline",ar:"أضِفه إلى شاشتك الرئيسية — يعمل دون إنترنت"},
+  installIosT:{en:"Add to Home Screen",ar:"إضافة إلى الشاشة الرئيسية"},
+  installIos:{en:"In Safari: tap the Share button, then choose “Add to Home Screen”. IBD Connect will open full-screen like a native app.",ar:"في Safari: اضغط زر المشاركة ثم اختر «إضافة إلى الشاشة الرئيسية». سيُفتح التطبيق بملء الشاشة كتطبيق أصلي."},
+  installAndroid:{en:"In Chrome: open the ⋮ menu and choose “Install app” / “Add to Home screen”.",ar:"في Chrome: افتح قائمة ⋮ واختر «تثبيت التطبيق» / «الإضافة إلى الشاشة الرئيسية»."},
+  updateAvailable:{en:"A new version is available",ar:"يتوفّر إصدار جديد"},
+  refresh:{en:"Refresh",ar:"تحديث"},
 };
 
 const DISC = [
@@ -2154,6 +2310,8 @@ route('more',(n)=>{
        ${mLi('👟',t('tSteps'),todaySteps().toLocaleString(),"go('steps')")}
      </div>
 
+     ${window.isStandalone&&window.isStandalone()?'':`<div class="card tap welcome" onclick="installApp()"><div class="row"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center">${svgIcon('download',22)}</span><div style="flex:1"><b style="font-size:14.5px">${t('installApp')}</b><div class="muted" style="font-size:12.5px">${t('installSub')}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></div>`}
+
      <div class="section-title">${t('settings')}</div>
      <div class="card">
        ${mLi('🎨',t('appearance'),isAr()?(THEMES.find(x=>x.id===S.prefs.theme)||{}).ar:(THEMES.find(x=>x.id===S.prefs.theme)||{}).en,"go('theme')")}
@@ -2485,6 +2643,13 @@ function todayActiveMin(){return logsOn(todayKey()).filter(l=>l.type==='activemi
 function todayWater(){return logsOn(todayKey()).filter(l=>l.type==='water').reduce((s,l)=>s+(l.glasses||0),0);}
 window.addGlass=function(){const cur=logsOn(todayKey()).find(l=>l.type==='water');if(cur){cur.glasses=(cur.glasses||0)+1;cur.t=new Date().toISOString();awardXp(2);checkBadges();save();}else{addLog({type:'water',glasses:1});}toast('💧 +1 '+t('glass'));if(MAIN_TABS.includes(CURRENT))render();};
 window.dismissWelcome=function(){S.prefs.seenWelcome=true;save();render();};
+window.isStandalone=function(){return window.matchMedia&&window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;};
+window.installApp=function(){
+  const e=window.__deferredInstall;
+  if(e){e.prompt();e.userChoice&&e.userChoice.then(()=>{window.__deferredInstall=null;});return;}
+  const isIos=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  openSheet(`${sheetHead(svgIcon('download',24),'installApp')}<p style="font-size:14.5px;line-height:1.7;color:var(--txt)">${isIos?t('installIos'):t('installAndroid')}</p><div class="card" style="background:var(--bg2);margin-top:8px"><p class="muted" style="font-size:12px;margin:0">${isIos?t('installAndroid'):t('installIos')}</p></div>`);
+};
 route('steps',(n)=>{
   const goal=S.prefs.stepGoal||8000;const cur=todaySteps();const pct=Math.min(cur/goal,1);
   const week=lastNDays(7).map(d=>S.logs.filter(l=>l.type==='steps'&&l.t.slice(0,10)===d).reduce((s,l)=>s+(l.steps||0),0));
@@ -2579,8 +2744,29 @@ window.dismissNudge=function(id){S.nudgeDismiss=S.nudgeDismiss||{};S.nudgeDismis
    INIT
    ============================================================ */
 function ensureSga(){let changed=false;SGA_ARTICLES.forEach(a=>{if(!S.learn.find(x=>x.id===a.id)){S.learn.push(JSON.parse(JSON.stringify(a)));changed=true;}});if(changed)save();}
+
+/* ---- PWA update prompt ---- */
+window.showUpdate=function(){const b=$('#updatebar');if(!b)return;
+  b.innerHTML=`<span class="ux">${t('updateAvailable')}</span><button class="ubtn" onclick="location.reload()">${t('refresh')}</button><button class="nclose" onclick="this.parentElement.classList.add('hidden')" aria-label="${t('cancel')}">✕</button>`;
+  b.classList.remove('hidden');};
+
+/* ---- desktop website: features + year ---- */
+function renderSite(){
+  const yr=document.getElementById('lyear');if(yr)yr.textContent=new Date().getFullYear();
+  const host=document.getElementById('lfeatures');if(!host)return;
+  const feats=[
+    ['pulse','Track everything','Symptoms, bowel movements (Bristol), meals, sleep, mood, activity, hydration, steps and weight — logged in seconds.'],
+    ['chart','See your patterns','Clean weekly & monthly reports, an activity heatmap and a consistency score — descriptive, never prescriptive.'],
+    ['book','Learn from experts','A bilingual IBD library featuring the Saudi Gastroenterology Association IBD Guide, authored by clinicians.'],
+    ['share','Stay connected','Share a clean summary with your doctor between visits — and keep everything private on your device.'],
+  ];
+  host.innerHTML=feats.map(([ic,h,p])=>`<div class="lcard"><div class="lc-ic">${svgIcon(ic,24)}</div><h3>${h}</h3><p>${p}</p></div>`).join('');
+}
+
 ensureSga();
 applyDir();
+renderSite();
+if(window.__updateReady)showUpdate();
 go('splash',{replace:true});
 
 </script>
