@@ -1059,8 +1059,10 @@ function blank(){return{
   lang:null, onboarded:false, authed:false,
   user:{name:'',email:'',year:'',gender:'',disease:'',diagYear:'',avatar:'🙂',country:'',countryFlag:''},
   prefs:{remindDaily:true,remindMed:false,remindContent:true,analytics:false,medTime:'20:00',theme:'whoop',
-    stepGoal:8000,activeMinGoal:30,waterGoal:8,nudges:true,nudgeDaily:true,nudgeStreak:true,nudgeHydra:true,seenWelcome:false},
+    stepGoal:8000,activeMinGoal:30,waterGoal:8,nudges:true,nudgeDaily:true,nudgeStreak:true,nudgeHydra:true,seenWelcome:false,
+    bigText:false},
   logs:[], disc:null, reminders:[],
+  meds:[], labs:[], control:null, registry:{optedIn:false, lastSync:null},
   badges:[], learn:JSON.parse(JSON.stringify(DEFAULT_LEARN)), tips:JSON.parse(JSON.stringify(DEFAULT_TIPS)),
   seenDays:[], nudgeDismiss:{},
   game:{xp:0, quests:{}, goalDays:[], lastLevel:1}
@@ -1126,6 +1128,7 @@ const TYPE_META={
   weight:{icon:svgIcon('scale'),key:'tWeight',color:'--accent2'},
   activemin:{icon:svgIcon('pulse'),key:'tActiveMin',color:'--warn'},
   water:{icon:svgIcon('droplet'),key:'hydrationT',color:'--accent2'},
+  note:{icon:svgIcon('edit'),key:'noteT',color:'--accent'},
 };
 function logLabel(l){
   const m=TYPE_META[l.type]||{icon:'•',key:'history'};let extra='';
@@ -1139,6 +1142,7 @@ function logLabel(l){
   else if(l.type==='weight')extra=(l.kg||0)+' '+t('weightKg').replace(/\s*\(.*\)/,'');
   else if(l.type==='activemin')extra=(l.mins||0)+' '+t('tActiveMin').toLowerCase();
   else if(l.type==='water')extra=(l.glasses||0)+' '+t('glass');
+  else if(l.type==='note')extra=(l.notes||'').slice(0,60);
   return {icon:m.icon,title:t(m.key),sub:extra};
 }
 function addLog(o){o.id=rid();o.t=o.t||new Date().toISOString();S.logs.push(o);awardXp(10);checkBadges();checkQuests();save();}
@@ -1932,17 +1936,341 @@ function drawDiscRadar(){
 }
 
 /* ---------- Medication reminders ---------- */
+/* ---- Medication & biologic scheduler (optional names, stored on-device only) ---- */
+function medNextDue(m){ if(m.kind!=='biologic'||!m.start||!m.interval)return null;
+  const start=new Date(m.start+'T00:00:00');let d=new Date(start);const now=new Date();now.setHours(0,0,0,0);
+  while(d<now)d.setDate(d.getDate()+m.interval);
+  return d; }
+function medAdherence(m){ // % of last 30 expected oral doses marked taken
+  if(m.kind==='biologic')return null;
+  const taken=new Set(m.log||[]);let exp=0,hit=0;
+  for(let i=0;i<30;i++){const d=new Date();d.setDate(d.getDate()-i);const k=d.toISOString().slice(0,10);exp++;if(taken.has(k))hit++;}
+  return Math.round(hit/exp*100); }
+function medTakenToday(m){return (m.log||[]).includes(todayKey());}
 route('meds',(n)=>{
-  n.innerHTML=`${topbar('medT',null,{back:true})}
+  const meds=S.meds||[];
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'الأدوية والعلاجات':'Medications & treatments',rawSub:isAr()?'تذكيرات ومتابعة الالتزام':'reminders & adherence'})}
    <div class="content">
-     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:13px;line-height:1.6;margin:0">🔒 ${t('medNote')}</p></div>
-     <div class="field"><label>${t('reminderTime')}</label><input class="input" type="time" id="medTime" value="${S.prefs.medTime}"></div>
-     <button class="btn btn-primary" onclick="addReminder()">${t('addReminder')}</button>
-     ${S.reminders.length?`<div class="section-title">${isAr()?'تذكيراتك':'Your reminders'}</div><div class="card">${S.reminders.map((r,i)=>`<div class="li"><div class="ic">⏰</div><div class="tx"><b>${r.time}</b><small>${r.taken?t('taken')+' ✓':t('reminderTime')}</small></div><button class="btn-sm ${r.taken?'btn-ghost':'btn-primary'}" onclick="toggleTaken(${i})">${r.taken?t('taken'):t('markTaken')}</button></div>`).join('')}</div>`:''}
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12.5px;line-height:1.6;margin:0;display:flex;gap:7px;align-items:flex-start">${svgIcon('lock',16)}<span>${isAr()?'الأسماء اختيارية وتُحفظ على جهازك فقط — لا تُرفع لأي خادم. اتركها فارغة لتذكير عام.':'Names are optional and stored only on your device — never uploaded. Leave blank for a generic reminder.'}</span></p></div>
+     <button class="btn btn-primary" onclick="openAddMed()">${svgIcon('plus',18)} ${isAr()?'إضافة دواء':'Add medication'}</button>
+     ${meds.length? meds.map(m=>{
+        const name=m.name||(m.kind==='biologic'?(isAr()?'علاج حيوي':'Biologic'):(isAr()?'دواء':'Medication'));
+        if(m.kind==='biologic'){const due=medNextDue(m);const days=due?Math.round((due-new Date().setHours(0,0,0,0))/864e5):null;
+          return `<div class="card"><div class="between"><div class="row" style="gap:11px"><span class="ic" style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon('syringe',22)}</span><div><b style="font-size:14.5px">${name}</b><div class="muted" style="font-size:12px">${isAr()?'كل':'every'} ${m.interval} ${isAr()?'يوم':'days'}</div></div></div><button class="btn-sm btn-ghost" onclick="delMed('${m.id}')">${svgIcon('trash',15)}</button></div>
+            <div class="card" style="background:color-mix(in srgb,var(--accent) 10%,transparent);border:none;margin:10px 0 0"><div class="between"><span style="font-size:13px;font-weight:600">${isAr()?'الجرعة القادمة':'Next dose'}</span><b style="color:var(--accent)">${due?due.toLocaleDateString(isAr()?'ar':'en',{day:'numeric',month:'short'}):'—'}</b></div><div class="muted" style="font-size:12px;margin-top:3px">${days!=null?(days===0?(isAr()?'اليوم':'today'):days===1?(isAr()?'غدًا':'tomorrow'):(isAr()?`بعد ${days} يومًا`:`in ${days} days`)):''}</div></div>
+            <button class="btn btn-ghost" style="margin-top:8px" onclick="medGiven('${m.id}')">${svgIcon('check',16)} ${isAr()?'سجّل أنني أخذتها':'Log this dose'}</button></div>`;
+        }
+        const adh=medAdherence(m),took=medTakenToday(m);
+        return `<div class="card"><div class="between"><div class="row" style="gap:11px"><span class="ic" style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon('pill',22)}</span><div><b style="font-size:14.5px">${name}</b><div class="muted" style="font-size:12px">${m.time||''} ${m.freq?'· '+m.freq:''}</div></div></div><button class="btn-sm btn-ghost" onclick="delMed('${m.id}')">${svgIcon('trash',15)}</button></div>
+          <div class="between" style="margin-top:10px"><span class="muted" style="font-size:12px">${isAr()?'الالتزام (٣٠ يومًا)':'Adherence (30d)'}</span><b style="font-size:13px;color:${adh>=80?'var(--good)':adh>=50?'var(--warn)':'var(--bad)'}">${adh}%</b></div>
+          <div class="pbar" style="margin-top:6px"><i style="width:${adh}%"></i></div>
+          <button class="btn ${took?'btn-ghost':'btn-primary'}" style="margin-top:10px" onclick="medTake('${m.id}')">${took?svgIcon('check',16)+' '+(isAr()?'تم اليوم':'Taken today'):(isAr()?'سجّل جرعة اليوم':'Mark today taken')}</button></div>`;
+      }).join('')
+      : `<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('pill',36)}</div><p class="muted" style="margin-top:8px">${isAr()?'لم تُضِف أي دواء بعد':'No medications added yet'}</p></div>`}
    </div>`;
 });
+window.openAddMed=function(){
+  openSheet(`<div class="row" style="gap:10px;margin-bottom:14px"><span style="color:var(--accent)">${svgIcon('pill',26)}</span><h2 style="font-size:19px;margin:0;font-weight:800">${isAr()?'إضافة دواء':'Add medication'}</h2></div>
+   <div class="field"><label>${isAr()?'الاسم (اختياري)':'Name (optional)'}</label><input class="input" id="mName" placeholder="${isAr()?'مثال: أزاثيوبرين':'e.g. Azathioprine'}"></div>
+   <div class="field"><label>${isAr()?'النوع':'Type'}</label>
+     <select class="input" id="mKind" onchange="window.__medKind(this.value)">
+       <option value="oral">${isAr()?'دواء يومي (فموي)':'Daily medication (oral)'}</option>
+       <option value="biologic">${isAr()?'علاج حيوي (حقن/تسريب دوري)':'Biologic (scheduled injection/infusion)'}</option>
+     </select></div>
+   <div id="mOral"><div class="field"><label>${isAr()?'وقت التذكير':'Reminder time'}</label><input class="input" type="time" id="mTime" value="20:00"></div></div>
+   <div id="mBio" style="display:none"><div class="field"><label>${isAr()?'كل كم يوم؟':'Every how many days?'}</label><input class="input" id="mInt" inputmode="numeric" placeholder="${isAr()?'مثال: 56 (كل ٨ أسابيع)':'e.g. 56 (every 8 weeks)'}"></div>
+     <div class="field"><label>${isAr()?'تاريخ آخر جرعة':'Date of last dose'}</label><input class="input" type="date" id="mStart" value="${todayKey()}"></div></div>
+   <button class="btn btn-primary" onclick="saveMed()">${isAr()?'حفظ':'Save'}</button>`);
+};
+window.__medKind=(v)=>{$('#mOral').style.display=v==='oral'?'':'none';$('#mBio').style.display=v==='biologic'?'':'none';};
+window.saveMed=function(){const kind=$('#mKind').value;const name=($('#mName').value||'').trim();
+  const m={id:rid(),name,kind,log:[]};
+  if(kind==='biologic'){m.interval=parseInt($('#mInt').value)||56;m.start=$('#mStart').value||todayKey();}
+  else{m.time=$('#mTime').value||'20:00';}
+  S.meds=S.meds||[];S.meds.push(m);save();closeSheet();toast(isAr()?'تمت الإضافة':'Added');render();};
+window.medTake=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;m.log=m.log||[];const k=todayKey();const i=m.log.indexOf(k);if(i>=0)m.log.splice(i,1);else{m.log.push(k);awardXp(3);}save();render();};
+window.medGiven=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;m.start=todayKey();m.log=m.log||[];m.log.push(todayKey());awardXp(5);save();toast(isAr()?'سُجّلت الجرعة':'Dose logged');render();};
+window.delMed=function(id){S.meds=(S.meds||[]).filter(x=>x.id!==id);save();render();};
 window.addReminder=()=>{const time=$('#medTime').value;S.prefs.medTime=time;S.reminders.push({time,taken:false});save();toast(t('reminderSet'));render();};
 window.toggleTaken=(i)=>{S.reminders[i].taken=!S.reminders[i].taken;save();render();};
+
+/* ---- Lab self-tracking (log + trend only, no interpretation) ---- */
+const LAB_TYPES=[
+  {id:'calpro',en:'Fecal calprotectin',ar:'الكالبروتكتين البرازي',unit:'µg/g'},
+  {id:'crp',en:'CRP',ar:'بروتين سي التفاعلي',unit:'mg/L'},
+  {id:'hb',en:'Hemoglobin',ar:'الهيموغلوبين',unit:'g/dL'},
+  {id:'ferritin',en:'Ferritin',ar:'الفيريتين',unit:'µg/L'},
+  {id:'albumin',en:'Albumin',ar:'الألبومين',unit:'g/L'},
+  {id:'esr',en:'ESR',ar:'سرعة الترسيب',unit:'mm/hr'},
+  {id:'plt',en:'Platelets',ar:'الصفائح',unit:'×10⁹/L'},
+  {id:'wbc',en:'White cells (WBC)',ar:'كريات الدم البيضاء',unit:'×10⁹/L'},
+];
+function labName(id){const l=LAB_TYPES.find(x=>x.id===id);return l?(isAr()?l.ar:l.en):id;}
+function labUnit(id){const l=LAB_TYPES.find(x=>x.id===id);return l?l.unit:'';}
+route('labs',(n)=>{
+  const labs=(S.labs||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const byType={};labs.forEach(l=>{(byType[l.type]=byType[l.type]||[]).push(l);});
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'نتائج التحاليل':'Lab results',rawSub:isAr()?'سجّل قيمك وتابع اتجاهها':'log your values & watch the trend'})}
+   <div class="content">
+     <button class="btn btn-primary" onclick="openAddLab()">${svgIcon('plus',18)} ${isAr()?'إضافة نتيجة':'Add a result'}</button>
+     ${Object.keys(byType).length? Object.keys(byType).map(tp=>{
+        const arr=byType[tp].slice().sort((a,b)=>new Date(a.date)-new Date(b.date));
+        const series=arr.map(x=>+x.value);const last=arr[arr.length-1];
+        const prev=arr.length>1?arr[arr.length-2]:null;
+        const delta=prev?(+last.value-+prev.value):null;
+        return `<div class="card"><div class="between" style="margin-bottom:6px"><div><b style="font-size:14.5px">${labName(tp)}</b><div class="muted" style="font-size:12px">${fmtDate(last.date)}</div></div><div style="text-align:end"><b style="font-size:19px;color:var(--accent)">${last.value}</b> <span class="muted" style="font-size:11px">${labUnit(tp)}</span>${delta!=null?`<div class="faint" style="font-size:11px;color:${delta>0?'var(--warn)':delta<0?'var(--good)':'var(--muted)'}">${delta>0?'▲':delta<0?'▼':''} ${Math.abs(delta).toFixed(1)}</div>`:''}</div></div>
+          ${series.length>1?spark(series,'var(--accent)'):''}
+          <div class="row" style="gap:6px;flex-wrap:wrap;margin-top:8px">${arr.slice().reverse().slice(0,6).map(x=>`<span class="badge" style="background:var(--bg2);color:var(--muted);font-size:10.5px">${x.value} · ${fmtDate(x.date).split(',')[0]}</span>`).join('')}</div></div>`;
+      }).join('')
+      : `<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('pulse',36)}</div><p class="muted" style="margin-top:8px">${isAr()?'لا نتائج بعد — أضف أول قيمة':'No results yet — add your first value'}</p></div>`}
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${isAr()?'يعرض هذا اتجاه قيمك فقط دون تفسير. تفسير النتائج يقوم به فريقك الطبي.':'This shows the trend of your values only, without interpretation. Result interpretation is done by your care team.'}</p></div>
+   </div>`;
+});
+window.openAddLab=function(){
+  openSheet(`<div class="row" style="gap:10px;margin-bottom:14px"><span style="color:var(--accent)">${svgIcon('pulse',26)}</span><h2 style="font-size:19px;margin:0;font-weight:800">${isAr()?'إضافة نتيجة':'Add result'}</h2></div>
+   <div class="field"><label>${isAr()?'التحليل':'Test'}</label><select class="input" id="lbType">${LAB_TYPES.map(l=>`<option value="${l.id}">${isAr()?l.ar:l.en} (${l.unit})</option>`).join('')}</select></div>
+   <div class="field"><label>${isAr()?'القيمة':'Value'}</label><input class="input" id="lbVal" inputmode="decimal" placeholder="${isAr()?'الرقم':'number'}"></div>
+   <div class="field"><label>${isAr()?'التاريخ':'Date'}</label><input class="input" type="date" id="lbDate" value="${todayKey()}"></div>
+   <button class="btn btn-primary" onclick="saveLab()">${isAr()?'حفظ':'Save'}</button>`);
+};
+window.saveLab=function(){const v=parseFloat($('#lbVal').value);if(isNaN(v))return toast(isAr()?'أدخل قيمة':'Enter a value');
+  S.labs=S.labs||[];S.labs.push({id:rid(),type:$('#lbType').value,value:v,date:$('#lbDate').value||todayKey()});save();closeSheet();awardXp(4);toast(isAr()?'تم الحفظ':'Saved');render();};
+
+/* ---- Self-reflection check-in (descriptive self-reflection, not a diagnostic tool) ---- */
+const CTRL_Q=[
+  [['Overall, how have you felt in the last 2 weeks?','بشكل عام، كيف شعرت في آخر أسبوعين؟'],['Poorly','بشكل سيئ'],['So-so','متوسط'],['Well','بخير'],['Very well','بخير جدًا']],
+  [['How well do you feel your symptoms have been controlled?','إلى أي مدى تشعر أن أعراضك تحت السيطرة؟'],['Not at all','إطلاقًا'],['A little','قليلًا'],['Mostly','غالبًا'],['Fully','تمامًا']],
+  [['Have symptoms affected your daily activities or work?','هل أثّرت الأعراض على أنشطتك اليومية أو عملك؟'],['A lot','كثيرًا'],['Somewhat','نوعًا ما'],['A little','قليلًا'],['Not at all','إطلاقًا']],
+  [['How has your energy been?','كيف كانت طاقتك؟'],['Very low','منخفضة جدًا'],['Low','منخفضة'],['Okay','جيّدة'],['Good','ممتازة']],
+  [['Have you needed the toilet urgently or often?','هل احتجت الحمّام بإلحاح أو بشكل متكرّر؟'],['Very often','كثيرًا جدًا'],['Often','كثيرًا'],['Sometimes','أحيانًا'],['Rarely','نادرًا']],
+  [['How has your mood been about your condition?','كيف كانت معنوياتك تجاه حالتك؟'],['Very low','منخفضة جدًا'],['Low','منخفضة'],['Okay','جيّدة'],['Good','ممتازة']],
+];
+let ctrlAns={},ctrlStep=0;
+route('control',(n)=>{
+  const total=CTRL_Q.length;
+  if(ctrlStep>=total){ // summary
+    const sum=Object.values(ctrlAns).reduce((a,b)=>a+b,0);const max=total*3;const pct=Math.round(sum/max*100);
+    const band=pct>=70?'good':pct>=40?'warn':'bad';
+    const msg=pct>=70?(isAr()?'تشير إجاباتك إلى أنك شعرت بحال جيدة عمومًا مؤخرًا.':'Your answers suggest you have generally been feeling well lately.'):pct>=40?(isAr()?'تشير إجاباتك إلى أن الأمور كانت متفاوتة مؤخرًا — قد يستحق متابعة ومشاركة فريقك.':'Your answers suggest things have been mixed lately — may be worth monitoring and sharing with your team.'):(isAr()?'تشير إجاباتك إلى أنك لم تكن في أفضل حال مؤخرًا. فكّر في التواصل مع فريقك الطبي.':'Your answers suggest you have not been at your best lately. Consider reaching out to your care team.');
+    S.control={date:new Date().toISOString(),score:pct};save();
+    n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'ملخّص التأمّل':'Reflection summary'})}
+     <div class="content" style="text-align:center">
+       <div class="card"><div style="font-size:46px;font-weight:800;color:var(--${band==='good'?'good':band==='warn'?'warn':'bad'})">${pct}<span style="font-size:20px">/100</span></div>
+         <div class="muted" style="font-size:13px;margin-top:6px">${isAr()?'مؤشّر شعور عام (أعلى = أفضل)':'General wellbeing index (higher = better)'}</div></div>
+       <div class="card" style="text-align:start"><p style="margin:0;font-size:14.5px;line-height:1.7">${msg}</p></div>
+       <button class="btn btn-primary" onclick="window.__ctrlStart()">${isAr()?'إعادة':'Retake'}</button>
+       <button class="btn btn-ghost" onclick="go('share')">${svgIcon('share',16)} ${isAr()?'مشاركتها مع طبيبي':'Share with my doctor'}</button>
+       <div class="card" style="background:var(--bg2);text-align:start"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${isAr()?'أداة تأمّل ذاتي للمساعدة في الحديث مع فريقك — ليست تشخيصًا ولا أداة طبية.':'A self-reflection aid to help your conversations with your team — not a diagnosis or medical tool.'}</p></div>
+     </div>`;
+    return;
+  }
+  const q=CTRL_Q[ctrlStep];
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'تأمّل سريع':'Quick check-in',rawSub:`${ctrlStep+1} / ${total}`})}
+   <div class="content">
+     <div class="pbar"><i style="width:${(ctrlStep)/total*100}%"></i></div>
+     <div class="card"><b style="font-size:16px;line-height:1.5;display:block;margin-bottom:14px">${q[0][EL()]}</b>
+       ${[1,2,3,4].map((_,i)=>`<button class="btn btn-ghost" style="text-align:start;margin-bottom:8px" onclick="window.__ctrlPick(${i})">${q[i+1][EL()]}</button>`).join('')}</div>
+   </div>`;
+});
+window.__ctrlStart=function(){ctrlAns={};ctrlStep=0;render();};
+window.__ctrlPick=function(score){ctrlAns[ctrlStep]=score;ctrlStep++;if(ctrlStep>=CTRL_Q.length)awardXp(10);render();};
+
+/* ---- Voice note logging (Web Speech API, on-device, with manual fallback) ---- */
+let __recog=null,__voiceText='';
+route('voicelog',(n)=>{
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'تدوين صوتي':'Voice note',rawSub:isAr()?'تحدّث، وسنحوّله إلى نص':'speak and we will transcribe'})}
+   <div class="content" style="text-align:center">
+     <button id="micBtn" class="btn btn-primary" style="border-radius:50%;width:96px;height:96px;margin:18px auto;display:flex;align-items:center;justify-content:center" onclick="window.__voiceToggle()">${svgIcon('pulse',34)}</button>
+     <div class="muted" id="micState" style="font-size:13px">${SR?(isAr()?'اضغط للتحدّث':'Tap to speak'):(isAr()?'المتصفّح لا يدعم الإدخال الصوتي — اكتب أدناه':'Voice input not supported here — type below')}</div>
+     <textarea class="input" id="voiceTx" style="min-height:120px;margin-top:14px;text-align:start" placeholder="${isAr()?'سيظهر النص هنا…':'Your text will appear here…'}">${__voiceText}</textarea>
+     <button class="btn btn-primary" onclick="window.__voiceSave()">${svgIcon('check',16)} ${isAr()?'حفظ كملاحظة':'Save as note'}</button>
+     <div class="card" style="background:var(--bg2);text-align:start"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${isAr()?'يتم التعرّف على الصوت عبر متصفّحك. تُحفظ الملاحظة على جهازك.':'Speech is recognized by your browser. The note is saved on your device.'}</p></div>
+   </div>`;
+});
+window.__voiceToggle=function(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR)return;
+  if(__recog){__recog.stop();__recog=null;const st=$('#micState');if(st)st.textContent=isAr()?'اضغط للتحدّث':'Tap to speak';return;}
+  __recog=new SR();__recog.lang=isAr()?'ar-SA':'en-US';__recog.interimResults=true;__recog.continuous=true;
+  const st=$('#micState');if(st)st.textContent=isAr()?'يستمع…':'Listening…';
+  __recog.onresult=(e)=>{let txt='';for(let i=0;i<e.results.length;i++)txt+=e.results[i][0].transcript;const ta=$('#voiceTx');if(ta){ta.value=txt;__voiceText=txt;}};
+  __recog.onerror=()=>{const s=$('#micState');if(s)s.textContent=isAr()?'تعذّر الاستماع':'Could not listen';__recog=null;};
+  __recog.onend=()=>{if(__recog){const s=$('#micState');if(s)s.textContent=isAr()?'اضغط للتحدّث':'Tap to speak';}__recog=null;};
+  try{__recog.start();}catch(e){}};
+window.__voiceSave=function(){const ta=$('#voiceTx');const txt=ta?ta.value.trim():'';if(!txt)return toast(isAr()?'لا يوجد نص':'Nothing to save');
+  if(__recog){try{__recog.stop();}catch(e){}__recog=null;}
+  S.logs.push({id:rid(),type:'note',t:new Date().toISOString(),notes:txt});__voiceText='';save();awardXp(3);toast(isAr()?'حُفظت الملاحظة':'Note saved');goBack();};
+
+/* ---- Specialist directory (pointers; confirm services directly) ---- */
+const CENTERS=[
+  ['King Faisal Specialist Hospital & RC','مستشفى الملك فيصل التخصصي','Riyadh / Jeddah','الرياض / جدة'],
+  ['King Saud University Medical City','مدينة الملك سعود الطبية','Riyadh','الرياض'],
+  ['King Abdulaziz Medical City (NGHA)','مدينة الملك عبدالعزيز الطبية','Riyadh / Jeddah','الرياض / جدة'],
+  ['King Fahad Medical City','مدينة الملك فهد الطبية','Riyadh','الرياض'],
+  ['King Abdulaziz University Hospital','مستشفى جامعة الملك عبدالعزيز','Jeddah','جدة'],
+  ['Saudi German Hospitals','المستشفيات السعودية الألمانية','Multiple cities','عدة مدن'],
+];
+route('directory',(n)=>{
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'أين أجد متخصصًا':'Finding a specialist',rawSub:isAr()?'مراكز ومصادر في السعودية':'centers & resources in Saudi Arabia'})}
+   <div class="content">
+     <a class="card tap" href="https://www.saudigastro.com" target="_blank" rel="noopener" style="text-decoration:none;display:block"><div class="row" style="gap:11px"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent)">${svgIcon('globe',22)}</span><div style="flex:1"><b style="font-size:14.5px">${isAr()?'الجمعية السعودية للجهاز الهضمي':'Saudi Gastroenterology Association'}</b><div class="muted" style="font-size:12.5px">saudigastro.com ↗</div></div></div></a>
+     <div class="card tap" onclick="toast('${isAr()?'افتح تطبيق صحتي للحجز':'Open the Sehhaty app to book'}')"><div class="row" style="gap:11px"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent)">${svgIcon('calendar',22)}</span><div style="flex:1"><b style="font-size:14.5px">${isAr()?'الحجز عبر صحتي':'Book via Sehhaty'}</b><div class="muted" style="font-size:12.5px">${isAr()?'منصّة المواعيد الوطنية':'national appointments platform'}</div></div></div></div>
+     <div class="section-title">${isAr()?'مراكز رعاية ثالثية':'Tertiary care centers'}</div>
+     <div class="card">${CENTERS.map(c=>`<div class="li"><span class="ic" style="color:var(--accent)">${svgIcon('heart',20)}</span><div class="tx"><b>${isAr()?c[1]:c[0]}</b><small>${isAr()?c[3]:c[2]}</small></div></div>`).join('')}</div>
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${isAr()?'قائمة استرشادية لمؤسسات معروفة — تأكّد من توفّر عيادة التهاب الأمعاء والمواعيد مباشرة. ليست توصية أو إحالة طبية.':'A guide to well-known institutions — confirm IBD clinic availability and appointments directly. Not an endorsement or medical referral.'}</p></div>
+   </div>`;
+});
+
+/* ---- Caregiver / family read-only snapshot ---- */
+route('caregiver',(n)=>{
+  const today=logsOn(todayKey());
+  const sym=today.filter(l=>l.type==='symptom');
+  const bio=(S.meds||[]).filter(m=>m.kind==='biologic').map(m=>({m,due:medNextDue(m)})).sort((a,b)=>(a.due||0)-(b.due||0))[0];
+  const lastLab=(S.labs||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+  const st=streak();
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'عرض للعائلة':'Family view',rawSub:isAr()?'ملخّص للقراءة فقط':'read-only snapshot'})}
+   <div class="content">
+     <div class="card" style="text-align:center"><div style="font-size:15px;font-weight:700">${S.user.name||(isAr()?'المريض':'Patient')}</div><div class="muted" style="font-size:12.5px">${S.user.disease?t(S.user.disease):''} · ${isAr()?'تتابع':'streak'} ${st} ${isAr()?'يوم':'d'}</div></div>
+     <div class="card"><div class="row" style="gap:10px"><span class="ic" style="color:var(--accent)">${svgIcon('pulse',20)}</span><div class="tx"><b>${isAr()?'أعراض اليوم':"Today's symptoms"}</b><small>${sym.length?sym.map(s=>t(s.sym||'symptoms')).join('، '):(isAr()?'لا شيء مُسجّل':'none logged')}</small></div></div></div>
+     ${bio&&bio.due?`<div class="card"><div class="row" style="gap:10px"><span class="ic" style="color:var(--accent)">${svgIcon('syringe',20)}</span><div class="tx"><b>${isAr()?'الجرعة الحيوية القادمة':'Next biologic dose'}</b><small>${bio.due.toLocaleDateString(isAr()?'ar':'en',{day:'numeric',month:'short'})}</small></div></div></div>`:''}
+     ${lastLab?`<div class="card"><div class="row" style="gap:10px"><span class="ic" style="color:var(--accent)">${svgIcon('chart',20)}</span><div class="tx"><b>${isAr()?'آخر تحليل':'Latest lab'}</b><small>${labName(lastLab.type)}: ${lastLab.value} ${labUnit(lastLab.type)} · ${fmtDate(lastLab.date)}</small></div></div></div>`:''}
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${isAr()?'هذه الشاشة للقراءة فقط لمشاركتها مع العائلة أو مقدّم الرعاية.':'This screen is read-only, for sharing with family or a caregiver.'}</p></div>
+   </div>`;
+});
+
+/* ---- Accessibility: large text zoom ---- */
+function applyA11y(){try{document.documentElement.style.zoom=(S.prefs&&S.prefs.bigText)?'1.12':'';}catch(e){}}
+window.toggleBigText=function(){S.prefs.bigText=!S.prefs.bigText;save();applyA11y();render();};
+
+/* ============================================================
+   NEW · Cloud backend (Supabase) — clinician share + anonymous registry
+   To activate: paste your project URL + anon key below. Until then,
+   clinician share falls back to a fully offline, on-device QR/link.
+   ============================================================ */
+const CLOUD = { url: '', anon: '' };  // <-- paste Supabase project URL + anon (public) key here
+function cloudOn(){return !!(CLOUD.url&&CLOUD.anon);}
+let __sb=null, __sbLoading=null;
+function loadSupabase(){
+  if(__sb)return Promise.resolve(__sb);
+  if(!cloudOn())return Promise.resolve(null);
+  if(__sbLoading)return __sbLoading;
+  __sbLoading=new Promise((res)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';
+    s.onload=()=>{try{__sb=window.supabase.createClient(CLOUD.url,CLOUD.anon);}catch(e){__sb=null;}res(__sb);};
+    s.onerror=()=>res(null);
+    document.head.appendChild(s);
+  });
+  return __sbLoading;
+}
+function loadQR(){
+  if(window.QRCode)return Promise.resolve(true);
+  return new Promise((res)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s);});
+}
+
+/* compact, privacy-minded clinician summary */
+function clinSummary(){
+  const last=(t,k)=>{const a=S.logs.filter(l=>l.type===t&&daysAgo(l.t.slice(0,10))<=14);return a.length?a:null;};
+  const sym=last('symptom');const bowel=last('bowel');const sleep=last('sleep');
+  const symAvg=sym?(sym.reduce((s,l)=>s+(l.sev||1),0)/sym.length):null;
+  const bowelAvg=bowel?(bowel.reduce((s,l)=>s+(l.count||0),0)/14):null;
+  const sleepAvg=sleep?(sleep.reduce((s,l)=>s+(l.hours||0),0)/sleep.length):null;
+  const orals=(S.meds||[]).filter(m=>m.kind!=='biologic');
+  const adh=orals.length?Math.round(orals.reduce((s,m)=>s+(medAdherence(m)||0),0)/orals.length):null;
+  const bio=(S.meds||[]).filter(m=>m.kind==='biologic').map(m=>({name:m.name||'biologic',due:medNextDue(m)})).filter(x=>x.due).sort((a,b)=>a.due-b.due)[0];
+  const labs=(S.labs||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,4).map(l=>({t:l.type,v:l.value,d:l.date}));
+  return {
+    nm:S.user.name||'', dx:S.user.disease||'', cty:S.user.country||'',
+    sym:symAvg!=null?+symAvg.toFixed(1):null, bow:bowelAvg!=null?+bowelAvg.toFixed(1):null, slp:sleepAvg!=null?+sleepAvg.toFixed(1):null,
+    adh, bio:bio?{n:bio.name,d:bio.due.toISOString().slice(0,10)}:null,
+    disc:S.disc?Object.values(S.disc.answers).reduce((a,b)=>a+b,0):null, ctrl:S.control?S.control.score:null,
+    labs, gen:new Date().toISOString().slice(0,10)
+  };
+}
+function b64e(o){try{return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}catch(e){return '';}}
+function b64d(s){try{return JSON.parse(decodeURIComponent(escape(atob(s))));}catch(e){return null;}}
+
+route('share',(n)=>{
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'مشاركة مع طبيبي':'Share with my doctor',rawSub:isAr()?'ملخّص للقراءة فقط':'a read-only summary'})}
+   <div class="content" style="text-align:center">
+     <div class="card" style="text-align:start"><p class="muted" style="font-size:13px;line-height:1.6;margin:0">${isAr()?'أنشئ ملخصًا نظيفًا لطبيبك يفتحه بمسح رمز QR — يشمل اتجاهات الأعراض والالتزام والجرعة الحيوية القادمة وآخر التحاليل.':'Create a clean summary your doctor opens by scanning a QR code — symptom trends, adherence, next biologic dose and latest labs.'}</p></div>
+     <button class="btn btn-primary" onclick="window.__mkShare()">${svgIcon('share',18)} ${isAr()?'إنشاء رمز المشاركة':'Generate share code'}</button>
+     <div id="shareOut"></div>
+     <div class="card" style="background:var(--bg2);text-align:start"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${cloudOn()?(isAr()?'يُنشأ رابط آمن عبر خادمك. ينتهي خلال ٧ أيام.':'A secure link is created via your backend. Expires in 7 days.'):(isAr()?'وضع خاص بالكامل: يُرمَّز الملخّص داخل الرمز نفسه على جهازك — لا يُرفع لأي خادم.':'Fully private mode: the summary is encoded inside the code itself on your device — nothing is uploaded.')}</p></div>
+   </div>`;
+});
+window.__mkShare=async function(){
+  const out=$('#shareOut');if(!out)return;
+  out.innerHTML=`<p class="muted" style="padding:14px">${isAr()?'جارٍ الإنشاء…':'Generating…'}</p>`;
+  const sum=clinSummary();let url;
+  if(cloudOn()){
+    const sb=await loadSupabase();
+    if(sb){const code=rid()+rid();const expires=new Date(Date.now()+7*864e5).toISOString();
+      const {error}=await sb.from('shared_reports').insert({code,data:sum,expires_at:expires});
+      url=location.origin+location.pathname+'#clin=live:'+code;
+      if(error)url=location.origin+location.pathname+'#clin='+b64e(sum);
+    } else url=location.origin+location.pathname+'#clin='+b64e(sum);
+  } else {
+    url=location.origin+location.pathname+'#clin='+b64e(sum);
+  }
+  out.innerHTML=`<div class="card"><div id="qrbox" style="display:flex;justify-content:center;padding:8px;background:#fff;border-radius:14px;width:max-content;margin:0 auto"></div>
+    <p class="muted" style="font-size:12px;margin:12px 0 6px">${isAr()?'يمسح الطبيب الرمز، أو انسخ الرابط:':'Doctor scans this, or copy the link:'}</p>
+    <div class="row" style="gap:6px"><input class="input" id="shareUrl" readonly value="${url}" style="font-size:11px"><button class="btn-sm btn-primary" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('shareUrl').value);toast('${isAr()?'نُسخ':'Copied'}')">${svgIcon('check',15)}</button></div>
+    ${navigator.share?`<button class="btn btn-ghost" style="margin-top:8px" onclick="navigator.share({title:'IBD Connect',url:document.getElementById('shareUrl').value})">${svgIcon('share',16)} ${isAr()?'مشاركة':'Share'}</button>`:''}</div>`;
+  await loadQR();const box=$('#qrbox');if(box&&window.QRCode){box.innerHTML='';new window.QRCode(box,{text:url,width:200,height:200,correctLevel:window.QRCode.CorrectLevel.M});}
+};
+
+/* clinician read-only view (opened from the share link) */
+function renderClinician(payload){
+  const host=$('#screens');host.innerHTML='';
+  const node=el('<div class="screen active"></div>');
+  const ar=isAr();const f=(v,u)=>v==null?'—':(v+(u?' '+u:''));
+  const labName2=(id)=>{const l=LAB_TYPES.find(x=>x.id===id);return l?(ar?l.ar:l.en):id;};
+  node.innerHTML=`<div class="topbar"><div style="flex:1"><h1 style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent)">${svgIcon('leaf',20)}</span> ${ar?'ملخّص سريري':'Clinician summary'}</h1><div class="sub">${ar?'مشترك من تطبيق IBD Connect — وصفي فقط':'Shared from IBD Connect — descriptive only'}</div></div></div>
+   <div class="content">
+     <div class="card"><div class="between"><b>${payload.nm||(ar?'مريض':'Patient')}</b><span class="muted" style="font-size:12px">${ar?'حُرّر':'generated'} ${payload.gen||''}</span></div><div class="muted" style="font-size:12.5px;margin-top:4px">${payload.dx?(I18N[payload.dx]?t(payload.dx):payload.dx):''} ${payload.cty?'· '+payload.cty:''}</div></div>
+     <div class="section-title">${ar?'آخر ١٤ يومًا':'Last 14 days'}</div>
+     <div class="grid2">
+       <div class="card"><div class="muted" style="font-size:12px">${ar?'متوسط شدّة الأعراض':'Avg symptom severity'}</div><b style="font-size:22px;color:var(--accent)">${f(payload.sym)}</b><span class="muted" style="font-size:11px">/3</span></div>
+       <div class="card"><div class="muted" style="font-size:12px">${ar?'تبرّز/يوم':'Bowel/day'}</div><b style="font-size:22px;color:var(--accent)">${f(payload.bow)}</b></div>
+       <div class="card"><div class="muted" style="font-size:12px">${ar?'نوم/ليلة':'Sleep/night'}</div><b style="font-size:22px;color:var(--accent)">${f(payload.slp,'h')}</b></div>
+       <div class="card"><div class="muted" style="font-size:12px">${ar?'الالتزام الدوائي':'Med adherence'}</div><b style="font-size:22px;color:var(--accent)">${f(payload.adh,'%')}</b></div>
+     </div>
+     ${payload.bio?`<div class="card"><div class="row" style="gap:10px"><span class="ic" style="color:var(--accent)">${svgIcon('syringe',20)}</span><div class="tx"><b>${ar?'الجرعة الحيوية القادمة':'Next biologic dose'}</b><small>${payload.bio.n} · ${payload.bio.d}</small></div></div></div>`:''}
+     ${(payload.disc!=null||payload.ctrl!=null)?`<div class="grid2">${payload.disc!=null?`<div class="card"><div class="muted" style="font-size:12px">IBD-DISC</div><b style="font-size:22px;color:var(--purple)">${payload.disc}/100</b></div>`:''}${payload.ctrl!=null?`<div class="card"><div class="muted" style="font-size:12px">${ar?'مؤشّر الشعور':'Wellbeing index'}</div><b style="font-size:22px;color:var(--accent)">${payload.ctrl}/100</b></div>`:''}</div>`:''}
+     ${payload.labs&&payload.labs.length?`<div class="section-title">${ar?'آخر التحاليل':'Latest labs'}</div><div class="card">${payload.labs.map(l=>`<div class="li"><span class="ic" style="color:var(--accent)">${svgIcon('pulse',18)}</span><div class="tx"><b>${labName2(l.t)}</b><small>${l.d}</small></div><b>${l.v} ${labUnit(l.t)}</b></div>`).join('')}</div>`:''}
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${ar?'بيانات يبلّغ عنها المريض ذاتيًا، وصفية فقط، ليست تشخيصًا. للاستخدام كمحفّز للنقاش أثناء الزيارة.':'Patient self-reported, descriptive data only, not a diagnosis. Intended as a conversation aid during the visit.'}</p></div>
+   </div>`;
+  host.appendChild(node);
+  $('#tabbar').classList.add('hidden');
+}
+async function checkClinHash(){
+  const h=location.hash||'';
+  const m=h.match(/#clin=(.+)$/);if(!m)return false;
+  let payload=null;const raw=decodeURIComponent(m[1]);
+  if(raw.startsWith('live:')){const sb=await loadSupabase();if(sb){try{const {data}=await sb.from('shared_reports').select('data').eq('code',raw.slice(5)).single();payload=data&&data.data;}catch(e){}}}
+  else payload=b64d(raw);
+  if(payload){renderClinician(payload);return true;}
+  return false;
+}
+
+/* ---- Anonymous registry opt-in ---- */
+route('registry',(n)=>{
+  const on=S.registry&&S.registry.optedIn;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'السجل الوطني لالتهاب الأمعاء':'National IBD registry',rawSub:isAr()?'مساهمة مجهولة وطوعية':'anonymous & voluntary'})}
+   <div class="content">
+     <div class="card"><div class="row" style="gap:11px;align-items:flex-start"><span class="ic" style="color:var(--accent);flex:none">${svgIcon('globe',22)}</span><p style="margin:0;font-size:13.5px;line-height:1.7">${isAr()?'بمساهمتك المجهولة تساعد الباحثين والأطباء على فهم التهاب الأمعاء في السعودية والخليج بشكل أفضل — دعمًا لرؤية ٢٠٣٠ الصحية. لا تُرسَل أي معلومة تعرّف بك (الاسم، البريد، الجهاز).':'Your anonymous contribution helps researchers and clinicians understand IBD in Saudi Arabia and the Gulf — supporting Vision 2030 health goals. No identifying information (name, email, device) is ever sent.'}</p></div></div>
+     <div class="card"><b style="font-size:13.5px">${isAr()?'ما الذي يُشارَك (مجهول):':'What is shared (anonymized):'}</b><div class="muted" style="font-size:12.5px;line-height:1.8;margin-top:6px">${isAr()?'• نوع المرض والفئة العمرية والمنطقة<br>• اتجاهات الأعراض المجمّعة<br>• الالتزام العام بالعلاج<br>• درجات التقييم الذاتي':'• Disease type, age band, region<br>• Aggregated symptom trends<br>• Overall treatment adherence<br>• Self-assessment scores'}</div></div>
+     <button class="btn ${on?'btn-ghost':'btn-primary'}" onclick="window.__regToggle()">${on?(svgIcon('check',16)+' '+(isAr()?'أنت مشارك — إيقاف':'You are contributing — turn off')):(isAr()?'أوافق على المساهمة':'I agree to contribute')}</button>
+     ${on&&cloudOn()?`<button class="btn btn-ghost" onclick="window.__regSync()">${svgIcon('share',16)} ${isAr()?'إرسال تحديث الآن':'Send update now'}</button>`:''}
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${cloudOn()?(isAr()?'تُرسَل البيانات المجهولة إلى السجل الآمن.':'Anonymized data is sent to the secure registry.'):(isAr()?'موافقتك محفوظة. ستبدأ المساهمة الفعلية عند ربط الخادم.':'Your consent is saved. Actual contribution begins once the backend is connected.')} ${isAr()?'يمكنك الانسحاب في أي وقت.':'You can opt out any time.'}</p></div>
+   </div>`;
+});
+function registryPayload(){const s=clinSummary();const yr=parseInt(S.user.year)||null;const age=yr?(new Date().getFullYear()-yr):null;
+  return {dx:s.dx,age_band:age?(age<25?'<25':age<40?'25-39':age<60?'40-59':'60+'):null,region:s.cty||null,sym:s.sym,bow:s.bow,adh:s.adh,disc:s.disc,ctrl:s.ctrl,gen:s.gen};}
+window.__regToggle=async function(){S.registry=S.registry||{};S.registry.optedIn=!S.registry.optedIn;save();
+  if(S.registry.optedIn){awardXp(15);if(cloudOn())await window.__regSync(true);toast(isAr()?'شكرًا لمساهمتك':'Thank you for contributing');}render();};
+window.__regSync=async function(silent){if(!cloudOn())return;const sb=await loadSupabase();if(!sb)return;
+  try{await sb.from('registry').insert(registryPayload());S.registry.lastSync=new Date().toISOString();save();if(!silent)toast(isAr()?'تم الإرسال':'Sent');}catch(e){if(!silent)toast(isAr()?'تعذّر الإرسال':'Could not send');}};
 
 /* ---------- History ---------- */
 route('history',(n)=>{
@@ -2376,9 +2704,49 @@ window.exGiSet=exGiSet;window.exTrigPick=exTrigPick;window.exMythTog=exMythTog;
 /* ============================================================
    SCREENS — Insights & Wellness
    ============================================================ */
+/* ---- Descriptive on-device insight engine (observations only, never diagnostic) ---- */
+function avg(a){return a.length?a.reduce((x,y)=>x+y,0)/a.length:null;}
+function daysAgo(k){return Math.round((Date.now()-new Date(k+'T00:00:00').getTime())/864e5);}
+function computeInsights(){
+  const out=[];const logs=S.logs||[];
+  const sevByDay={},bowelByDay={},sleepByDay={},stepsByDay={};
+  logs.forEach(l=>{const d=l.t.slice(0,10);
+    if(l.type==='symptom'){(sevByDay[d]=sevByDay[d]||[]).push(l.sev||1);}
+    if(l.type==='bowel')bowelByDay[d]=(bowelByDay[d]||0)+(l.count||0);
+    if(l.type==='sleep')sleepByDay[d]=(l.hours||0);
+    if(l.type==='steps')stepsByDay[d]=(stepsByDay[d]||0)+(l.steps||0);
+  });
+  const recentSev=[],baseSev=[];
+  Object.keys(sevByDay).forEach(d=>{const a=daysAgo(d),m=avg(sevByDay[d]);if(a<=7)recentSev.push(m);else if(a<=28)baseSev.push(m);});
+  const rs=avg(recentSev),bs=avg(baseSev);
+  if(rs!=null&&bs!=null&&baseSev.length>=3){
+    const diff=rs-bs;const dir=diff>0.4?'up':diff<-0.4?'down':'flat';
+    out.push({icon:dir==='up'?'info':dir==='down'?'check':'pulse',tone:dir==='up'?'warn':dir==='down'?'good':'',
+      title:isAr()?'مستوى الأعراض مقابل المعتاد':'Symptom level vs your usual',
+      text:dir==='up'?(isAr()?`أعراضك خلال ٧ أيام أعلى قليلًا من معتادك في الشهر الماضي. هذه ملاحظة وصفية فقط — قد تستحق الانتباه أو الحديث مع فريقك.`:`Your last 7 days are running a bit higher than your usual over the past month. This is a descriptive observation only — it may be worth noting or mentioning to your team.`):dir==='down'?(isAr()?`أعراضك خلال ٧ أيام أقل من معتادك في الشهر الماضي. اتجاه لطيف.`:`Your last 7 days are running lower than your usual over the past month. A gentle trend.`):(isAr()?`أعراضك خلال ٧ أيام قريبة من معتادك في الشهر الماضي.`:`Your last 7 days are about the same as your usual over the past month.`)});
+  }
+  // sleep vs symptoms correlation
+  const lowDays=[],highDays=[];
+  Object.keys(sevByDay).forEach(d=>{const s=sleepByDay[d];if(s==null)return;const m=avg(sevByDay[d]);if(s<6)lowDays.push(m);else if(s>=7)highDays.push(m);});
+  if(lowDays.length>=3&&highDays.length>=3){
+    const lo=avg(lowDays),hi=avg(highDays);
+    if(Math.abs(lo-hi)>0.4)out.push({icon:'moon',tone:'',title:isAr()?'النوم والأعراض':'Sleep and symptoms',
+      text:lo>hi?(isAr()?`في الأيام التي نمت فيها أقل من ٦ ساعات، كان متوسط شدّة أعراضك أعلى (${lo.toFixed(1)}) منه في ليالي النوم الأطول (${hi.toFixed(1)}). ارتباط ملحوظ، وليس سببًا مؤكدًا.`:`On days after less than 6h sleep, your average symptom severity was higher (${lo.toFixed(1)}) than after longer nights (${hi.toFixed(1)}). An observed association, not a proven cause.`):(isAr()?`لم يظهر فرق واضح في أعراضك بين ليالي النوم القصيرة والطويلة.`:`No clear difference between short and long sleep nights in your data.`)});
+  }
+  // hydration / steps note
+  const stKeys=Object.keys(stepsByDay).filter(d=>daysAgo(d)<=7);
+  if(stKeys.length>=3){const a=avg(stKeys.map(d=>stepsByDay[d]));out.push({icon:'footprints',tone:'',title:isAr()?'النشاط هذا الأسبوع':'Activity this week',text:isAr()?`متوسط خطواتك خلال ٧ أيام كان ${Math.round(a).toLocaleString()} خطوة يوميًا.`:`Your steps averaged ${Math.round(a).toLocaleString()}/day over the last 7 days.`});}
+  if(!out.length)out.push({icon:'edit',tone:'',title:isAr()?'سجّل لترى أنماطك':'Log to see your patterns',text:isAr()?'بعد عدة أيام من التسجيل ستظهر هنا ملاحظات وصفية عن أنماطك الشخصية.':'After a few days of logging, descriptive observations about your personal patterns will appear here.'});
+  return out;
+}
 route('insights',(n)=>{
+  const ins=computeInsights();
   n.innerHTML=`${topbar('insightsT','insightsSub',{back:true})}
    <div class="content">
+     <div class="section-title">${isAr()?'ملاحظات من بياناتك':'Observations from your data'}</div>
+     ${ins.map(i=>`<div class="card" style="${i.tone==='warn'?'border-color:color-mix(in srgb,var(--warn) 35%,transparent)':i.tone==='good'?'border-color:color-mix(in srgb,var(--good) 35%,transparent)':''}"><div class="row" style="gap:11px;align-items:flex-start"><span class="ic" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex:none;color:${i.tone==='warn'?'var(--warn)':i.tone==='good'?'var(--good)':'var(--accent)'}">${svgIcon(i.icon,20)}</span><div><b style="font-size:14px;display:block;margin-bottom:4px">${i.title}</b><span class="muted" style="font-size:13px;line-height:1.6">${i.text}</span></div></div></div>`).join('')}
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${isAr()?'هذه ملاحظات وصفية محسوبة على جهازك فقط — ليست تشخيصًا ولا تنبؤًا ولا نصيحة طبية.':'These are descriptive observations computed only on your device — not a diagnosis, prediction, or medical advice.'}</p></div>
+     <div class="section-title">${isAr()?'نصائح العافية':'Wellness tips'}</div>
      <div class="grid2">${S.tips.map(tp=>`<button class="tile tap" style="text-align:start;aspect-ratio:auto;min-height:120px" onclick="openTip('${tp.id}')"><span class="emoji" style="color:var(--accent)">${gicon(tp.icon,26)}</span><span class="lab" style="font-size:14px;line-height:1.3">${L(tp[S.lang])}</span></button>`).join('')}</div>
    </div>`;
 });
@@ -2412,6 +2780,22 @@ route('more',(n)=>{
        ${mLi('footprints',t('tSteps'),todaySteps().toLocaleString(),"go('steps')")}
      </div>
 
+     <div class="section-title">${isAr()?'العناية والمتابعة':'Care & tracking'}</div>
+     <div class="card">
+       ${mLi('pill',isAr()?'الأدوية والعلاجات':'Medications & treatments','',"go('meds')")}
+       ${mLi('pulse',isAr()?'نتائج التحاليل':'Lab results','',"go('labs')")}
+       ${mLi('compass',isAr()?'تأمّل سريع':'Quick check-in',S.control?(S.control.score+'/100'):'',"window.__ctrlStart()")}
+       ${mLi('moon',isAr()?'دليلك المحلي':'Your local guide',isAr()?'رمضان · الحج · الأطعمة':'Ramadan · Hajj · food',"go('localize')")}
+       ${mLi('edit',isAr()?'تدوين صوتي':'Voice note','',"go('voicelog')")}
+     </div>
+
+     <div class="card">
+       ${mLi('share',isAr()?'مشاركة مع طبيبي':'Share with my doctor','',"go('share')")}
+       ${mLi('user',isAr()?'عرض للعائلة':'Family view','',"go('caregiver')")}
+       ${mLi('heart',isAr()?'أين أجد متخصصًا':'Find a specialist','',"go('directory')")}
+       ${mLi('globe',isAr()?'المساهمة في السجل الوطني':'Contribute to registry',S.registry&&S.registry.optedIn?(isAr()?'مُفعّل':'on'):'',"go('registry')")}
+     </div>
+
      ${window.isStandalone&&window.isStandalone()?'':`<div class="card tap welcome" onclick="installApp()"><div class="row"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center">${svgIcon('download',22)}</span><div style="flex:1"><b style="font-size:14.5px">${t('installApp')}</b><div class="muted" style="font-size:12.5px">${t('installSub')}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></div>`}
 
      <div class="section-title">${t('settings')}</div>
@@ -2421,6 +2805,7 @@ route('more',(n)=>{
        ${mLi('bell',t('notifications'),'',"go('notifs')")}
        ${mLi('lock',t('privacy'),'',"go('privacy')")}
        ${mLi('compass',t('insightsWellness'),'',"go('insights')")}
+       ${mLi('sun',isAr()?'نص كبير':'Large text',(S.prefs.bigText?(isAr()?'مُفعّل':'On'):(isAr()?'مُطفأ':'Off')),"toggleBigText()")}
        ${mLi('key',t('changePw'),'',"go('changePw')")}
      </div>
 
@@ -2845,6 +3230,71 @@ function nudgeBanner(){const nd=getNudge();if(!nd)return '';
 window.dismissNudge=function(id){S.nudgeDismiss=S.nudgeDismiss||{};S.nudgeDismiss[id]=todayKey();save();const b=$('#nudgeBan');if(b){b.style.transition='.25s';b.style.opacity='0';b.style.height='0';setTimeout(()=>render(),200);}};
 
 /* ============================================================
+   NEW · Saudi/GCC localization pack (Ramadan, Hajj/Umrah, Gulf foods)
+   Content is cultural-lifestyle guidance, non-medical. Always defers to care team.
+   ============================================================ */
+const AR=()=>isAr();
+Object.assign(I18N,{ noteT:{en:'Voice note',ar:'ملاحظة صوتية'} });
+function localBack(){return `<button class="iconbtn" aria-label="back" onclick="goBack()">${isAr()?'›':'‹'}</button>`;}
+
+const RAMADAN_TIPS=[
+  ['sun',['Talk to your team before Ramadan','تحدّث مع فريقك قبل رمضان'],['Ask whether fasting is suitable for you this year, and how to time medication around suhoor and iftar. Many people with IBD can fast safely when in remission — but it is a personal, clinical decision.','اسأل هل الصيام مناسب لك هذا العام، وكيف توقّت دواءك بين السحور والإفطار. كثير من مرضى التهاب الأمعاء يصومون بأمان أثناء الهدأة — لكنه قرار شخصي وطبي.']],
+  ['droplet',['Rehydrate between iftar and suhoor','عوّض السوائل بين الإفطار والسحور'],['Diarrhea plus long fasting hours can cause dehydration. Sip water steadily through the night rather than large amounts at once, and limit caffeine which increases fluid loss.','الإسهال مع ساعات الصيام الطويلة قد يسبّب الجفاف. ارتشف الماء بثبات طوال الليل بدل كميات كبيرة دفعة واحدة، وقلّل الكافيين لأنه يزيد فقد السوائل.']],
+  ['utensils',['Gentle suhoor, gentle iftar','سحور لطيف، إفطار لطيف'],['Break your fast slowly — dates and water, then a light meal, then more later. Heavy, very spicy or deep-fried iftar foods can trigger urgency. Favor slow-release foods at suhoor.','افطر تدريجيًا — تمر وماء، ثم وجبة خفيفة، ثم المزيد لاحقًا. الأطعمة الدسمة أو الحارة جدًا أو المقلية قد تثير الإلحاح. فضّل أطعمة بطيئة الهضم في السحور.']],
+  ['pill',['Know your medication timing','اعرف توقيت دوائك'],['Some treatments are once-daily and easy to shift to iftar or suhoor; others need food or specific spacing. Confirm the plan with your team — never skip doses to fit fasting.','بعض العلاجات مرة يوميًا ويسهل نقلها للإفطار أو السحور؛ وبعضها يحتاج طعامًا أو فاصلًا محددًا. أكّد الخطة مع فريقك — ولا تتخطّ الجرعات لتناسب الصيام.']],
+  ['info',['When to consider breaking the fast','متى تفكّر في الإفطار'],['Worsening pain, frequent bloody stools, fever, dizziness or signs of a flare are reasons to stop fasting and seek advice. Your health comes first — Islam permits not fasting when it harms health.','ازدياد الألم، تكرّر البراز المدمّى، الحمّى، الدوخة أو علامات النوبة أسباب لإيقاف الصيام وطلب المشورة. صحتك أولًا — والشرع يبيح الفطر عند الضرر.']],
+];
+const HAJJ_TIPS=[
+  ['list',['Plan before you travel','خطّط قبل السفر'],['Get a fit-to-travel check, carry a clinic letter (Arabic + English), and pack enough medication for the whole trip plus extra. Keep biologics cool if needed and carry them in hand luggage.','احصل على فحص اللياقة للسفر، واحمل تقرير عيادة (عربي + إنجليزي)، وجهّز دواءً يكفي الرحلة كاملة وزيادة. احفظ العلاجات الحيوية باردة عند الحاجة واحملها في حقيبة اليد.']],
+  ['globe',['Restroom & crowd strategy','استراتيجية دورات المياه والزحام'],['Locate restrooms near the Haram, Mina, Arafat and Muzdalifah in advance. Consider quieter prayer times, comfortable footwear, and a small comfort kit (wipes, spare clothes, hand sanitizer).','حدّد دورات المياه قرب الحرم ومنى وعرفات ومزدلفة مسبقًا. فكّر بأوقات الصلاة الأقل ازدحامًا، وحذاء مريح، وحقيبة راحة صغيرة (مناديل، ملابس احتياطية، معقّم).']],
+  ['sun',['Heat, hydration & energy','الحرارة والترطيب والطاقة'],['Hajj is physically demanding in heat. Dehydration worsens IBD symptoms — drink regularly, use oral rehydration if you have diarrhea, rest in shade, and pace your rituals. Ihram makes some medication routines harder, so plan ahead.','الحج مجهد بدنيًا في الحر. الجفاف يفاقم الأعراض — اشرب بانتظام، واستخدم محلول الإماهة عند الإسهال، واسترح في الظل، ووزّع مناسكك. الإحرام يصعّب بعض روتين الدواء، فخطّط مسبقًا.']],
+  ['shield',['Reduce infection risk','قلّل خطر العدوى'],['Crowds raise infection risk, which can trigger flares. Stay up to date on required and recommended vaccines, wash hands often, and consider a mask in dense areas — discuss with your team, especially if you are on immune-modifying treatment.','الزحام يرفع خطر العدوى التي قد تُشعل النوبات. حدّث لقاحاتك المطلوبة والموصى بها، واغسل يديك كثيرًا، وفكّر بكمامة في الأماكن المكتظة — وناقش فريقك خاصة إن كنت على علاج مثبّط للمناعة.']],
+  ['pill',['Keep your routine on the road','حافظ على روتينك أثناء التنقّل'],['Time-zone changes and busy days make missed doses common — set reminders in this app. If you are unwell, there are medical centers throughout the holy sites; do not push through serious symptoms.','تغيّر المناطق الزمنية والأيام المزدحمة يجعل نسيان الجرعات شائعًا — اضبط التذكيرات في هذا التطبيق. إن شعرت بتوعّك، فهناك مراكز طبية في المشاعر؛ لا تتجاهل الأعراض الخطيرة.']],
+];
+const GULF_FOODS=[
+  {n:['Kabsa / Mandi (spiced rice & meat)','الكبسة / المندي'],c:'common',note:['Often well tolerated plain; heavy spice, ghee or very fatty cuts may trigger urgency in some.','غالبًا مقبولة عادية؛ التوابل الكثيرة أو السمن أو القطع الدسمة قد تثير الإلحاح لدى البعض.']},
+  {n:['Dates (Tamr)','التمر'],c:'fiber',note:['Nutritious and traditional for iftar; high in fiber and sugar — a few are fine, large amounts may cause gas or looser stools for some.','مغذٍّ وتقليدي للإفطار؛ غني بالألياف والسكر — القليل جيّد، والكثير قد يسبّب غازات أو ليونة لدى البعض.']},
+  {n:['Laban / Labneh (dairy)','اللبن / اللبنة'],c:'dairy',note:['If you are lactose-sensitive, dairy can worsen bloating and diarrhea. Tolerance is personal — track how you feel.','إن كنت حسّاسًا للّاكتوز فقد يزيد الألبان الانتفاخ والإسهال. التحمّل شخصي — تتبّع شعورك.']},
+  {n:['Harees / Jareesh (wheat)','الهريس / الجريش'],c:'common',note:['Soft and usually gentle on the gut; contains gluten, relevant only if you also have celiac disease.','طري وعادة لطيف على الأمعاء؛ يحتوي غلوتين، ويهمّ فقط إن كان لديك أيضًا داء سيلياك.']},
+  {n:['Spicy / chili-heavy dishes (Shatta, Mutabbal harr)','الأطباق الحارة (الشطة)'],c:'spicy',note:['Capsaicin can speed gut transit and increase urgency or cramping during active disease for some people.','الفلفل الحار قد يسرّع حركة الأمعاء ويزيد الإلحاح أو التقلّص أثناء النشاط لدى البعض.']},
+  {n:['Fried foods (Sambousek, Luqaimat)','المقليات (السمبوسك، اللقيمات)'],c:'fatty',note:['High-fat fried foods are a common trigger for cramping and loose stools, especially in larger portions.','المقليات عالية الدهون من المثيرات الشائعة للتقلّص والليونة، خاصة بكميات كبيرة.']},
+  {n:['Gahwa & strong tea (caffeine)','القهوة والشاي الثقيل'],c:'caffeine',note:['Caffeine stimulates the bowel and increases fluid loss — may worsen urgency and dehydration during flares.','الكافيين ينبّه الأمعاء ويزيد فقد السوائل — قد يفاقم الإلحاح والجفاف أثناء النوبات.']},
+  {n:['Soft drinks & carbonated juices','المشروبات الغازية'],c:'gas',note:['Carbonation and sugar/sweeteners can increase bloating and gas for many people.','الغازات والسكر/المحليات قد تزيد الانتفاخ والغازات لدى كثيرين.']},
+  {n:['Fresh vegetables & salads (raw)','الخضار والسلطات النيّة'],c:'fiber',note:['Healthy in remission; raw high-fiber veg can be harder to tolerate during a flare — cooked/peeled is often gentler then.','صحّية في الهدأة؛ الخضار النيّة عالية الألياف قتصعب أثناء النوبة — والمطبوخة/المقشّرة ألطف حينها.']},
+  {n:['Grilled fish & lean meat','السمك المشوي واللحم قليل الدهن'],c:'safe',note:['Lean grilled proteins are usually well tolerated and a good base for many meals.','البروتينات المشوية قليلة الدهن عادة جيّدة التحمّل وأساس جيّد لكثير من الوجبات.']},
+];
+const FOOD_CATS=[['all',['All','الكل']],['safe',['Usually gentle','عادة لطيف']],['spicy',['Spicy','حار']],['fatty',['Fried/fatty','مقلي/دسم']],['dairy',['Dairy','ألبان']],['caffeine',['Caffeine','كافيين']],['fiber',['High-fiber','ألياف']],['gas',['Gassy','منفّخ']]];
+let foodCat='all', foodQ='';
+
+route('localize',(n)=>{
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'دليلك المحلي':'Your local guide',rawSub:isAr()?'رمضان · الحج والعمرة · أطعمة الخليج':'Ramadan · Hajj & Umrah · Gulf foods'})}
+   <div class="content">
+     <div class="card" style="background:color-mix(in srgb,var(--accent) 10%,transparent);border-color:color-mix(in srgb,var(--accent) 26%,transparent)">
+       <p style="margin:0;font-size:13px;line-height:1.6;color:var(--accent);font-weight:600">${isAr()?'محتوى ثقافي ونمط حياة — وليس نصيحة طبية. قراراتك حول الصيام والسفر والدواء تكون مع فريقك الطبي.':'Cultural & lifestyle content — not medical advice. Decisions about fasting, travel and medication are made with your care team.'}</p>
+     </div>
+     <button class="card tap" onclick="go('ramadan')"><div class="row" style="gap:12px"><span class="ic" style="width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--accent)">${svgIcon('moon',24)}</span><div style="flex:1"><b style="font-size:15px">${isAr()?'الصيام في رمضان':'Fasting in Ramadan'}</b><div class="muted" style="font-size:12.5px">${isAr()?'الترطيب، توقيت الدواء، السحور والإفطار':'Hydration, medication timing, suhoor & iftar'}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>
+     <button class="card tap" onclick="go('hajj')"><div class="row" style="gap:12px"><span class="ic" style="width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--accent)">${svgIcon('globe',24)}</span><div style="flex:1"><b style="font-size:15px">${isAr()?'الحج والعمرة':'Hajj & Umrah'}</b><div class="muted" style="font-size:12.5px">${isAr()?'التخطيط، دورات المياه، الحرارة، العدوى':'Planning, restrooms, heat, infection'}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>
+     <button class="card tap" onclick="go('foods')"><div class="row" style="gap:12px"><span class="ic" style="width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--accent)">${svgIcon('utensils',24)}</span><div style="flex:1"><b style="font-size:15px">${isAr()?'دليل أطعمة الخليج':'Gulf foods guide'}</b><div class="muted" style="font-size:12.5px">${isAr()?'كيف قد تؤثّر الأطباق المحلية — والتحمّل شخصي':'How local dishes may affect you — tolerance is personal'}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>
+   </div>`;
+});
+function tipList(arr){return arr.map(x=>`<div class="card"><div class="row" style="gap:11px;align-items:flex-start"><span class="ic" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon(x[0],21)}</span><div><b style="font-size:14.5px;display:block;margin-bottom:5px">${x[1][EL()]}</b><span class="muted" style="font-size:13px;line-height:1.6">${x[2][EL()]}</span></div></div></div>`).join('');}
+route('ramadan',(n)=>{ n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'الصيام في رمضان':'Fasting in Ramadan',rawSub:isAr()?'مع التهاب الأمعاء':'with IBD'})}<div class="content">${tipList(RAMADAN_TIPS)}</div>`; });
+route('hajj',(n)=>{ n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'الحج والعمرة':'Hajj & Umrah',rawSub:isAr()?'دليل عملي':'a practical guide'})}<div class="content">${tipList(HAJJ_TIPS)}</div>`; });
+route('foods',(n)=>{
+  const list=GULF_FOODS.filter(f=>(foodCat==='all'||f.c===foodCat)&&(!foodQ||f.n[EL()].toLowerCase().includes(foodQ.toLowerCase())));
+  const badge={safe:'good',spicy:'bad',fatty:'warn',dairy:'accent2',caffeine:'warn',fiber:'accent',gas:'purple',common:'muted'};
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'دليل أطعمة الخليج':'Gulf foods guide',rawSub:isAr()?'التحمّل شخصي ويختلف بين الناس':'tolerance is personal'})}
+   <div class="content">
+     <input class="input" placeholder="${isAr()?'ابحث عن طبق…':'Search a dish…'}" value="${foodQ}" oninput="window.__foodQ(this.value)">
+     <div class="chips" style="overflow-x:auto;flex-wrap:nowrap">${FOOD_CATS.map(c=>`<button class="chip ${foodCat===c[0]?'on':''}" style="white-space:nowrap" onclick="window.__foodCat('${c[0]}')">${c[1][EL()]}</button>`).join('')}</div>
+     ${list.length?list.map(f=>`<div class="card"><div class="between" style="margin-bottom:6px"><b style="font-size:14.5px">${f.n[EL()]}</b><span class="badge ${badge[f.c]||'muted'}" style="font-size:10.5px">${(FOOD_CATS.find(c=>c[0]===f.c)||[,['',' ']])[1][EL()]||''}</span></div><span class="muted" style="font-size:13px;line-height:1.6">${f.note[EL()]}</span></div>`).join(''):`<p class="muted center" style="padding:20px">${isAr()?'لا نتائج':'No results'}</p>`}
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.6">${isAr()?'هذه ملاحظات عامة. أفضل دليل هو سجلّك الخاص — دوّن وجباتك وكيف تشعر لاكتشاف مثيراتك أنت.':'These are general notes. Your own log is the best guide — track meals and how you feel to find your personal triggers.'}</p></div>
+   </div>`;
+});
+window.__foodQ=(v)=>{foodQ=v;const a=document.activeElement,p=a&&a.selectionStart;render();const i=document.querySelector('.content input');if(i){i.focus();try{i.setSelectionRange(p,p);}catch(e){}}};
+window.__foodCat=(c)=>{foodCat=c;render();};
+
+/* ============================================================
    INIT
    ============================================================ */
 function ensureSga(){let changed=false;SGA_ARTICLES.forEach(a=>{if(!S.learn.find(x=>x.id===a.id)){S.learn.push(JSON.parse(JSON.stringify(a)));changed=true;}});if(changed)save();}
@@ -2869,9 +3319,11 @@ function renderSite(){
 
 ensureSga();
 applyDir();
+applyA11y();
 renderSite();
 if(window.__updateReady)showUpdate();
-go('splash',{replace:true});
+(async()=>{ if(/#clin=/.test(location.hash)){ const ok=await checkClinHash(); if(ok)return; } go('splash',{replace:true}); })();
+window.addEventListener('hashchange',()=>{ if(/#clin=/.test(location.hash)) checkClinHash(); });
 
 </script>
 </body>
