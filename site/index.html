@@ -2553,9 +2553,9 @@ function gaugeSvg(pct){pct=Math.max(0,Math.min(100,pct));const r=70,cx=90,cy=90;
 function animateGauge(root){const a=(root||document).querySelector('#gaugeArc');if(a)requestAnimationFrame(()=>requestAnimationFrame(()=>{a.style.strokeDashoffset=a.dataset.off;}));}
 function makeGradient(ctx,area,hex){if(!area)return hex;const g=ctx.createLinearGradient(0,area.top,0,area.bottom);g.addColorStop(0,hex+'cc');g.addColorStop(1,hex+'10');return g;}
 function chartBase(){const tick=cssVar('--muted')||'#8DA0B2',grid=cssVar('--line')||'#243140';
-  return {responsive:true,maintainAspectRatio:false,animation:{duration:900},plugins:{legend:{display:false}},
-  scales:{x:{ticks:{color:tick,font:{size:10}},grid:{display:false}},
-    y:{ticks:{color:tick,font:{size:10},precision:0},grid:{color:grid},beginAtZero:true}}};}
+  return {responsive:true,maintainAspectRatio:true,aspectRatio:1.9,animation:{duration:900},plugins:{legend:{display:false}},
+  scales:{x:{ticks:{color:tick,font:{size:10},maxRotation:0,autoSkip:true},grid:{display:false}},
+    y:{ticks:{color:tick,font:{size:10},precision:0,maxTicksLimit:6},grid:{color:grid},beginAtZero:true}}};}
 function areaFill(hex){return (c)=>{const{ctx,chartArea}=c.chart;if(!chartArea)return hex+'20';const g=ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);g.addColorStop(0,hex+'66');g.addColorStop(1,hex+'08');return g;};}
 function barFill(hex){return (c)=>{const{ctx,chartArea}=c.chart;if(!chartArea)return hex;const g=ctx.createLinearGradient(0,chartArea.top,0,chartArea.bottom);g.addColorStop(0,hex);g.addColorStop(1,hex+'55');return g;};}
 function drawReportCharts(days,ls){
