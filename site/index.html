@@ -438,6 +438,82 @@ input[type=range]{accent-color:var(--accent)}
   @media (max-width:1180px){ .lhero{grid-template-columns:1fr 380px;gap:32px} .lgrid{grid-template-columns:repeat(2,1fr)} }
 }
 </style>
+<style>
+/* ============================================================
+   PREMIUM LANDING (≥1024px) — motion + real photography
+   ============================================================ */
+@media (max-width:1023px){ .lx-section,.lhero-bg,.lhero-photos,.llang{display:none!important} }
+@media (min-width:1024px){
+  html{scroll-behavior:smooth}
+  /* nav language toggle */
+  .llang{margin-inline-start:6px;background:var(--card);border:1px solid var(--line);color:var(--txt);
+    padding:9px 14px;border-radius:11px;font-weight:800;font-size:13.5px;cursor:pointer;letter-spacing:.3px}
+  .llang:hover{border-color:color-mix(in srgb,var(--accent) 50%,transparent)}
+  .lcta{transition:transform .15s, box-shadow .15s} .lcta:hover{transform:translateY(-2px);box-shadow:0 14px 30px -8px color-mix(in srgb,var(--accent) 70%,transparent)}
+
+  /* HERO */
+  .lhero{position:relative;overflow:hidden;align-items:center;padding-top:64px}
+  .lhero-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+  .blob{position:absolute;border-radius:50%;filter:blur(60px);opacity:.55;animation:floaty 16s ease-in-out infinite}
+  .blob.b1{width:520px;height:520px;top:-180px;inset-inline-end:-120px;background:radial-gradient(circle,color-mix(in srgb,var(--accent) 70%,transparent),transparent 70%)}
+  .blob.b2{width:460px;height:460px;bottom:-220px;inset-inline-start:-140px;background:radial-gradient(circle,color-mix(in srgb,var(--accent2) 65%,transparent),transparent 70%);animation-delay:-6s}
+  .blob.b3{width:300px;height:300px;top:40%;inset-inline-start:46%;background:radial-gradient(circle,color-mix(in srgb,var(--purple) 55%,transparent),transparent 70%);animation-delay:-3s;opacity:.4}
+  @keyframes floaty{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(24px,-30px) scale(1.06)}66%{transform:translate(-20px,18px) scale(.96)}}
+  .lhero>*{position:relative;z-index:1}
+  .lhero-copy h1{font-size:60px;line-height:1.02;letter-spacing:-2.2px}
+  .lhero-copy h1 .grad{background:linear-gradient(115deg,var(--accent),var(--accent2) 60%,var(--purple));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lhero-photos{display:flex;gap:12px;margin-top:30px}
+  .lhero-photos .hp{flex:1;height:96px;border-radius:16px;background-size:cover;background-position:center;
+    box-shadow:0 14px 30px -16px rgba(0,0,0,.6);border:1px solid var(--line);transition:transform .5s cubic-bezier(.2,.7,.2,1);
+    background-color:color-mix(in srgb,var(--accent) 20%,var(--card2))}
+  .lhero-photos .hp:hover{transform:translateY(-6px) scale(1.03)}
+  .ldevice{transition:transform .6s cubic-bezier(.2,.7,.2,1)}
+
+  /* generic reveal-on-scroll */
+  .reveal{opacity:0;transform:translateY(26px);transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1;transform:none}
+
+  /* LIVING-WELL GALLERY */
+  .lx-section{max-width:1180px;margin:0 auto;padding:64px 40px}
+  .lx-eyebrow{display:block;text-align:center;font-size:13px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent);margin-bottom:10px}
+  .lx-h2{font-size:36px;letter-spacing:-1px;font-weight:800;text-align:center;margin:0 auto 8px;max-width:760px;line-height:1.1}
+  .lx-lead{text-align:center;color:var(--muted);font-size:17px;max-width:620px;margin:0 auto 40px;line-height:1.6}
+  .lx-gal{display:grid;grid-template-columns:2fr 1fr 1fr;grid-auto-rows:200px;gap:16px}
+  .gcard{position:relative;border-radius:22px;overflow:hidden;background-size:cover;background-position:center;
+    border:1px solid var(--line);background-color:color-mix(in srgb,var(--accent) 18%,var(--card2));isolation:isolate}
+  .gcard.big{grid-row:span 2}
+  .gcard::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(4,10,14,.78),rgba(4,10,14,.05) 55%);z-index:1}
+  .gcard img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;transition:transform .8s cubic-bezier(.2,.7,.2,1)}
+  .gcard:hover img{transform:scale(1.07)}
+  .gcard .cap{position:absolute;inset-inline:0;bottom:0;z-index:2;padding:18px 20px;color:#fff}
+  .gcard .cap b{font-size:17px;font-weight:800;letter-spacing:-.3px;display:block;text-shadow:0 2px 10px rgba(0,0,0,.4)}
+  .gcard .cap span{font-size:13px;opacity:.9}
+
+  /* STATS band */
+  .lx-stats{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 14%,var(--card)),color-mix(in srgb,var(--accent2) 10%,var(--card)));
+    border:1px solid var(--line);border-radius:28px;max-width:1100px}
+  .lx-statgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;text-align:center}
+  .lx-statgrid .num{font-size:44px;font-weight:800;letter-spacing:-1.5px;background:linear-gradient(120deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lx-statgrid .lab{font-size:13.5px;color:var(--muted);margin-top:6px;line-height:1.45}
+
+  /* QUOTE */
+  .lx-quote{display:grid;grid-template-columns:280px 1fr;gap:40px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:28px;max-width:1000px}
+  .lx-quote .portrait{width:100%;aspect-ratio:1;border-radius:24px;object-fit:cover;background-color:color-mix(in srgb,var(--accent) 18%,var(--card2));border:1px solid var(--line)}
+  .lx-quote blockquote{margin:0;font-size:23px;line-height:1.5;font-weight:600;letter-spacing:-.4px}
+  .lx-quote .who{margin-top:16px;color:var(--muted);font-size:14px}
+
+  /* CTA band */
+  .lx-cta{position:relative;overflow:hidden;text-align:center;border-radius:32px;max-width:1000px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));padding:64px 40px}
+  .lx-cta h2{font-size:40px;letter-spacing:-1.2px;color:#04221d;margin:0 0 12px;font-weight:800}
+  [data-mode=light] .lx-cta h2{color:#06302a}
+  .lx-cta p{color:rgba(4,34,29,.82);font-size:17px;margin:0 auto 26px;max-width:520px}
+  .lx-cta .lbtn-primary{background:#04221d;color:#fff}
+  .lx-cta .lbtn-ghost{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.4);color:#04221d;backdrop-filter:blur(4px)}
+  .lx-cta .blob{opacity:.3}
+  @media (max-width:1180px){ .lx-gal{grid-template-columns:1fr 1fr;grid-auto-rows:180px} .lx-statgrid{grid-template-columns:repeat(2,1fr);gap:18px} .lx-quote{grid-template-columns:1fr} }
+}
+</style>
 </head>
 <body>
 <!-- Desktop website shell (hidden on phones; app goes full-screen there) -->
@@ -445,24 +521,31 @@ input[type=range]{accent-color:var(--accent)}
   <header class="lnav">
     <a class="lbrand" href="#top"><span class="lbrand-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c4-4 7-6 12-7"/></svg></span><span>IBD&nbsp;Connect</span></a>
     <nav class="llinks">
-      <a href="#features">Features</a>
-      <a href="website.html">Learn more</a>
-      <a href="#about">About</a>
+      <a href="#features" data-en="Features" data-ar="المزايا">Features</a>
+      <a href="#gallery" data-en="Living well" data-ar="حياة أفضل">Living well</a>
+      <a class="llink-site" href="website.html" data-en="Learn" data-ar="تعلّم">Learn</a>
+      <a href="#about" data-en="About" data-ar="عن التطبيق">About</a>
     </nav>
-    <a class="lcta" href="website.html">Explore the website ↗</a>
+    <button class="llang" onclick="landSetLang(window.__landLang==='ar'?'en':'ar')" aria-label="language">العربية</button>
+    <a class="lcta llink-site" href="website.html" data-en="Explore the site ↗" data-ar="استكشف الموقع ↗">Explore the site ↗</a>
   </header>
 
   <section class="lhero" id="top">
+    <div class="lhero-bg" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
     <div class="lhero-copy">
-      <span class="lpill">Saudi Gastroenterology Association · IBD Guide</span>
-      <h1>Your IBD journey,<br>connected.</h1>
-      <p class="lhero-ar">رحلتك مع التهاب الأمعاء، متّصلة</p>
-      <p class="lhero-sub">A bilingual, non-medical companion to track daily symptoms, understand your patterns over time, and stay connected to your care — with education reviewed by clinical experts.</p>
+      <span class="lpill" data-en="Saudi Gastroenterology Association · IBD Guide" data-ar="الجمعية السعودية للجهاز الهضمي · دليل IBD">Saudi Gastroenterology Association · IBD Guide</span>
+      <h1><span data-en="Your IBD journey," data-ar="رحلتك مع التهاب الأمعاء،">Your IBD journey,</span><br><span class="grad" data-en="connected." data-ar="متّصلة.">connected.</span></h1>
+      <p class="lhero-sub" data-en="A bilingual companion to track daily symptoms, understand your own patterns, and stay close to your care — with education reviewed by clinical experts, and made for life in Saudi Arabia & the Gulf." data-ar="رفيق ثنائي اللغة لتتبّع أعراضك اليومية، وفهم أنماطك الشخصية، والبقاء قريبًا من رعايتك — بمحتوى يراجعه خبراء، ومصمّم للحياة في السعودية والخليج.">A bilingual companion to track daily symptoms, understand your own patterns, and stay close to your care — with education reviewed by clinical experts, and made for life in Saudi Arabia & the Gulf.</p>
       <div class="lhero-actions">
-        <a class="lbtn lbtn-primary" href="#app-anchor">Try it now</a>
-        <button class="lbtn lbtn-ghost" onclick="installApp&&installApp()">Add to home screen</button>
+        <a class="lbtn lbtn-primary" href="#app-anchor" data-en="Try it now" data-ar="جرّبه الآن">Try it now</a>
+        <button class="lbtn lbtn-ghost" onclick="installApp&&installApp()" data-en="Add to home screen" data-ar="أضِف للشاشة الرئيسية">Add to home screen</button>
       </div>
-      <div class="ltrust">Non-medical companion · Private on your device · English &amp; العربية</div>
+      <div class="lhero-photos" aria-hidden="true">
+        <div class="hp" data-img="photo-1543333995-a78aea2eee50"></div>
+        <div class="hp" data-img="photo-1571019613454-1cb2f99b2d8b"></div>
+        <div class="hp" data-img="photo-1490645935967-10de6ba17061"></div>
+      </div>
+      <div class="ltrust" data-en="Non-medical companion · Private on your device · English & العربية" data-ar="رفيق غير طبي · خاص على جهازك · العربية والإنجليزية">Non-medical companion · Private on your device · English & العربية</div>
     </div>
     <div class="lhero-device" id="app-anchor">
       <div class="ldevice">
@@ -478,15 +561,61 @@ input[type=range]{accent-color:var(--accent)}
     </div>
   </section>
 
+  <section class="lx-section" id="gallery">
+    <span class="lx-eyebrow reveal" data-en="Living well, every day" data-ar="حياة أفضل، كل يوم">Living well, every day</span>
+    <h2 class="lx-h2 reveal" data-en="More than a tracker — a companion for a fuller life" data-ar="أكثر من مجرّد متتبّع — رفيق لحياة أكمل">More than a tracker — a companion for a fuller life</h2>
+    <p class="lx-lead reveal" data-en="IBD is part of your story, not all of it. IBD Connect helps you stay active, eat well, travel, and keep doing what you love." data-ar="المرض جزء من قصتك، لا كلّها. يساعدك IBD Connect لتبقى نشطًا، وتأكل جيدًا، وتسافر، وتواصل ما تحب.">IBD is part of your story, not all of it. IBD Connect helps you stay active, eat well, travel, and keep doing what you love.</p>
+    <div class="lx-gal reveal">
+      <div class="gcard big"><img loading="lazy" data-img="photo-1511632765486-a01980e01a18" alt=""><div class="cap"><b data-en="Stay connected" data-ar="ابقَ متّصلًا">Stay connected</b><span data-en="Share a clean summary with the people who care for you" data-ar="شارك ملخصًا أنيقًا مع من يرعونك">Share a clean summary with the people who care for you</span></div></div>
+      <div class="gcard"><img loading="lazy" data-img="photo-1518611012118-696072aa579a" alt=""><div class="cap"><b data-en="Move gently" data-ar="تحرّك بلطف">Move gently</b><span data-en="Activity & steps" data-ar="النشاط والخطوات">Activity & steps</span></div></div>
+      <div class="gcard"><img loading="lazy" data-img="photo-1490645935967-10de6ba17061" alt=""><div class="cap"><b data-en="Eat with confidence" data-ar="كُل بثقة">Eat with confidence</b><span data-en="Gulf-food trigger guide" data-ar="دليل أطعمة الخليج">Gulf-food trigger guide</span></div></div>
+      <div class="gcard"><img loading="lazy" data-img="photo-1571019613454-1cb2f99b2d8b" alt=""><div class="cap"><b data-en="Build healthy habits" data-ar="عادات صحية">Build healthy habits</b><span data-en="Streaks & gentle nudges" data-ar="تتابعات وتنبيهات لطيفة">Streaks & gentle nudges</span></div></div>
+      <div class="gcard"><img loading="lazy" data-img="photo-1543333995-a78aea2eee50" alt=""><div class="cap"><b data-en="Travel with peace of mind" data-ar="سافر بطمأنينة">Travel with peace of mind</b><span data-en="Hajj, Umrah & beyond" data-ar="الحج والعمرة وأكثر">Hajj, Umrah & beyond</span></div></div>
+    </div>
+  </section>
+
+  <section class="lx-section">
+    <div class="lx-stats reveal" style="padding:44px 40px">
+      <div class="lx-statgrid">
+        <div><div class="num" data-count="80" data-suffix="+">0</div><div class="lab" data-en="countries where IBD is now an active challenge" data-ar="دولة أصبح فيها التهاب الأمعاء تحديًا نشطًا">countries where IBD is now an active challenge</div></div>
+        <div><div class="num" data-count="35" data-suffix="/100k">0</div><div class="lab" data-en="estimated prevalence in Saudi Arabia" data-ar="معدل الانتشار التقديري في السعودية">estimated prevalence in Saudi Arabia</div></div>
+        <div><div class="num" data-count="2" data-suffix="×">0</div><div class="lab" data-en="languages, fully bilingual with RTL" data-ar="لغتان، ثنائي اللغة بالكامل مع دعم RTL">languages, fully bilingual with RTL</div></div>
+        <div><div class="num" data-count="100" data-suffix="%">0</div><div class="lab" data-en="private — your data stays on your device" data-ar="خصوصية — بياناتك تبقى على جهازك">private — your data stays on your device</div></div>
+      </div>
+    </div>
+  </section>
+
   <section class="lsection" id="features">
-    <h2 class="ltitle">Everything for living well with IBD</h2>
+    <h2 class="ltitle reveal" data-en="Everything for living well with IBD" data-ar="كل ما تحتاجه للتعايش الجيد مع المرض">Everything for living well with IBD</h2>
     <div class="lgrid" id="lfeatures"></div>
+  </section>
+
+  <section class="lx-section">
+    <div class="lx-quote reveal">
+      <img class="portrait" loading="lazy" data-img="photo-1607990281513-2c110a25bd8c" alt="">
+      <div>
+        <blockquote data-en="“Having everything in one place — my symptoms, my reminders, and a clear summary for my doctor — made me feel in control again.”" data-ar="«وجود كل شيء في مكان واحد — أعراضي وتذكيراتي وملخص واضح لطبيبي — أعادني للشعور بالسيطرة.»">“Having everything in one place — my symptoms, my reminders, and a clear summary for my doctor — made me feel in control again.”</blockquote>
+        <div class="who" data-en="— A person living with IBD" data-ar="— شخص يتعايش مع المرض">— A person living with IBD</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lx-section">
+    <div class="lx-cta reveal">
+      <span class="blob b1" aria-hidden="true"></span>
+      <h2 data-en="Start your journey today" data-ar="ابدأ رحلتك اليوم">Start your journey today</h2>
+      <p data-en="Free, bilingual, and private. Open it in your browser or add it to your home screen." data-ar="مجاني وثنائي اللغة وخاص. افتحه في متصفّحك أو أضِفه لشاشتك الرئيسية.">Free, bilingual, and private. Open it in your browser or add it to your home screen.</p>
+      <div class="lhero-actions" style="justify-content:center">
+        <a class="lbtn lbtn-primary" href="#app-anchor" data-en="Open the app" data-ar="افتح التطبيق">Open the app</a>
+        <a class="lbtn lbtn-ghost llink-site" href="website.html" data-en="Explore the full site" data-ar="استكشف الموقع كاملًا">Explore the full site</a>
+      </div>
+    </div>
   </section>
 
   <footer class="lfoot" id="about">
     <div class="lfoot-in">
       <div><span class="lbrand-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c4-4 7-6 12-7"/></svg></span> <b>IBD Connect</b></div>
-      <p>IBD Connect is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider.</p>
+      <p data-en="IBD Connect is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider." data-ar="IBD Connect رفيق صحي غير طبي للتتبّع الذاتي والتثقيف. لا يقدّم نصيحة طبية أو تشخيصًا أو علاجًا وليس بديلًا عن الرعاية المهنية. استشر دائمًا مقدّم الرعاية الصحية.">IBD Connect is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider.</p>
       <p class="lfoot-sub">Educational content from the Saudi Gastroenterology Association — IBDguide.net. © <span id="lyear"></span> IBD Connect.</p>
     </div>
   </footer>
@@ -3305,22 +3434,64 @@ window.showUpdate=function(){const b=$('#updatebar');if(!b)return;
   b.classList.remove('hidden');};
 
 /* ---- desktop website: features + year ---- */
+const LAND_FEATS=[
+  ['pulse',['Track everything','تتبّع كل شيء'],['Symptoms, bowel movements (Bristol), meals, sleep, mood, activity, hydration, steps and weight — logged in seconds.','الأعراض وحركة الأمعاء (بريستول) والوجبات والنوم والمزاج والنشاط والترطيب والخطوات والوزن — تُسجَّل في ثوانٍ.']],
+  ['moon',['Made for Saudi & the Gulf','مصمّم للسعودية والخليج'],['Ramadan fasting guidance, Hajj & Umrah planning, and a Gulf-food trigger guide — things global apps simply do not have.','إرشاد صيام رمضان، وتخطيط الحج والعمرة، ودليل أطعمة الخليج — ما لا توفّره التطبيقات العالمية.']],
+  ['chart',['See your patterns','اكتشف أنماطك'],['Clean reports, an activity heatmap and private on-device observations — descriptive, never prescriptive.','تقارير واضحة وخريطة نشاط وملاحظات خاصة على جهازك — وصفية لا إرشادية.']],
+  ['share',['Share with your doctor','شارك مع طبيبك'],['Generate a clean summary your clinician opens by scanning a QR — and keep everything private on your device.','أنشئ ملخصًا يفتحه طبيبك بمسح رمز QR — مع إبقاء كل شيء خاصًا على جهازك.']],
+];
+const UNSPLASH=(id,w)=>`https://images.unsplash.com/${id}?w=${w||900}&q=80&auto=format&fit=crop`;
+function landImages(){
+  document.querySelectorAll('#site img[data-img]').forEach(im=>{const big=im.classList.contains('portrait')||im.closest('.gcard.big');im.src=UNSPLASH(im.getAttribute('data-img'),big?1100:800);im.onerror=()=>{im.style.display='none';};});
+  document.querySelectorAll('#site .hp[data-img]').forEach(d=>{d.style.backgroundImage=`url("${UNSPLASH(d.getAttribute('data-img'),500)}")`;});
+}
+window.__landLang='en';
+function landSetLang(lang){
+  window.__landLang=lang; try{localStorage.setItem('ibdweb_lang',lang);}catch(e){}
+  // keep the embedded app + page direction in sync
+  S.lang=lang; applyDir(); save();
+  document.querySelectorAll('#site [data-en]').forEach(elm=>{const v=elm.getAttribute(lang==='ar'?'data-ar':'data-en');if(v!=null)elm.textContent=v;});
+  const lb=document.querySelector('.llang');if(lb)lb.textContent=lang==='ar'?'EN':'العربية';
+  document.querySelectorAll('#site a.llink-site').forEach(a=>{a.href='website.html?lang='+lang;});
+  renderSite(); render();
+}
 function renderSite(){
   const yr=document.getElementById('lyear');if(yr)yr.textContent=new Date().getFullYear();
   const host=document.getElementById('lfeatures');if(!host)return;
-  const feats=[
-    ['pulse','Track everything','Symptoms, bowel movements (Bristol), meals, sleep, mood, activity, hydration, steps and weight — logged in seconds.'],
-    ['chart','See your patterns','Clean weekly & monthly reports, an activity heatmap and a consistency score — descriptive, never prescriptive.'],
-    ['book','Learn from experts','A bilingual IBD library featuring the Saudi Gastroenterology Association IBD Guide, authored by clinicians.'],
-    ['share','Stay connected','Share a clean summary with your doctor between visits — and keep everything private on your device.'],
-  ];
-  host.innerHTML=feats.map(([ic,h,p])=>`<div class="lcard"><div class="lc-ic">${svgIcon(ic,24)}</div><h3>${h}</h3><p>${p}</p></div>`).join('');
+  const ar=window.__landLang==='ar';
+  host.innerHTML=LAND_FEATS.map(([ic,h,p])=>`<div class="lcard reveal"><div class="lc-ic">${svgIcon(ic,24)}</div><h3>${ar?h[1]:h[0]}</h3><p>${ar?p[1]:p[0]}</p></div>`).join('');
+  initReveal();
+}
+function initReveal(){
+  if(!('IntersectionObserver' in window)){document.querySelectorAll('#site .reveal').forEach(e=>e.classList.add('in'));return;}
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.14});
+  document.querySelectorAll('#site .reveal:not(.in)').forEach(e=>io.observe(e));
+}
+function initCounters(){
+  const els=document.querySelectorAll('#site [data-count]');if(!els.length)return;
+  if(!('IntersectionObserver' in window)){els.forEach(el=>el.textContent=el.getAttribute('data-count')+(el.getAttribute('data-suffix')||''));return;}
+  const io=new IntersectionObserver((es)=>es.forEach(e=>{if(e.isIntersecting){const el=e.target,to=+el.getAttribute('data-count'),suf=el.getAttribute('data-suffix')||'';const t0=performance.now();
+    (function step(t){const k=Math.min((t-t0)/1000,1);const v=Math.round(to*(1-Math.pow(1-k,3)));el.textContent=v+suf;if(k<1)requestAnimationFrame(step);})(t0);io.unobserve(el);}}),{threshold:.5});
+  els.forEach(el=>io.observe(el));
+}
+function initParallax(){
+  const bg=document.querySelector('.lhero-bg'),dev=document.querySelector('.ldevice');
+  if(!bg)return;let tick=false;
+  window.addEventListener('scroll',()=>{if(tick)return;tick=true;requestAnimationFrame(()=>{const y=window.scrollY;bg.style.transform='translateY('+(y*.18)+'px)';if(dev&&window.innerWidth>=1024)dev.style.transform='translateY('+(y*-.05)+'px)';tick=false;});},{passive:true});
+}
+function initLanding(){
+  let lang='en';
+  try{const u=new URLSearchParams(location.search).get('lang');lang=u||localStorage.getItem('ibdweb_lang')||(navigator.language||'').slice(0,2)||'en';}catch(e){}
+  if(lang!=='ar')lang='en';
+  landImages();
+  landSetLang(lang);
+  initCounters();initParallax();
 }
 
 ensureSga();
 applyDir();
 applyA11y();
-renderSite();
+initLanding();
 if(window.__updateReady)showUpdate();
 (async()=>{ if(/#clin=/.test(location.hash)){ const ok=await checkClinHash(); if(ok)return; } go('splash',{replace:true}); })();
 window.addEventListener('hashchange',()=>{ if(/#clin=/.test(location.hash)) checkClinHash(); });
