@@ -443,7 +443,7 @@ input[type=range]{accent-color:var(--accent)}
 <!-- Desktop website shell (hidden on phones; app goes full-screen there) -->
 <div id="site">
   <header class="lnav">
-    <a class="lbrand" href="#top"><span class="lbrand-mark">🌿</span><span>IBD&nbsp;Connect</span></a>
+    <a class="lbrand" href="#top"><span class="lbrand-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c4-4 7-6 12-7"/></svg></span><span>IBD&nbsp;Connect</span></a>
     <nav class="llinks">
       <a href="#features">Features</a>
       <a href="website.html">Learn more</a>
@@ -485,7 +485,7 @@ input[type=range]{accent-color:var(--accent)}
 
   <footer class="lfoot" id="about">
     <div class="lfoot-in">
-      <div><span class="lbrand-mark">🌿</span> <b>IBD Connect</b></div>
+      <div><span class="lbrand-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c4-4 7-6 12-7"/></svg></span> <b>IBD Connect</b></div>
       <p>IBD Connect is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider.</p>
       <p class="lfoot-sub">Educational content from the Saudi Gastroenterology Association — IBDguide.net. © <span id="lyear"></span> IBD Connect.</p>
     </div>
@@ -546,12 +546,39 @@ const ICONS = {
   user:'<circle cx="12" cy="8" r="4"/><path d="M5 20a7 7 0 0 1 14 0"/>',
   wrench:'<path d="M14.5 6.5a3.5 3.5 0 0 1-4.6 4.6L5 16l3 3 4.9-4.9a3.5 3.5 0 0 0 4.6-4.6l-2 2-2-2z"/>',
   key:'<circle cx="8" cy="15" r="4"/><path d="m11 12 8-8 2 2-2 2 2 2-2 2-2-2-2 2z"/>',
+  dna:'<path d="M7 4c0 5 10 7 10 12M17 4c0 5-10 7-10 12"/><path d="M8.5 6h7M9.5 9h5M9.5 13h5M8.5 16h7"/>',
+  shield:'<path d="M12 3 5 6v5c0 4.4 3 8 7 10 4-2 7-5.6 7-10V6z"/><path d="m9 12 2 2 4-4"/>',
+  germ:'<circle cx="12" cy="12" r="6"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.5 5.5l2 2M16.5 16.5l2 2M18.5 5.5l-2 2M7.5 16.5l-2 2"/><circle cx="10.5" cy="11" r="1"/><circle cx="14" cy="13.5" r="1"/>',
+  smoking:'<path d="M3 16h14v3H3z"/><path d="M17 13c1.5 0 2-1 2-2s-.6-1.6-1.4-2.2S16 7 16 5.5"/><path d="M14 16v3"/>',
+  pause:'<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>',
+  frown:'<circle cx="12" cy="12" r="9"/><path d="M8.5 15.5s1.2-1.6 3.5-1.6 3.5 1.6 3.5 1.6"/><path d="M9 9.5h.01M15 9.5h.01"/>',
+  leaf:'<path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c4-4 7-6 12-7"/>',
+  brain:'<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 1 5 3 3 0 0 0 3 3 2.5 2.5 0 0 0 3-2.5V6.5A2.5 2.5 0 0 0 9 4z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-1 5 3 3 0 0 1-3 3 2.5 2.5 0 0 1-3-2.5V6.5A2.5 2.5 0 0 1 15 4z"/>',
+  plane:'<path d="M10 13 3 11l1-2 7 1 4-7 2.5 1L16 11l4 1 1 2-7 1-1 5-2-1z"/>',
+  ruler:'<rect x="3" y="8" width="18" height="8" rx="2" transform="rotate(0 12 12)"/><path d="M7 8v3M11 8v4M15 8v3M19 8v3"/>',
+  meat:'<path d="M14 10a5 5 0 1 0-7 7l-3 3 2 2 3-3a5 5 0 0 0 5-9z"/><circle cx="15.5" cy="8.5" r="3.5"/>',
+  cup:'<path d="M6 8h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z"/><path d="M9 8V5a3 3 0 0 1 6 0v3"/>',
+  stomach:'<path d="M8 4v5a4 4 0 0 0 4 4h2a3 3 0 0 1 0 6 4 4 0 0 1-4-4"/>',
+  sun:'<circle cx="12" cy="12" r="4.5"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/>',
+  microscope:'<path d="M6 18h12"/><path d="M9 18a5 5 0 0 0 8-4"/><path d="M10 6 8 8"/><rect x="8.5" y="3.5" width="4" height="6" rx="2" transform="rotate(45 10.5 6.5)"/><path d="M10 14h2"/>',
+  baby:'<circle cx="12" cy="6" r="2.5"/><path d="M12 9v5M7 12h10M9 21l3-4 3 4"/>',
+  syringe:'<path d="m18 2 4 4M17 5l2 2M14.5 7.5 16 9 9 16l-3 1 1-3z"/><path d="m6 18-2 2"/>',
+  bandage:'<rect x="3" y="8" width="18" height="8" rx="4" transform="rotate(45 12 12)"/><path d="M10 10l.01.01M14 14l.01.01M12 12l.01.01M10 14l.01.01M14 10l.01.01"/>',
+  telescope:'<path d="m4 14 14-7 2 4-14 7z"/><path d="m6.5 13 2 4M11 11l2 4M9 18l-2 3M13 16l2 3"/>',
+  circle:'<circle cx="12" cy="12" r="8"/>',
+  lotus:'<path d="M12 20c-5 0-8-3-8-6 2 0 4 1 5 2 0-3 1-6 3-9 2 3 3 6 3 9 1-1 3-2 5-2 0 3-3 6-8 6z"/>',
+  camera:'<path d="M4 8a2 2 0 0 1 2-2h2l1.2-1.6a1 1 0 0 1 .8-.4h4a1 1 0 0 1 .8.4L18 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2z" transform="translate(0 0)"/><circle cx="12" cy="13" r="3.2"/>',
+  play:'<path d="M7 5v14l11-7z"/>',
+  link:'<path d="M10 13a4 4 0 0 0 5.6 0l2.4-2.4a4 4 0 0 0-5.6-5.6L11 6.4"/><path d="M14 11a4 4 0 0 0-5.6 0L6 13.4a4 4 0 0 0 5.6 5.6L13 17.6"/>',
+  bulb:'<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.8.8 1 1.5 1 2.5h6c0-1 .2-1.7 1-2.5A6 6 0 0 0 12 3z"/>',
 };
 function svgIcon(name, size, cls) {
   const p = ICONS[name]; if (!p) return '';
   const s = size || 22;
   return `<svg class="svgi ${cls||''}" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
 }
+/* gicon: render a pro SVG icon when the value is an icon name, else fall back to the raw glyph */
+function gicon(v, size){ return ICONS[v] ? svgIcon(v, size||22) : (v||''); }
 
 /* ---------- i18n dictionary ---------- */
 const I18N = {
@@ -971,56 +998,56 @@ const DISC = [
 
 /* ---------- Learn content & wellness tips (admin-editable) ---------- */
 const DEFAULT_LEARN = [
-  {id:'l1',cat:'basics',new:true,min:5,icon:'🧬',en:["Basics of IBD","Inflammatory Bowel Disease (IBD) is a group of conditions causing chronic inflammation of the digestive tract. The two main types are Ulcerative Colitis and Crohn's Disease. IBD follows a relapsing–remitting course, meaning symptoms can flare and then settle. Understanding your condition is the first step toward living well with it. Daily tracking helps you and your care team see the bigger picture beyond a single clinic visit."], ar:["أساسيات التهاب الأمعاء","التهاب الأمعاء مجموعة من الحالات التي تسبّب التهابًا مزمنًا في الجهاز الهضمي. النوعان الرئيسيان هما التهاب القولون التقرّحي وداء كرون. يتّبع المرض مسارًا من الانتكاس والهدأة، أي أن الأعراض قد تشتد ثم تهدأ. فهم حالتك هو الخطوة الأولى للتعايش الجيد معها. التتبّع اليومي يساعدك وفريق رعايتك على رؤية الصورة الأشمل."]},
-  {id:'l2',cat:'uc',new:false,min:6,icon:'🔵',en:["Ulcerative Colitis fundamentals","Ulcerative Colitis (UC) affects the large intestine (colon and rectum), causing continuous inflammation of the innermost lining. Common experiences include diarrhea, urgency, and blood in the stool. UC severity and extent vary between people. Keeping a simple record of bowel movements and symptoms can help you notice changes early and have richer conversations with your gastroenterologist."], ar:["أساسيات التهاب القولون التقرّحي","يؤثّر التهاب القولون التقرّحي على الأمعاء الغليظة (القولون والمستقيم)، مسبّبًا التهابًا مستمرًا في البطانة الداخلية. تشمل الأعراض الشائعة الإسهال والإلحاح ووجود دم في البراز. تختلف الشدّة والامتداد من شخص لآخر. تسجيل حركة الأمعاء والأعراض يساعدك على ملاحظة التغيّرات مبكرًا."]},
-  {id:'l3',cat:'cd',new:false,min:6,icon:'🟣',en:["Crohn's Disease fundamentals","Crohn's Disease can affect any part of the digestive tract from mouth to anus, often in patches, and can involve the full thickness of the bowel wall. Symptoms may include abdominal pain, diarrhea, fatigue and weight changes. Because it varies so widely, tracking your individual pattern over time is especially valuable."], ar:["أساسيات داء كرون","يمكن أن يصيب داء كرون أي جزء من الجهاز الهضمي من الفم حتى الشرج، غالبًا بشكل متقطّع، وقد يشمل كامل سماكة جدار الأمعاء. تشمل الأعراض ألم البطن والإسهال والإرهاق وتغيّر الوزن. لأنه متفاوت جدًا، فإن تتبّع نمطك الفردي مع الوقت قيّم بشكل خاص."]},
-  {id:'l4',cat:'basics',new:false,min:4,icon:'🩹',en:["Mucosal healing","Mucosal healing refers to the recovery of the inflamed lining of the gut. It is an important goal in IBD care and is associated with better long-term outcomes. Your clinician assesses this through tests — your daily logs are a helpful companion to those assessments, not a replacement."], ar:["التئام الغشاء المخاطي","يشير التئام الغشاء المخاطي إلى تعافي البطانة الملتهبة للأمعاء. وهو هدف مهم في رعاية المرض ويرتبط بنتائج أفضل على المدى الطويل. يقيّمه طبيبك عبر الفحوصات — وسجلاتك اليومية رفيق مساعد لتلك التقييمات وليست بديلًا عنها."]},
-  {id:'l5',cat:'nutrition',new:true,min:7,icon:'🥗',en:["Nutrition & diet principles","There is no single 'IBD diet' that works for everyone. Many people find it helpful to identify foods that they personally tolerate well or poorly. Logging meals alongside how you feel can reveal personal patterns over time. Always discuss major dietary changes with your care team or a dietitian, especially during a flare."], ar:["مبادئ التغذية والحمية","لا توجد حمية واحدة تناسب الجميع. يجد كثيرون أنه من المفيد تحديد الأطعمة التي يتحمّلونها جيدًا أو بصعوبة. تسجيل الوجبات مع شعورك قد يكشف أنماطًا شخصية مع الوقت. ناقش دائمًا التغييرات الكبيرة مع فريق رعايتك أو أخصائي التغذية، خاصة أثناء النوبة."]},
-  {id:'l6',cat:'lifestyle',new:false,min:5,icon:'🧘',en:["Lifestyle & stress management","Stress doesn't cause IBD, but many people notice it can affect how they feel. Gentle routines — regular sleep, light activity, breathing exercises and social connection — support overall wellbeing. Small, consistent habits often matter more than dramatic changes."], ar:["نمط الحياة وإدارة التوتّر","التوتّر لا يسبّب المرض، لكن كثيرين يلاحظون أنه قد يؤثّر على شعورهم. الروتين اللطيف — نوم منتظم، نشاط خفيف، تمارين تنفّس وتواصل اجتماعي — يدعم العافية العامة. العادات الصغيرة المنتظمة غالبًا أهم من التغييرات الكبيرة."]},
+  {id:'l1',cat:'basics',new:true,min:5,icon:'dna',en:["Basics of IBD","Inflammatory Bowel Disease (IBD) is a group of conditions causing chronic inflammation of the digestive tract. The two main types are Ulcerative Colitis and Crohn's Disease. IBD follows a relapsing–remitting course, meaning symptoms can flare and then settle. Understanding your condition is the first step toward living well with it. Daily tracking helps you and your care team see the bigger picture beyond a single clinic visit."], ar:["أساسيات التهاب الأمعاء","التهاب الأمعاء مجموعة من الحالات التي تسبّب التهابًا مزمنًا في الجهاز الهضمي. النوعان الرئيسيان هما التهاب القولون التقرّحي وداء كرون. يتّبع المرض مسارًا من الانتكاس والهدأة، أي أن الأعراض قد تشتد ثم تهدأ. فهم حالتك هو الخطوة الأولى للتعايش الجيد معها. التتبّع اليومي يساعدك وفريق رعايتك على رؤية الصورة الأشمل."]},
+  {id:'l2',cat:'uc',new:false,min:6,icon:'stomach',en:["Ulcerative Colitis fundamentals","Ulcerative Colitis (UC) affects the large intestine (colon and rectum), causing continuous inflammation of the innermost lining. Common experiences include diarrhea, urgency, and blood in the stool. UC severity and extent vary between people. Keeping a simple record of bowel movements and symptoms can help you notice changes early and have richer conversations with your gastroenterologist."], ar:["أساسيات التهاب القولون التقرّحي","يؤثّر التهاب القولون التقرّحي على الأمعاء الغليظة (القولون والمستقيم)، مسبّبًا التهابًا مستمرًا في البطانة الداخلية. تشمل الأعراض الشائعة الإسهال والإلحاح ووجود دم في البراز. تختلف الشدّة والامتداد من شخص لآخر. تسجيل حركة الأمعاء والأعراض يساعدك على ملاحظة التغيّرات مبكرًا."]},
+  {id:'l3',cat:'cd',new:false,min:6,icon:'pulse',en:["Crohn's Disease fundamentals","Crohn's Disease can affect any part of the digestive tract from mouth to anus, often in patches, and can involve the full thickness of the bowel wall. Symptoms may include abdominal pain, diarrhea, fatigue and weight changes. Because it varies so widely, tracking your individual pattern over time is especially valuable."], ar:["أساسيات داء كرون","يمكن أن يصيب داء كرون أي جزء من الجهاز الهضمي من الفم حتى الشرج، غالبًا بشكل متقطّع، وقد يشمل كامل سماكة جدار الأمعاء. تشمل الأعراض ألم البطن والإسهال والإرهاق وتغيّر الوزن. لأنه متفاوت جدًا، فإن تتبّع نمطك الفردي مع الوقت قيّم بشكل خاص."]},
+  {id:'l4',cat:'basics',new:false,min:4,icon:'bandage',en:["Mucosal healing","Mucosal healing refers to the recovery of the inflamed lining of the gut. It is an important goal in IBD care and is associated with better long-term outcomes. Your clinician assesses this through tests — your daily logs are a helpful companion to those assessments, not a replacement."], ar:["التئام الغشاء المخاطي","يشير التئام الغشاء المخاطي إلى تعافي البطانة الملتهبة للأمعاء. وهو هدف مهم في رعاية المرض ويرتبط بنتائج أفضل على المدى الطويل. يقيّمه طبيبك عبر الفحوصات — وسجلاتك اليومية رفيق مساعد لتلك التقييمات وليست بديلًا عنها."]},
+  {id:'l5',cat:'nutrition',new:true,min:7,icon:'utensils',en:["Nutrition & diet principles","There is no single 'IBD diet' that works for everyone. Many people find it helpful to identify foods that they personally tolerate well or poorly. Logging meals alongside how you feel can reveal personal patterns over time. Always discuss major dietary changes with your care team or a dietitian, especially during a flare."], ar:["مبادئ التغذية والحمية","لا توجد حمية واحدة تناسب الجميع. يجد كثيرون أنه من المفيد تحديد الأطعمة التي يتحمّلونها جيدًا أو بصعوبة. تسجيل الوجبات مع شعورك قد يكشف أنماطًا شخصية مع الوقت. ناقش دائمًا التغييرات الكبيرة مع فريق رعايتك أو أخصائي التغذية، خاصة أثناء النوبة."]},
+  {id:'l6',cat:'lifestyle',new:false,min:5,icon:'lotus',en:["Lifestyle & stress management","Stress doesn't cause IBD, but many people notice it can affect how they feel. Gentle routines — regular sleep, light activity, breathing exercises and social connection — support overall wellbeing. Small, consistent habits often matter more than dramatic changes."], ar:["نمط الحياة وإدارة التوتّر","التوتّر لا يسبّب المرض، لكن كثيرين يلاحظون أنه قد يؤثّر على شعورهم. الروتين اللطيف — نوم منتظم، نشاط خفيف، تمارين تنفّس وتواصل اجتماعي — يدعم العافية العامة. العادات الصغيرة المنتظمة غالبًا أهم من التغييرات الكبيرة."]},
 ];
 const DEFAULT_TIPS = [
-  {id:'t1',icon:'✈️',cat:'travel',en:["Travelling with IBD","Plan ahead: locate restrooms along your route, carry a small comfort kit (wipes, spare clothes, medication in hand luggage), and keep a copy of your clinic letter. Stay hydrated on flights and give yourself extra time. A little preparation makes travel far less stressful."], ar:["السفر مع المرض","خطّط مسبقًا: حدّد دورات المياه على طريقك، واحمل حقيبة راحة صغيرة (مناديل، ملابس احتياطية، الدواء في حقيبة اليد)، واحتفظ بنسخة من تقرير عيادتك. حافظ على ترطيبك في الرحلات وامنح نفسك وقتًا إضافيًا."]},
-  {id:'t2',icon:'🍽️',cat:'meals',en:["Meal planning made simple","Preparing meals ahead can reduce stress on busy days. Keep a few 'safe' meals you tolerate well ready to go. Eat smaller, more frequent meals if large ones feel uncomfortable, and note how different foods sit with you in your meal log."], ar:["تخطيط الوجبات ببساطة","تحضير الوجبات مسبقًا يقلّل التوتّر في الأيام المزدحمة. احتفظ بوجبات 'آمنة' تتحمّلها جيدًا جاهزة. تناول وجبات أصغر وأكثر تكرارًا إن كانت الكبيرة غير مريحة، وسجّل كيف يستقر كل طعام معك."]},
-  {id:'t3',icon:'💧',cat:'hydration',en:["Hydration reminders","Staying well hydrated is important, particularly if you experience frequent diarrhea. Sip fluids throughout the day rather than large amounts at once. Oral rehydration solutions can help replace lost salts — ask your care team what suits you."], ar:["تذكيرات الترطيب","الترطيب الجيّد مهم، خاصة مع الإسهال المتكرّر. ارتشف السوائل طوال اليوم بدل كميات كبيرة دفعة واحدة. محاليل الإماهة الفموية تساعد على تعويض الأملاح المفقودة — اسأل فريق رعايتك عمّا يناسبك."]},
-  {id:'t4',icon:'🌙',cat:'lifestyle',en:["Building a sleep routine","Consistent sleep supports energy and mood. Try a regular bedtime, dim screens an hour before, and keep your room cool and dark. If night-time symptoms disturb your sleep, note them so you can discuss patterns with your clinician."], ar:["بناء روتين نوم","النوم المنتظم يدعم الطاقة والمزاج. جرّب وقت نوم ثابتًا، وخفّف الشاشات قبل ساعة، وأبقِ غرفتك باردة ومظلمة. إن أزعجتك أعراض ليلية، فدوّنها لتناقش الأنماط مع طبيبك."]},
-  {id:'t5',icon:'🧠',cat:'wellbeing',en:["Caring for your mental wellbeing","Living with a chronic condition can be emotionally demanding. It's okay to ask for help. Simple practices — talking to someone you trust, short walks, mindfulness — can ease the load. If low mood or anxiety persists, reach out to a professional."], ar:["العناية بصحتك النفسية","التعايش مع حالة مزمنة قد يكون مرهقًا عاطفيًا. لا بأس بطلب المساعدة. ممارسات بسيطة — التحدّث لشخص تثق به، مشي قصير، اليقظة الذهنية — تخفّف العبء. إن استمر تدنّي المزاج أو القلق، تواصل مع مختص."]},
-  {id:'t6',icon:'🌿',cat:'wellbeing',en:["General lifestyle tips","Move gently when you can, avoid smoking (it worsens Crohn's), limit alcohol if it bothers you, and build a support network. Wellbeing is the sum of many small choices, not perfection."], ar:["نصائح عامة لنمط الحياة","تحرّك بلطف عندما تستطيع، تجنّب التدخين (يفاقم كرون)، قلّل الكحول إن أزعجك، وابنِ شبكة دعم. العافية مجموع خيارات صغيرة كثيرة، لا الكمال."]},
+  {id:'t1',icon:'plane',cat:'travel',en:["Travelling with IBD","Plan ahead: locate restrooms along your route, carry a small comfort kit (wipes, spare clothes, medication in hand luggage), and keep a copy of your clinic letter. Stay hydrated on flights and give yourself extra time. A little preparation makes travel far less stressful."], ar:["السفر مع المرض","خطّط مسبقًا: حدّد دورات المياه على طريقك، واحمل حقيبة راحة صغيرة (مناديل، ملابس احتياطية، الدواء في حقيبة اليد)، واحتفظ بنسخة من تقرير عيادتك. حافظ على ترطيبك في الرحلات وامنح نفسك وقتًا إضافيًا."]},
+  {id:'t2',icon:'utensils',cat:'meals',en:["Meal planning made simple","Preparing meals ahead can reduce stress on busy days. Keep a few 'safe' meals you tolerate well ready to go. Eat smaller, more frequent meals if large ones feel uncomfortable, and note how different foods sit with you in your meal log."], ar:["تخطيط الوجبات ببساطة","تحضير الوجبات مسبقًا يقلّل التوتّر في الأيام المزدحمة. احتفظ بوجبات 'آمنة' تتحمّلها جيدًا جاهزة. تناول وجبات أصغر وأكثر تكرارًا إن كانت الكبيرة غير مريحة، وسجّل كيف يستقر كل طعام معك."]},
+  {id:'t3',icon:'droplet',cat:'hydration',en:["Hydration reminders","Staying well hydrated is important, particularly if you experience frequent diarrhea. Sip fluids throughout the day rather than large amounts at once. Oral rehydration solutions can help replace lost salts — ask your care team what suits you."], ar:["تذكيرات الترطيب","الترطيب الجيّد مهم، خاصة مع الإسهال المتكرّر. ارتشف السوائل طوال اليوم بدل كميات كبيرة دفعة واحدة. محاليل الإماهة الفموية تساعد على تعويض الأملاح المفقودة — اسأل فريق رعايتك عمّا يناسبك."]},
+  {id:'t4',icon:'moon',cat:'lifestyle',en:["Building a sleep routine","Consistent sleep supports energy and mood. Try a regular bedtime, dim screens an hour before, and keep your room cool and dark. If night-time symptoms disturb your sleep, note them so you can discuss patterns with your clinician."], ar:["بناء روتين نوم","النوم المنتظم يدعم الطاقة والمزاج. جرّب وقت نوم ثابتًا، وخفّف الشاشات قبل ساعة، وأبقِ غرفتك باردة ومظلمة. إن أزعجتك أعراض ليلية، فدوّنها لتناقش الأنماط مع طبيبك."]},
+  {id:'t5',icon:'brain',cat:'wellbeing',en:["Caring for your mental wellbeing","Living with a chronic condition can be emotionally demanding. It's okay to ask for help. Simple practices — talking to someone you trust, short walks, mindfulness — can ease the load. If low mood or anxiety persists, reach out to a professional."], ar:["العناية بصحتك النفسية","التعايش مع حالة مزمنة قد يكون مرهقًا عاطفيًا. لا بأس بطلب المساعدة. ممارسات بسيطة — التحدّث لشخص تثق به، مشي قصير، اليقظة الذهنية — تخفّف العبء. إن استمر تدنّي المزاج أو القلق، تواصل مع مختص."]},
+  {id:'t6',icon:'leaf',cat:'wellbeing',en:["General lifestyle tips","Move gently when you can, avoid smoking (it worsens Crohn's), limit alcohol if it bothers you, and build a support network. Wellbeing is the sum of many small choices, not perfection."], ar:["نصائح عامة لنمط الحياة","تحرّك بلطف عندما تستطيع، تجنّب التدخين (يفاقم كرون)، قلّل الكحول إن أزعجك، وابنِ شبكة دعم. العافية مجموع خيارات صغيرة كثيرة، لا الكمال."]},
 ];
 
 /* ---------- SGA IBD Guide content (IBDguide.net — Saudi Gastroenterology Association) ----------
    Source: https://www.saudigastro.com/ibd-guide  · expert-authored, bilingual */
 const SGA_ARTICLES = [
-  {id:'sga_flare',cat:'aboutibd',icon:'🔥',min:3,new:true,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/acute-flares',author:{en:'Prof. Majid Al-Madi',ar:'أ.د. ماجد عبدالرحمن الماضي'},
+  {id:'sga_flare',cat:'aboutibd',icon:'flame',min:3,new:true,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/acute-flares',author:{en:'Prof. Majid Al-Madi',ar:'أ.د. ماجد عبدالرحمن الماضي'},
    en:["Managing acute flare-ups","A flare is a period of intense disease activity, when clear symptoms return after a phase of relative calm.\n\nSigns may include frequent diarrhea, abdominal pain and cramping, blood in the stool, fever, weight loss and general fatigue.\n\nSeek medical care for severe abdominal pain, ongoing bleeding, high fever, inability to stay hydrated, or worrying new symptoms.\n\nEarly treatment shortens symptoms, prevents complications, reduces hospital admission and protects quality of life. During a flare: rest well, keep hydrated, follow a light diet, avoid stress, and take medication as advised.\n\nFlares become less likely when you stick to regular treatment, avoid known triggers, manage stress, attend follow-ups, and keep a healthy lifestyle."],
    ar:["التعامل مع الهجمات الحادة","الهجمة الحادة فترة يحدث فيها نشاط شديد للمرض مع ظهور أعراض واضحة بعد فترة من الهدوء النسبي.\n\nتشمل العلامات: إسهالاً متكرراً، ألماً وتقلصات في البطن، نزيفاً في البراز، حمى، فقدان وزن، وإرهاقاً عاماً.\n\nاطلب الرعاية الطبية عند الألم البطني الشديد أو النزيف المستمر أو الحمى العالية أو عدم القدرة على الترطيب أو ظهور أعراض جديدة مقلقة.\n\nالعلاج المبكر يقلّل مدة الأعراض ويمنع المضاعفات ويقلّل الحاجة للمستشفى ويحافظ على جودة الحياة. أثناء الهجمة: راحة كافية، سوائل وافرة، نظام غذائي خفيف، تجنّب الضغوط، وتناول الأدوية حسب التوصيات.\n\nيمكن تقليل الانتكاسات بالالتزام بالعلاج المنتظم وتجنّب المثيرات وإدارة التوتر والمتابعة الدورية ونمط حياة صحي."]},
-  {id:'sga_nutrition',cat:'nutrition',icon:'🥗',min:3,new:true,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/nutrition-and-ibd',author:{en:'Dr. Mahdi Al-Sahhaf',ar:'د. مهدي عبدالرسول الصحاف'},
+  {id:'sga_nutrition',cat:'nutrition',icon:'utensils',min:3,new:true,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/nutrition-and-ibd',author:{en:'Dr. Mahdi Al-Sahhaf',ar:'د. مهدي عبدالرسول الصحاف'},
    en:["Nutrition and IBD","Good nutrition plays a crucial role in managing IBD. The right diet helps improve symptoms, maintain a healthy weight, and avoid nutrient deficiencies.\n\nAim for enough protein (to repair tissue), carbohydrates (for energy), healthy fats (to absorb vitamins), and vitamins and minerals for overall health.\n\nSome foods may worsen symptoms in certain people — fatty foods, spicy foods, dairy (for some), and excess fiber.\n\nDuring a flare you may need to reduce fiber, split meals into smaller portions, avoid irritating foods, and sometimes use liquid nutrition. In remission you can gradually reintroduce foods, slowly increase fiber, and keep variety and balance.\n\nWorking with a dietitian experienced in IBD is strongly recommended to build a personal plan."],
    ar:["التغذية وأمراض التهاب الأمعاء","تلعب التغذية السليمة دوراً حاسماً في إدارة أمراض التهاب الأمعاء، إذ تساعد على تحسين الأعراض والحفاظ على وزن صحي وتجنّب نقص العناصر الغذائية.\n\nاحرص على البروتينات لإصلاح الأنسجة، والكربوهيدرات للطاقة، والدهون لامتصاص الفيتامينات، والفيتامينات والمعادن للصحة العامة.\n\nقد تزيد بعض الأطعمة الأعراض لدى بعض المرضى مثل الأطعمة الدهنية والحارة ومنتجات الألبان والألياف الزائدة.\n\nخلال الهجمات قد تحتاج لتقليل الألياف وتقسيم الوجبات وتجنّب الأطعمة المهيجة وربما التغذية السائلة. وفي فترة الخمول يمكن إعادة إدخال الأطعمة وزيادة الألياف تدريجياً مع الحفاظ على التوازن.\n\nيوصى بشدة بالعمل مع اختصاصي تغذية متخصص في IBD لوضع خطة غذائية شخصية."]},
-  {id:'sga_smoking',cat:'aboutibd',icon:'🚭',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/smoking-and-ibd',author:{en:'Dr. Faisal Al-Adwani & Dr. Hadi Qutub',ar:'د. فيصل العدواني، د. هادي قطب'},
+  {id:'sga_smoking',cat:'aboutibd',icon:'smoking',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/smoking-and-ibd',author:{en:'Dr. Faisal Al-Adwani & Dr. Hadi Qutub',ar:'د. فيصل العدواني، د. هادي قطب'},
    en:["Smoking and IBD","Smoking has an important — and opposite — effect on the two main forms of IBD.\n\nIn Crohn's disease, smokers tend to have more severe symptoms, more complications (strictures and fistulas), more frequent flares, a greater need for stronger medication, and more repeat surgery. Stopping smoking is clearly beneficial: about a year after quitting, the risk of Crohn's activity can approach that of a non-smoker.\n\nIn ulcerative colitis, the disease is less common among smokers, who may have lower disease activity and less need for hospitalization, steroids or colectomy — possibly because nicotine affects the mucous layer and colon immune response.\n\nEither way, the overall harms of smoking — chronic bronchitis, lung cancer and heart disease — far outweigh any effect on the bowel."],
    ar:["التدخين وداء الأمعاء الالتهابي","للتدخين تأثير مهم ومتعاكس على النوعين الرئيسيين للمرض.\n\nفي داء كرون، المدخنون أكثر عرضة لأعراض حادة ومضاعفات (تضيّقات ونواسير) ونشاط متكرر، ويحتاجون أدوية أقوى وتدخلاً جراحياً متكرراً. ترك التدخين مفيد بوضوح: بعد سنة من الإقلاع قد تقترب فرص النشاط من غير المدخن.\n\nأما التهاب القولون التقرحي فهو أقل شيوعاً لدى المدخنين، وقد يكون لديهم نشاط أقل واحتياج أقل للتنويم والكورتيزون واستئصال القولون، ربما لأن النيكوتين يزيد الطبقة المخاطية ويكبت مناعة القولون.\n\nوفي جميع الأحوال، فإن مضار التدخين العامة — التهاب الشعب المزمن وسرطان الرئة وأمراض القلب — تفوق أي تأثير على الأمعاء."]},
-  {id:'sga_endoscopy',cat:'aboutibd',icon:'🔬',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/endoscopy-and-ibd',author:{en:'Dr. Abdullah Al-Bishi',ar:'د. عبدالله محمد البيشي'},
+  {id:'sga_endoscopy',cat:'aboutibd',icon:'microscope',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/endoscopy-and-ibd',author:{en:'Dr. Abdullah Al-Bishi',ar:'د. عبدالله محمد البيشي'},
    en:["Endoscopy and IBD","Endoscopy is a procedure in which a thin, flexible tube with a camera is passed into the digestive tract to examine the tissue and take images.\n\nTypes include upper endoscopy (esophagus, stomach, duodenum), colonoscopy (colon and rectum), and capsule endoscopy for the small bowel.\n\nIt helps diagnose Crohn's disease and ulcerative colitis, assess the degree of inflammation, and take tissue samples for microscopic examination. It also allows treatments such as widening narrowed areas and stopping bleeding.\n\nEndoscopy is relatively safe; rare complications include bleeding or bowel perforation. It requires preparation such as bowel cleansing and avoiding food and drink beforehand."],
    ar:["التنظير وداء الأمعاء الالتهابي","التنظير إجراء يُدخَل فيه أنبوب رفيع مرن مزوّد بكاميرا في الجهاز الهضمي لفحص الأنسجة والتقاط الصور.\n\nأنواعه: التنظير العلوي (المريء والمعدة والاثنا عشر)، والتنظير السفلي (القولون والمستقيم)، وتنظير الكبسولة للأمعاء الدقيقة.\n\nيساعد على تشخيص داء كرون والتهاب القولون التقرحي وتقييم درجة الالتهاب وأخذ عينات للفحص المجهري، كما يتيح تدخلات علاجية مثل توسيع الأماكن الضيقة وإيقاف النزيف.\n\nالتنظير آمن نسبياً، وقد تحدث مضاعفات نادرة كالنزيف أو انثقاب الأمعاء. ويتطلب تحضيراً مثل تنظيف القولون وتجنّب الطعام والشراب قبله."]},
-  {id:'sga_biologics',cat:'research',icon:'💉',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/biological-therapies',author:{en:'IBD Guide Editorial Team',ar:'فريق دليل IBD'},
+  {id:'sga_biologics',cat:'research',icon:'syringe',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/biological-therapies',author:{en:'IBD Guide Editorial Team',ar:'فريق دليل IBD'},
    en:["Biological therapies for IBD","Biologics are advanced medicines made from living organisms. They target the immune system and reduce inflammation in the digestive tract.\n\nTypes include anti-TNF-alpha agents (which reduce certain inflammatory proteins), integrin inhibitors (which block immune-cell migration), and cytokine inhibitors (which target specific inflammatory pathways).\n\nVedolizumab is a gut-selective integrin-targeting biologic that reduces inflammation effectively with a good safety profile.\n\nStudies show biologics are effective at inducing remission and improving symptoms in many patients. They require regular monitoring; side effects may include infection and allergic reactions. Discuss the options with your specialist to choose what suits you."],
    ar:["العلاجات البيولوجية (الحيوية)","العلاجات البيولوجية أدوية متقدّمة مصنّعة من كائنات حية، تستهدف الجهاز المناعي وتقلّل الالتهاب في الجهاز الهضمي.\n\nمن أنواعها: مضادات TNF-alpha (تقلّل بروتينات التهابية معينة)، ومثبطات التكاملات (تمنع هجرة الخلايا المناعية)، ومثبطات السيتوكين (تستهدف مسارات التهابية محددة).\n\nفيدوليزوماب دواء بيولوجي يستهدف تكاملات الأمعاء تحديداً، ويقلّل الالتهاب بفعالية مع ملف أمان جيّد.\n\nأظهرت الدراسات فعاليتها في تحريض الخمول وتحسين الأعراض لدى كثير من المرضى. وتتطلب مراقبة دورية، وقد تشمل آثارها الجانبية العدوى والحساسية. ناقش الخيارات مع طبيبك المختص."]},
-  {id:'sga_fgid',cat:'research',icon:'🧠',min:4,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/functional-gi-disorders',author:{en:'Dr. Mohammed Al-Sulaimi',ar:'د. محمد سعود السليمي'},
+  {id:'sga_fgid',cat:'research',icon:'brain',min:4,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/functional-gi-disorders',author:{en:'Dr. Mohammed Al-Sulaimi',ar:'د. محمد سعود السليمي'},
    en:["Functional GI disorders in IBD","Functional gastrointestinal disorders (FGIDs) are common and significantly affect people living with IBD. Unlike the chronic inflammation of IBD, FGIDs arise from dysregulation of the gut–brain axis, causing chronic, recurring symptoms without clear structural changes.\n\nAround 25% of people with quiescent (inactive) IBD experience symptoms from a functional bowel disorder, which can mimic IBD and make diagnosis difficult.\n\nCommon types include irritable bowel syndrome (IBS), functional dyspepsia, functional constipation, functional diarrhea, and functional abdominal pain.\n\nContributing factors include altered gut motility, microbiome imbalance, medication effects, prior surgery, altered gut permeability, immune activation and visceral hypersensitivity. Treatment is individualized and may combine behavioral, psychological, nutritional and medication approaches. Accurate diagnosis can greatly improve quality of life."],
    ar:["اضطرابات الجهاز الهضمي الوظيفية مع IBD","اضطرابات الجهاز الهضمي الوظيفية شائعة وتؤثر كثيراً في حياة مرضى التهاب الأمعاء. وخلافاً للالتهاب المزمن في IBD، تنتج هذه الاضطرابات عن خلل في تنظيم محور الأمعاء والدماغ، مسبّبة أعراضاً مزمنة ومتكررة دون تغيّرات تركيبية واضحة.\n\nنحو 25% من مرضى IBD في فترة الخمول يعانون أعراض اضطراب وظيفي قد تشبه أعراض المرض نفسه فيصعب التشخيص.\n\nمن أنواعها الشائعة: متلازمة القولون العصبي، وعسر الهضم الوظيفي، والإمساك الوظيفي، والإسهال الوظيفي، وآلام البطن الوظيفية.\n\nتسهم عوامل عدة مثل تغيّر حركية الأمعاء وخلل الميكروبيوم وآثار الأدوية والعمليات السابقة واختلال نفاذية الأمعاء وتنشيط المناعة وفرط الحساسية المعوية. والعلاج فردي وقد يجمع المناهج السلوكية والنفسية والتغذوية والدوائية، والتشخيص الدقيق يحسّن جودة الحياة كثيراً."]},
-  {id:'sga_skin',cat:'aboutibd',icon:'🩹',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/skin-diseases',author:{en:'Dr. Abdulaziz Al-Omari',ar:'د. عبدالعزيز العمري'},
+  {id:'sga_skin',cat:'aboutibd',icon:'bandage',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/skin-diseases',author:{en:'Dr. Abdulaziz Al-Omari',ar:'د. عبدالعزيز العمري'},
    en:["Skin manifestations in IBD","IBD is associated with several skin manifestations outside the gut, which are important complications that can affect quality of life.\n\nErythema nodosum is a painful rash, usually on the legs and ankles, closely linked to bowel disease activity.\n\nOther features include painful red, raised lesions on the limbs; mouth involvement such as ulcers and inflammation of the lips; and skin infections (fungal or bacterial) in patients on immune-suppressing treatment.\n\nKeep the skin clean, avoid irritants, and see a dermatologist for the right treatment. Early recognition matters."],
    ar:["الأمراض الجلدية في داء الأمعاء الالتهابي","يترافق المرض مع عدة تظاهرات جلدية خارج الجهاز الهضمي، وهي مضاعفات مهمة قد تؤثر في جودة الحياة.\n\nالحمامى العقدية طفح مؤلم يظهر عادة على الساقين والكاحلين ويرتبط ارتباطاً وثيقاً بنشاط المرض المعوي.\n\nوتشمل التظاهرات الأخرى طفحاً أحمر منتفخاً مؤلماً على الأطراف، وإصابة الفم كالقرح والتهاب الشفاه، وعدوى جلدية (فطرية أو جرثومية) لدى من يتلقون علاجاً مثبطاً للمناعة.\n\nحافظ على نظافة الجلد وتجنّب المهيجات واستشر طبيب الجلدية للعلاج الأمثل. والتعرّف المبكر مهم."]},
-  {id:'sga_pregnancy',cat:'stories',icon:'🤰',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/pregnancy-and-ibd',author:{en:'Dr. Bushra Al-Sharif & Dr. Noha Bawarth',ar:'د. بشرى الشريف، د. نهى باوارث'},
+  {id:'sga_pregnancy',cat:'stories',icon:'baby',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/pregnancy-and-ibd',author:{en:'Dr. Bushra Al-Sharif & Dr. Noha Bawarth',ar:'د. بشرى الشريف، د. نهى باوارث'},
    en:["Pregnancy and IBD","IBD's effect on fertility, pregnancy and the baby's health is a key concern for patients and doctors.\n\nIf one parent has IBD, the child's risk is about 5–7%, rising to about 30% if both parents are affected.\n\nIt's best to plan pregnancy during remission, since conceiving during active disease often leads to active disease through the pregnancy. Pregnancy may even reduce relapse rates long term, though active disease can raise the risk of bleeding, low birth weight and preterm birth — but not birth defects.\n\nFollow a balanced diet with folic acid (2 mg daily) and check for iron and vitamin deficiency early. Lab tests are safe; lower endoscopy is safe in pregnancy and MRI is the preferred imaging. Some medicines (such as anti-TNF) are safe, while methotrexate and sulfasalazine should be avoided. Vaginal birth is generally safe; cesarean is advised for active perianal Crohn's. Breastfeeding does not directly affect the disease."],
    ar:["الحمل وداء الأمعاء الالتهابي","تأثير المرض على الإخصاب والحمل وصحة الجنين محل اهتمام المريض والطبيب.\n\nإذا كان أحد الوالدين مصاباً فاحتمال إصابة الطفل 5–7%، ويصل إلى نحو 30% إن كان كلاهما مصاباً.\n\nيُفضّل التخطيط للحمل في فترة خمول المرض، لأن الحمل أثناء النشاط غالباً ما يستمر فيه النشاط. وقد يكون الحمل وقائياً على المدى الطويل بتقليل الانتكاسات، رغم أن النشاط قد يزيد خطر النزيف وانخفاض وزن المولود والولادة المبكرة، لكنه لا يزيد التشوهات الخلقية.\n\nاتبعي حمية متوازنة مع حمض الفوليك (2 ملجم يومياً) وافحصي نقص الحديد والفيتامينات مبكراً. التحاليل آمنة، والمنظار السفلي آمن أثناء الحمل، والرنين المغناطيسي الخيار الأفضل للأشعة. بعض الأدوية آمنة مثل anti-TNF، ويجب تجنّب methotrexate والسلفاسالازين. الولادة الطبيعية آمنة عموماً، وتُنصح القيصرية في حالات كرون النشطة حول الشرج. والرضاعة لا تؤثر مباشرة في المرض."]},
-  {id:'sga_future',cat:'research',icon:'🔭',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/future-outlook',author:{en:'Dr. Al-Zubaidi, Dr. Al-Mutairi & Dr. Al-Omro',ar:'د. الزبيدي، د. المطيري، د. العمرو'},
+  {id:'sga_future',cat:'research',icon:'telescope',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/future-outlook',author:{en:'Dr. Al-Zubaidi, Dr. Al-Mutairi & Dr. Al-Omro',ar:'د. الزبيدي، د. المطيري، د. العمرو'},
    en:["The future of Crohn's & UC care","With rising IBD rates, coordinated effort between health centers, hospitals, staff and researchers is essential to improve care.\n\nIntegrated specialized centers bring a multidisciplinary team offering early diagnosis, complete patient records, easy patient–provider communication, and evidence-based comprehensive care.\n\nThe main goals are inducing remission, improving quality of life, and full mucosal healing seen on endoscopy.\n\nNew treatment paths include JAK inhibitors (small molecules that interrupt inflammation, e.g. tofacitinib, available in Saudi Arabia), antisense nucleotides, and probiotics and stem cells under research. Response is increasingly measured by tissue-level healing under the microscope rather than symptom relief alone. Education, peer support, cognitive behavioral therapy and preventive medicine all play a role."],
    ar:["الرؤية المستقبلية لكرون والقولون التقرحي","مع ازدياد حالات التهاب الأمعاء، أصبح تضافر جهود المراكز الصحية والمستشفيات والعاملين والباحثين ضرورياً لتحسين الرعاية.\n\nتوفّر المراكز المتخصصة المتكاملة فريقاً متعدد التخصصات يقدّم تشخيصاً مبكراً وملفات متكاملة للمرضى وسهولة تواصل وخدمات علاجية شمولية مبنية على الأدلة.\n\nالهدف الرئيسي هو تحريض خمود المرض وتحسين جودة الحياة والالتئام الكامل للأمعاء بالمنظار.\n\nتشمل المسارات الجديدة مثبطات جاك (جزيئات صغيرة تتداخل مع الالتهاب مثل توفاسيتينيب المتوفر في السعودية)، والنكليوتيدات المضادة، والبروبيوتيك والخلايا الجذعية قيد البحث. ويتطوّر قياس الاستجابة من اختفاء الأعراض إلى خلو الأنسجة من الالتهاب تحت المجهر. وللتوعية والدعم النفسي والعلاج السلوكي المعرفي والطب الوقائي دور مهم."]},
-  {id:'sga_stomacare',cat:'aboutibd',icon:'🩺',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/anastomosis-care',author:{en:'Dr. Mohammed Al-Sulaimi',ar:'د. محمد سعود السليمي'},
+  {id:'sga_stomacare',cat:'aboutibd',icon:'heart',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/anastomosis-care',author:{en:'Dr. Mohammed Al-Sulaimi',ar:'د. محمد سعود السليمي'},
    en:["Stoma care basics","A stoma is a surgically created opening in the abdomen that diverts waste outside the body, usually after bowel surgery or in obstruction, connected to an external pouch.\n\nThe two main types are colostomy (connected to the large bowel) and ileostomy (connected to the small bowel when parts of the bowel are removed).\n\nKey care steps: learn correct care from your providers; empty the pouch when it is about one-third full; work with a specialized stoma nurse; protect the skin around the stoma with the right size opening; and clean and dry before changing the pouch.\n\nDrink enough fluids, chew food well to prevent blockage, and wear loose clothing and cotton underwear. Exercise and return to work are possible after healing, with care to protect the stoma from direct injury."],
    ar:["أساسيات العناية بالفغرة (المفاغرة)","الفغرة فتحة جراحية في البطن تحوّل الفضلات خارج الجسم، تُجرى عادة بعد جراحات الأمعاء أو في حالات الانسداد، وتُوصَل بكيس خارجي لجمع الفضلات.\n\nنوعاها الرئيسيان: فغرة القولون (تتصل بالأمعاء الغليظة)، وفغرة اللفائفي (تتصل بالأمعاء الدقيقة عند إزالة أجزاء منها).\n\nأهم خطوات العناية: تعلّم العناية الصحيحة من مقدمي الرعاية، وتفريغ الكيس عند امتلائه إلى الثلث، والتعاون مع ممرضة متخصصة، وحماية الجلد حول الفتحة بالحجم المناسب، والتنظيف والتجفيف قبل تغيير الكيس.\n\nاشرب سوائل كافية، وامضغ الطعام جيداً لمنع الانسداد، وارتدِ ملابس فضفاضة وقطنية. ويمكن ممارسة الرياضة والعودة للعمل بعد الشفاء مع حماية الفغرة من الإصابة المباشرة."]},
-  {id:'sga_stomacomp',cat:'aboutibd',icon:'⚠️',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/stoma-complications',author:{en:'IBD Guide Editorial Team',ar:'فريق دليل IBD'},
+  {id:'sga_stomacomp',cat:'aboutibd',icon:'info',min:3,source:'SGA',link:'https://www.saudigastro.com/ibd-guide/stoma-complications',author:{en:'IBD Guide Editorial Team',ar:'فريق دليل IBD'},
    en:["Stoma complications to watch for","Like any surgery, a stoma may have complications worth knowing so you can act early.\n\nSkin irritation — redness, itching and rash from contact with adhesive or waste. Dehydration — especially with an ileostomy, causing strong thirst, dry mouth, headache and dizziness. Leakage — from a poorly fitting or improperly sealed appliance.\n\nBowel obstruction — from poorly chewed food, causing abdominal pain and bloating. Stoma retraction — from rapid weight loss or poor nutrition. Parastomal hernia — from increased abdominal pressure.\n\nStomal necrosis (loss of blood supply) is a medical emergency. Regular follow-up with your care providers is essential — contact them promptly if you notice any of these signs."],
    ar:["مضاعفات الفغرة التي يجب الانتباه لها","كأي إجراء جراحي، قد تصاحب الفغرة مضاعفات من المهم معرفتها للتصرّف مبكراً.\n\nتهيّج الجلد: احمرار وحكة وطفح من ملامسة اللاصق أو الفضلات. الجفاف: خاصة في فغرة اللفائفي، يسبّب عطشاً شديداً وجفاف فم وصداعاً ودوخة. التسرّب: من عدم ملاءمة الجهاز أو ضعف الإغلاق.\n\nانسداد الأمعاء: من عدم مضغ الطعام جيداً، مع ألم وانتفاخ. انكماش الفغرة: من فقدان الوزن السريع أو سوء التغذية. الفتق المجاور: من زيادة الضغط على البطن.\n\nنخر الفغرة (نقص التروية الدموية) حالة طارئة. المتابعة المنتظمة مع مقدمي الرعاية ضرورية — تواصل معهم فوراً عند ملاحظة أي من هذه العلامات."]},
 ];
@@ -1031,7 +1058,7 @@ let S = load();
 function blank(){return{
   lang:null, onboarded:false, authed:false,
   user:{name:'',email:'',year:'',gender:'',disease:'',diagYear:'',avatar:'🙂',country:'',countryFlag:''},
-  prefs:{remindDaily:true,remindMed:false,remindContent:true,analytics:false,medTime:'20:00',theme:'midnight',
+  prefs:{remindDaily:true,remindMed:false,remindContent:true,analytics:false,medTime:'20:00',theme:'whoop',
     stepGoal:8000,activeMinGoal:30,waterGoal:8,nudges:true,nudgeDaily:true,nudgeStreak:true,nudgeHydra:true,seenWelcome:false},
   logs:[], disc:null, reminders:[],
   badges:[], learn:JSON.parse(JSON.stringify(DEFAULT_LEARN)), tips:JSON.parse(JSON.stringify(DEFAULT_TIPS)),
@@ -1118,12 +1145,12 @@ function addLog(o){o.id=rid();o.t=o.t||new Date().toISOString();S.logs.push(o);a
 
 /* badges / achievements (descriptive engagement only) */
 const BADGE_DEFS=[
-  {id:'first',icon:'🌱',en:'First log',ar:'أول تسجيل',test:()=>S.logs.length>=1},
-  {id:'streak3',icon:'🔥',en:'3-day streak',ar:'٣ أيام متتالية',test:()=>streak()>=3},
-  {id:'streak7',icon:'⚡',en:'7-day streak',ar:'٧ أيام متتالية',test:()=>streak()>=7},
-  {id:'allsix',icon:'🎯',en:'Full day logged',ar:'يوم مكتمل',test:()=>{const set=new Set(logsOn(todayKey()).map(l=>l.type));return set.size>=5;}},
-  {id:'disc',icon:'🧭',en:'Self-check done',ar:'أكملت التقييم',test:()=>!!S.disc},
-  {id:'logs25',icon:'📚',en:'25 logs',ar:'٢٥ تسجيلًا',test:()=>S.logs.length>=25},
+  {id:'first',icon:'leaf',en:'First log',ar:'أول تسجيل',test:()=>S.logs.length>=1},
+  {id:'streak3',icon:'flame',en:'3-day streak',ar:'٣ أيام متتالية',test:()=>streak()>=3},
+  {id:'streak7',icon:'pulse',en:'7-day streak',ar:'٧ أيام متتالية',test:()=>streak()>=7},
+  {id:'allsix',icon:'target',en:'Full day logged',ar:'يوم مكتمل',test:()=>{const set=new Set(logsOn(todayKey()).map(l=>l.type));return set.size>=5;}},
+  {id:'disc',icon:'compass',en:'Self-check done',ar:'أكملت التقييم',test:()=>!!S.disc},
+  {id:'logs25',icon:'book',en:'25 logs',ar:'٢٥ تسجيلًا',test:()=>S.logs.length>=25},
 ];
 function checkBadges(){BADGE_DEFS.forEach(b=>{if(b.test()&&!S.badges.includes(b.id)){S.badges.push(b.id);setTimeout(()=>toast((isAr()?'🏅 إنجاز جديد: ':'🏅 New badge: ')+(isAr()?b.ar:b.en)),400);}});}
 
@@ -1179,7 +1206,7 @@ function getScale(id){const w=$('#'+id);return w&&w.dataset.val?+w.dataset.val:0
 route('splash',(n)=>{
   n.classList.add('splash');
   n.innerHTML=`
-    <div class="logo-mark">🌿</div>
+    <div class="logo-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c4-4 7-6 12-7"/></svg></div>
     <div>
       <div style="font-size:30px;font-weight:800;letter-spacing:-.5px">IBD Connect</div>
       <div style="font-size:16px;color:var(--muted);margin-top:6px">رفيق التهاب الأمعاء</div>
@@ -1197,7 +1224,7 @@ route('splash',(n)=>{
 route('lang',(n)=>{
   n.innerHTML=`
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:30px 22px;gap:26px">
-      <div class="logo-mark" style="width:64px;height:64px;border-radius:20px;font-size:30px">🌿</div>
+      <div class="logo-mark" style="width:64px;height:64px;border-radius:20px;color:#fff"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c4-4 7-6 12-7"/></svg></div>
       <div>
         <h1 style="font-size:25px;margin:0 0 6px">Choose your language</h1>
         <div style="font-size:25px;font-weight:800;margin-bottom:8px">اختر لغتك</div>
@@ -1214,13 +1241,13 @@ window.setLang=function(l){S.lang=l;save();applyDir();go('onboard',{replace:true
 const OB=['ob1','ob2','ob3'];
 let obIdx=0;
 route('onboard',(n)=>{
-  const slides=[['📝','ob1t','ob1d','🩺'],['📈','ob2t','ob2d','📊'],['🤝','ob3t','ob3d','📄']];
+  const slides=[['edit','ob1t','ob1d'],['chart','ob2t','ob2d'],['share','ob3t','ob3d']];
   const [emoji,tk,dk]=slides[obIdx];
   n.innerHTML=`
    <div style="flex:1;display:flex;flex-direction:column;padding:20px">
      <div class="between"><div></div><button class="btn-sm btn-ghost" onclick="obSkip()">${t('skip')}</button></div>
      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:22px">
-       <div style="width:160px;height:160px;border-radius:40px;display:flex;align-items:center;justify-content:center;font-size:74px;background:linear-gradient(150deg,rgba(0,224,184,.18),rgba(25,160,255,.1));border:1px solid rgba(0,224,184,.25)">${emoji}</div>
+       <div style="width:160px;height:160px;border-radius:40px;display:flex;align-items:center;justify-content:center;color:var(--accent);background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 18%,transparent),color-mix(in srgb,var(--accent2) 10%,transparent));border:1px solid color-mix(in srgb,var(--accent) 25%,transparent)">${gicon(emoji,72)}</div>
        <h1 style="font-size:24px;margin:0;padding:0 10px">${t(tk)}</h1>
        <p class="muted" style="margin:0;font-size:15px;line-height:1.6;padding:0 14px;max-width:340px">${t(dk)}</p>
      </div>
@@ -1234,7 +1261,7 @@ window.obNext=()=>{if(obIdx<2){obIdx++;render();}else{obIdx=0;go('disclaimer');}
 route('disclaimer',(n)=>{
   n.innerHTML=`${topbar('disclaimerT',null,{back:true})}
    <div class="content" style="gap:18px">
-     <div style="font-size:42px">⚕️</div>
+     <div style="color:var(--accent)">${svgIcon('shield',40)}</div>
      <div class="disc-box">${t('disclaimerBody').replace(/\n/g,'<br>')}</div>
      <div class="check" id="discChk" onclick="this.classList.toggle('on')">
        <div class="box">✓</div><div class="t">${t('agreeDisc')}</div></div>
@@ -1298,7 +1325,7 @@ window.setupNext=()=>{
 route('login',(n)=>{
   n.innerHTML=`
    <div style="padding:calc(30px + env(safe-area-inset-top)) 22px 30px;display:flex;flex-direction:column;min-height:100%">
-     <div class="logo-mark" style="width:60px;height:60px;border-radius:18px;font-size:28px;margin-bottom:24px">🌿</div>
+     <div class="logo-mark" style="width:60px;height:60px;border-radius:18px;margin-bottom:24px;color:#fff"><svg viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c4-4 7-6 12-7"/></svg></div>
      <h1 style="font-size:26px;margin:0 0 4px">${t('welcome')}</h1>
      <p class="muted" style="margin:0 0 26px">${t('appName')} · ${t('tagline')}</p>
      <div class="field"><label>${t('email')}</label><input class="input" id="liEmail" type="email" placeholder="you@email.com" value="${S.user.email||''}"></div>
@@ -1375,7 +1402,7 @@ route('today',(n)=>{
      <!-- Level / XP bar -->
      <div class="card tap" onclick="go('rewards')" style="padding:15px 16px">
        <div class="between">
-         <div class="row" style="gap:11px"><div style="width:42px;height:42px;border-radius:13px;background:var(--accent-d);display:flex;align-items:center;justify-content:center;font-size:21px;border:1px solid var(--accent)">${lv.icon}</div>
+         <div class="row" style="gap:11px"><div style="width:42px;height:42px;border-radius:13px;background:var(--accent-d);display:flex;align-items:center;justify-content:center;color:var(--accent);border:1px solid var(--accent)">${gicon(lv.icon,22)}</div>
            <div><b style="font-size:15px">${isAr()?'المستوى':'Level'} ${lv.level} · ${isAr()?lv.ar:lv.en}</b><div class="muted" style="font-size:12px">${lv.xpIn} / ${lv.xpFor} XP</div></div></div>
          <div class="badge accent">🔥 ${st} ${isAr()?'يوم':'d'}</div>
        </div>
@@ -1448,7 +1475,7 @@ route('today',(n)=>{
      <div class="between"><div class="section-title" style="margin:0">${t('achievements')}</div>
        <button class="muted" style="font-size:12.5px;font-weight:600" onclick="go('rewards')">${t('viewAll')}</button></div>
      <div class="card" style="display:flex;gap:14px;overflow-x:auto;padding:16px">
-       ${BADGE_DEFS.map(b=>{const got=S.badges.includes(b.id);return `<div style="text-align:center;min-width:64px;opacity:${got?1:.35}"><div style="width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;background:${got?'rgba(0,224,184,.15)':'var(--bg2)'};border:1px solid ${got?'var(--accent)':'var(--line)'}">${b.icon}</div><div style="font-size:10.5px;margin-top:6px;color:var(--muted)">${isAr()?b.ar:b.en}</div></div>`;}).join('')}
+       ${BADGE_DEFS.map(b=>{const got=S.badges.includes(b.id);return `<div style="text-align:center;min-width:64px;opacity:${got?1:.35}"><div style="width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;color:${got?'var(--accent)':'var(--muted)'};background:${got?'color-mix(in srgb,var(--accent) 15%,transparent)':'var(--bg2)'};border:1px solid ${got?'var(--accent)':'var(--line)'}">${gicon(b.icon,24)}</div><div style="font-size:10.5px;margin-top:6px;color:var(--muted)">${isAr()?b.ar:b.en}</div></div>`;}).join('')}
      </div>
 
      <div class="card tap" onclick="openLogger('disc')" style="background:linear-gradient(150deg,rgba(155,124,255,.14),rgba(25,160,255,.06));border-color:rgba(155,124,255,.3)">
@@ -1471,13 +1498,13 @@ route('badges',(n)=>{go('rewards',{replace:true});});
    GAMIFICATION — XP, levels, goal rings, quests, confetti
    ============================================================ */
 const LEVELS=[
-  {min:0,en:'Seedling',ar:'بذرة',icon:'🌱'},
-  {min:80,en:'Sprout',ar:'برعم',icon:'🌿'},
-  {min:200,en:'Explorer',ar:'مستكشف',icon:'🧭'},
-  {min:400,en:'Pathfinder',ar:'رائد الطريق',icon:'⭐'},
-  {min:700,en:'Achiever',ar:'منجِز',icon:'🏅'},
-  {min:1100,en:'Champion',ar:'بطل',icon:'🏆'},
-  {min:1700,en:'Legend',ar:'أسطورة',icon:'👑'},
+  {min:0,en:'Seedling',ar:'بذرة',icon:'leaf'},
+  {min:80,en:'Sprout',ar:'برعم',icon:'leaf'},
+  {min:200,en:'Explorer',ar:'مستكشف',icon:'compass'},
+  {min:400,en:'Pathfinder',ar:'رائد الطريق',icon:'sparkles'},
+  {min:700,en:'Achiever',ar:'منجِز',icon:'target'},
+  {min:1100,en:'Champion',ar:'بطل',icon:'trophy'},
+  {min:1700,en:'Legend',ar:'أسطورة',icon:'sun'},
 ];
 function levelInfo(){const xp=S.game.xp||0;let i=0;for(let j=0;j<LEVELS.length;j++){if(xp>=LEVELS[j].min)i=j;}
   const cur=LEVELS[i],nxt=LEVELS[i+1];const floor=cur.min,ceil=nxt?nxt.min:cur.min+600;
@@ -1518,19 +1545,19 @@ window.dayDetail=function(d){const ls=logsOn(d);openSheet(`<h2 style="font-size:
 
 /* quests */
 const QUESTS=[
-  {id:'q_days3',icon:'📅',en:'Log on 3 different days',ar:'سجّل في ٣ أيام مختلفة',goal:3,xp:50,prog:()=>new Set(S.logs.map(l=>l.t.slice(0,10))).size},
-  {id:'q_full',icon:'🎯',en:'Complete a full day (5 types)',ar:'أكمل يومًا كاملًا (٥ أنواع)',goal:5,xp:40,prog:()=>{let m=0;lastNDays(30).forEach(d=>{m=Math.max(m,new Set(logsOn(d).map(l=>l.type)).size);});return m;}},
-  {id:'q_streak7',icon:'🔥',en:'Reach a 7-day streak',ar:'حقّق تتابع ٧ أيام',goal:7,xp:80,prog:()=>streak()},
-  {id:'q_disc',icon:'🧭',en:'Finish an IBD-DISC self-check',ar:'أكمل تقييم IBD-DISC',goal:1,xp:30,prog:()=>S.disc?1:0},
-  {id:'q_learn3',icon:'📖',en:'Read 3 Learn articles',ar:'اقرأ ٣ مقالات تثقيفية',goal:3,xp:30,prog:()=>S.game.readCount||0},
-  {id:'q_logs50',icon:'📚',en:'Reach 50 total logs',ar:'بلوغ ٥٠ تسجيلًا',goal:50,xp:100,prog:()=>S.logs.length},
+  {id:'q_days3',icon:'calendar',en:'Log on 3 different days',ar:'سجّل في ٣ أيام مختلفة',goal:3,xp:50,prog:()=>new Set(S.logs.map(l=>l.t.slice(0,10))).size},
+  {id:'q_full',icon:'target',en:'Complete a full day (5 types)',ar:'أكمل يومًا كاملًا (٥ أنواع)',goal:5,xp:40,prog:()=>{let m=0;lastNDays(30).forEach(d=>{m=Math.max(m,new Set(logsOn(d).map(l=>l.type)).size);});return m;}},
+  {id:'q_streak7',icon:'flame',en:'Reach a 7-day streak',ar:'حقّق تتابع ٧ أيام',goal:7,xp:80,prog:()=>streak()},
+  {id:'q_disc',icon:'compass',en:'Finish an IBD-DISC self-check',ar:'أكمل تقييم IBD-DISC',goal:1,xp:30,prog:()=>S.disc?1:0},
+  {id:'q_learn3',icon:'book',en:'Read 3 Learn articles',ar:'اقرأ ٣ مقالات تثقيفية',goal:3,xp:30,prog:()=>S.game.readCount||0},
+  {id:'q_logs50',icon:'list',en:'Reach 50 total logs',ar:'بلوغ ٥٠ تسجيلًا',goal:50,xp:100,prog:()=>S.logs.length},
 ];
 function checkQuests(){let any=false;QUESTS.forEach(q=>{if(!S.game.quests[q.id]&&q.prog()>=q.goal){S.game.quests[q.id]='ready';any=true;}});return any;}
 window.claimQuest=function(id){if(S.game.quests[id]==='ready'){const q=QUESTS.find(x=>x.id===id);S.game.quests[id]='claimed';awardXp(q.xp);confetti();toast('+'+q.xp+' XP 🎉');render();}};
 function questTeaser(){checkQuests();const ready=QUESTS.filter(q=>S.game.quests[q.id]==='ready').length;
   if(ready>0)return `<div class="card tap" onclick="go('rewards')" style="background:linear-gradient(140deg,color-mix(in srgb,var(--warn) 18%,transparent),transparent);border-color:color-mix(in srgb,var(--warn) 35%,transparent)"><div class="row"><div style="font-size:24px">🎁</div><div style="flex:1"><b style="font-size:14.5px">${ready} ${isAr()?'مكافأة جاهزة':'reward(s) ready'}</b><div class="muted" style="font-size:12px">${isAr()?'اضغط لاستلام نقاطك':'Tap to claim your XP'}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></div>`;
   const ip=QUESTS.filter(q=>S.game.quests[q.id]!=='claimed').map(q=>({q,p:Math.min(q.prog(),q.goal)})).filter(x=>x.p<x.q.goal).sort((a,b)=>(b.p/b.q.goal)-(a.p/a.q.goal))[0];
-  if(ip)return `<div class="card tap" onclick="go('rewards')"><div class="row"><div style="font-size:24px">${ip.q.icon}</div><div style="flex:1"><b style="font-size:13.5px">${isAr()?ip.q.ar:ip.q.en}</b><div class="pbar" style="margin-top:7px"><i style="width:${ip.p/ip.q.goal*100}%"></i></div></div><span class="muted" style="font-size:12px;font-weight:700">${ip.p}/${ip.q.goal}</span></div></div>`;
+  if(ip)return `<div class="card tap" onclick="go('rewards')"><div class="row"><div style="color:var(--accent)">${gicon(ip.q.icon,24)}</div><div style="flex:1"><b style="font-size:13.5px">${isAr()?ip.q.ar:ip.q.en}</b><div class="pbar" style="margin-top:7px"><i style="width:${ip.p/ip.q.goal*100}%"></i></div></div><span class="muted" style="font-size:12px;font-weight:700">${ip.p}/${ip.q.goal}</span></div></div>`;
   return '';
 }
 
@@ -1550,7 +1577,7 @@ route('rewards',(n)=>{
   n.innerHTML=`${topbar('rewardsT','rewardsSub',{back:true})}
    <div class="content">
      <div class="card glass center">
-       <div style="font-size:48px">${lv.icon}</div>
+       <div style="color:var(--accent)">${gicon(lv.icon,46)}</div>
        <div style="font-size:20px;font-weight:800;margin-top:4px">${t('levelLbl')} ${lv.level} · ${isAr()?lv.ar:lv.en}</div>
        <div class="pbar" style="margin:12px 0 6px"><i style="width:${lv.pct}%"></i></div>
        <div class="muted" style="font-size:12.5px">${lv.xpIn} / ${lv.xpFor} XP ${isAr()?'للمستوى التالي':'to next level'}</div>
@@ -1567,12 +1594,12 @@ route('rewards',(n)=>{
 
      <div class="section-title">${t('quests')}</div>
      <div class="card">${QUESTS.map(q=>{const p=Math.min(q.prog(),q.goal);const st=S.game.quests[q.id];const done=st==='claimed';const ready=st==='ready';
-       return `<div class="quest"><div class="qic" style="${done?'opacity:.5':''}">${q.icon}</div><div class="qx"><b style="font-size:13.5px;${done?'opacity:.6':''}">${isAr()?q.ar:q.en}</b>
+       return `<div class="quest"><div class="qic" style="color:var(--accent);${done?'opacity:.5':''}">${gicon(q.icon,22)}</div><div class="qx"><b style="font-size:13.5px;${done?'opacity:.6':''}">${isAr()?q.ar:q.en}</b>
          <div class="between" style="margin-top:6px;gap:10px"><div class="pbar" style="flex:1"><i style="width:${p/q.goal*100}%"></i></div><span class="muted" style="font-size:11.5px;white-space:nowrap">${p}/${q.goal} · +${q.xp}XP</span></div></div>
          ${ready?`<button class="btn-sm btn-primary" onclick="claimQuest('${q.id}')">${t('claim')}</button>`:done?`<span class="badge good">✓</span>`:''}</div>`;}).join('')}</div>
 
      <div class="section-title">${t('achievements')}</div>
-     <div class="grid3">${BADGE_DEFS.map(b=>{const got=S.badges.includes(b.id);return `<div class="tile" style="opacity:${got?1:.4};align-items:center;text-align:center;padding:14px 8px"><div style="font-size:30px">${b.icon}</div><div class="lab" style="font-size:11.5px">${isAr()?b.ar:b.en}</div></div>`;}).join('')}</div>
+     <div class="grid3">${BADGE_DEFS.map(b=>{const got=S.badges.includes(b.id);return `<div class="tile" style="opacity:${got?1:.4};align-items:center;text-align:center;padding:14px 8px"><div style="color:var(--accent)">${gicon(b.icon,28)}</div><div class="lab" style="font-size:11.5px">${isAr()?b.ar:b.en}</div></div>`;}).join('')}</div>
      <div style="height:10px"></div>
    </div>`;
   setTimeout(()=>{animateRings(n);runCountups(n);},30);
@@ -1582,35 +1609,32 @@ route('rewards',(n)=>{
    THEMES — iOS-style appearance picker
    ============================================================ */
 const THEMES=[
-  {id:'midnight',en:'Midnight',ar:'منتصف الليل',mode:'dark',
-   vars:{'--bg':'#0B0F14','--bg2':'#0F151D','--card':'#141C26','--card2':'#1B2530','--line':'#243140','--txt':'#EAF2F8','--muted':'#8DA0B2','--faint':'#5A6B7B','--accent':'#00E0B8','--accent2':'#19A0FF','--accent-d':'#0B3B36','--nav':'rgba(15,21,29,.9)'},
+  {id:'whoop',en:'Midnight',ar:'منتصف الليل',like:'WHOOP',mode:'dark',
+   vars:{'--bg':'#0B0F14','--bg2':'#0F151D','--card':'#141C26','--card2':'#1B2530','--line':'#243140','--txt':'#EAF2F8','--muted':'#8DA0B2','--faint':'#5A6B7B','--accent':'#00E0B8','--accent2':'#19A0FF','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#2BD67B','--accent-d':'#0B3B36','--nav':'rgba(15,21,29,.9)'},
    wall:'radial-gradient(120% 80% at 50% -10%,#0d2b2a 0%,#0B0F14 55%)'},
-  {id:'obsidian',en:'Obsidian',ar:'سبج',mode:'dark',
-   vars:{'--bg':'#000000','--bg2':'#0B0B0D','--card':'#121214','--card2':'#1A1A1E','--line':'#26262C','--txt':'#F2F2F4','--muted':'#9A9AA4','--faint':'#5E5E68','--accent':'#34E1FF','--accent2':'#7C8CFF','--accent-d':'#062a33','--nav':'rgba(8,8,10,.92)'},
-   wall:'radial-gradient(130% 90% at 50% 0%,#0a1418 0%,#000 60%)'},
-  {id:'aurora',en:'Aurora',ar:'الشفق',mode:'dark',
-   vars:{'--bg':'#0C0A1A','--bg2':'#121029','--card':'#191636','--card2':'#221E45','--line':'#332C5C','--txt':'#ECEAFB','--muted':'#A398C9','--faint':'#6B6094','--accent':'#9B7CFF','--accent2':'#FF7CC8','--accent-d':'#241a47','--nav':'rgba(18,16,41,.9)'},
-   wall:'radial-gradient(120% 90% at 80% -10%,#3a1d6e 0%,#0C0A1A 55%),radial-gradient(100% 80% at 0% 100%,#1d2e6e 0%,transparent 60%)'},
-  {id:'ocean',en:'Ocean',ar:'المحيط',mode:'dark',
-   vars:{'--bg':'#06121C','--bg2':'#0A1A28','--card':'#0F2333','--card2':'#163245','--line':'#214055','--txt':'#E6F3FB','--muted':'#86A6BC','--faint':'#557089','--accent':'#1FC8E8','--accent2':'#3BE0C0','--accent-d':'#06303a','--nav':'rgba(10,26,40,.9)'},
-   wall:'radial-gradient(120% 90% at 50% -10%,#0a3a52 0%,#06121C 55%)'},
-  {id:'ember',en:'Ember',ar:'الجمر',mode:'dark',
-   vars:{'--bg':'#160D0A','--bg2':'#21130E','--card':'#2A1913','--card2':'#38231A','--line':'#4A3024','--txt':'#FBEEE6','--muted':'#C8A593','--faint':'#946C58','--accent':'#FF8A4B','--accent2':'#FFC24B','--accent-d':'#3a1d0e','--nav':'rgba(33,19,14,.9)'},
-   wall:'radial-gradient(120% 90% at 50% -10%,#5a2410 0%,#160D0A 55%)'},
-  {id:'daylight',en:'Daylight',ar:'ضوء النهار',mode:'light',
-   vars:{'--bg':'#EEF2F6','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EAF0F5','--line':'#DCE5EC','--txt':'#0F1A24','--muted':'#5E7286','--faint':'#9AAAB8','--accent':'#00B392','--accent2':'#0A84FF','--accent-d':'#D6F4EC','--nav':'rgba(255,255,255,.82)'},
-   wall:'linear-gradient(180deg,#DDF3EE 0%,#EEF2F6 38%)'},
-  {id:'blossom',en:'Blossom',ar:'الزهر',mode:'light',
-   vars:{'--bg':'#FBEEF3','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCEEF4','--line':'#F2DBE5','--txt':'#2A1620','--muted':'#9B7385','--faint':'#C3A3B2','--accent':'#F0468A','--accent2':'#9B7CFF','--accent-d':'#FCE0EC','--nav':'rgba(255,255,255,.82)'},
-   wall:'radial-gradient(120% 80% at 80% -10%,#ffd6e6 0%,#FBEEF3 55%)'},
-  {id:'mint',en:'Mint',ar:'النعناع',mode:'light',
-   vars:{'--bg':'#EAF6EF','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E6F4EC','--line':'#D5EADD','--txt':'#0F2418','--muted':'#5C7A68','--faint':'#9BBBA8','--accent':'#1FA85F','--accent2':'#0AAFA0','--accent-d':'#D6F1E1','--nav':'rgba(255,255,255,.82)'},
-   wall:'linear-gradient(180deg,#D6F0E0 0%,#EAF6EF 38%)'},
-  {id:'sand',en:'Sand',ar:'الرمال',mode:'light',
-   vars:{'--bg':'#F5EFE6','--bg2':'#FFFDFA','--card':'#FFFDFA','--card2':'#F2E9DC','--line':'#E6DBCB','--txt':'#27201A','--muted':'#7D6E5C','--faint':'#B6A88C','--accent':'#C96A3A','--accent2':'#D9A441','--accent-d':'#F3E3D4','--nav':'rgba(255,253,250,.82)'},
-   wall:'radial-gradient(120% 80% at 50% -10%,#ecdcc4 0%,#F5EFE6 55%)'},
+  {id:'oura',en:'Aura',ar:'الهالة',like:'Oura',mode:'dark',
+   vars:{'--bg':'#0E0D12','--bg2':'#15131C','--card':'#1C1926','--card2':'#262232','--line':'#332D42','--txt':'#F1ECF6','--muted':'#A89CB8','--faint':'#6E6480','--accent':'#E8B07A','--accent2':'#C58BF2','--purple':'#C58BF2','--warn':'#F2C24B','--bad':'#FF6B8A','--good':'#7FD1A6','--accent-d':'#2A2030','--nav':'rgba(21,19,28,.92)'},
+   wall:'radial-gradient(120% 90% at 80% -10%,#3a2a1a 0%,#0E0D12 55%)'},
+  {id:'calm',en:'Deep Calm',ar:'هدوء عميق',like:'Calm',mode:'dark',
+   vars:{'--bg':'#0A1730','--bg2':'#0E1F40','--card':'#13294F','--card2':'#1B3361','--line':'#274377','--txt':'#E7F0FF','--muted':'#93AAD0','--faint':'#5E769E','--accent':'#4FA8FF','--accent2':'#7BD8FF','--purple':'#9BA8FF','--warn':'#FFC061','--bad':'#FF7C92','--good':'#5FD0C0','--accent-d':'#10294F','--nav':'rgba(14,31,64,.92)'},
+   wall:'radial-gradient(120% 90% at 50% -10%,#123a6b 0%,#0A1730 55%)'},
+  {id:'forest',en:'Forest',ar:'الغابة',like:'Fitbit',mode:'dark',
+   vars:{'--bg':'#0A1410','--bg2':'#0F1D17','--card':'#14271E','--card2':'#1D3528','--line':'#274A37','--txt':'#E8F5EC','--muted':'#8FB6A0','--faint':'#5C7E6A','--accent':'#46D08A','--accent2':'#8FD14F','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#46D08A','--accent-d':'#12271C','--nav':'rgba(15,29,23,.92)'},
+   wall:'radial-gradient(120% 90% at 50% -10%,#103a26 0%,#0A1410 55%)'},
+  {id:'apple',en:'Clean',ar:'نظيف',like:'Apple Health',mode:'light',
+   vars:{'--bg':'#F2F4F8','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EDF1F6','--line':'#DCE3EC','--txt':'#0F1722','--muted':'#5C6B7D','--faint':'#93A1B1','--accent':'#0A84FF','--accent2':'#30C758','--purple':'#7C5CFF','--warn':'#FF9F0A','--bad':'#FF3B30','--good':'#30C758','--accent-d':'#DCEBFF','--nav':'rgba(255,255,255,.82)'},
+   wall:'linear-gradient(180deg,#E4EEFB 0%,#F2F4F8 40%)'},
+  {id:'headspace',en:'Sunshine',ar:'إشراق',like:'Headspace',mode:'light',
+   vars:{'--bg':'#FFF7EC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FBEFDD','--line':'#F0E2CC','--txt':'#2A2014','--muted':'#8A765C','--faint':'#B8A488','--accent':'#FF8A3D','--accent2':'#4F86FF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FFE6D2','--nav':'rgba(255,255,255,.82)'},
+   wall:'linear-gradient(180deg,#FFEAD2 0%,#FFF7EC 40%)'},
+  {id:'flo',en:'Blossom',ar:'زهر',like:'Flo',mode:'light',
+   vars:{'--bg':'#FFF0F5','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCE6EF','--line':'#F3D7E3','--txt':'#2A1620','--muted':'#9B7385','--faint':'#C3A3B2','--accent':'#F0468A','--accent2':'#9B7CFF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FCE0EC','--nav':'rgba(255,255,255,.82)'},
+   wall:'radial-gradient(120% 80% at 80% -10%,#ffd6e6 0%,#FFF0F5 55%)'},
+  {id:'mint',en:'Fresh Mint',ar:'نعناع',like:'Clue',mode:'light',
+   vars:{'--bg':'#ECF7F0','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E3F2E9','--line':'#D3EADC','--txt':'#0F2418','--muted':'#5C7A68','--faint':'#9BBBA8','--accent':'#1FA85F','--accent2':'#0AAFA0','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#1FA85F','--accent-d':'#D6F1E1','--nav':'rgba(255,255,255,.82)'},
+   wall:'linear-gradient(180deg,#D9F2E3 0%,#ECF7F0 40%)'},
 ];
-function applyTheme(){const th=THEMES.find(x=>x.id===(S.prefs.theme||'midnight'))||THEMES[0];
+function applyTheme(){const th=THEMES.find(x=>x.id===(S.prefs.theme||'whoop'))||THEMES[0];
   const r=document.documentElement;Object.entries(th.vars).forEach(([k,v])=>r.style.setProperty(k,v));
   const app=$('#app');if(app)app.style.background=th.wall||th.vars['--bg'];
   const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',th.vars['--bg']);
@@ -1626,7 +1650,7 @@ function themePreview(th){const v=th.vars;
     </div></div>`;}
 route('theme',(n)=>{
   const dark=THEMES.filter(x=>x.mode==='dark'),light=THEMES.filter(x=>x.mode==='light');
-  const grid=arr=>`<div class="grid3" style="gap:12px">${arr.map(th=>`<div class="theme-card ${S.prefs.theme===th.id?'on':''}" onclick="setTheme('${th.id}')">${themePreview(th)}<div class="tcheck">✓</div><div class="tname">${isAr()?th.ar:th.en}</div></div>`).join('')}</div>`;
+  const grid=arr=>`<div class="grid3" style="gap:12px">${arr.map(th=>`<div class="theme-card ${S.prefs.theme===th.id?'on':''}" onclick="setTheme('${th.id}')">${themePreview(th)}<div class="tcheck">✓</div><div class="tname">${isAr()?th.ar:th.en}${th.like?`<br><span style="font-weight:400;opacity:.7;font-size:9px">${th.like}</span>`:''}</div></div>`).join('')}</div>`;
   n.innerHTML=`${topbar('themeT','themeSub',{back:true})}
    <div class="content">
      <div class="section-title">🌙 ${t('darkThemes')}</div>${grid(dark)}
@@ -1760,11 +1784,11 @@ window.openLogger=function(ty){
   const builders={symptom:lgSymptom,meal:lgMeal,sleep:lgSleep,mood:lgMood,activity:lgActivity,bowel:lgBowel,water:lgWater};
   openSheet(builders[ty]());
 };
-function sheetHead(icon,key){return `<div class="row" style="margin-bottom:16px"><div style="font-size:26px">${icon}</div><h2 style="font-size:19px;margin:0;font-weight:800">${t(key)}</h2></div>`;}
+function sheetHead(icon,key){return `<div class="row" style="margin-bottom:16px"><div style="font-size:26px;color:var(--accent)">${gicon(icon,26)}</div><h2 style="font-size:19px;margin:0;font-weight:800">${t(key)}</h2></div>`;}
 
 function lgSymptom(){
   const syms=['abdPain','diarrhea','blood','urgency','bloating','fatigue','nausea','jointPain','fever','cramping'];
-  return sheetHead('🩺','symptoms')+`
+  return sheetHead('pulse','symptoms')+`
     <div class="field"><label>${t('symType')}</label>
       <div class="chips" id="syType">${syms.map(k=>`<button class="chip" data-v="${k}" onclick="pickChip('syType',this)">${t(k)}</button>`).join('')}</div></div>
     <div class="field"><label>${t('severity')}</label>
@@ -1782,7 +1806,7 @@ function lgMeal(){
       <div class="chips" id="mlType">${['breakfast','lunch','dinner','snack'].map(k=>`<button class="chip" data-v="${k}" onclick="pickChip('mlType',this)">${t(k)}</button>`).join('')}</div></div>
     <div class="field"><label>${t('mealDesc')}</label><textarea class="input" id="mlDesc" placeholder="${t('mealPh')}"></textarea></div>
     <div class="field"><label>${t('addPhoto')}</label>
-      <button class="btn btn-ghost" id="mlPhotoBtn" onclick="this.dataset.on='1';this.innerHTML='📸 ${t('photoAdded')} ✓'">📷 ${t('addPhoto')}</button></div>
+      <button class="btn btn-ghost" id="mlPhotoBtn" onclick="this.dataset.on='1';this.innerHTML='${svgIcon('check',16)} ${t('photoAdded')}'">${svgIcon('camera',16)} ${t('addPhoto')}</button></div>
     <button class="btn btn-primary" onclick="saveMeal()">${t('logNow')}</button>`;
 }
 window.saveMeal=()=>{const mealType=$('#mlType').dataset.val,desc=$('#mlDesc').value.trim();
@@ -2020,7 +2044,7 @@ route('reports',(n)=>{
   n.innerHTML=`${topbar('reportsT','reportsSub')}
    <div class="content">
      <div class="seg">${[[7,'weekly'],[30,'monthly']].map(([v,k])=>`<button class="${repRange===v?'on':''}" onclick="setRepRange(${v})">${t(k)}</button>`).join('')}</div>
-     ${!hasData?`<div class="card center" style="padding:40px"><div style="font-size:40px">📊</div><p class="muted">${t('noData')}</p></div>`:`
+     ${!hasData?`<div class="card center" style="padding:40px"><div style="color:var(--muted)">${svgIcon('chart',38)}</div><p class="muted">${t('noData')}</p></div>`:`
      <!-- consistency gauge -->
      <div class="card glass">
        <div class="gauge-wrap">${gaugeSvg(consist)}
@@ -2045,7 +2069,7 @@ route('reports',(n)=>{
        <div class="card"><div class="section-title" style="margin:0 0 10px">${t('moodTrend')}</div><canvas id="cMood" height="120"></canvas></div>
        <div class="card"><div class="section-title" style="margin:0 0 10px">${t('sleepTrend')}</div><canvas id="cSleep" height="120"></canvas></div>
      </div>
-     <button class="btn btn-primary" onclick="exportPDF()">📄 ${t('exportPdf')}</button>
+     <button class="btn btn-primary" onclick="exportPDF()">${svgIcon('share',18)} ${t('exportPdf')}</button>
      <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12.5px;margin:0;line-height:1.6">ℹ️ ${t('reportNote')}</p></div>`}
    </div>`;
   if(hasData)setTimeout(()=>{drawReportCharts(days,ls);runCountups(n);animateGauge(n);},60);
@@ -2137,7 +2161,7 @@ function buildReportHTML(){
   .note{background:#fff7ee;border:1px solid #ffe2bf;border-radius:10px;padding:13px 15px;font-size:12px;color:#7a5a2a;margin-top:24px}
   .hd{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #00897b;padding-bottom:14px}
   @media print{.noprint{display:none}}</style></head><body>
-  <div class="hd"><div><h1>🌿 IBD Connect</h1><div class="sub">${isAr()?'ملخّص للطبيب — وصفي فقط':'Clinician summary — descriptive only'}</div></div>
+  <div class="hd"><div><h1 style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent)">${svgIcon('leaf',22)}</span> IBD Connect</h1><div class="sub">${isAr()?'ملخّص للطبيب — وصفي فقط':'Clinician summary — descriptive only'}</div></div>
     <div style="text-align:${isAr()?'left':'right'};font-size:12px;color:#667">${isAr()?'الفترة:':'Period:'} ${isAr()?'آخر':'last'} ${repRange} ${isAr()?'يوم':'days'}<br>${new Date().toLocaleDateString()}</div></div>
   <div class="pt"><span><b>${T('fullName')}:</b> ${u.name||'—'}</span><span><b>${T('diseaseType')}:</b> ${dz}</span><span><b>${isAr()?'العمر':'Age'}:</b> ${age}</span>${ctry?`<span><b>${T('joinFrom')}:</b> ${u.countryFlag||''} ${ctry}</span>`:''}</div>
   <div class="grid">
@@ -2194,29 +2218,29 @@ route('metrics',(n)=>{
   const fmtN=x=>(x||0).toLocaleString();
   const lastW=lastLog('weight');
   const M=[
-    {icon:'🩺',label:t('symptoms'),color:'var(--bad)',today:logsOn(todayKey()).filter(l=>l.type==='symptom').length,
+    {icon:'pulse',label:t('symptoms'),color:'var(--bad)',today:logsOn(todayKey()).filter(l=>l.type==='symptom').length,
      latest:(()=>{const l=lastLog('symptom');return l?t(l.sym||'symptoms')+' · '+t(['mild','moderate','severe'][(l.sev||1)-1]):t('noneYet');})(),
      series:dailyAgg('symptom','count')},
-    {icon:'🚽',label:t('bowel'),color:'var(--purple)',today:logsOn(todayKey()).filter(l=>l.type==='bowel').reduce((s,l)=>s+(l.count||0),0)+'×',
+    {icon:'waves',label:t('bowel'),color:'var(--purple)',today:logsOn(todayKey()).filter(l=>l.type==='bowel').reduce((s,l)=>s+(l.count||0),0)+'×',
      latest:(()=>{const l=lastLog('bowel');return l?(l.count||0)+'× · Bristol '+(l.bristol||'-'):t('noneYet');})(),
      series:dailyAgg('bowel','sumCount')},
-    {icon:'👟',label:t('tSteps'),color:'var(--good)',today:fmtN(todaySteps()),
+    {icon:'footprints',label:t('tSteps'),color:'var(--good)',today:fmtN(todaySteps()),
      latest:fmtN(todaySteps())+' / '+fmtN(sg),series:dailyAgg('steps','sumSteps')},
-    {icon:'😴',label:t('sleep'),color:'var(--accent2)',today:(()=>{const l=logsOn(todayKey()).find(x=>x.type==='sleep');return l?(l.hours+'h'):'—';})(),
+    {icon:'moon',label:t('sleep'),color:'var(--accent2)',today:(()=>{const l=logsOn(todayKey()).find(x=>x.type==='sleep');return l?(l.hours+'h'):'—';})(),
      latest:(()=>{const l=lastLog('sleep');return l?(l.hours||0)+'h · '+t(['poor','fair','good','great'][(l.qual||1)-1]):t('noneYet');})(),
      series:dailyAgg('sleep','avgHours')},
-    {icon:'🌤️',label:t('mood'),color:'var(--warn)',today:(()=>{const l=logsOn(todayKey()).find(x=>x.type==='mood');return l?l.mood+'/5':'—';})(),
+    {icon:'smile',label:t('mood'),color:'var(--warn)',today:(()=>{const l=logsOn(todayKey()).find(x=>x.type==='mood');return l?l.mood+'/5':'—';})(),
      latest:(()=>{const l=lastLog('mood');return l?t(['veryLow','low','okay','happy','great2'][(l.mood||1)-1]):t('noneYet');})(),
      series:dailyAgg('mood','avgMood')},
-    {icon:'🏃',label:t('activity'),color:'var(--good)',today:logsOn(todayKey()).filter(l=>l.type==='activity').reduce((s,l)=>s+(l.mins||0),0)+'m',
+    {icon:'dumbbell',label:t('activity'),color:'var(--good)',today:logsOn(todayKey()).filter(l=>l.type==='activity').reduce((s,l)=>s+(l.mins||0),0)+'m',
      latest:(()=>{const l=lastLog('activity');return l?t(l.act||'activity')+' · '+(l.mins||0)+'m':t('noneYet');})(),
      series:dailyAgg('activity','sumMins')},
-    {icon:'⚖️',label:t('tWeight'),color:'var(--accent2)',today:lastW?lastW.kg+' kg':'—',
+    {icon:'scale',label:t('tWeight'),color:'var(--accent2)',today:lastW?lastW.kg+' kg':'—',
      latest:lastW?lastW.kg+' kg · '+fmtDate(lastW.t):t('noneYet'),series:dailyAgg('weight','lastWeight')},
-    {icon:'🍽️',label:t('meals'),color:'var(--coral)',today:logsOn(todayKey()).filter(l=>l.type==='meal').length,
+    {icon:'utensils',label:t('meals'),color:'var(--coral)',today:logsOn(todayKey()).filter(l=>l.type==='meal').length,
      latest:(()=>{const l=lastLog('meal');return l?t(l.mealType||'meals')+(l.photo?' · 📷':''):t('noneYet');})(),
      series:dailyAgg('meal','count')},
-    {icon:'💧',label:t('hydrationT'),color:'var(--accent2)',today:todayWater()+' / '+(S.prefs.waterGoal||8),
+    {icon:'droplet',label:t('hydrationT'),color:'var(--accent2)',today:todayWater()+' / '+(S.prefs.waterGoal||8),
      latest:(()=>{const v=todayWater();return v?v+' '+t('glass'):t('noneYet');})(),
      series:dailyAgg('water','sumGlasses')},
   ];
@@ -2226,17 +2250,17 @@ route('metrics',(n)=>{
      <div class="card glass"><div class="between"><div><b style="font-size:14px">${t('dataCompleteness')}</b><div class="muted" style="font-size:12px">${t('last14')}</div></div><div class="big-num" style="font-size:26px;color:var(--accent)">${completeness}%</div></div>
        <div class="pbar" style="margin-top:10px"><i style="width:${completeness}%"></i></div></div>
 
-     ${S.disc?`<div class="card tap" onclick="go('disc',{replace:false})" style="background:linear-gradient(150deg,rgba(155,124,255,.14),rgba(25,160,255,.06));border-color:rgba(155,124,255,.3)"><div class="between"><div class="row" style="gap:11px"><div style="font-size:24px">🧭</div><div><b style="font-size:14px">${t('lastDiscShort')}</b><div class="muted" style="font-size:12px">${fmtDate(S.disc.date)}</div></div></div><b style="font-size:20px;color:var(--purple)">${Object.values(S.disc.answers).reduce((a,b)=>a+b,0)}/100</b></div></div>`:''}
+     ${S.disc?`<div class="card tap" onclick="go('disc',{replace:false})" style="background:linear-gradient(150deg,rgba(155,124,255,.14),rgba(25,160,255,.06));border-color:rgba(155,124,255,.3)"><div class="between"><div class="row" style="gap:11px"><div style="color:var(--purple)">${svgIcon('compass',24)}</div><div><b style="font-size:14px">${t('lastDiscShort')}</b><div class="muted" style="font-size:12px">${fmtDate(S.disc.date)}</div></div></div><b style="font-size:20px;color:var(--purple)">${Object.values(S.disc.answers).reduce((a,b)=>a+b,0)}/100</b></div></div>`:''}
 
      ${M.map(m=>`<div class="card"><div class="between" style="margin-bottom:8px">
-        <div class="row" style="gap:11px"><div style="width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:20px">${m.icon}</div>
+        <div class="row" style="gap:11px"><div style="width:40px;height:40px;border-radius:12px;background:var(--card2);display:flex;align-items:center;justify-content:center;color:${m.color}">${gicon(m.icon,21)}</div>
           <div><b style="font-size:14.5px">${m.label}</b><div class="muted" style="font-size:12px">${m.latest}</div></div></div>
         <div style="text-align:end"><b style="font-size:18px;color:${m.color}">${m.today}</b><div class="faint" style="font-size:10.5px">${t('today2')}</div></div></div>
         ${m.series.some(v=>v>0)?spark(m.series,m.color):`<div class="faint" style="font-size:11.5px;text-align:center;padding:6px">${t('noneYet')}</div>`}
       </div>`).join('')}
 
-     <button class="btn btn-primary" onclick="navTab('reports')">📊 ${isAr()?'فتح التقارير الكاملة':'Open full reports'}</button>
-     <button class="btn btn-ghost" onclick="exportPDF()">📄 ${t('shareReport')}</button>
+     <button class="btn btn-primary" onclick="navTab('reports')">${svgIcon('chart',18)} ${isAr()?'فتح التقارير الكاملة':'Open full reports'}</button>
+     <button class="btn btn-ghost" onclick="exportPDF()">${svgIcon('share',18)} ${t('shareReport')}</button>
      <div style="height:6px"></div>
    </div>`;
 });
@@ -2260,9 +2284,9 @@ route('learn',(n)=>{
        <div class="row"><div style="font-size:30px">📗</div><div style="flex:1"><b style="font-size:15.5px">${isAr()?'دليل IBD — الجمعية السعودية للجهاز الهضمي':'IBD Guide — Saudi Gastroenterology Association'}</b><div class="muted" style="font-size:12.5px">${sgaCount} ${isAr()?'مقالات موثّقة من خبراء':'expert-authored articles'} · IBDguide.net</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>`:''}
      <div class="chips" style="overflow-x:auto;flex-wrap:nowrap">${cats.map(c=>`<button class="chip ${learnCat===c?'on':''}" style="white-space:nowrap" onclick="setLearnCat('${c}')">${CAT_LABEL[c][S.lang]}</button>`).join('')}</div>
      ${learnCat==='all'&&sugg.length?`<div class="section-title">${t('forYou')}</div>
-       <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px">${sugg.map(a=>`<button class="card tap" style="min-width:210px;text-align:start" onclick="openArticle('${a.id}')"><div style="font-size:30px">${a.icon}</div><b style="font-size:14.5px;display:block;margin-top:8px;line-height:1.3">${L(a[S.lang])}</b><div class="row" style="gap:6px;margin-top:8px"><span class="badge accent">${a.min} ${t('minRead')}</span>${a.source==='SGA'?'<span class="badge" style="background:color-mix(in srgb,var(--accent2) 18%,transparent);color:var(--accent2)">SGA</span>':''}</div></button>`).join('')}</div>`:''}
+       <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px">${sugg.map(a=>`<button class="card tap" style="min-width:210px;text-align:start" onclick="openArticle('${a.id}')"><div style="color:var(--accent)">${gicon(a.icon,28)}</div><b style="font-size:14.5px;display:block;margin-top:8px;line-height:1.3">${L(a[S.lang])}</b><div class="row" style="gap:6px;margin-top:8px"><span class="badge accent">${a.min} ${t('minRead')}</span>${a.source==='SGA'?'<span class="badge" style="background:color-mix(in srgb,var(--accent2) 18%,transparent);color:var(--accent2)">SGA</span>':''}</div></button>`).join('')}</div>`:''}
      <div class="section-title">${learnCat==='sga'?(isAr()?'دليل IBD':'IBD Guide'):t('allArticles')}</div>
-     <div class="card">${items.map(a=>`<div class="li" onclick="openArticle('${a.id}')"><div class="ic">${a.icon}</div><div class="tx"><b>${L(a[S.lang])}${a.new?` <span class="badge accent" style="font-size:10px">${t('newBadge')}</span>`:''}</b><small>${a.min} ${t('minRead')} · ${CAT_LABEL[a.cat]?CAT_LABEL[a.cat][S.lang]:''}${a.source==='SGA'?' · SGA':''}</small></div><div class="chev">${isAr()?'‹':'›'}</div></div>`).join('')}</div>
+     <div class="card">${items.map(a=>`<div class="li" onclick="openArticle('${a.id}')"><div class="ic" style="color:var(--accent)">${gicon(a.icon,22)}</div><div class="tx"><b>${L(a[S.lang])}${a.new?` <span class="badge accent" style="font-size:10px">${t('newBadge')}</span>`:''}</b><small>${a.min} ${t('minRead')} · ${CAT_LABEL[a.cat]?CAT_LABEL[a.cat][S.lang]:''}${a.source==='SGA'?' · SGA':''}</small></div><div class="chev">${isAr()?'‹':'›'}</div></div>`).join('')}</div>
    </div>`;
 });
 window.setLearnCat=c=>{learnCat=c;render();};
@@ -2270,13 +2294,13 @@ window.openArticle=function(id){const a=S.learn.find(x=>x.id===id);if(!a)return;
   S.game.readCount=(S.game.readCount||0)+1;checkQuests();save();
   const body=(c[1]||'').replace(/\n/g,'<br>');
   const auth=a.author?(isAr()?a.author.ar:a.author.en):'';
-  openSheet(`<div style="font-size:42px">${a.icon}</div><h2 style="font-size:21px;margin:8px 0 6px;line-height:1.3">${c[0]}</h2>
+  openSheet(`<div style="color:var(--accent);margin-bottom:4px">${gicon(a.icon,40)}</div><h2 style="font-size:21px;margin:8px 0 6px;line-height:1.3">${c[0]}</h2>
    <div class="row" style="gap:6px;margin-bottom:12px"><span class="badge accent">${a.min} ${t('minRead')}</span>${a.source==='SGA'?'<span class="badge" style="background:color-mix(in srgb,var(--accent2) 18%,transparent);color:var(--accent2)">SGA · IBDguide.net</span>':''}</div>
-   ${auth?`<div class="row" style="gap:10px;margin-bottom:14px;padding:10px 12px;background:var(--bg2);border-radius:12px"><div style="width:36px;height:36px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:16px">✍️</div><div><div style="font-size:13px;font-weight:600">${auth}</div><div class="faint" style="font-size:11.5px">${isAr()?'مؤلف المقال':'Article author'}</div></div></div>`:''}
-   <div style="height:140px;border-radius:14px;background:linear-gradient(135deg,var(--card2),var(--accent-d));display:flex;align-items:center;justify-content:center;font-size:50px;margin-bottom:16px">${a.icon}</div>
+   ${auth?`<div class="row" style="gap:10px;margin-bottom:14px;padding:10px 12px;background:var(--bg2);border-radius:12px"><div style="width:36px;height:36px;border-radius:50%;background:var(--card2);display:flex;align-items:center;justify-content:center;color:var(--accent)">${svgIcon('edit',16)}</div><div><div style="font-size:13px;font-weight:600">${auth}</div><div class="faint" style="font-size:11.5px">${isAr()?'مؤلف المقال':'Article author'}</div></div></div>`:''}
+   <div style="height:140px;border-radius:14px;background:linear-gradient(135deg,var(--card2),var(--accent-d));display:flex;align-items:center;justify-content:center;color:var(--accent);margin-bottom:16px">${gicon(a.icon,56)}</div>
    <p style="font-size:15px;line-height:1.8;color:var(--txt)">${body}</p>
-   ${a.video?`<button class="btn btn-ghost">▶️ ${t('watchVideo')}</button>`:''}
-   ${a.link?`<a href="${a.link}" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-top:6px;text-decoration:none">🔗 ${isAr()?'اقرأ المصدر على موقع الجمعية':'Read source on SGA website'}</a>`:''}
+   ${a.video?`<button class="btn btn-ghost">${svgIcon('play',16)} ${t('watchVideo')}</button>`:''}
+   ${a.link?`<a href="${a.link}" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-top:6px;text-decoration:none">${svgIcon('link',16)} ${isAr()?'اقرأ المصدر على موقع الجمعية':'Read source on SGA website'}</a>`:''}
    <div class="card" style="background:var(--bg2);margin-top:12px"><p class="muted" style="font-size:12px;margin:0;line-height:1.55">${a.source==='SGA'?(isAr()?'✓ من مبادرة IBDguide.net التابعة للجمعية السعودية للجهاز الهضمي — محتوى علمي مُراجَع.':'✓ From the IBDguide.net initiative of the Saudi Gastroenterology Association — scientifically reviewed content.'):(isAr()?'✓ تمت مراجعة هذا المحتوى من قِبل خبراء سريريين':'✓ Content validated by clinical experts')}</p></div>`);
 };
 
@@ -2301,15 +2325,15 @@ function exGiSet(type){exGiType=type;const set=(id,c)=>{const e=$('#'+id);if(e)e
   set('gi-colon','var(--faint)');set('gi-si','var(--muted)');set('gi-ileum','var(--muted)');set('gi-rectum','var(--faint)');
   const uc=$('#giUC'),cd=$('#giCD');if(uc)uc.classList.toggle('on',type==='uc');if(cd)cd.classList.toggle('on',type==='cd');
   if(type==='uc'){set('gi-colon','var(--accent)');set('gi-rectum','var(--accent)');}else{set('gi-ileum','var(--warn)');set('gi-si','var(--warn)');}}
-function exFactors(){const f=[['🧬',['Genes','الجينات']],['🛡️',['Immune system','جهاز المناعة']],['🌍',['Environment','البيئة']],['🦠',['Gut bacteria','بكتيريا الأمعاء']]];
-  return `<div class="grid2" style="gap:10px">${f.map(x=>`<div class="tile" style="align-items:center;text-align:center;padding:14px"><div style="font-size:28px">${x[0]}</div><div class="lab" style="font-size:13px">${x[1][EL()]}</div></div>`).join('')}</div><div class="card" style="background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);margin-top:10px"><p style="margin:0;color:var(--accent);font-weight:700;font-size:13px;text-align:center">${isAr()?'لم تتسبّب أنت في هذا — ليس بسبب التوتّر أو الطعام.':"You didn't cause this — it isn't from stress or food."}</p></div>`;}
-const EX_TRIGS=[['🦠',['Infections','العدوى'],['A stomach bug can sometimes set off a flare.','نزلة معوية قد تُشعل النوبة أحيانًا.']],['💊',['Painkillers (NSAIDs)','المسكّنات'],['Anti-inflammatory painkillers can irritate the gut.','مسكّنات الالتهاب قد تهيّج الأمعاء.']],['🚬',['Smoking','التدخين'],["Smoking makes Crohn's worse. Quitting helps a lot.",'التدخين يفاقم كرون، والإقلاع يساعد كثيرًا.']],['⏸️',['Stopping medicine','إيقاف الدواء'],['Skipping or stopping treatment is a common trigger.','تخطّي العلاج من أكثر المثيرات شيوعًا.']],['😣',['Stress','التوتّر'],["Stress doesn't cause IBD, but many feel it affects flares.",'التوتّر لا يسبّب المرض لكنه قد يؤثّر على الشعور.']],['🍽️',['Certain foods','بعض الأطعمة'],['Triggers are personal — they differ for everyone.','المثيرات شخصية وتختلف بين الناس.']]];
-function exTriggers(){return `<div class="chips" id="exTrigs">${EX_TRIGS.map((x,i)=>`<button class="chip" onclick="exTrigPick(${i})">${x[0]} ${x[1][EL()]}</button>`).join('')}</div><div class="card" id="exTrigDetail" style="background:var(--bg2);margin-top:12px;min-height:54px"><p class="muted" style="margin:0;font-size:13.5px;line-height:1.55">${t('exTapLearn')}</p></div>`;}
+function exFactors(){const f=[['dna',['Genes','الجينات']],['shield',['Immune system','جهاز المناعة']],['globe',['Environment','البيئة']],['germ',['Gut bacteria','بكتيريا الأمعاء']]];
+  return `<div class="grid2" style="gap:10px">${f.map(x=>`<div class="tile" style="align-items:center;text-align:center;padding:14px"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;margin:0 auto">${svgIcon(x[0],22)}</span><div class="lab" style="font-size:13px;margin-top:8px">${x[1][EL()]}</div></div>`).join('')}</div><div class="card" style="background:color-mix(in srgb,var(--accent) 12%,transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent);margin-top:10px"><p style="margin:0;color:var(--accent);font-weight:700;font-size:13px;text-align:center">${isAr()?'لم تتسبّب أنت في هذا — ليس بسبب التوتّر أو الطعام.':"You didn't cause this — it isn't from stress or food."}</p></div>`;}
+const EX_TRIGS=[['germ',['Infections','العدوى'],['A stomach bug can sometimes set off a flare.','نزلة معوية قد تُشعل النوبة أحيانًا.']],['pill',['Painkillers (NSAIDs)','المسكّنات'],['Anti-inflammatory painkillers can irritate the gut.','مسكّنات الالتهاب قد تهيّج الأمعاء.']],['smoking',['Smoking','التدخين'],["Smoking makes Crohn's worse. Quitting helps a lot.",'التدخين يفاقم كرون، والإقلاع يساعد كثيرًا.']],['pause',['Stopping medicine','إيقاف الدواء'],['Skipping or stopping treatment is a common trigger.','تخطّي العلاج من أكثر المثيرات شيوعًا.']],['frown',['Stress','التوتّر'],["Stress doesn't cause IBD, but many feel it affects flares.",'التوتّر لا يسبّب المرض لكنه قد يؤثّر على الشعور.']],['utensils',['Certain foods','بعض الأطعمة'],['Triggers are personal — they differ for everyone.','المثيرات شخصية وتختلف بين الناس.']]];
+function exTriggers(){return `<div class="chips" id="exTrigs">${EX_TRIGS.map((x,i)=>`<button class="chip" style="display:inline-flex;align-items:center;gap:7px" onclick="exTrigPick(${i})">${svgIcon(x[0],16)} ${x[1][EL()]}</button>`).join('')}</div><div class="card" id="exTrigDetail" style="background:var(--bg2);margin-top:12px;min-height:54px"><p class="muted" style="margin:0;font-size:13.5px;line-height:1.55">${t('exTapLearn')}</p></div>`;}
 function exTrigPick(i){document.querySelectorAll('#exTrigs .chip').forEach((c,k)=>c.classList.toggle('on',k===i));$('#exTrigDetail').innerHTML=`<p class="muted" style="margin:0;font-size:13.5px;line-height:1.55">${EX_TRIGS[i][2][EL()]}</p>`;}
-function exWorse(){const w=[['🚬',['Smoking (especially in Crohn\'s)','التدخين (خاصة في كرون)']],['⏸️',['Stopping your medicine','إيقاف دوائك']],['🔥',['Untreated inflammation','التهاب دون علاج']],['🦠',['Gut infections','عدوى الأمعاء']],['😴',['Poor sleep & high stress','قلّة النوم والتوتّر']]];
-  return `<div class="card" style="background:color-mix(in srgb,var(--bad) 9%,transparent);border-color:color-mix(in srgb,var(--bad) 30%,transparent)"><b style="color:var(--bad);font-size:14px">⚠️ ${isAr()?'يزيدها سوءًا':'Makes it worse'}</b>${w.map(x=>`<div class="row" style="gap:10px;margin-top:11px"><span style="font-size:18px">${x[0]}</span><span style="font-size:13.5px">${x[1][EL()]}</span></div>`).join('')}</div>`;}
-function exBetter(){const b=[['💊',['Taking medicine as prescribed','أخذ الدواء كما وُصف']],['🚭',['Not smoking','عدم التدخين']],['🥗',['Balanced nutrition','تغذية متوازنة']],['😴',['Good sleep & less stress','نوم جيّد وتوتّر أقل']],['🩺',['Check-ups & vaccines','المتابعة واللقاحات']],['📝',['Tracking your symptoms','تتبّع أعراضك']]];
-  return `<div class="card" style="background:color-mix(in srgb,var(--good) 9%,transparent);border-color:color-mix(in srgb,var(--good) 30%,transparent)"><b style="color:var(--good);font-size:14px">✅ ${isAr()?'يجعلها أفضل':'Makes it better'}</b>${b.map(x=>`<div class="row" style="gap:10px;margin-top:11px"><span style="font-size:18px">${x[0]}</span><span style="font-size:13.5px">${x[1][EL()]}</span></div>`).join('')}</div>`;}
+function exWorse(){const w=[['smoking',['Smoking (especially in Crohn\'s)','التدخين (خاصة في كرون)']],['pause',['Stopping your medicine','إيقاف دوائك']],['flame',['Untreated inflammation','التهاب دون علاج']],['germ',['Gut infections','عدوى الأمعاء']],['moon',['Poor sleep & high stress','قلّة النوم والتوتّر']]];
+  return `<div class="card" style="background:color-mix(in srgb,var(--bad) 9%,transparent);border-color:color-mix(in srgb,var(--bad) 30%,transparent)"><b style="color:var(--bad);font-size:14px;display:flex;align-items:center;gap:7px">${svgIcon('info',18)} ${isAr()?'يزيدها سوءًا':'Makes it worse'}</b>${w.map(x=>`<div class="row" style="gap:10px;margin-top:11px"><span style="color:var(--bad)">${svgIcon(x[0],18)}</span><span style="font-size:13.5px">${x[1][EL()]}</span></div>`).join('')}</div>`;}
+function exBetter(){const b=[['pill',['Taking medicine as prescribed','أخذ الدواء كما وُصف']],['shield',['Not smoking','عدم التدخين']],['utensils',['Balanced nutrition','تغذية متوازنة']],['moon',['Good sleep & less stress','نوم جيّد وتوتّر أقل']],['heart',['Check-ups & vaccines','المتابعة واللقاحات']],['edit',['Tracking your symptoms','تتبّع أعراضك']]];
+  return `<div class="card" style="background:color-mix(in srgb,var(--good) 9%,transparent);border-color:color-mix(in srgb,var(--good) 30%,transparent)"><b style="color:var(--good);font-size:14px;display:flex;align-items:center;gap:7px">${svgIcon('check',18)} ${isAr()?'يجعلها أفضل':'Makes it better'}</b>${b.map(x=>`<div class="row" style="gap:10px;margin-top:11px"><span style="color:var(--good)">${svgIcon(x[0],18)}</span><span style="font-size:13.5px">${x[1][EL()]}</span></div>`).join('')}</div>`;}
 function exWave(){return `<div class="card" style="background:var(--bg2)"><svg viewBox="0 0 320 150" width="100%"><line x1="0" y1="90" x2="320" y2="90" stroke="var(--line)" stroke-dasharray="4 4"/><path d="M0 90 Q30 38 60 90 T120 90 Q150 24 180 90 T240 90 Q270 52 300 90 L320 90" fill="none" stroke="var(--bad)" stroke-width="3" stroke-linecap="round"/><circle r="5" fill="var(--accent)"><animateMotion dur="6s" repeatCount="indefinite" path="M0 90 Q30 38 60 90 T120 90 Q150 24 180 90 T240 90 Q270 52 300 90 L320 90"/></circle><text x="60" y="26" fill="var(--bad)" font-size="11" text-anchor="middle">${isAr()?'نوبة':'Flare'}</text><text x="100" y="116" fill="var(--good)" font-size="11" text-anchor="middle">${isAr()?'هدأة':'Remission'}</text></svg></div>`;}
 const EX_MYTH=[[['Myth: IBD is caused by stress or food.','خرافة: التوتّر أو الطعام يسبّب المرض.'],['It isn\'t. Genes, immune system, environment & gut bacteria all play a part.','ليس كذلك. الجينات والمناعة والبيئة والبكتيريا تلعب دورًا.'],'var(--bad)'],[['Myth: IBD is the same as IBS.','خرافة: IBD مثل القولون العصبي.'],['Different. IBD causes real inflammation; IBS does not.','مختلفان. IBD يسبّب التهابًا حقيقيًا؛ القولون العصبي لا.'],'var(--bad)'],[['Myth: Surgery means you failed.','خرافة: الجراحة تعني الفشل.'],['Surgery is a normal, often very helpful part of care.','الجراحة جزء طبيعي ومفيد من الرعاية.'],'var(--bad)'],[['Fact: You can live a full life.','حقيقة: يمكنك أن تعيش حياة كاملة.'],['With treatment and follow-up, most reach remission and thrive.','مع العلاج والمتابعة يصل الأغلب للهدأة ويزدهرون.'],'var(--good)']];
 function exMyths(){return `<div class="grid2" style="gap:10px">${EX_MYTH.map((m,i)=>`<div class="tile" id="exMyth${i}" onclick="exMythTog(${i})" style="text-align:start;cursor:pointer;min-height:96px"><div style="font-size:12.5px;font-weight:700;line-height:1.4">${m[0][EL()]}</div><div id="exMa${i}" style="display:none;font-size:12px;color:var(--muted);margin-top:8px;line-height:1.45">${m[1][EL()]}</div><div id="exTp${i}" class="faint" style="font-size:11px;margin-top:6px">${t('exTapReveal')}</div></div>`).join('')}</div>`;}
@@ -2355,11 +2379,11 @@ window.exGiSet=exGiSet;window.exTrigPick=exTrigPick;window.exMythTog=exMythTog;
 route('insights',(n)=>{
   n.innerHTML=`${topbar('insightsT','insightsSub',{back:true})}
    <div class="content">
-     <div class="grid2">${S.tips.map(tp=>`<button class="tile tap" style="text-align:start;aspect-ratio:auto;min-height:120px" onclick="openTip('${tp.id}')"><span class="emoji" style="font-size:28px">${tp.icon}</span><span class="lab" style="font-size:14px;line-height:1.3">${L(tp[S.lang])}</span></button>`).join('')}</div>
+     <div class="grid2">${S.tips.map(tp=>`<button class="tile tap" style="text-align:start;aspect-ratio:auto;min-height:120px" onclick="openTip('${tp.id}')"><span class="emoji" style="color:var(--accent)">${gicon(tp.icon,26)}</span><span class="lab" style="font-size:14px;line-height:1.3">${L(tp[S.lang])}</span></button>`).join('')}</div>
    </div>`;
 });
 window.openTip=function(id){const tp=S.tips.find(x=>x.id===id);if(!tp)return;const c=tp[S.lang];
-  openSheet(`<div style="font-size:46px">${tp.icon}</div><h2 style="font-size:21px;margin:8px 0 14px">${c[0]}</h2>
+  openSheet(`<div style="color:var(--accent);margin-bottom:4px">${gicon(tp.icon,42)}</div><h2 style="font-size:21px;margin:8px 0 14px">${c[0]}</h2>
    <p style="font-size:15px;line-height:1.75">${c[1]}</p>
    <div class="card" style="background:var(--bg2);margin-top:6px"><p class="muted" style="font-size:12px;margin:0">${isAr()?'محتوى عام لنمط الحياة، غير طبي.':'General lifestyle content, non-medical.'}</p></div>`);
 };
@@ -2379,41 +2403,41 @@ route('more',(n)=>{
      </div>
 
      <div class="card tap" onclick="go('rewards')" style="background:linear-gradient(140deg,color-mix(in srgb,var(--accent) 16%,transparent),transparent);border-color:color-mix(in srgb,var(--accent) 30%,transparent)">
-       <div class="row"><div style="width:46px;height:46px;border-radius:14px;background:var(--accent-d);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:22px">${levelInfo().icon}</div>
+       <div class="row"><div style="width:46px;height:46px;border-radius:14px;background:var(--accent-d);border:1px solid var(--accent);display:flex;align-items:center;justify-content:center;color:var(--accent)">${gicon(levelInfo().icon,24)}</div>
        <div style="flex:1"><b style="font-size:15px">${t('rewardsT')}</b><div class="muted" style="font-size:12.5px">${t('levelLbl')} ${levelInfo().level} · ${levelInfo().xp} XP · 🔥 ${streak()}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div>
      </div>
 
      <div class="card">
-       ${mLi('🧮',t('toolsT'),'',"go('tools')")}
-       ${mLi('👟',t('tSteps'),todaySteps().toLocaleString(),"go('steps')")}
+       ${mLi('calculator',t('toolsT'),'',"go('tools')")}
+       ${mLi('footprints',t('tSteps'),todaySteps().toLocaleString(),"go('steps')")}
      </div>
 
      ${window.isStandalone&&window.isStandalone()?'':`<div class="card tap welcome" onclick="installApp()"><div class="row"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center">${svgIcon('download',22)}</span><div style="flex:1"><b style="font-size:14.5px">${t('installApp')}</b><div class="muted" style="font-size:12.5px">${t('installSub')}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></div>`}
 
      <div class="section-title">${t('settings')}</div>
      <div class="card">
-       ${mLi('🎨',t('appearance'),isAr()?(THEMES.find(x=>x.id===S.prefs.theme)||{}).ar:(THEMES.find(x=>x.id===S.prefs.theme)||{}).en,"go('theme')")}
-       ${mLi('🌐',t('language'),isAr()?'العربية':'English','toggleLangSetting()')}
-       ${mLi('🔔',t('notifications'),'',"go('notifs')")}
-       ${mLi('🔒',t('privacy'),'',"go('privacy')")}
-       ${mLi('🧭',t('insightsWellness'),'',"go('insights')")}
-       ${mLi('🔑',t('changePw'),'',"go('changePw')")}
+       ${mLi('palette',t('appearance'),isAr()?(THEMES.find(x=>x.id===S.prefs.theme)||{}).ar:(THEMES.find(x=>x.id===S.prefs.theme)||{}).en,"go('theme')")}
+       ${mLi('globe',t('language'),isAr()?'العربية':'English','toggleLangSetting()')}
+       ${mLi('bell',t('notifications'),'',"go('notifs')")}
+       ${mLi('lock',t('privacy'),'',"go('privacy')")}
+       ${mLi('compass',t('insightsWellness'),'',"go('insights')")}
+       ${mLi('key',t('changePw'),'',"go('changePw')")}
      </div>
 
      <div class="card tap" onclick="location.href='website.html'"><div class="row"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center">${svgIcon('globe',22)}</span><div style="flex:1"><b style="font-size:14.5px">${t('visitWebsite')}</b><div class="muted" style="font-size:12.5px">${t('visitWebsiteSub')}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></div>
 
      <div class="section-title">${t('legal')}</div>
      <div class="card">
-       ${mLi('📄',t('terms'),'',"openLegal('terms')")}
-       ${mLi('🛡️',t('privacyPolicy'),'',"openLegal('privacy')")}
-       ${mLi('❓',t('faq'),'',"openLegal('faq')")}
-       ${mLi('ℹ️',t('about'),'',"openLegal('about')")}
+       ${mLi('list',t('terms'),'',"openLegal('terms')")}
+       ${mLi('shield',t('privacyPolicy'),'',"openLegal('privacy')")}
+       ${mLi('help',t('faq'),'',"openLegal('faq')")}
+       ${mLi('info',t('about'),'',"openLegal('about')")}
      </div>
 
      <div class="section-title">${isAr()?'البيانات':'Data'}</div>
      <div class="card">
-       ${mLi('📤',t('dataExport'),'',"doExport()")}
-       ${mLi('🗑️',t('dataDelete'),'',"confirmDataDelete()")}
+       ${mLi('download',t('dataExport'),'',"doExport()")}
+       ${mLi('trash',t('dataDelete'),'',"confirmDataDelete()")}
      </div>
 
      <div class="card tap" onclick="go('adminLogin')"><div class="row"><div class="ic" style="width:40px;height:40px;border-radius:11px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:18px">🛠️</div><div style="flex:1"><b style="font-size:14.5px">${t('adminEntry')}</b><div class="muted" style="font-size:12px">${isAr()?'للمسؤولين':'For administrators'}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></div>
@@ -2423,7 +2447,7 @@ route('more',(n)=>{
      <div class="center faint" style="font-size:12px;padding:8px">IBD Connect v1.0 · ${isAr()?'تطبيق غير طبي':'Non-medical app'}</div>
    </div>`;
 });
-function mLi(ic,title,val,onclick){return `<div class="li" onclick="${onclick}"><div class="ic">${ic}</div><div class="tx"><b>${title}</b></div>${val?`<small class="muted">${val}</small>`:''}<div class="chev">${isAr()?'‹':'›'}</div></div>`;}
+function mLi(ic,title,val,onclick){return `<div class="li" onclick="${onclick}"><div class="ic" style="color:var(--accent)">${gicon(ic,22)}</div><div class="tx"><b>${title}</b></div>${val?`<small class="muted">${val}</small>`:''}<div class="chev">${isAr()?'‹':'›'}</div></div>`;}
 window.toggleLangSetting=()=>{S.lang=isAr()?'en':'ar';save();render();toast(t('saved'));};
 window.signOut=()=>{S.authed=false;save();STACK=[];go('login',{replace:true});};
 
@@ -2536,12 +2560,12 @@ window.adminEnter=()=>{if(!$('#adEmail').value.trim()||$('#adPw').value.length<1
 
 route('admin',(n)=>{
   n.classList.add('admin-wrap');
-  const tabs=[['dashboard','📊','dashboard'],['manageLearn','📖','manageLearn'],['manageTips','💡','manageTips'],['managePages','📄','managePages']];
+  const tabs=[['dashboard','chart','dashboard'],['manageLearn','book','manageLearn'],['manageTips','bulb','manageTips'],['managePages','list','managePages']];
   const allowed=tabs.filter(([k])=>{if(adminRole==='analyst')return k==='dashboard';if(adminRole==='contentEditor')return k!=='managePages'||true;return true;});
   n.innerHTML=`
    <div class="topbar"><div style="flex:1"><h1>${t('adminEntry')}</h1><div class="sub">${t(adminRole)} · ${isAr()?'الإصدار 1.0':'v1.0'}</div></div>
      <button class="btn-sm btn-ghost" onclick="navTab('more')">${t('exitAdmin')}</button></div>
-   <div style="padding:0 18px 8px"><div class="chips">${allowed.map(([k,ic,lab])=>`<button class="chip ${adminTab===k?'on':''}" onclick="setAdminTab('${k}')">${ic} ${t(lab)}</button>`).join('')}</div></div>
+   <div style="padding:0 18px 8px"><div class="chips">${allowed.map(([k,ic,lab])=>`<button class="chip ${adminTab===k?'on':''}" style="display:inline-flex;align-items:center;gap:6px" onclick="setAdminTab('${k}')">${svgIcon(ic,15)} ${t(lab)}</button>`).join('')}</div></div>
    <div class="content" id="adminBody"></div>`;
   renderAdminBody(n.querySelector('#adminBody'));
 });
@@ -2578,7 +2602,7 @@ function renderAdminBody(host){
 function adminContentList(arr,kind){
   return `<div class="between"><div class="section-title" style="margin:0">${kind==='learn'?t('manageLearn'):t('manageTips')}</div>
     <button class="btn-sm btn-primary" onclick="adminAddContent('${kind}')">＋ ${t('addContent')}</button></div>
-    <div class="card">${arr.map(item=>`<div class="li" onclick="adminEditContent('${kind}','${item.id}')"><div class="ic">${item.icon}</div><div class="tx"><b>${L(item[S.lang])}</b><small>${item.cat||'—'}</small></div><span class="badge good">${t('published')}</span><div class="chev">${isAr()?'‹':'›'}</div></div>`).join('')}</div>`;
+    <div class="card">${arr.map(item=>`<div class="li" onclick="adminEditContent('${kind}','${item.id}')"><div class="ic" style="color:var(--accent)">${gicon(item.icon,22)}</div><div class="tx"><b>${L(item[S.lang])}</b><small>${item.cat||'—'}</small></div><span class="badge good">${t('published')}</span><div class="chev">${isAr()?'‹':'›'}</div></div>`).join('')}</div>`;
 }
 window.adminAddContent=function(kind){
   openSheet(`<h2 style="font-size:19px;margin:6px 0 14px">${t('addContent')}</h2>
@@ -2619,23 +2643,23 @@ const ACT_FACTORS=[['sedentary',1.2],['lightAct',1.375],['modAct',1.55],['active
 
 const TOOLS=[
   // Everyday
-  {id:'bmi',cat:'core',icon:'⚖️',name:'tBmi',sub:'tBmiSub'},
-  {id:'cal',cat:'core',icon:'🔥',name:'tCal',sub:'tCalSub'},
-  {id:'hydra',cat:'core',icon:'💧',name:'tHydra',sub:'tHydraSub'},
-  {id:'steps',cat:'core',icon:'👟',name:'tSteps',sub:'tStepsSub'},
+  {id:'bmi',cat:'core',icon:'scale',name:'tBmi',sub:'tBmiSub'},
+  {id:'cal',cat:'core',icon:'flame',name:'tCal',sub:'tCalSub'},
+  {id:'hydra',cat:'core',icon:'droplet',name:'tHydra',sub:'tHydraSub'},
+  {id:'steps',cat:'core',icon:'footprints',name:'tSteps',sub:'tStepsSub'},
   // Body metrics
-  {id:'ibw',cat:'body',icon:'🎯',name:'tIbw',sub:'tIbwSub'},
-  {id:'whtr',cat:'body',icon:'📏',name:'tWhtr',sub:'tWhtrSub'},
-  {id:'bf',cat:'body',icon:'🫀',name:'tBf',sub:'tBfSub'},
-  {id:'protein',cat:'body',icon:'🥩',name:'tProtein',sub:'tProteinSub'},
+  {id:'ibw',cat:'body',icon:'target',name:'tIbw',sub:'tIbwSub'},
+  {id:'whtr',cat:'body',icon:'ruler',name:'tWhtr',sub:'tWhtrSub'},
+  {id:'bf',cat:'body',icon:'heart',name:'tBf',sub:'tBfSub'},
+  {id:'protein',cat:'body',icon:'meat',name:'tProtein',sub:'tProteinSub'},
   // IBD wellness
-  {id:'fluid',cat:'ibd',icon:'🚰',name:'tFluid',sub:'tFluidSub'},
-  {id:'fiber',cat:'ibd',icon:'🌾',name:'tFiber',sub:'tFiberSub'},
-  {id:'weight',cat:'ibd',icon:'📉',name:'tWeight',sub:'tWeightSub'},
+  {id:'fluid',cat:'ibd',icon:'cup',name:'tFluid',sub:'tFluidSub'},
+  {id:'fiber',cat:'ibd',icon:'leaf',name:'tFiber',sub:'tFiberSub'},
+  {id:'weight',cat:'ibd',icon:'scale',name:'tWeight',sub:'tWeightSub'},
   // Activity
-  {id:'hr',cat:'activity',icon:'❤️',name:'tHr',sub:'tHrSub'},
-  {id:'burn',cat:'activity',icon:'⚡',name:'tBurn',sub:'tBurnSub'},
-  {id:'activemin',cat:'activity',icon:'⏱️',name:'tActiveMin',sub:'tActiveMinSub'},
+  {id:'hr',cat:'activity',icon:'heart',name:'tHr',sub:'tHrSub'},
+  {id:'burn',cat:'activity',icon:'flame',name:'tBurn',sub:'tBurnSub'},
+  {id:'activemin',cat:'activity',icon:'clock',name:'tActiveMin',sub:'tActiveMinSub'},
 ];
 let toolsCat='core';
 route('tools',(n)=>{
@@ -2645,7 +2669,7 @@ route('tools',(n)=>{
    <div class="content">
      <div class="seg-tab">${cats.map(([v,k])=>`<button class="region-chip ${toolsCat===v?'on':''}" onclick="toolsCat='${v}';render()">${t(k)}</button>`).join('')}</div>
      <div class="grid2">
-       ${list.map(x=>`<button class="tool-card" onclick="openCalc('${x.id}')"><div class="tem">${x.icon}</div><b style="font-size:14.5px">${t(x.name)}</b><span class="muted" style="font-size:12px">${t(x.sub)}</span></button>`).join('')}
+       ${list.map(x=>`<button class="tool-card" onclick="openCalc('${x.id}')"><div class="tem" style="color:var(--accent)">${gicon(x.icon,26)}</div><b style="font-size:14.5px">${t(x.name)}</b><span class="muted" style="font-size:12px">${t(x.sub)}</span></button>`).join('')}
      </div>
      <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.6">ℹ️ ${t('toolDisc')}</p></div>
    </div>`;
@@ -2658,7 +2682,7 @@ window.openCalc=function(id){
   openSheet(b());
 };
 function calcFields(rows){return rows.map(r=>`<div class="field"><label>${t(r.l)}</label>${r.sel?`<select class="input" id="${r.id}">${r.sel.map(([v,k],i)=>`<option value="${v}" ${i===(r.def||0)?'selected':''}>${t(k)}</option>`).join('')}</select>`:`<input class="input" id="${r.id}" inputmode="decimal" value="${r.v!=null?r.v:''}" placeholder="${r.ph||''}">`}</div>`).join('');}
-function calcShell(icon,name,fields,onCalc){return `${sheetHead(icon,name)}${fields}<button class="btn btn-primary" onclick="${onCalc}">${t('calculate')}</button><div id="calcOut" style="margin-top:14px"></div><div class="card" style="background:var(--bg2);margin-top:12px"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">ℹ️ ${t('toolDisc')}</p></div>`;}
+function calcShell(icon,name,fields,onCalc){return `${sheetHead(icon,name)}${fields}<button class="btn btn-primary" onclick="${onCalc}">${t('calculate')}</button><div id="calcOut" style="margin-top:14px"></div><div class="card" style="background:var(--bg2);margin-top:12px"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55;display:flex;gap:6px;align-items:flex-start">${svgIcon('info',14)} <span>${t('toolDisc')}</span></p></div>`;}
 function showResult(val,unit,cat,catColor){const out=$('#calcOut');if(!out)return;
   out.innerHTML=`<div class="calc-result"><div class="ru">${t('yourResult')}</div><div class="rv">${val}</div><div class="ru">${unit||''}</div>${cat?`<div class="rc"><span class="badge" style="background:color-mix(in srgb,${catColor||'var(--accent)'} 18%,transparent);color:${catColor||'var(--accent)'}">${cat}</span></div>`:''}</div>`;
   const rv=out.querySelector('.rv');const sval=(val+'').replace(/,/g,'');
@@ -2667,51 +2691,51 @@ function showResult(val,unit,cat,catColor){const out=$('#calcOut');if(!out)retur
 }
 function num(id){return parseFloat(($('#'+id)||{}).value)||0;}
 
-function cBmi(){return calcShell('⚖️','tBmi',calcFields([{id:'bW',l:'weightKg',ph:'70'},{id:'bH',l:'heightCm',ph:'170'}]),'doBmi()');}
+function cBmi(){return calcShell('scale','tBmi',calcFields([{id:'bW',l:'weightKg',ph:'70'},{id:'bH',l:'heightCm',ph:'170'}]),'doBmi()');}
 window.doBmi=()=>{const w=num('bW'),h=num('bH')/100;if(!w||!h)return toast(t('fillFields'));const bmi=w/(h*h);
   const c=bmi<18.5?['underweight','var(--accent2)']:bmi<25?['normalW','var(--good)']:bmi<30?['overweight','var(--warn)']:['obese','var(--coral)'];
   showResult(bmi.toFixed(1),'kg/m²',t(c[0])+' · '+(isAr()?'مرجع عام':'general reference'),c[1]);};
 
-function cCal(){return calcShell('🔥','tCal',calcFields([{id:'cW',l:'weightKg',ph:'70'},{id:'cH',l:'heightCm',ph:'170'},{id:'cA',l:'ageY',v:age()},{id:'cAct',l:'activityLvl',sel:ACT_FACTORS.map(([k])=>[k,k]),def:1}]),'doCal()');}
+function cCal(){return calcShell('flame','tCal',calcFields([{id:'cW',l:'weightKg',ph:'70'},{id:'cH',l:'heightCm',ph:'170'},{id:'cA',l:'ageY',v:age()},{id:'cAct',l:'activityLvl',sel:ACT_FACTORS.map(([k])=>[k,k]),def:1}]),'doCal()');}
 window.doCal=()=>{const w=num('cW'),h=num('cH'),a=num('cA');if(!w||!h)return toast(t('fillFields'));
   const bmr=10*w+6.25*h-5*a+(isMale()?5:-161);const f=ACT_FACTORS[($('#cAct').selectedIndex)||0][1];const tdee=Math.round(bmr*f);
   showResult(tdee.toLocaleString(),'kcal · '+t('perDay'),(isAr()?'تقدير الطاقة':'energy estimate'),'var(--accent)');};
 
-function cHydra(){return calcShell('💧','tHydra',calcFields([{id:'hW',l:'weightKg',ph:'70'}]),'doHydra()');}
+function cHydra(){return calcShell('droplet','tHydra',calcFields([{id:'hW',l:'weightKg',ph:'70'}]),'doHydra()');}
 window.doHydra=()=>{const w=num('hW');if(!w)return toast(t('fillFields'));const ml=Math.round(w*35);const liters=(ml/1000).toFixed(1);const cups=Math.round(ml/250);
   showResult(liters,'L · '+t('perDay'),'≈ '+cups+' '+t('glasses'),'var(--accent2)');};
 
-function cIbw(){return calcShell('🎯','tIbw',calcFields([{id:'iH',l:'heightCm',ph:'170'}]),'doIbw()');}
+function cIbw(){return calcShell('target','tIbw',calcFields([{id:'iH',l:'heightCm',ph:'170'}]),'doIbw()');}
 window.doIbw=()=>{const h=num('iH');if(!h)return toast(t('fillFields'));const inches=h/2.54;const over=Math.max(0,inches-60);
   const base=isMale()?50:45.5;const dev=base+2.3*over;const lo=(dev*0.9).toFixed(0),hi=(dev*1.1).toFixed(0);
   showResult(lo+'–'+hi,'kg',t('healthyRef'),'var(--good)');};
 
-function cWhtr(){return calcShell('📏','tWhtr',calcFields([{id:'wWaist',l:'waistCm',ph:'85'},{id:'wH',l:'heightCm',ph:'170'}]),'doWhtr()');}
+function cWhtr(){return calcShell('ruler','tWhtr',calcFields([{id:'wWaist',l:'waistCm',ph:'85'},{id:'wH',l:'heightCm',ph:'170'}]),'doWhtr()');}
 window.doWhtr=()=>{const wa=num('wWaist'),h=num('wH');if(!wa||!h)return toast(t('fillFields'));const r=wa/h;
   const c=r<0.5?['normalW','var(--good)']:r<0.6?['overweight','var(--warn)']:['obese','var(--coral)'];
   showResult(r.toFixed(2),'',t(c[0])+' · '+(isAr()?'<0.5 مرجع':'<0.5 reference'),c[1]);};
 
-function cBf(){return calcShell('🫀','tBf',calcFields([{id:'fW',l:'weightKg',ph:'70'},{id:'fH',l:'heightCm',ph:'170'},{id:'fA',l:'ageY',v:age()}]),'doBf()');}
+function cBf(){return calcShell('heart','tBf',calcFields([{id:'fW',l:'weightKg',ph:'70'},{id:'fH',l:'heightCm',ph:'170'},{id:'fA',l:'ageY',v:age()}]),'doBf()');}
 window.doBf=()=>{const w=num('fW'),h=num('fH')/100,a=num('fA');if(!w||!h)return toast(t('fillFields'));const bmi=w/(h*h);
   const bf=1.20*bmi+0.23*a-10.8*(isMale()?1:0)-5.4;showResult(Math.max(3,bf).toFixed(1),'%',t('estimate')+' · Deurenberg','var(--purple)');};
 
-function cProtein(){return calcShell('🥩','tProtein',calcFields([{id:'pW',l:'weightKg',ph:'70'}]),'doProtein()');}
+function cProtein(){return calcShell('meat','tProtein',calcFields([{id:'pW',l:'weightKg',ph:'70'}]),'doProtein()');}
 window.doProtein=()=>{const w=num('pW');if(!w)return toast(t('fillFields'));const lo=(w*1.0).toFixed(0),hi=(w*1.5).toFixed(0);
   showResult(lo+'–'+hi,'g · '+t('perDay'),(isAr()?'نطاق عام':'general range'),'var(--coral)');};
 
 function cFluid(){const loose=logsOn(todayKey()).filter(l=>l.type==='bowel'&&(l.bristol>=6)).reduce((s,l)=>s+(l.count||1),0);
-  return calcShell('🚰','tFluid',calcFields([{id:'flW',l:'weightKg',ph:'70'}])+`<p class="muted" style="font-size:12px;margin:-4px 2px 12px">${isAr()?'براز لين اليوم:':'Loose stools today:'} <b>${loose}</b> (+250ml ${isAr()?'لكل':'each'})</p>`,'doFluid()');}
+  return calcShell('cup','tFluid',calcFields([{id:'flW',l:'weightKg',ph:'70'}])+`<p class="muted" style="font-size:12px;margin:-4px 2px 12px">${isAr()?'براز لين اليوم:':'Loose stools today:'} <b>${loose}</b> (+250ml ${isAr()?'لكل':'each'})</p>`,'doFluid()');}
 window.doFluid=()=>{const w=num('flW');if(!w)return toast(t('fillFields'));const loose=logsOn(todayKey()).filter(l=>l.type==='bowel'&&(l.bristol>=6)).reduce((s,l)=>s+(l.count||1),0);
   const ml=Math.round(w*35)+loose*250;showResult((ml/1000).toFixed(1),'L · '+t('perDay'),(isAr()?'مُعدّل لليوم':'adjusted for today'),'var(--accent2)');};
 
-function cFiber(){return calcShell('🌾','tFiber',`<p class="muted" style="font-size:14px;line-height:1.6;margin:0 2px 12px">${isAr()?'المرجع العام للبالغين هو حوالي ٢٥–٣٠ جرامًا من الألياف يوميًا. أثناء النوبة قد ينصح طبيبك بتقليلها مؤقتًا.':'A general adult reference is about 25–30 g of fiber per day. During a flare your clinician may advise reducing it temporarily.'}</p><div class="calc-result"><div class="rv">25–30</div><div class="ru">g · ${t('perDay')}</div></div>`,'closeSheet()');}
+function cFiber(){return calcShell('leaf','tFiber',`<p class="muted" style="font-size:14px;line-height:1.6;margin:0 2px 12px">${isAr()?'المرجع العام للبالغين هو حوالي ٢٥–٣٠ جرامًا من الألياف يوميًا. أثناء النوبة قد ينصح طبيبك بتقليلها مؤقتًا.':'A general adult reference is about 25–30 g of fiber per day. During a flare your clinician may advise reducing it temporarily.'}</p><div class="calc-result"><div class="rv">25–30</div><div class="ru">g · ${t('perDay')}</div></div>`,'closeSheet()');}
 
-function cHr(){return calcShell('❤️','tHr',calcFields([{id:'hrA',l:'ageY',v:age()}]),'doHr()');}
+function cHr(){return calcShell('heart','tHr',calcFields([{id:'hrA',l:'ageY',v:age()}]),'doHr()');}
 window.doHr=()=>{const a=num('hrA');if(!a)return toast(t('fillFields'));const mx=220-a;
   const z=[['50–60%',.5,.6,'var(--accent2)',isAr()?'إحماء':'Warm-up'],['60–70%',.6,.7,'var(--good)',isAr()?'حرق دهون':'Fat burn'],['70–80%',.7,.8,'var(--warn)',isAr()?'هوائي':'Aerobic'],['80–90%',.8,.9,'var(--coral)',isAr()?'لاهوائي':'Anaerobic']];
   $('#calcOut').innerHTML=`<div class="calc-result"><div class="ru">${isAr()?'أقصى نبض تقديري':'Estimated max HR'}</div><div class="rv">${mx}</div><div class="ru">bpm</div></div><div class="card" style="margin-top:10px">${z.map(zo=>`<div class="between" style="padding:8px 2px;border-bottom:1px solid var(--line)"><span class="row" style="gap:8px"><span class="dot" style="background:${zo[3]}"></span><b style="font-size:13px">${zo[4]}</b></span><span class="muted" style="font-size:12.5px">${Math.round(mx*zo[1])}–${Math.round(mx*zo[2])} bpm</span></div>`).join('')}</div>`;};
 
-function cBurn(){return calcShell('⚡','tBurn',calcFields([{id:'buS',l:'tSteps',ph:'8000'},{id:'buW',l:'weightKg',ph:'70'}]),'doBurn()');}
+function cBurn(){return calcShell('flame','tBurn',calcFields([{id:'buS',l:'tSteps',ph:'8000'},{id:'buW',l:'weightKg',ph:'70'}]),'doBurn()');}
 window.doBurn=()=>{const s=num('buS'),w=num('buW')||70;if(!s)return toast(t('fillFields'));const kcal=Math.round(s*w*0.00045);
   showResult(kcal.toLocaleString(),'kcal',(isAr()?'تقدير من الخطوات':'estimate from steps'),'var(--warn)');};
 
@@ -2800,24 +2824,24 @@ function getNudge(){
   const st=streak();
   if(S.prefs.nudgeStreak&&logsOn(today).length===0){
     const yKey=todayKey(new Date(Date.now()-864e5));
-    if(logsOn(yKey).length>0&&st>=1&&fresh('streak'))cands.push({id:'streak',icon:'🔥',text:t('nudgeStreak').replace('{n}',st),action:"navTab('track')",pri:5});
+    if(logsOn(yKey).length>0&&st>=1&&fresh('streak'))cands.push({id:'streak',icon:'flame',text:t('nudgeStreak').replace('{n}',st),action:"navTab('track')",pri:5});
   }
   // log today
-  if(S.prefs.nudgeDaily&&logsOn(today).length===0&&fresh('daily'))cands.push({id:'daily',icon:'📝',text:t('nudgeLogToday'),action:"navTab('track')",pri:4});
+  if(S.prefs.nudgeDaily&&logsOn(today).length===0&&fresh('daily'))cands.push({id:'daily',icon:'edit',text:t('nudgeLogToday'),action:"navTab('track')",pri:4});
   // steps behind goal (afternoon onward)
   if(S.prefs.nudgeHydra){
     const goal=S.prefs.stepGoal||8000;const cur=todaySteps();const hr=new Date().getHours();
-    if(hr>=14&&cur<goal&&fresh('steps'))cands.push({id:'steps',icon:'🚶',text:t('nudgeSteps').replace('{n}',(goal-cur).toLocaleString()),action:"go('steps')",pri:3});
-    if(fresh('hydra'))cands.push({id:'hydra',icon:'💧',text:t('nudgeHydra'),action:"openCalc('hydra')",pri:1});
+    if(hr>=14&&cur<goal&&fresh('steps'))cands.push({id:'steps',icon:'footprints',text:t('nudgeSteps').replace('{n}',(goal-cur).toLocaleString()),action:"go('steps')",pri:3});
+    if(fresh('hydra'))cands.push({id:'hydra',icon:'droplet',text:t('nudgeHydra'),action:"openCalc('hydra')",pri:1});
   }
   // DISC due (none in 30 days)
   if(fresh('disc')){const last=S.disc?new Date(S.disc.date):null;const due=!last||(Date.now()-last.getTime())>30*864e5;
-    if(due&&S.logs.length>5)cands.push({id:'disc',icon:'🧭',text:t('nudgeDisc'),action:"go('disc')",pri:2});}
+    if(due&&S.logs.length>5)cands.push({id:'disc',icon:'compass',text:t('nudgeDisc'),action:"go('disc')",pri:2});}
   if(!cands.length)return null;
   cands.sort((a,b)=>b.pri-a.pri);return cands[0];
 }
 function nudgeBanner(){const nd=getNudge();if(!nd)return '';
-  return `<div class="nudge" id="nudgeBan"><div class="nem">${nd.icon}</div><div class="nx" onclick="${nd.action}">${nd.text}</div><button class="nclose" onclick="dismissNudge('${nd.id}')">✕</button></div>`;}
+  return `<div class="nudge" id="nudgeBan"><div class="nem" style="color:var(--accent)">${gicon(nd.icon,22)}</div><div class="nx" onclick="${nd.action}">${nd.text}</div><button class="nclose" onclick="dismissNudge('${nd.id}')">✕</button></div>`;}
 window.dismissNudge=function(id){S.nudgeDismiss=S.nudgeDismiss||{};S.nudgeDismiss[id]=todayKey();save();const b=$('#nudgeBan');if(b){b.style.transition='.25s';b.style.opacity='0';b.style.height='0';setTimeout(()=>render(),200);}};
 
 /* ============================================================
