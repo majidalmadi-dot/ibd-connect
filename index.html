@@ -1339,9 +1339,9 @@ function topbar(titleK,subK,opts){opts=opts||{};
   return `<div class="topbar">${left}<div style="flex:1"><h1>${opts.rawTitle||t(titleK)}</h1>${subK?`<div class="sub">${opts.rawSub||t(subK)}</div>`:''}</div>${right}</div>`;
 }
 function greeting(){const h=new Date().getHours();return h<12?t('goodMorning'):h<18?t('goodAfternoon'):t('goodEvening');}
-function scaleSel(id,n,colors,val){let h='<div class="scale" id="'+id+'">';for(let i=1;i<=n;i++){const c=colors?colors[i-1]:'var(--accent)';h+=`<button data-v="${i}" class="${val===i?'on':''}" style="${val===i?`background:${c}`:''}" onclick="pickScale('${id}',${i},'${c}')">${i}</button>`;}h+='</div>';return h;}
+function scaleSel(id,n,colors,val,start){start=(start==null?1:start);let h='<div class="scale" id="'+id+'">';for(let i=start;i<=n;i++){const c=colors?(colors[i-start]||'var(--accent)'):'var(--accent)';h+=`<button data-v="${i}" class="${val===i?'on':''}" style="${val===i?`background:${c}`:''}" onclick="pickScale('${id}',${i},'${c}')">${i}</button>`;}h+='</div>';return h;}
 window.pickScale=function(id,v,c){const wrap=$('#'+id);[...wrap.children].forEach(b=>{b.classList.remove('on');b.style.background='';});const btn=wrap.querySelector(`[data-v="${v}"]`);btn.classList.add('on');btn.style.background=c;wrap.dataset.val=v;};
-function getScale(id){const w=$('#'+id);return w&&w.dataset.val?+w.dataset.val:0;}
+function getScale(id){const w=$('#'+id);return w&&w.dataset.val!==undefined?+w.dataset.val:null;}
 
 /* ============================================================
    SCREENS — Onboarding & Auth
@@ -2045,12 +2045,12 @@ route('disc',(n)=>{
        <b style="font-size:17px">${labels[0]}</b>
        <p class="muted" style="font-size:14px;line-height:1.55;margin:8px 0 0">"${labels[1]}"</p>
      </div>
-     <div class="between"><span class="faint" style="font-size:12px">${t('notAtAll')}</span><span class="faint" style="font-size:12px">${t('extremely')}</span></div>
-     ${scaleSel('discScale',10,Array(10).fill('var(--purple)'),discAns[q.k])}
+     <div class="between"><span class="faint" style="font-size:12px">0 · ${t('notAtAll')}</span><span class="faint" style="font-size:12px">${t('extremely')} · 10</span></div>
+     ${scaleSel('discScale',10,Array(11).fill('var(--purple)'),discAns[q.k],0)}
      <button class="btn btn-primary" onclick="discAnswer()">${discIdx<DISC.length-1?t('next'):t('viewSummary')}</button>
    </div>`;
 });
-window.discAnswer=()=>{const v=getScale('discScale');if(!v)return toast(t('selectOne'));
+window.discAnswer=()=>{const v=getScale('discScale');if(v===null)return toast(t('selectOne'));
   discAns[DISC[discIdx].k]=v;discIdx++;render();};
 function renderDiscResult(n){
   S.disc={date:new Date().toISOString(),answers:{...discAns}};
