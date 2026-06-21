@@ -46,7 +46,7 @@
       <li><strong>Share with my doctor:</strong> when you generate a share, a read-only summary (your initials only — never your full name — plus descriptive trends and latest labs) is stored on our backend (Supabase) behind a random, unguessable link that expires after 7 days. You may also share it as a self-contained link or by email; those stay on your device.</li>
       <li><strong>Anonymous research registry (opt-in):</strong> if you opt in, de-identified, aggregate data points (e.g. disease type, age band, region, summary scores) are contributed for population insight. No name, email, or identifier is sent, and the data cannot be read back to you.</li>
       <li><strong>Reminders / notifications (opt-in):</strong> if you enable notifications, a push subscription token is stored so reminders can be delivered. You can turn this off anytime.</li>
-      <li><strong>Usage & crash diagnostics (opt-in):</strong> off by default. If you opt in (and your browser does not signal “Do Not Track”), we collect anonymous, privacy-scrubbed analytics (Plausible) and error reports (Sentry) with personal data and app state removed.</li>
+      <li><strong>Usage & crash diagnostics (opt-in):</strong> off by default. If you opt in (and your browser does not signal “Do Not Track”), we record anonymous, aggregate usage events on our own backend (e.g. which screens are used, how often an entry is logged) — never your name, notes, doses or values — plus scrubbed crash reports (Sentry). Optional cookieless analytics (Plausible) may also be enabled.</li>
     </ul>
 
     <h2>Third parties</h2>
@@ -81,7 +81,7 @@
       <li><strong>المشاركة مع طبيبي:</strong> عند إنشاء مشاركة، يُحفظ ملخّص للقراءة فقط (الأحرف الأولى من اسمك فقط — لا اسمك الكامل — مع اتجاهات وصفية وآخر التحاليل) على خادمنا (Supabase) خلف رابط عشوائي يصعب تخمينه وينتهي خلال ٧ أيام. يمكنك أيضًا مشاركته كرابط ذاتي أو بالبريد، ويبقى ذلك على جهازك.</li>
       <li><strong>سجل بحثي مجهول (اختياري):</strong> إن وافقت، تُسهم نقاط بيانات مجمّعة ومجهولة الهوية (مثل نوع المرض، الفئة العمرية، المنطقة، درجات ملخّصة) لأغراض رؤى سكانية. لا يُرسَل اسم أو بريد أو مُعرّف، ولا يمكن ربط البيانات بك.</li>
       <li><strong>التذكيرات والإشعارات (اختياري):</strong> عند تفعيل الإشعارات يُحفظ رمز اشتراك لإرسال التذكيرات. يمكنك إيقاف ذلك في أي وقت.</li>
-      <li><strong>تحليلات الاستخدام والأعطال (اختياري):</strong> متوقّفة افتراضيًا. عند الموافقة (وما لم يُفعّل متصفّحك خيار «عدم التتبّع») نجمع تحليلات مجهولة ومنزوعة البيانات الشخصية (Plausible) وتقارير أعطال (Sentry) بعد إزالة البيانات الشخصية وحالة التطبيق.</li>
+      <li><strong>تحليلات الاستخدام والأعطال (اختياري):</strong> متوقّفة افتراضيًا. عند الموافقة (وما لم يُفعّل متصفّحك خيار «عدم التتبّع») نسجّل أحداث استخدام مجهولة ومجمّعة على خادمنا (مثل الشاشات المستخدَمة وعدد مرات التسجيل) — دون اسمك أو ملاحظاتك أو جرعاتك أو قيمك — بالإضافة إلى تقارير أعطال منزوعة البيانات (Sentry). ويمكن تفعيل تحليلات اختيارية بلا كوكيز (Plausible).</li>
     </ul>
 
     <h2>أطراف ثالثة</h2>

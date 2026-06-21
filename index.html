@@ -1046,6 +1046,7 @@ const I18N = {
   manageTips:{en:"Wellness tips",ar:"نصائح العافية"},
   managePages:{en:"Legal & static pages",ar:"الصفحات القانونية والثابتة"},
   regUsers:{en:"Registered users",ar:"المستخدمون المسجّلون"},
+  usageTab:{en:"Usage",ar:"الاستخدام"},
   activeUsers:{en:"Active this week",ar:"نشطون هذا الأسبوع"},
   totalLogsAdmin:{en:"Total logs",ar:"إجمالي السجلات"},
   contentItems:{en:"Content items",ar:"عناصر المحتوى"},
@@ -1443,6 +1444,7 @@ function render(){
   const tb=$('#tabbar');
   if(MAIN_TABS.includes(CURRENT)){tb.classList.remove('hidden');renderTabs();}
   else tb.classList.add('hidden');
+  try{ if(typeof track==='function') track('view',{r:CURRENT}); }catch(e){}
 }
 let CURRENT_OPTS={};
 function navTab(name){STACK=[];CURRENT=name;CURRENT_OPTS={};render();}
@@ -2545,7 +2547,16 @@ function initTelemetry(){
   }catch(e){}
 }
 /* privacy-safe product analytics — these fire ONLY when Plausible is active (analytics opt-in + DNT honoured). No names, notes, doses or values are ever sent — event names only. */
-function track(ev,props){try{if(window.plausible)window.plausible(ev,props?{props:props}:undefined);}catch(e){}}
+function track(ev,props){
+  try{ if(window.plausible) window.plausible(ev, props?{props:props}:undefined); }catch(e){}
+  // self-hosted, anonymous usage events on our own backend (no third party). Consent + DNT gated.
+  try{
+    if(!telemetryOn())return;
+    if(navigator.doNotTrack==='1'||window.doNotTrack==='1'||navigator.doNotTrack==='yes')return;
+    if(!cloudOn())return;
+    loadSupabase().then(sb=>{ if(sb) sb.from('events').insert({ev:String(ev).slice(0,40),props:props||null}); });
+  }catch(e){}
+}
 window.track=track;
 /* ---- Push reminders (opt-in). Public VAPID key ships; private key is a Supabase secret. ---- */
 function urlB64ToUint8(b){const pad='='.repeat((4-b.length%4)%4);const s=(b+pad).replace(/-/g,'+').replace(/_/g,'/');const r=atob(s);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)));}
@@ -4185,8 +4196,8 @@ window.adminEnter=()=>{if(!$('#adEmail').value.trim()||$('#adPw').value.length<1
 
 route('admin',(n)=>{
   n.classList.add('admin-wrap');
-  const tabs=[['dashboard','chart','dashboard'],['manageLearn','book','manageLearn'],['manageTips','bulb','manageTips'],['managePages','list','managePages']];
-  const allowed=tabs.filter(([k])=>{if(adminRole==='analyst')return k==='dashboard';if(adminRole==='contentEditor')return k!=='managePages'||true;return true;});
+  const tabs=[['dashboard','chart','dashboard'],['usage','pulse','usageTab'],['manageLearn','book','manageLearn'],['manageTips','bulb','manageTips'],['managePages','list','managePages']];
+  const allowed=tabs.filter(([k])=>{if(adminRole==='analyst')return k==='dashboard'||k==='usage';if(adminRole==='contentEditor')return k!=='managePages'||true;return true;});
   n.innerHTML=`
    <div class="topbar"><div style="flex:1"><h1>${t('adminEntry')}</h1><div class="sub">${t(adminRole)} · ${isAr()?'الإصدار 1.0':'v1.0'}</div></div>
      <button class="btn-sm btn-ghost" onclick="navTab('more')">${t('exitAdmin')}</button></div>
@@ -4195,6 +4206,31 @@ route('admin',(n)=>{
   renderAdminBody(n.querySelector('#adminBody'));
 });
 window.setAdminTab=k=>{adminTab=k;render();};
+/* Real, self-hosted usage analytics (aggregate-only, from our own Supabase) */
+async function loadUsage(host){
+  const ar=isAr();
+  host.innerHTML=skel(4);
+  if(!cloudOn()){host.innerHTML=`<div class="card"><p class="muted">${ar?'الخادم غير مُهيّأ.':'Backend not configured.'}</p></div>`;return;}
+  const sb=await loadSupabase();
+  if(!sb){host.innerHTML=`<div class="card"><p class="muted">${ar?'تعذّر الاتصال.':'Could not connect.'}</p></div>`;return;}
+  let sum=[],daily=[];
+  try{const a=await sb.rpc('event_summary',{days:30});sum=a.data||[];const b=await sb.rpc('event_daily',{days:14});daily=b.data||[];}catch(e){}
+  const total=sum.reduce((a,b)=>a+Number(b.n),0);
+  const L={view:ar?'مشاهدات الشاشات':'Screen views',log:ar?'تسجيلات':'Entries logged',share_report:ar?'مشاركة تقرير':'Reports shared',enable_push:ar?'تفعيل الإشعارات':'Notifications enabled',read_article:ar?'قراءة مقال':'Articles read'};
+  const max=Math.max(1,...sum.map(r=>Number(r.n)));
+  const rows=sum.length?sum.map(r=>`<div style="margin-bottom:10px"><div class="between" style="margin-bottom:4px"><span style="font-size:13.5px">${L[r.ev]||esc(r.ev)}</span><b style="font-size:13px">${r.n}</b></div><div class="pbar"><i style="width:${Math.round(Number(r.n)/max*100)}%"></i></div></div>`).join('')
+    :`<p class="muted" style="padding:8px">${ar?'لا توجد بيانات بعد — تظهر عندما يوافق المستخدمون على التحليلات في الإعدادات.':'No data yet — appears once users opt into analytics in Settings.'}</p>`;
+  host.innerHTML=`
+    <div class="grid2">
+      <div class="kpi"><div class="v">${total}</div><div class="l">${ar?'أحداث (٣٠ يوم)':'Events (30d)'}</div></div>
+      <div class="kpi"><div class="v">${sum.length}</div><div class="l">${ar?'أنواع التفاعل':'Interaction types'}</div></div>
+    </div>
+    <div class="card"><div class="section-title" style="margin:0 0 12px">${ar?'كيف يتفاعل الناس (٣٠ يوم)':'How people interact (30d)'}</div>${rows}</div>
+    <div class="card"><div class="section-title" style="margin:0 0 8px">${ar?'النشاط اليومي':'Daily activity'}</div><canvas id="usgChart" height="140"></canvas></div>
+    <p class="muted" style="font-size:11px;line-height:1.5">${ar?'بيانات مجهولة ومجمّعة من المستخدمين الموافقين فقط، على خادمكم (Supabase) — بلا أطراف ثالثة.':'Anonymous, aggregate data from consenting users only, on your own backend (Supabase) — no third parties.'}</p>`;
+  setTimeout(()=>{const C=window.Chart;if(!C||!$('#usgChart'))return;destroyCharts();
+    CHARTS.push(new C($('#usgChart'),{type:'bar',data:{labels:daily.map(x=>String(x.day).slice(5)),datasets:[{data:daily.map(x=>Number(x.n)),backgroundColor:'#19A0FF',borderRadius:6}]},options:chartBase()}));},60);
+}
 function renderAdminBody(host){
   if(adminTab==='dashboard'){
     const reg=128+Math.floor(S.logs.length/3);
@@ -4212,6 +4248,7 @@ function renderAdminBody(host){
       const labels=lastNDays(7).map(d=>new Date(d+'T00:00').toLocaleDateString(isAr()?'ar-SA':'en-GB',{weekday:'short'}));
       CHARTS.push(new C($('#adChart'),{type:'bar',data:{labels,datasets:[{data:labels.map(()=>40+Math.floor(Math.random()*60)),backgroundColor:'#00E0B8',borderRadius:6}]},options:chartBase()}));},60);
   }
+  else if(adminTab==='usage'){ loadUsage(host); }
   else if(adminTab==='manageLearn'){
     host.innerHTML=adminContentList(S.learn,'learn');
   }
