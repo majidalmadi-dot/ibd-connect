@@ -543,7 +543,12 @@ input[type=range]{accent-color:var(--accent)}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
 }
+/* Arabic typography polish: Latin negative tracking looks cramped in Arabic — reset it, and give Arabic prose more comfortable line-height */
+html[dir=rtl] .lhero-copy h1,html[dir=rtl] .lx-h2,html[dir=rtl] .ltitle,html[dir=rtl] .lx-cta h2,html[dir=rtl] .lpill,html[dir=rtl] .lhero-sub,html[dir=rtl] .lx-eyebrow{letter-spacing:normal}
+html[dir=rtl] .lhero-sub,html[dir=rtl] .lx-lead,html[dir=rtl] .lcard p,html[dir=rtl] .lfoot p,html[dir=rtl] .lx-quote blockquote,html[dir=rtl] .ltrust{line-height:1.95}
 </style>
+<!-- Set direction/lang before first paint so an ?lang=ar (or saved) Arabic visit never flashes English/LTR -->
+<script>try{var _q=new URLSearchParams(location.search).get('lang');var _l=_q||localStorage.getItem('ibdweb_lang');if(_l==='ar'){document.documentElement.dir='rtl';document.documentElement.lang='ar';}}catch(e){}</script>
 </head>
 <body>
 <!-- Desktop website shell (hidden on phones; app goes full-screen there) -->
@@ -557,7 +562,7 @@ input[type=range]{accent-color:var(--accent)}
       <a href="#about" data-en="About" data-ar="عن التطبيق">About</a>
     </nav>
     <button class="llang" onclick="landSetLang(window.__landLang==='ar'?'en':'ar')" aria-label="language">العربية</button>
-    <a class="lcta llink-site" href="website.html" data-en="Explore the site ↗" data-ar="استكشف الموقع ↗">Explore the site ↗</a>
+    <a class="lcta llink-site" href="website.html" data-en="Explore the site ↗" data-ar="استكشف الموقع ↖">Explore the site ↗</a>
   </header>
 
   <main id="appMain">
@@ -647,7 +652,7 @@ input[type=range]{accent-color:var(--accent)}
   <footer class="lfoot" id="about">
     <div class="lfoot-in">
       <div><span class="lbrand-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg></span> <b>Rafeeq</b></div>
-      <p data-en="Rafeeq is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider." data-ar="Rafeeq رفيق صحي غير طبي للتتبّع الذاتي والتثقيف. لا يقدّم نصيحة طبية أو تشخيصًا أو علاجًا وليس بديلًا عن الرعاية المهنية. استشر دائمًا مقدّم الرعاية الصحية.">Rafeeq is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider.</p>
+      <p data-en="Rafeeq is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider." data-ar="«رفيق» هو رفيق صحي غير طبي للتتبّع الذاتي والتثقيف. لا يقدّم نصيحة طبية أو تشخيصًا أو علاجًا وليس بديلًا عن الرعاية المهنية. استشر دائمًا مقدّم الرعاية الصحية.">Rafeeq is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider.</p>
       <p class="lfoot-sub">Educational content from the Saudi Gastroenterology Association — IBDguide.net. © <span id="lyear"></span> Rafeeq.</p>
     </div>
   </footer>
@@ -1217,6 +1222,8 @@ const SGA_ARTICLES = [
 /* ---------- State & storage ---------- */
 const KEY='ibdconnect_v1';
 let S = load();
+/* honor a ?lang= / saved website language on first run so a shared Arabic link opens the app in Arabic too */
+if(!S.lang){try{const _q=new URLSearchParams(location.search).get('lang');const _w=localStorage.getItem('ibdweb_lang');const _g=_q||_w;if(_g==='ar'||_g==='en')S.lang=_g;}catch(e){}}
 function blank(){return{
   lang:null, onboarded:false, authed:false,
   user:{name:'',email:'',year:'',gender:'',disease:'',diagYear:'',avatar:'🙂',country:'',countryFlag:'',heightCm:''},
