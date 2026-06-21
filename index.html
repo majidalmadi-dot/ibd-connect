@@ -1230,7 +1230,20 @@ function blank(){return{
   seenDays:[], nudgeDismiss:{},
   game:{xp:0, quests:{}, goalDays:[], lastLevel:1}
 };}
-function load(){try{const v=JSON.parse(localStorage.getItem(KEY));return v?Object.assign(blank(),v):seedDemo(blank());}catch(e){return seedDemo(blank());}}
+/* deep-merge saved state over defaults so newly-added nested fields aren't lost on upgrade
+   (arrays are replaced wholesale by the saved value, objects merge key-by-key) */
+function deepMerge(base,over){
+  if(base===null||typeof base!=='object'||Array.isArray(base)) return over===undefined?base:over;
+  const out=Object.assign({},base);
+  if(over&&typeof over==='object'&&!Array.isArray(over)){
+    for(const k in over){
+      const b=base[k],o=over[k];
+      out[k]=(b&&typeof b==='object'&&!Array.isArray(b)&&o&&typeof o==='object'&&!Array.isArray(o))?deepMerge(b,o):o;
+    }
+  }
+  return out;
+}
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));return v?deepMerge(blank(),v):seedDemo(blank());}catch(e){return seedDemo(blank());}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 function reset(){S=blank();save();}
 
@@ -2473,6 +2486,8 @@ function loadQR(){
   return new Promise((res)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s);});
 }
 
+/* privacy: share only initials to the cloud, never the full name (full name stays on-device) */
+function initialsOf(n){n=(n||'').trim();if(!n)return '';return n.split(/\s+/).slice(0,2).map(w=>w&&w[0]?w[0].toUpperCase()+'.':'').join(' ');}
 /* compact, privacy-minded clinician summary */
 function clinSummary(){
   const last=(t,k)=>{const a=S.logs.filter(l=>l.type===t&&daysAgo(l.t.slice(0,10))<=14);return a.length?a:null;};
@@ -2485,7 +2500,7 @@ function clinSummary(){
   const bio=(S.meds||[]).filter(m=>m.kind==='biologic').map(m=>({name:m.name||'biologic',due:medNextDue(m)})).filter(x=>x.due).sort((a,b)=>a.due-b.due)[0];
   const labs=(S.labs||[]).slice().sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,4).map(l=>({t:l.type,v:l.value,d:l.date}));
   return {
-    nm:S.user.name||'', dx:S.user.disease||'', cty:S.user.country||'',
+    nm:initialsOf(S.user.name), dx:S.user.disease||'', cty:S.user.country||'',
     sym:symAvg!=null?+symAvg.toFixed(1):null, bow:bowelAvg!=null?+bowelAvg.toFixed(1):null, slp:sleepAvg!=null?+sleepAvg.toFixed(1):null,
     adh, bio:bio?{n:bio.name,d:bio.due.toISOString().slice(0,10)}:null,
     disc:S.disc?Object.values(S.disc.answers).reduce((a,b)=>a+b,0):null, ctrl:S.control?S.control.score:null,
