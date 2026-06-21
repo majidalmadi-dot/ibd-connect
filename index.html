@@ -311,6 +311,29 @@ body{font-feature-settings:"cv11","ss01";letter-spacing:-0.01em}
 [data-mode=light] .card{box-shadow:0 1px 2px rgba(16,26,36,.05), 0 10px 26px -16px rgba(16,26,36,.22)}
 .card.tap:active{transform:translateY(1px) scale(.99)}
 .stat{box-shadow:inset 0 1px 0 rgba(255,255,255,.03)}
+/* ===== UI polish: staggered entrance, press feedback, skeletons, empty art ===== */
+@media (prefers-reduced-motion:no-preference){
+  .content>*{animation:riseIn .42s cubic-bezier(.2,.8,.2,1) both}
+  .content>*:nth-child(2){animation-delay:.045s}
+  .content>*:nth-child(3){animation-delay:.09s}
+  .content>*:nth-child(4){animation-delay:.135s}
+  .content>*:nth-child(5){animation-delay:.18s}
+  .content>*:nth-child(n+6){animation-delay:.22s}
+}
+@keyframes riseIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
+.btn:active{transform:translateY(1px) scale(.99)}
+.chip:active{transform:scale(.96)}
+.tab:active{transform:scale(.92)}
+.tab.on .ic,.tab.on .svgi{animation:tabPop .32s ease}
+@keyframes tabPop{0%{transform:scale(.82)}55%{transform:scale(1.16)}100%{transform:scale(1)}}
+/* skeleton shimmer (async loads) */
+.skel{position:relative;overflow:hidden;background:var(--card2);border-radius:12px}
+.skel::after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--txt) 9%,transparent),transparent);animation:shimmer 1.25s infinite}
+.skel-row{height:13px;margin:9px 0;border-radius:7px}
+@keyframes shimmer{to{transform:translateX(100%)}}
+/* empty-state spot illustration */
+.empty-art{width:92px;height:92px;margin:2px auto 8px;color:var(--accent);opacity:.92}
+.empty-art svg{width:100%;height:100%}
 /* tinted icon chips */
 .ic{color:var(--accent);background:linear-gradient(150deg,color-mix(in srgb,var(--accent) 16%,var(--card2)),var(--card2));border:1px solid color-mix(in srgb,var(--accent) 14%,transparent)}
 .ic .svgi{width:20px;height:20px}
@@ -1247,6 +1270,15 @@ function closeSheet(){$('#sheetbg').classList.remove('open');}
 $('#sheetbg').addEventListener('click',e=>{if(e.target.id==='sheetbg')closeSheet();});
 /* HTML/attribute escaping for any user-supplied text rendered via innerHTML or value="…" */
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+/* skeleton placeholder for async waits */
+function skel(rows){rows=rows||3;const w=[92,78,86,70];let h='';for(let i=0;i<rows;i++)h+=`<div class="skel skel-row" style="width:${w[i%4]}%"></div>`;return `<div class="card">${h}</div>`;}
+/* owned, themeable inline-SVG spot art for empty states */
+function emptyArt(kind){const A={
+  cart:'<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 13h6l5.5 28h26L52 21H18.5"/><circle cx="27" cy="51" r="3.4"/><circle cx="44" cy="51" r="3.4"/></svg>',
+  pill:'<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="13" y="23" width="38" height="18" rx="9"/><path d="M32 23v18"/></svg>',
+  chart:'<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M11 51V13M11 51h42"/><path d="M19 43l10-12 9 7 13-19"/></svg>',
+  list:'<svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 18h27M24 32h27M24 46h27"/><circle cx="13" cy="18" r="2.3"/><circle cx="13" cy="32" r="2.3"/><circle cx="13" cy="46" r="2.3"/></svg>'
+  };return `<div class="empty-art" aria-hidden="true">${A[kind]||A.list}</div>`;}
 
 /* date helpers */
 function todayKey(d){d=d||new Date();return d.toISOString().slice(0,10);}
@@ -1790,6 +1822,12 @@ const THEMES=[
   {id:'mint',en:'Fresh Mint',ar:'نعناع',like:'Clue',mode:'light',
    vars:{'--bg':'#ECF7F0','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E3F2E9','--line':'#D3EADC','--txt':'#0F2418','--muted':'#4E6B5A','--faint':'#6E9080','--accent':'#1FA85F','--accent2':'#0AAFA0','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#1FA85F','--accent-d':'#D6F1E1','--nav':'rgba(255,255,255,.82)'},
    wall:'linear-gradient(180deg,#D9F2E3 0%,#ECF7F0 40%)'},
+  {id:'nebula',en:'Nebula',ar:'سديم',like:'Samsung Health',mode:'dark',
+   vars:{'--bg':'#0C0A1A','--bg2':'#131029','--card':'#1A1636','--card2':'#241E47','--line':'#332A5C','--txt':'#EFEAFB','--muted':'#AA9CCC','--faint':'#75699B','--accent':'#A78BFA','--accent2':'#5EB0FF','--purple':'#C58BF2','--warn':'#FFC061','--bad':'#FF6B8A','--good':'#5FD0A0','--accent-d':'#241B45','--nav':'rgba(19,16,41,.92)'},
+   wall:'radial-gradient(120% 90% at 50% -10%,#2a1d5a 0%,#0C0A1A 55%)'},
+  {id:'sandstone',en:'Sandstone',ar:'حجر رملي',like:'Vision 2030',mode:'light',
+   vars:{'--bg':'#F6F1E9','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#F1E8D9','--line':'#E6DAC6','--txt':'#241B12','--muted':'#6B5C49','--faint':'#8A7A64','--accent':'#9A6620','--accent2':'#2F8F77','--purple':'#7C5CFF','--warn':'#C9831F','--bad':'#C24A33','--good':'#2F8F77','--accent-d':'#F0E2C9','--nav':'rgba(255,255,255,.82)'},
+   wall:'linear-gradient(180deg,#EFE4D0 0%,#F6F1E9 40%)'},
 ];
 function applyTheme(){const th=THEMES.find(x=>x.id===(S.prefs.theme||'whoop'))||THEMES[0];
   const r=document.documentElement;Object.entries(th.vars).forEach(([k,v])=>r.style.setProperty(k,v));
@@ -3248,7 +3286,7 @@ route('supps',(n)=>{
        return `<div class="card"><div class="between"><div class="row" style="gap:11px"><span class="ic" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon('leaf',20)}</span><div><b style="font-size:14.5px">${esc(s.name)}</b><div class="muted" style="font-size:12px">${[esc(s.dose),s.freq===' weekly'?(ar?'أسبوعي':'weekly'):(ar?'يومي':'daily')].filter(Boolean).join(' · ')}</div></div></div><button class="btn-sm btn-ghost" onclick="delSupp('${s.id}')">${svgIcon('trash',15)}</button></div>
        ${adh!=null?`<div class="between" style="margin-top:10px"><span class="muted" style="font-size:12px">${ar?'الالتزام (٣٠ يومًا)':'Adherence (30d)'}</span><b style="font-size:13px;color:${adh>=80?'var(--good)':adh>=50?'var(--warn)':'var(--bad)'}">${adh}%</b></div><div class="pbar" style="margin-top:6px"><i style="width:${adh}%"></i></div>`:''}
        <button class="btn ${took?'btn-ghost':'btn-primary'}" style="margin-top:10px" onclick="suppTake('${s.id}')">${took?svgIcon('check',16)+' '+(ar?'تم اليوم':'Taken today'):(ar?'سجّل جرعة اليوم':'Mark today taken')}</button></div>`;}).join('')
-       :`<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('leaf',36)}</div><p class="muted" style="margin-top:8px">${ar?'لم تُضِف مكمّلات بعد':'No supplements added yet'}</p></div>`}
+       :`<div class="card center" style="padding:30px">${emptyArt('pill')}<p class="muted" style="margin-top:8px">${ar?'لم تُضِف مكمّلات بعد':'No supplements added yet'}</p></div>`}
      <div class="dsec" style="color:var(--accent)">${ar?'لماذا تهمّ في التهاب الأمعاء':'Why these matter in IBD'}</div>
      <div class="card">${SUPP_TYPES.slice(0,5).map(s=>`<div class="dtip"><span class="tk" style="color:var(--accent)">${svgIcon('check',16)}</span><span><b>${dietLX(s.n)}:</b> ${dietLX(s.note)}</span></div>`).join('')}</div>
      <button class="btn btn-ghost" onclick="go('labs')">${svgIcon('pulse',18)} ${ar?'تابع تحاليلك (الفيريتين، ب12، فيتامين د)':'Track related labs (ferritin, B12, vit D)'}</button>
@@ -3480,7 +3518,7 @@ route('grocery',(n)=>{
      <div class="card"><div class="row" style="gap:8px"><input class="input" id="gcAdd" placeholder="${ar?'أضِف عنصرًا…':'Add an item…'}" style="flex:1"><button class="btn btn-primary btn-sm" onclick="groceryAddCustom()">${svgIcon('plus',16)}</button></div></div>
      ${g.length?`<div class="card">${g.map((it,i)=>`<div class="row" style="gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><button onclick="groceryToggle(${i})" style="flex:none;width:24px;height:24px;border-radius:7px;border:2px solid ${it.got?'var(--good)':'var(--line)'};background:${it.got?'var(--good)':'transparent'};color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer">${it.got?svgIcon('check',14):''}</button><span style="flex:1;font-size:13.5px;${it.got?'text-decoration:line-through;color:var(--muted)':''}">${esc(it.item)}</span><button class="btn-sm btn-ghost" onclick="groceryDel(${i})">${svgIcon('trash',14)}</button></div>`).join('')}</div>
        <button class="btn btn-ghost" onclick="groceryClear()">${svgIcon('trash',16)} ${ar?'إفراغ القائمة':'Clear list'}</button>`
-       :`<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('list',36)}</div><p class="muted" style="margin-top:8px">${ar?'القائمة فارغة — أضِف من الوصفات':'List is empty — add from recipes'}</p><button class="btn btn-ghost" style="margin-top:10px" onclick="go('recipes')">${ar?'تصفّح الوصفات':'Browse recipes'}</button></div>`}
+       :`<div class="card center" style="padding:30px">${emptyArt('cart')}<p class="muted" style="margin-top:8px">${ar?'القائمة فارغة — أضِف من الوصفات':'List is empty — add from recipes'}</p><button class="btn btn-ghost" style="margin-top:10px" onclick="go('recipes')">${ar?'تصفّح الوصفات':'Browse recipes'}</button></div>`}
      <div style="height:8px"></div>
    </div>`;
 });
