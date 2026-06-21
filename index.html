@@ -459,6 +459,20 @@ input[type=range]{accent-color:var(--accent)}
   .lfoot-in p{font-size:13px;line-height:1.6;max-width:760px}
   .lfoot-sub{color:var(--faint);font-size:12px;margin-top:14px}
   @media (max-width:1180px){ .lhero{grid-template-columns:1fr 380px;gap:32px} .lgrid{grid-template-columns:repeat(2,1fr)} }
+  /* ===== Full-screen app mode (desktop): the app fills the window; landing hidden ===== */
+  body.appfull{overflow:hidden}
+  body.appfull .lnav,body.appfull .lx-section,body.appfull .lsection,body.appfull .lfoot,
+  body.appfull .lhero-copy,body.appfull .lhero-bg,body.appfull .lhero-photos{display:none!important}
+  body.appfull .lhero{display:block;max-width:none;margin:0;padding:0;min-height:100vh}
+  body.appfull .lhero-device{min-height:100vh;align-items:stretch;justify-content:center;padding:0}
+  body.appfull .ldevice{width:min(760px,100vw);height:100vh;max-height:100vh;margin:0 auto;border:none;border-radius:0;
+    box-shadow:0 0 0 1px var(--line)}
+  body.appfull #app{border-radius:0}
+  .appfull-exit{display:none}
+  body.appfull .appfull-exit{display:inline-flex;position:fixed;top:14px;inset-inline-start:14px;z-index:130;align-items:center;gap:7px;
+    background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(8px);border:1px solid var(--line);color:var(--txt);
+    padding:8px 14px;border-radius:12px;font-weight:600;font-size:13px;cursor:pointer}
+  body.appfull .appfull-exit:hover{background:var(--card)}
 }
 </style>
 <style>
@@ -553,6 +567,7 @@ html[dir=rtl] .lhero-sub,html[dir=rtl] .lx-lead,html[dir=rtl] .lcard p,html[dir=
 <body>
 <!-- Desktop website shell (hidden on phones; app goes full-screen there) -->
 <div id="site">
+  <button class="appfull-exit" onclick="exitAppFull()" aria-label="Back to site"><span aria-hidden="true">✕</span> <span data-en="Site" data-ar="الموقع">Site</span></button>
   <header class="lnav">
     <a class="lbrand" href="#top"><span class="lbrand-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg></span><span data-en="Rafeeq" data-ar="رفيق">Rafeeq</span></a>
     <nav class="llinks">
@@ -1540,7 +1555,7 @@ window.toggleLangQuick=()=>{S.lang=isAr()?'en':'ar';save();render();};
 window.doLogin=()=>{
   const email=$('#liEmail').value.trim(),pw=$('#liPw').value;
   if(!email||pw.length<6)return toast(t('fillFields'));
-  S.user.email=email;S.authed=true;save();
+  S.user.email=email;S.authed=true;save();enterAppFull();
   if(!S.user.name)go('setup',{replace:true});else navTab('today');
 };
 
@@ -1567,7 +1582,7 @@ window.doSignup=()=>{
   if(!email)return toast(t('fillFields'));
   if(pw.length<6)return toast(t('pwShort'));
   if(pw!==pw2)return toast(t('pwMatch'));
-  S.user.email=email;S.authed=true;suPwTmp='';save();
+  S.user.email=email;S.authed=true;suPwTmp='';save();enterAppFull();
   checkBadges();navTab('today');
 };
 
@@ -4472,6 +4487,10 @@ function initParallax(){
   if(!bg)return;let tick=false;
   window.addEventListener('scroll',()=>{if(tick)return;tick=true;requestAnimationFrame(()=>{const y=window.scrollY;bg.style.transform='translateY('+(y*.18)+'px)';if(dev&&window.innerWidth>=1024)dev.style.transform='translateY('+(y*-.05)+'px)';tick=false;});},{passive:true});
 }
+/* Full-screen app mode on desktop (mobile is already full-screen via display:contents) */
+function enterAppFull(){ try{ if(window.innerWidth>=1024){ document.body.classList.add('appfull'); window.scrollTo(0,0); } }catch(e){} }
+function exitAppFull(){ try{ document.body.classList.remove('appfull'); }catch(e){} }
+window.enterAppFull=enterAppFull; window.exitAppFull=exitAppFull;
 function initLanding(){
   let lang='en';
   try{const u=new URLSearchParams(location.search).get('lang');lang=u||localStorage.getItem('ibdweb_lang')||(navigator.language||'').slice(0,2)||'en';}catch(e){}
@@ -4479,6 +4498,10 @@ function initLanding(){
   landImages();
   landSetLang(lang);
   initCounters();initParallax();
+  // entering the app (any "Open/Try" CTA) switches desktop into full-screen app mode
+  document.querySelectorAll('a[href="#app-anchor"]').forEach(a=>a.addEventListener('click',()=>enterAppFull()));
+  // returning users (already signed in / onboarded) land straight in the full app
+  if(S.authed||S.onboarded) enterAppFull();
 }
 
 ensureSga();
