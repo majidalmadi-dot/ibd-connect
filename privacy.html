@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rafeeq — Privacy Policy</title>
+<style>
+  :root{--bg:#F4F8F7;--card:#fff;--txt:#16202B;--muted:#5B6B79;--line:#E2EAE8;--accent:#00897B}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.65 -apple-system,Segoe UI,Arial,sans-serif}
+  .wrap{max-width:820px;margin:0 auto;padding:32px 20px 80px}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px}
+  .mark{width:34px;height:34px;border-radius:11px;background:linear-gradient(140deg,#00897B,#19A0FF);display:flex;align-items:center;justify-content:center;color:#fff}
+  .btn{border:1px solid var(--line);background:var(--card);color:var(--txt);border-radius:10px;padding:8px 14px;font-weight:600;cursor:pointer}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px 26px}
+  h1{font-size:26px;margin:0 0 4px}
+  h2{font-size:18px;margin:26px 0 8px;color:var(--accent)}
+  p,li{color:#26313c}
+  .muted{color:var(--muted);font-size:13.5px}
+  a{color:var(--accent)}
+  [hidden]{display:none}
+  html[dir=rtl] body{font-family:'Segoe UI','Tahoma',Arial,sans-serif}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand"><span class="mark">ر</span> Rafeeq · رفيق</div>
+    <button class="btn" id="lang" onclick="toggle()">العربية</button>
+  </header>
+
+  <!-- ENGLISH -->
+  <div class="card" id="en">
+    <h1>Privacy Policy</h1>
+    <p class="muted">Rafeeq — a non-medical IBD companion by the Saudi Gastroenterology Association. Last updated: 21 June 2026.</p>
+
+    <h2>Our approach</h2>
+    <p>Rafeeq is built privacy-first. By default, everything you log stays <strong>on your device</strong> in your browser’s local storage. We do not require an account to use the app, and we do not sell or rent your data.</p>
+
+    <h2>What we store on your device</h2>
+    <p>Your profile (name, year of birth, gender, disease type, country, height), and the entries you create: symptoms, bowel movements, meals, sleep, mood, activity, hydration, weight, medications and doses, supplements, labs, the IBD-DISC self-reflection, reminders, and app settings. This stays on your device unless you choose to use a feature below.</p>
+
+    <h2>Optional features that use a server</h2>
+    <ul>
+      <li><strong>Share with my doctor:</strong> when you generate a share, a read-only summary (your initials only — never your full name — plus descriptive trends and latest labs) is stored on our backend (Supabase) behind a random, unguessable link that expires after 7 days. You may also share it as a self-contained link or by email; those stay on your device.</li>
+      <li><strong>Anonymous research registry (opt-in):</strong> if you opt in, de-identified, aggregate data points (e.g. disease type, age band, region, summary scores) are contributed for population insight. No name, email, or identifier is sent, and the data cannot be read back to you.</li>
+      <li><strong>Reminders / notifications (opt-in):</strong> if you enable notifications, a push subscription token is stored so reminders can be delivered. You can turn this off anytime.</li>
+      <li><strong>Usage & crash diagnostics (opt-in):</strong> off by default. If you opt in (and your browser does not signal “Do Not Track”), we collect anonymous, privacy-scrubbed analytics (Plausible) and error reports (Sentry) with personal data and app state removed.</li>
+    </ul>
+
+    <h2>Third parties</h2>
+    <p>We use Vercel (hosting), Supabase (optional backend), Sentry and Plausible (optional, opt-in diagnostics), and content-delivery networks for fonts, charts and images. These process only what the features above describe.</p>
+
+    <h2>Your rights</h2>
+    <p>You can <strong>export</strong> all your data as a file, <strong>import</strong> it back, and <strong>delete</strong> your data or your whole profile at any time from Settings. Deleting clears every module from your device.</p>
+
+    <h2>Children</h2>
+    <p>Rafeeq is intended for adults living with IBD. It is not directed at children under 13.</p>
+
+    <h2>Not medical advice</h2>
+    <p>Rafeeq is a non-medical health companion for personal tracking and education. It does not provide diagnosis, prediction, or treatment, and is not a substitute for professional care. Always consult your healthcare provider.</p>
+
+    <h2>Contact</h2>
+    <p>Questions or data requests: <a href="mailto:majid.almadi@gmail.com">majid.almadi@gmail.com</a> (Saudi Gastroenterology Association). We may update this policy; material changes will be noted here.</p>
+  </div>
+
+  <!-- ARABIC -->
+  <div class="card" id="ar" hidden dir="rtl">
+    <h1>سياسة الخصوصية</h1>
+    <p class="muted">رفيق — رفيق غير طبي لمرضى التهاب الأمعاء من الجمعية السعودية للجهاز الهضمي. آخر تحديث: ٢١ يونيو ٢٠٢٦.</p>
+
+    <h2>نهجنا</h2>
+    <p>صُمِّم رفيق ليضع الخصوصية أولًا. افتراضيًا، يبقى كل ما تسجّله <strong>على جهازك</strong> داخل تخزين المتصفّح. لا نطلب حسابًا لاستخدام التطبيق، ولا نبيع بياناتك أو نؤجّرها.</p>
+
+    <h2>ما يُحفظ على جهازك</h2>
+    <p>ملفك الشخصي (الاسم، سنة الميلاد، الجنس، نوع المرض، الدولة، الطول)، وما تسجّله: الأعراض، التبرّز، الوجبات، النوم، المزاج، النشاط، الترطيب، الوزن، الأدوية والجرعات، المكمّلات، التحاليل، أداة التأمّل IBD-DISC، التذكيرات، وإعدادات التطبيق. يبقى ذلك على جهازك ما لم تستخدم إحدى الميزات أدناه.</p>
+
+    <h2>ميزات اختيارية تستخدم خادمًا</h2>
+    <ul>
+      <li><strong>المشاركة مع طبيبي:</strong> عند إنشاء مشاركة، يُحفظ ملخّص للقراءة فقط (الأحرف الأولى من اسمك فقط — لا اسمك الكامل — مع اتجاهات وصفية وآخر التحاليل) على خادمنا (Supabase) خلف رابط عشوائي يصعب تخمينه وينتهي خلال ٧ أيام. يمكنك أيضًا مشاركته كرابط ذاتي أو بالبريد، ويبقى ذلك على جهازك.</li>
+      <li><strong>سجل بحثي مجهول (اختياري):</strong> إن وافقت، تُسهم نقاط بيانات مجمّعة ومجهولة الهوية (مثل نوع المرض، الفئة العمرية، المنطقة، درجات ملخّصة) لأغراض رؤى سكانية. لا يُرسَل اسم أو بريد أو مُعرّف، ولا يمكن ربط البيانات بك.</li>
+      <li><strong>التذكيرات والإشعارات (اختياري):</strong> عند تفعيل الإشعارات يُحفظ رمز اشتراك لإرسال التذكيرات. يمكنك إيقاف ذلك في أي وقت.</li>
+      <li><strong>تحليلات الاستخدام والأعطال (اختياري):</strong> متوقّفة افتراضيًا. عند الموافقة (وما لم يُفعّل متصفّحك خيار «عدم التتبّع») نجمع تحليلات مجهولة ومنزوعة البيانات الشخصية (Plausible) وتقارير أعطال (Sentry) بعد إزالة البيانات الشخصية وحالة التطبيق.</li>
+    </ul>
+
+    <h2>أطراف ثالثة</h2>
+    <p>نستخدم Vercel (الاستضافة)، Supabase (خادم اختياري)، Sentry وPlausible (تشخيصات اختيارية)، وشبكات توزيع محتوى للخطوط والرسوم والصور، وتعالج فقط ما تصفه الميزات أعلاه.</p>
+
+    <h2>حقوقك</h2>
+    <p>يمكنك <strong>تصدير</strong> جميع بياناتك كملف، و<strong>استيرادها</strong>، و<strong>حذف</strong> بياناتك أو ملفك بالكامل في أي وقت من الإعدادات. يمسح الحذف كل الوحدات من جهازك.</p>
+
+    <h2>الأطفال</h2>
+    <p>رفيق موجّه للبالغين المتعايشين مع المرض، وليس موجّهًا للأطفال دون ١٣ عامًا.</p>
+
+    <h2>ليس نصيحة طبية</h2>
+    <p>رفيق رفيق صحي غير طبي للتتبّع الذاتي والتثقيف. لا يقدّم تشخيصًا أو تنبؤًا أو علاجًا وليس بديلًا عن الرعاية المهنية. استشر دائمًا مقدّم الرعاية الصحية.</p>
+
+    <h2>التواصل</h2>
+    <p>للأسئلة أو طلبات البيانات: <a href="mailto:majid.almadi@gmail.com">majid.almadi@gmail.com</a> (الجمعية السعودية للجهاز الهضمي). قد نحدّث هذه السياسة، وستُذكر التغييرات الجوهرية هنا.</p>
+  </div>
+
+  <p class="muted" style="text-align:center;margin-top:22px">© <span id="y"></span> Rafeeq · Saudi Gastroenterology Association · <a href="/">Open the app</a></p>
+</div>
+<script>
+  document.getElementById('y').textContent=new Date().getFullYear();
+  function toggle(){var ar=document.getElementById('ar'),en=document.getElementById('en'),b=document.getElementById('lang');
+    var showAr=en.hidden===false; en.hidden=showAr; ar.hidden=!showAr;
+    document.documentElement.lang=showAr?'ar':'en'; document.documentElement.dir=showAr?'rtl':'ltr';
+    b.textContent=showAr?'English':'العربية';}
+  try{if((new URLSearchParams(location.search).get('lang')||localStorage.getItem('ibdweb_lang'))==='ar')toggle();}catch(e){}
+</script>
+</body>
+</html>
