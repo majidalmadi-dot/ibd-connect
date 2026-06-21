@@ -933,7 +933,7 @@ const I18N = {
   remindDaily:{en:"Daily logging reminder",ar:"تذكير التسجيل اليومي"},
   remindMed:{en:"Medication reminder",ar:"تذكير الدواء"},
   remindContent:{en:"New content alerts",ar:"تنبيهات المحتوى الجديد"},
-  analyticsOptin:{en:"Anonymous usage analytics",ar:"تحليلات استخدام مجهولة"},
+  analyticsOptin:{en:"Anonymous usage & crash diagnostics",ar:"تحليلات استخدام وتشخيص أعطال مجهولة"},
   exportConfirm:{en:"Your data was exported as a file.",ar:"تم تصدير بياناتك كملف."},
   deleteWarn:{en:"This permanently erases all your logs on this device. This cannot be undone.",ar:"هذا يمحو نهائيًا جميع سجلاتك على هذا الجهاز. لا يمكن التراجع."},
   confirmDelete:{en:"Yes, delete everything",ar:"نعم، احذف كل شيء"},
@@ -2390,6 +2390,28 @@ window.toggleBigText=function(){S.prefs.bigText=!S.prefs.bigText;save();applyA11
    ============================================================ */
 const CLOUD = { url: '', anon: '' };  // <-- paste Supabase project URL + anon (public) key here
 function cloudOn(){return !!(CLOUD.url&&CLOUD.anon);}
+/* ---- Optional, privacy-first telemetry. DORMANT until BOTH a key is pasted here AND the user opts in
+   (Privacy → Anonymous usage & diagnostics). Never sends health data, names, doses, or labs. ---- */
+const TELEMETRY = { sentryDsn: '', plausibleDomain: '' };  // <-- paste a Sentry DSN and/or Plausible domain to enable
+function telemetryOn(){ return !!(S && S.prefs && S.prefs.analytics); }
+function initTelemetry(){
+  try{
+    if(!telemetryOn()) return;                                   // requires explicit user consent
+    if(navigator.doNotTrack==='1'||window.doNotTrack==='1'||navigator.doNotTrack==='yes') return; // respect DNT
+    // Cookieless, no-PII analytics (Plausible): counts page/route views only
+    if(TELEMETRY.plausibleDomain && !window.__plLoaded){ window.__plLoaded=1;
+      const s=document.createElement('script'); s.defer=true; s.setAttribute('data-domain',TELEMETRY.plausibleDomain);
+      s.src='https://plausible.io/js/script.js'; document.head.appendChild(s); }
+    // Error monitoring (Sentry) — scrubbed: no request bodies, cookies, user, or app state
+    if(TELEMETRY.sentryDsn && !window.__snLoaded){ window.__snLoaded=1;
+      const s=document.createElement('script'); s.src='https://browser.sentry-cdn.com/8.0.0/bundle.min.js'; s.crossOrigin='anonymous';
+      s.onload=()=>{ try{ Sentry.init({ dsn:TELEMETRY.sentryDsn, sampleRate:1.0, tracesSampleRate:0, sendDefaultPii:false,
+        beforeSend(ev){ try{ if(ev.request){ delete ev.request.data; delete ev.request.cookies; delete ev.request.query_string; }
+          delete ev.user; if(ev.contexts){ delete ev.contexts.state; } }catch(e){} return ev; },
+        beforeBreadcrumb(){ return null; } }); }catch(e){} };
+      document.head.appendChild(s); }
+  }catch(e){}
+}
 let __sb=null, __sbLoading=null;
 function loadSupabase(){
   if(__sb)return Promise.resolve(__sb);
@@ -3920,7 +3942,7 @@ route('privacy',(n)=>{
    </div>`;
 });
 function tggl(key,label,on){return `<div class="li"><div class="tx"><b>${label}</b></div><button class="toggle ${on?'on':''}" data-k="${key}" onclick="togglePref(this)" style="width:48px;height:28px;border-radius:16px;background:${on?'var(--accent)':'var(--line)'};position:relative;transition:.2s"><span style="position:absolute;top:3px;${on?'inset-inline-end:3px':'inset-inline-start:3px'};width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s"></span></button></div>`;}
-window.togglePref=function(btn){const k=btn.dataset.k;S.prefs[k]=!S.prefs[k];save();render();};
+window.togglePref=function(btn){const k=btn.dataset.k;S.prefs[k]=!S.prefs[k];save();if(k==='analytics'&&S.prefs[k])initTelemetry();render();};
 
 route('changePw',(n)=>{
   n.innerHTML=`${topbar('changePw',null,{back:true})}
@@ -4386,6 +4408,7 @@ applyDir();
 applyA11y();
 initLanding();
 if(window.__updateReady)showUpdate();
+initTelemetry();
 (async()=>{ if(/#clin=/.test(location.hash)){ const ok=await checkClinHash(); if(ok)return; } go('splash',{replace:true}); })();
 window.addEventListener('hashchange',()=>{ if(/#clin=/.test(location.hash)) checkClinHash(); });
 
