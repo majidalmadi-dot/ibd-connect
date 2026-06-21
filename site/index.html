@@ -2388,11 +2388,11 @@ window.toggleBigText=function(){S.prefs.bigText=!S.prefs.bigText;save();applyA11
    To activate: paste your project URL + anon key below. Until then,
    clinician share falls back to a fully offline, on-device QR/link.
    ============================================================ */
-const CLOUD = { url: '', anon: '' };  // <-- paste Supabase project URL + anon (public) key here
+const CLOUD = { url: 'https://uuscistqaqqaebjjwoml.supabase.co', anon: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1c2Npc3RxYXFxYWViamp3b21sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMTkzNzIsImV4cCI6MjA5NzU5NTM3Mn0.PVEQ0FFQe3_SL71Ah3cP-2wTBBX93d_wKuDYacwQsMs' };  // Supabase project URL + anon (public) key
 function cloudOn(){return !!(CLOUD.url&&CLOUD.anon);}
 /* ---- Optional, privacy-first telemetry. DORMANT until BOTH a key is pasted here AND the user opts in
    (Privacy → Anonymous usage & diagnostics). Never sends health data, names, doses, or labs. ---- */
-const TELEMETRY = { sentryDsn: '', plausibleDomain: '' };  // <-- paste a Sentry DSN and/or Plausible domain to enable
+const TELEMETRY = { sentryDsn: 'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320', plausibleDomain: '' };  // Sentry DSN wired; opt-in + DNT gated
 function telemetryOn(){ return !!(S && S.prefs && S.prefs.analytics); }
 function initTelemetry(){
   try{
