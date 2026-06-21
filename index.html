@@ -2255,7 +2255,7 @@ window.saveMed=function(){const kind=$('#mKind').value;const name=($('#mName').v
 window.openMedChange=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;
   openSheet(`<div class="row" style="gap:10px;margin-bottom:14px"><span style="color:var(--accent)">${svgIcon('edit',24)}</span><h2 style="font-size:18px;margin:0;font-weight:800">${isAr()?'تسجيل تغيير':'Log a change'}</h2></div>
    <p class="muted" style="font-size:12.5px;margin:-6px 0 12px">${m.name?esc(m.name):(isAr()?'الدواء':'Medication')}</p>
-   <div class="field"><label>${isAr()?'الجرعة الجديدة (اختياري)':'New dose (optional)'}</label><input class="input" id="mcDose" value="${m.dose||''}"></div>
+   <div class="field"><label>${isAr()?'الجرعة الجديدة (اختياري)':'New dose (optional)'}</label><input class="input" id="mcDose" value="${esc(m.dose)}"></div>
    <div class="field"><label>${isAr()?'ماذا تغيّر؟':'What changed?'}</label>
      <select class="input" id="mcType">
        <option value="dose">${isAr()?'تعديل الجرعة':'Dose change'}</option>
@@ -2525,7 +2525,7 @@ async function enablePush(){
     if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8(PUSH.vapidPublic)});
     S.prefs.pushOn=true;save();
     try{ if(cloudOn()){const sb=await loadSupabase();if(sb){const j=sub.toJSON();
-      await sb.from('push_subscriptions').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,med_time:S.prefs.medTime||'20:00',lang:S.lang||'en'},{onConflict:'endpoint'});}} }catch(e){}
+      await sb.from('push_subscriptions').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,med_time:S.prefs.medTime||'20:00',lang:S.lang||'en'},{onConflict:'endpoint',ignoreDuplicates:true});}} }catch(e){}
     reg.showNotification('رفيق · Rafeeq',{body:isAr()?'تم تفعيل التذكيرات ✓':'Reminders enabled ✓',icon:'icon-192.png',badge:'icon-192.png',tag:'rafeeq-welcome'});
     toast(isAr()?'تم تفعيل الإشعارات':'Notifications enabled');render();
   }catch(e){toast(isAr()?'تعذّر التفعيل':'Could not enable');}
@@ -4029,7 +4029,7 @@ route('editProfile',(n)=>{
    <div class="content">
      <div class="center"><div style="font-size:13px;color:var(--muted);margin-bottom:10px">${isAr()?'الصورة الرمزية':'Avatar'}</div>
        <div class="chips" style="justify-content:center" id="epAvatar">${AVATARS.map(a=>`<button class="chip ${u.avatar===a?'on':''}" data-v="${a}" style="font-size:22px;padding:8px 12px" onclick="pickChip('epAvatar',this)">${a}</button>`).join('')}</div></div>
-     <div class="field"><label>${t('fullName')}</label><input class="input" id="epName" value="${u.name||''}"></div>
+     <div class="field"><label>${t('fullName')}</label><input class="input" id="epName" value="${esc(u.name)}"></div>
      <div class="grid2">
        <div class="field"><label>${t('yearBirth')}</label><input class="input" id="epYear" value="${u.year||''}"></div>
        <div class="field"><label>${t('gender')}</label><select class="input" id="epGender"><option value="">—</option><option value="male" ${u.gender==='male'?'selected':''}>${t('male')}</option><option value="female" ${u.gender==='female'?'selected':''}>${t('female')}</option><option value="na" ${u.gender==='na'?'selected':''}>${t('preferNot')}</option></select></div>
@@ -4040,7 +4040,7 @@ route('editProfile',(n)=>{
        <button class="input" style="display:flex;align-items:center;justify-content:space-between;text-align:start" onclick="stashEditGoCountry()">
          <span class="row" style="gap:10px">${u.country?`<span style="font-size:22px">${u.countryFlag}</span><span>${isAr()?(COUNTRIES.find(x=>x.c===u.country)||{}).ar:(COUNTRIES.find(x=>x.c===u.country)||{}).en}</span>`:`<span style="font-size:22px">🌍</span><span class="muted">${t('selectCountry')}</span>`}</span>
          <span class="chev">${isAr()?'‹':'›'}</span></button></div>
-     <div class="field"><label>${t('email')}</label><input class="input" id="epEmail" value="${u.email||''}"></div>
+     <div class="field"><label>${t('email')}</label><input class="input" id="epEmail" value="${esc(u.email)}"></div>
      <button class="btn btn-primary" onclick="saveProfile()">${t('save')}</button>
    </div>`;
 });

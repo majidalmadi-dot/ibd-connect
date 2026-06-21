@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.sga.rafeeq",
+      "sha256_cert_fingerprints": [
+        "C2:20:F8:7B:7E:71:91:E1:98:A2:B3:BA:8F:01:97:66:10:36:55:79:D8:12:F1:C1:7F:69:F4:A6:8E:3A:C7:97"
+      ]
+    }
+  }
+]
