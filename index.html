@@ -1266,7 +1266,7 @@ function blank(){return{
   user:{name:'',email:'',year:'',gender:'',disease:'',diagYear:'',avatar:'🙂',country:'',countryFlag:'',heightCm:''},
   prefs:{remindDaily:true,remindMed:false,remindContent:true,analytics:false,medTime:'20:00',theme:'whoop',
     stepGoal:8000,activeMinGoal:30,waterGoal:8,nudges:true,nudgeDaily:true,nudgeStreak:true,nudgeHydra:true,seenWelcome:false,
-    bigText:false},
+    bigText:false,pushOn:false},
   logs:[], disc:null, discHistory:[], reminders:[],
   meds:[], labs:[], control:null, registry:{optedIn:false, lastSync:null},
   supplements:[], grocery:[], vaccines:{},
@@ -2491,7 +2491,9 @@ const CLOUD = { url: 'https://uuscistqaqqaebjjwoml.supabase.co', anon: 'eyJhbGci
 function cloudOn(){return !!(CLOUD.url&&CLOUD.anon);}
 /* ---- Optional, privacy-first telemetry. DORMANT until BOTH a key is pasted here AND the user opts in
    (Privacy → Anonymous usage & diagnostics). Never sends health data, names, doses, or labs. ---- */
-const TELEMETRY = { sentryDsn: 'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320', plausibleDomain: '' };  // Sentry DSN wired; opt-in + DNT gated
+const TELEMETRY = { sentryDsn: 'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320', plausibleDomain: 'ibd-connect.vercel.app' };  // Sentry DSN wired; Plausible ready (activates on opt-in + once the domain is added to a Plausible account)
+/* Web-push public (application server) key — safe to ship. Private key lives only as a Supabase Edge Function secret. */
+const PUSH = { vapidPublic: 'BB4DzDvxHyUtiOBPU4UQ3oKq3Aa4WU_Qwt1MVlmFIdIJqYTAgYRcMxjJUSW9T3QbE3a_tjuf71OZ-X87J8_Ytq4' };
 function telemetryOn(){ return !!(S && S.prefs && S.prefs.analytics); }
 function initTelemetry(){
   try{
@@ -2511,6 +2513,30 @@ function initTelemetry(){
       document.head.appendChild(s); }
   }catch(e){}
 }
+/* ---- Push reminders (opt-in). Public VAPID key ships; private key is a Supabase secret. ---- */
+function urlB64ToUint8(b){const pad='='.repeat((4-b.length%4)%4);const s=(b+pad).replace(/-/g,'+').replace(/_/g,'/');const r=atob(s);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)));}
+async function enablePush(){
+  try{
+    if(!('Notification'in window)||!('serviceWorker'in navigator)||!('PushManager'in window)){toast(isAr()?'غير مدعوم على هذا المتصفح':'Not supported on this browser');return;}
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){toast(isAr()?'لم يُسمح بالإشعارات':'Notifications not allowed');return;}
+    const reg=await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:urlB64ToUint8(PUSH.vapidPublic)});
+    S.prefs.pushOn=true;save();
+    try{ if(cloudOn()){const sb=await loadSupabase();if(sb){const j=sub.toJSON();
+      await sb.from('push_subscriptions').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,med_time:S.prefs.medTime||'20:00',lang:S.lang||'en'},{onConflict:'endpoint'});}} }catch(e){}
+    reg.showNotification('رفيق · Rafeeq',{body:isAr()?'تم تفعيل التذكيرات ✓':'Reminders enabled ✓',icon:'icon-192.png',badge:'icon-192.png',tag:'rafeeq-welcome'});
+    toast(isAr()?'تم تفعيل الإشعارات':'Notifications enabled');render();
+  }catch(e){toast(isAr()?'تعذّر التفعيل':'Could not enable');}
+}
+async function disablePush(){
+  try{const reg=await navigator.serviceWorker.ready;const sub=await reg.pushManager.getSubscription();
+    if(sub){try{if(cloudOn()){const sb=await loadSupabase();if(sb)await sb.from('push_subscriptions').delete().eq('endpoint',sub.endpoint);}}catch(e){}await sub.unsubscribe();}
+  }catch(e){}
+  S.prefs.pushOn=false;save();render();
+}
+window.enablePush=enablePush;window.disablePush=disablePush;
 let __sb=null, __sbLoading=null;
 function loadSupabase(){
   if(__sb)return Promise.resolve(__sb);
@@ -2577,12 +2603,18 @@ window.__mkShare=async function(){
   } else {
     url=location.origin+location.pathname+'#clin='+b64e(sum);
   }
+  window.__lastShareUrl=url;
   out.innerHTML=`<div class="card"><div id="qrbox" style="display:flex;justify-content:center;padding:8px;background:#fff;border-radius:14px;width:max-content;margin:0 auto"></div>
     <p class="muted" style="font-size:12px;margin:12px 0 6px">${isAr()?'يمسح الطبيب الرمز، أو انسخ الرابط:':'Doctor scans this, or copy the link:'}</p>
     <div class="row" style="gap:6px"><input class="input" id="shareUrl" readonly value="${url}" style="font-size:11px"><button class="btn-sm btn-primary" onclick="navigator.clipboard&&navigator.clipboard.writeText(document.getElementById('shareUrl').value);toast('${isAr()?'نُسخ':'Copied'}')">${svgIcon('check',15)}</button></div>
-    ${navigator.share?`<button class="btn btn-ghost" style="margin-top:8px" onclick="navigator.share({title:'Rafeeq',url:document.getElementById('shareUrl').value})">${svgIcon('share',16)} ${isAr()?'مشاركة':'Share'}</button>`:''}</div>`;
+    ${navigator.share?`<button class="btn btn-ghost" style="margin-top:8px" onclick="navigator.share({title:'Rafeeq',url:document.getElementById('shareUrl').value})">${svgIcon('share',16)} ${isAr()?'مشاركة':'Share'}</button>`:''}
+    <button class="btn btn-ghost" style="margin-top:8px" onclick="emailDoctor()">${svgIcon('share',16)} ${isAr()?'إرسال بالبريد إلى طبيبي':'Email to my doctor'}</button></div>`;
   await loadQR();const box=$('#qrbox');if(box&&window.QRCode){box.innerHTML='';new window.QRCode(box,{text:url,width:200,height:200,correctLevel:window.QRCode.CorrectLevel.M});}
 };
+window.emailDoctor=function(){const u=window.__lastShareUrl||'';if(!u){toast(isAr()?'أنشئ الرمز أولًا':'Generate the code first');return;}
+  const s=encodeURIComponent(isAr()?'ملخص Rafeeq':'My Rafeeq summary');
+  const b=encodeURIComponent((isAr()?'ملخص حالتي (للقراءة فقط) من تطبيق رفيق:\n':'A read-only summary from my Rafeeq app:\n')+u);
+  location.href='mailto:?subject='+s+'&body='+b;};
 
 /* clinician read-only view (opened from the share link) */
 function renderClinician(payload){
@@ -3735,6 +3767,14 @@ window.importHealthCSV=function(){const ar=isAr();const f=($('#hiFile').files||[
 let learnCat='all';
 const CAT_LABEL={all:{en:'All',ar:'الكل'},sga:{en:'🇸🇦 IBD Guide',ar:'🇸🇦 دليل IBD'},aboutibd:{en:'About IBD',ar:'عن المرض'},nutrition:{en:'Nutrition',ar:'تغذية'},research:{en:'Research',ar:'أبحاث'},stories:{en:'Stories',ar:'قصص'},basics:{en:'Basics',ar:'الأساسيات'},uc:{en:'UC',ar:'تقرّحي'},cd:{en:'CD',ar:'كرون'},lifestyle:{en:'Lifestyle',ar:'نمط حياة'}};
 function learnMatch(a){if(learnCat==='all')return true;if(learnCat==='sga')return a.source==='SGA';return a.cat===learnCat;}
+let learnSearch='';
+function learnRowsHtml(){
+  const q=learnSearch.trim().toLowerCase();
+  const items=S.learn.filter(a=>learnMatch(a)&&(!q||(((a.en||[]).join(' ')+' '+(a.ar||[]).join(' ')).toLowerCase().includes(q))));
+  if(!items.length)return `<div class="card center" style="padding:26px"><p class="muted">${isAr()?'لا توجد نتائج':'No results'}</p></div>`;
+  return `<div class="card">${items.map(a=>`<div class="li" onclick="openArticle('${a.id}')"><div class="ic" style="color:var(--accent)">${gicon(a.icon,22)}</div><div class="tx"><b>${L(a[S.lang])}${a.new?` <span class="badge accent" style="font-size:10px">${t('newBadge')}</span>`:''}</b><small>${a.min} ${t('minRead')} · ${CAT_LABEL[a.cat]?CAT_LABEL[a.cat][S.lang]:''}${a.source==='SGA'?' · SGA':''}</small></div><div class="chev">${isAr()?'‹':'›'}</div></div>`).join('')}</div>`;
+}
+window.rerenderLearnList=function(){const el=document.getElementById('learnList');if(el)el.innerHTML=learnRowsHtml();};
 route('learn',(n)=>{
   const items=S.learn.filter(learnMatch);
   const cats=['all','sga','aboutibd','nutrition','research','stories','basics','uc','cd','lifestyle'];
@@ -3746,11 +3786,12 @@ route('learn',(n)=>{
        <div class="row"><span class="ic" style="width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center">${svgIcon('sparkles',24)}</span><div style="flex:1"><b style="font-size:15.5px">${t('explainedCardT')}</b><div class="muted" style="font-size:12.5px">${t('explainedCardSub')}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>
      ${learnCat==='all'?`<button class="card tap" onclick="setLearnCat('sga')" style="text-align:start;background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 18%,transparent),color-mix(in srgb,var(--accent2) 8%,transparent));border-color:color-mix(in srgb,var(--accent) 30%,transparent)">
        <div class="row"><div style="font-size:30px">📗</div><div style="flex:1"><b style="font-size:15.5px">${isAr()?'دليل IBD — الجمعية السعودية للجهاز الهضمي':'IBD Guide — Saudi Gastroenterology Association'}</b><div class="muted" style="font-size:12.5px">${sgaCount} ${isAr()?'مقالات موثّقة من خبراء':'expert-authored articles'} · IBDguide.net</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>`:''}
+     <input class="input" id="learnSearch" placeholder="${isAr()?'🔍 ابحث في المقالات':'🔍 Search articles'}" value="${esc(learnSearch)}" oninput="learnSearch=this.value;rerenderLearnList()">
      <div class="chips" style="overflow-x:auto;flex-wrap:nowrap">${cats.map(c=>`<button class="chip ${learnCat===c?'on':''}" style="white-space:nowrap" onclick="setLearnCat('${c}')">${CAT_LABEL[c][S.lang]}</button>`).join('')}</div>
      ${learnCat==='all'&&sugg.length?`<div class="section-title">${t('forYou')}</div>
        <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px">${sugg.map(a=>`<button class="card tap" style="min-width:210px;text-align:start" onclick="openArticle('${a.id}')"><div style="color:var(--accent)">${gicon(a.icon,28)}</div><b style="font-size:14.5px;display:block;margin-top:8px;line-height:1.3">${L(a[S.lang])}</b><div class="row" style="gap:6px;margin-top:8px"><span class="badge accent">${a.min} ${t('minRead')}</span>${a.source==='SGA'?'<span class="badge" style="background:color-mix(in srgb,var(--accent2) 18%,transparent);color:var(--accent2)">SGA</span>':''}</div></button>`).join('')}</div>`:''}
      <div class="section-title">${learnCat==='sga'?(isAr()?'دليل IBD':'IBD Guide'):t('allArticles')}</div>
-     <div class="card">${items.map(a=>`<div class="li" onclick="openArticle('${a.id}')"><div class="ic" style="color:var(--accent)">${gicon(a.icon,22)}</div><div class="tx"><b>${L(a[S.lang])}${a.new?` <span class="badge accent" style="font-size:10px">${t('newBadge')}</span>`:''}</b><small>${a.min} ${t('minRead')} · ${CAT_LABEL[a.cat]?CAT_LABEL[a.cat][S.lang]:''}${a.source==='SGA'?' · SGA':''}</small></div><div class="chev">${isAr()?'‹':'›'}</div></div>`).join('')}</div>
+     <div id="learnList">${learnRowsHtml()}</div>
    </div>`;
 });
 window.setLearnCat=c=>{learnCat=c;render();};
@@ -4018,6 +4059,12 @@ route('notifs',(n)=>{
   const p=S.prefs;
   n.innerHTML=`${topbar('notifications',null,{back:true})}
    <div class="content">
+     <div class="card">
+       <div class="li" style="border:none;padding:4px 2px 12px"><div class="ic" style="color:var(--accent)">${svgIcon('pulse',18)}</div><div class="tx"><b>${isAr()?'إشعارات على الجهاز':'Device notifications'}</b><small>${isAr()?'تذكيرات تظهر حتى عند إغلاق التطبيق':'Reminders that appear even when the app is closed'}</small></div></div>
+       <button class="btn ${p.pushOn?'btn-ghost':'btn-primary'}" onclick="${p.pushOn?'disablePush()':'enablePush()'}">${p.pushOn?(isAr()?'إيقاف الإشعارات':'Turn off notifications'):(isAr()?'تفعيل الإشعارات':'Enable notifications')}</button>
+       <p class="muted" style="font-size:11px;line-height:1.5;margin:10px 2px 0">${isAr()?'على آيفون: أضِف التطبيق للشاشة الرئيسية أولًا لتعمل الإشعارات.':'On iPhone: add the app to your home screen first for notifications to work.'}</p>
+     </div>
+     <div class="section-title">${isAr()?'التذكيرات':'Reminders'}</div>
      <div class="card">
        ${tggl('remindDaily',t('remindDaily'),p.remindDaily)}
        ${tggl('remindMed',t('remindMed'),p.remindMed)}

@@ -1,6 +1,6 @@
 /* IBD Connect service worker — offline support + fresh-on-deploy.
    Bump CACHE on each release to invalidate old assets. */
-const CACHE = 'ibd-connect-v28';
+const CACHE = 'ibd-connect-v29';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
   // precache the charting lib so charts work on the very first offline launch
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'];
@@ -16,6 +16,24 @@ self.addEventListener('activate', (e) => {
   );
 });
 
+// Push reminders: show the notification, and focus/open the app on click
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) { try { d = { body: e.data && e.data.text() }; } catch (e2) { d = {}; } }
+  const title = d.title || 'Rafeeq · رفيق';
+  e.waitUntil(self.registration.showNotification(title, {
+    body: d.body || '', icon: './icon-192.png', badge: './icon-192.png',
+    tag: d.tag || 'rafeeq', data: { url: d.url || './' }
+  }));
+});
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || './';
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((cl) => {
+    for (const c of cl) { if ('focus' in c) return c.focus(); }
+    return self.clients.openWindow(url);
+  }));
+});
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
