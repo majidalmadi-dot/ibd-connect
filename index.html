@@ -19,13 +19,16 @@
 <meta property="og:title" content="Rafeeq — your IBD companion">
 <meta property="og:description" content="A free, bilingual non-medical companion for living with IBD: track symptoms, diet, meds and labs, and share a clinician-ready summary. By the Saudi Gastroenterology Association.">
 <meta property="og:url" content="https://ibd-connect.vercel.app/">
-<meta property="og:image" content="https://ibd-connect.vercel.app/icon-512.png">
+<meta property="og:image" content="https://ibd-connect.vercel.app/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Rafeeq — your IBD journey, connected. A bilingual non-medical IBD companion.">
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="ar_SA">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Rafeeq — your IBD companion">
 <meta name="twitter:description" content="A free, bilingual non-medical IBD companion by the Saudi Gastroenterology Association.">
-<meta name="twitter:image" content="https://ibd-connect.vercel.app/icon-512.png">
+<meta name="twitter:image" content="https://ibd-connect.vercel.app/og-image.png">
 <!-- Structured data: helps search engines & classifiers categorize this as a free Health application -->
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
@@ -1404,7 +1407,7 @@ function logLabel(l){
   else if(l.type==='note')extra=esc((l.notes||'').slice(0,60));
   return {icon:m.icon,title:t(m.key),sub:extra};
 }
-function addLog(o){o.id=rid();o.t=o.t||new Date().toISOString();S.logs.push(o);awardXp(10);checkBadges();checkQuests();save();}
+function addLog(o){o.id=rid();o.t=o.t||new Date().toISOString();S.logs.push(o);awardXp(10);checkBadges();checkQuests();save();track('log',{type:o.type});}
 
 /* badges / achievements (descriptive engagement only) */
 const BADGE_DEFS=[
@@ -2541,6 +2544,9 @@ function initTelemetry(){
       document.head.appendChild(s); }
   }catch(e){}
 }
+/* privacy-safe product analytics — these fire ONLY when Plausible is active (analytics opt-in + DNT honoured). No names, notes, doses or values are ever sent — event names only. */
+function track(ev,props){try{if(window.plausible)window.plausible(ev,props?{props:props}:undefined);}catch(e){}}
+window.track=track;
 /* ---- Push reminders (opt-in). Public VAPID key ships; private key is a Supabase secret. ---- */
 function urlB64ToUint8(b){const pad='='.repeat((4-b.length%4)%4);const s=(b+pad).replace(/-/g,'+').replace(/_/g,'/');const r=atob(s);return Uint8Array.from([...r].map(c=>c.charCodeAt(0)));}
 async function enablePush(){
@@ -2555,7 +2561,7 @@ async function enablePush(){
     try{ if(cloudOn()){const sb=await loadSupabase();if(sb){const j=sub.toJSON();
       await sb.from('push_subscriptions').upsert({endpoint:j.endpoint,p256dh:j.keys.p256dh,auth:j.keys.auth,med_time:S.prefs.medTime||'20:00',lang:S.lang||'en'},{onConflict:'endpoint',ignoreDuplicates:true});}} }catch(e){}
     reg.showNotification('رفيق · Rafeeq',{body:isAr()?'تم تفعيل التذكيرات ✓':'Reminders enabled ✓',icon:'icon-192.png',badge:'icon-192.png',tag:'rafeeq-welcome'});
-    toast(isAr()?'تم تفعيل الإشعارات':'Notifications enabled');render();
+    toast(isAr()?'تم تفعيل الإشعارات':'Notifications enabled');track('enable_push');render();
   }catch(e){toast(isAr()?'تعذّر التفعيل':'Could not enable');}
 }
 async function disablePush(){
@@ -2618,7 +2624,7 @@ route('share',(n)=>{
    </div>`;
 });
 window.__mkShare=async function(){
-  const out=$('#shareOut');if(!out)return;
+  const out=$('#shareOut');if(!out)return;track('share_report');
   out.innerHTML=`<p class="muted" style="padding:14px">${isAr()?'جارٍ الإنشاء…':'Generating…'}</p>`;
   const sum=clinSummary();let url;
   if(cloudOn()){
@@ -3823,7 +3829,7 @@ route('learn',(n)=>{
    </div>`;
 });
 window.setLearnCat=c=>{learnCat=c;render();};
-window.openArticle=function(id){const a=S.learn.find(x=>x.id===id);if(!a)return;const c=a[S.lang];
+window.openArticle=function(id){const a=S.learn.find(x=>x.id===id);if(!a)return;track('read_article');const c=a[S.lang];
   S.game.readCount=(S.game.readCount||0)+1;checkQuests();save();
   const body=(c[1]||'').replace(/\n/g,'<br>');
   const auth=a.author?(isAr()?a.author.ar:a.author.en):'';
