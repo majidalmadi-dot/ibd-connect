@@ -1245,6 +1245,8 @@ function toast(msg){const e=$('#toast');e.textContent=msg;e.classList.add('show'
 function openSheet(html){$('#sheet').innerHTML='<div class="grip"></div>'+html;$('#sheetbg').classList.add('open');}
 function closeSheet(){$('#sheetbg').classList.remove('open');}
 $('#sheetbg').addEventListener('click',e=>{if(e.target.id==='sheetbg')closeSheet();});
+/* HTML/attribute escaping for any user-supplied text rendered via innerHTML or value="…" */
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
 /* date helpers */
 function todayKey(d){d=d||new Date();return d.toISOString().slice(0,10);}
@@ -1282,7 +1284,7 @@ function logLabel(l){
   else if(l.type==='weight')extra=(l.kg||0)+' '+t('weightKg').replace(/\s*\(.*\)/,'');
   else if(l.type==='activemin')extra=(l.mins||0)+' '+t('tActiveMin').toLowerCase();
   else if(l.type==='water')extra=(l.glasses||0)+' '+t('glass');
-  else if(l.type==='note')extra=(l.notes||'').slice(0,60);
+  else if(l.type==='note')extra=esc((l.notes||'').slice(0,60));
   return {icon:m.icon,title:t(m.key),sub:extra};
 }
 function addLog(o){o.id=rid();o.t=o.t||new Date().toISOString();S.logs.push(o);awardXp(10);checkBadges();checkQuests();save();}
@@ -1434,9 +1436,9 @@ route('setup',(n)=>{
   const dz=[['uc','uc'],['cd','cd'],['ibdu','ibdu'],['notsure','notsure']];
   n.innerHTML=`${topbar('setupT','setupSub',{back:true})}
    <div class="content">
-     <div class="field"><label>${t('fullName')}</label><input class="input" id="suName" placeholder="${t('yourName')}" value="${u.name||''}"></div>
+     <div class="field"><label>${t('fullName')}</label><input class="input" id="suName" placeholder="${t('yourName')}" value="${esc(u.name)}"></div>
      <div class="grid2">
-       <div class="field"><label>${t('yearBirth')}</label><input class="input" id="suYear" inputmode="numeric" placeholder="1995" value="${u.year||''}"></div>
+       <div class="field"><label>${t('yearBirth')}</label><input class="input" id="suYear" inputmode="numeric" placeholder="1995" value="${esc(u.year)}"></div>
        <div class="field"><label>${t('gender')}</label><select class="input" id="suGender">
          <option value="">—</option><option value="male" ${u.gender==='male'?'selected':''}>${t('male')}</option>
          <option value="female" ${u.gender==='female'?'selected':''}>${t('female')}</option>
@@ -1445,7 +1447,7 @@ route('setup',(n)=>{
      <div class="field"><label>${t('diseaseType')}</label>
        <div class="chips" id="suDisease">${dz.map(([v,k])=>`<button class="chip ${u.disease===v?'on':''}" data-v="${v}" onclick="pickChip('suDisease',this)">${t(k)}</button>`).join('')}</div>
      </div>
-     <div class="field"><label>${t('yearDiag')}</label><input class="input" id="suDiag" inputmode="numeric" placeholder="2021" value="${u.diagYear||''}"></div>
+     <div class="field"><label>${t('yearDiag')}</label><input class="input" id="suDiag" inputmode="numeric" placeholder="2021" value="${esc(u.diagYear)}"></div>
      <div class="field"><label>${t('joinFrom')}</label>
        <button class="input" style="display:flex;align-items:center;justify-content:space-between;text-align:start" onclick="stashSetupGoCountry()">
          <span class="row" style="gap:10px">${u.country?`<span style="font-size:22px">${u.countryFlag}</span><span>${isAr()?(COUNTRIES.find(x=>x.c===u.country)||{}).ar:(COUNTRIES.find(x=>x.c===u.country)||{}).en}</span>`:`<span style="font-size:22px">🌍</span><span class="muted">${t('selectCountry')}</span>`}</span>
@@ -1472,9 +1474,10 @@ route('login',(n)=>{
      <div class="logo-mark" style="width:60px;height:60px;border-radius:18px;margin-bottom:24px;color:#fff"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg></div>
      <h1 style="font-size:26px;margin:0 0 4px">${t('welcome')}</h1>
      <p class="muted" style="margin:0 0 26px">${t('appName')} · ${t('tagline')}</p>
-     <div class="field"><label>${t('email')}</label><input class="input" id="liEmail" type="email" placeholder="you@email.com" value="${S.user.email||''}"></div>
+     <div class="field"><label>${t('email')}</label><input class="input" id="liEmail" type="email" placeholder="you@email.com" value="${esc(S.user.email)}"></div>
      <div class="field"><label>${t('password')}</label><input class="input" id="liPw" type="password" placeholder="••••••••"></div>
-     <div style="text-align:end;margin-bottom:18px"><button class="muted" style="font-size:13px;font-weight:600" onclick="go('reset')">${t('forgotPw')}</button></div>
+     <div style="text-align:end;margin-bottom:10px"><button class="muted" style="font-size:13px;font-weight:600" onclick="go('reset')">${t('forgotPw')}</button></div>
+     <p class="muted" style="font-size:11.5px;line-height:1.55;margin:0 0 16px">${isAr()?'هذا ملف شخصي على هذا الجهاز فقط — وليس حسابًا سحابيًا. تُحفظ بياناتك محليًا ولا تُرسل كلمة المرور إلى أي خادم.':'This is a profile stored on this device only — not a cloud account. Your data stays local and your password is never sent to a server.'}</p>
      <button class="btn btn-primary" onclick="doLogin()">${t('signIn')}</button>
      <button class="btn btn-ghost" style="margin-top:12px" onclick="go('signup')">${t('noAccount')}</button>
      <div style="flex:1"></div>
@@ -1494,13 +1497,14 @@ route('signup',(n)=>{
   const sel=S.user.country?COUNTRIES.find(x=>x.c===S.user.country):null;
   n.innerHTML=`${topbar('createAccount',null,{back:true})}
    <div class="content">
-     <div class="field"><label>${t('email')}</label><input class="input" id="suEmail" type="email" placeholder="you@email.com" value="${S.user.email||''}"></div>
+     <div class="field"><label>${t('email')}</label><input class="input" id="suEmail" type="email" placeholder="you@email.com" value="${esc(S.user.email)}"></div>
      <div class="field"><label>${t('password')}</label><input class="input" id="suPw" type="password" placeholder="${isAr()?'٦ أحرف على الأقل':'At least 6 characters'}" value="${suPwTmp}"></div>
      <div class="field"><label>${t('confirmPw')}</label><input class="input" id="suPw2" type="password" placeholder="••••••••" value="${suPwTmp}"></div>
      <div class="field"><label>${t('joinFrom')}</label>
        <button class="input" style="display:flex;align-items:center;justify-content:space-between;text-align:start" onclick="stashSignupGoCountry()">
          <span class="row" style="gap:10px">${sel?`<span style="font-size:22px">${sel.f}</span><span>${isAr()?sel.ar:sel.en}</span>`:`<span style="font-size:22px">🌍</span><span class="muted">${t('selectCountry')}</span>`}</span>
          <span class="chev">${isAr()?'‹':'›'}</span></button></div>
+     <p class="muted" style="font-size:11.5px;line-height:1.55;margin:0 0 14px">${isAr()?'يُنشئ ملفًا على هذا الجهاز فقط — لا حساب سحابي. تبقى بياناتك محلية ولا تُرسل كلمة المرور إلى أي خادم.':'Creates a profile on this device only — no cloud account. Your data stays local and your password is never sent to a server.'}</p>
      <button class="btn btn-primary" onclick="doSignup()">${t('signUp')}</button>
      <button class="btn btn-ghost" style="margin-top:12px" onclick="go('login')">${t('haveAccount')}</button>
    </div>`;
@@ -2155,7 +2159,7 @@ window.saveMed=function(){const kind=$('#mKind').value;const name=($('#mName').v
   S.meds=S.meds||[];S.meds.push(m);save();closeSheet();toast(isAr()?'تمت الإضافة':'Added');render();};
 window.openMedChange=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;
   openSheet(`<div class="row" style="gap:10px;margin-bottom:14px"><span style="color:var(--accent)">${svgIcon('edit',24)}</span><h2 style="font-size:18px;margin:0;font-weight:800">${isAr()?'تسجيل تغيير':'Log a change'}</h2></div>
-   <p class="muted" style="font-size:12.5px;margin:-6px 0 12px">${m.name||(isAr()?'الدواء':'Medication')}</p>
+   <p class="muted" style="font-size:12.5px;margin:-6px 0 12px">${m.name?esc(m.name):(isAr()?'الدواء':'Medication')}</p>
    <div class="field"><label>${isAr()?'الجرعة الجديدة (اختياري)':'New dose (optional)'}</label><input class="input" id="mcDose" value="${m.dose||''}"></div>
    <div class="field"><label>${isAr()?'ماذا تغيّر؟':'What changed?'}</label>
      <select class="input" id="mcType">
@@ -2371,7 +2375,7 @@ route('caregiver',(n)=>{
   const st=streak();
   n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'عرض للعائلة':'Family view',rawSub:isAr()?'ملخّص للقراءة فقط':'read-only snapshot'})}
    <div class="content">
-     <div class="card" style="text-align:center"><div style="font-size:15px;font-weight:700">${S.user.name||(isAr()?'المريض':'Patient')}</div><div class="muted" style="font-size:12.5px">${S.user.disease?t(S.user.disease):''} · ${isAr()?'تتابع':'streak'} ${st} ${isAr()?'يوم':'d'}</div></div>
+     <div class="card" style="text-align:center"><div style="font-size:15px;font-weight:700">${S.user.name?esc(S.user.name):(isAr()?'المريض':'Patient')}</div><div class="muted" style="font-size:12.5px">${S.user.disease?t(S.user.disease):''} · ${isAr()?'تتابع':'streak'} ${st} ${isAr()?'يوم':'d'}</div></div>
      <div class="card"><div class="row" style="gap:10px"><span class="ic" style="color:var(--accent)">${svgIcon('pulse',20)}</span><div class="tx"><b>${isAr()?'أعراض اليوم':"Today's symptoms"}</b><small>${sym.length?sym.map(s=>t(s.sym||'symptoms')).join('، '):(isAr()?'لا شيء مُسجّل':'none logged')}</small></div></div></div>
      ${bio&&bio.due?`<div class="card"><div class="row" style="gap:10px"><span class="ic" style="color:var(--accent)">${svgIcon('syringe',20)}</span><div class="tx"><b>${isAr()?'الجرعة الحيوية القادمة':'Next biologic dose'}</b><small>${bio.due.toLocaleDateString(isAr()?'ar':'en',{day:'numeric',month:'short'})}</small></div></div></div>`:''}
      ${lastLab?`<div class="card"><div class="row" style="gap:10px"><span class="ic" style="color:var(--accent)">${svgIcon('chart',20)}</span><div class="tx"><b>${isAr()?'آخر تحليل':'Latest lab'}</b><small>${labName(lastLab.type)}: ${lastLab.value} ${labUnit(lastLab.type)} · ${fmtDate(lastLab.date)}</small></div></div></div>`:''}
@@ -2491,7 +2495,7 @@ function renderClinician(payload){
   const labName2=(id)=>{const l=LAB_TYPES.find(x=>x.id===id);return l?(ar?l.ar:l.en):id;};
   node.innerHTML=`<div class="topbar"><div style="flex:1"><h1 style="display:flex;align-items:center;gap:8px"><span style="color:var(--accent)">${svgIcon('brand',20)}</span> ${ar?'ملخّص سريري':'Clinician summary'}</h1><div class="sub">${ar?'مشترك من تطبيق Rafeeq — وصفي فقط':'Shared from Rafeeq — descriptive only'}</div></div></div>
    <div class="content">
-     <div class="card"><div class="between"><b>${payload.nm||(ar?'مريض':'Patient')}</b><span class="muted" style="font-size:12px">${ar?'حُرّر':'generated'} ${payload.gen||''}</span></div><div class="muted" style="font-size:12.5px;margin-top:4px">${payload.dx?(I18N[payload.dx]?t(payload.dx):payload.dx):''} ${payload.cty?'· '+payload.cty:''}</div></div>
+     <div class="card"><div class="between"><b>${payload.nm?esc(payload.nm):(ar?'مريض':'Patient')}</b><span class="muted" style="font-size:12px">${ar?'حُرّر':'generated'} ${esc(payload.gen)}</span></div><div class="muted" style="font-size:12.5px;margin-top:4px">${payload.dx?(I18N[payload.dx]?t(payload.dx):esc(payload.dx)):''} ${payload.cty?'· '+esc(payload.cty):''}</div></div>
      <div class="section-title">${ar?'آخر ١٤ يومًا':'Last 14 days'}</div>
      <div class="grid2">
        <div class="card"><div class="muted" style="font-size:12px">${ar?'متوسط شدّة الأعراض':'Avg symptom severity'}</div><b style="font-size:22px;color:var(--accent)">${f(payload.sym)}</b><span class="muted" style="font-size:11px">/3</span></div>
@@ -2501,7 +2505,7 @@ function renderClinician(payload){
      </div>
      ${payload.bio?`<div class="card"><div class="row" style="gap:10px"><span class="ic" style="color:var(--accent)">${svgIcon('syringe',20)}</span><div class="tx"><b>${ar?'الجرعة الحيوية القادمة':'Next biologic dose'}</b><small>${payload.bio.n} · ${payload.bio.d}</small></div></div></div>`:''}
      ${(payload.disc!=null||payload.ctrl!=null)?`<div class="grid2">${payload.disc!=null?`<div class="card"><div class="muted" style="font-size:12px">IBD-DISC</div><b style="font-size:22px;color:var(--purple)">${payload.disc}/100</b></div>`:''}${payload.ctrl!=null?`<div class="card"><div class="muted" style="font-size:12px">${ar?'مؤشّر الشعور':'Wellbeing index'}</div><b style="font-size:22px;color:var(--accent)">${payload.ctrl}/100</b></div>`:''}</div>`:''}
-     ${payload.labs&&payload.labs.length?`<div class="section-title">${ar?'آخر التحاليل':'Latest labs'}</div><div class="card">${payload.labs.map(l=>`<div class="li"><span class="ic" style="color:var(--accent)">${svgIcon('pulse',18)}</span><div class="tx"><b>${labName2(l.t)}</b><small>${l.d}</small></div><b>${l.v} ${labUnit(l.t)}</b></div>`).join('')}</div>`:''}
+     ${payload.labs&&payload.labs.length?`<div class="section-title">${ar?'آخر التحاليل':'Latest labs'}</div><div class="card">${payload.labs.map(l=>`<div class="li"><span class="ic" style="color:var(--accent)">${svgIcon('pulse',18)}</span><div class="tx"><b>${labName2(l.t)}</b><small>${esc(l.d)}</small></div><b>${esc(l.v)} ${labUnit(l.t)}</b></div>`).join('')}</div>`:''}
      <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:11.5px;margin:0;line-height:1.55">${ar?'بيانات يبلّغ عنها المريض ذاتيًا، وصفية فقط، ليست تشخيصًا. للاستخدام كمحفّز للنقاش أثناء الزيارة.':'Patient self-reported, descriptive data only, not a diagnosis. Intended as a conversation aid during the visit.'}</p></div>
    </div>`;
   host.appendChild(node);
@@ -2549,9 +2553,9 @@ route('history',(n)=>{
 function fmtDateFull(k){const d=new Date(k+'T00:00');const today=todayKey(),y=todayKey(new Date(Date.now()-864e5));
   if(k===today)return isAr()?'اليوم':'Today';if(k===y)return isAr()?'أمس':'Yesterday';
   return d.toLocaleDateString(isAr()?'ar-SA':'en-GB',{weekday:'long',day:'numeric',month:'long'});}
-function liRowDetail(l){const x=logLabel(l);return `<div class="li" onclick="showLogDetail('${l.id}')"><div class="ic">${x.icon}</div><div class="tx"><b>${x.title}</b><small>${x.sub}${l.notes?' · '+l.notes:''}</small></div><small class="faint">${fmtTime(l.t)}</small></div>`;}
+function liRowDetail(l){const x=logLabel(l);return `<div class="li" onclick="showLogDetail('${l.id}')"><div class="ic">${x.icon}</div><div class="tx"><b>${x.title}</b><small>${x.sub}${l.notes?' · '+esc(l.notes):''}</small></div><small class="faint">${fmtTime(l.t)}</small></div>`;}
 window.showLogDetail=function(id){const l=S.logs.find(x=>x.id===id);if(!l)return;const x=logLabel(l);
-  openSheet(`${sheetHead(x.icon,TYPE_META[l.type].key)}<div class="card" style="background:var(--bg2)"><div class="li"><div class="tx"><b>${x.sub}</b><small>${fmtDateFull(l.t.slice(0,10))} · ${fmtTime(l.t)}</small></div></div>${l.notes?`<p class="muted" style="font-size:13.5px;margin:10px 4px 0">📝 ${l.notes}</p>`:''}${l.photo?`<div style="margin-top:10px;height:120px;border-radius:12px;background:linear-gradient(135deg,var(--card2),var(--line));display:flex;align-items:center;justify-content:center;font-size:34px">📷</div>`:''}</div><button class="btn btn-danger" style="margin-top:14px" onclick="delLog('${id}')">🗑️ ${isAr()?'حذف هذا السجل':'Delete this log'}</button>`);
+  openSheet(`${sheetHead(x.icon,TYPE_META[l.type].key)}<div class="card" style="background:var(--bg2)"><div class="li"><div class="tx"><b>${x.sub}</b><small>${fmtDateFull(l.t.slice(0,10))} · ${fmtTime(l.t)}</small></div></div>${l.notes?`<p class="muted" style="font-size:13.5px;margin:10px 4px 0">📝 ${esc(l.notes)}</p>`:''}${l.photo?`<div style="margin-top:10px;height:120px;border-radius:12px;background:linear-gradient(135deg,var(--card2),var(--line));display:flex;align-items:center;justify-content:center;font-size:34px">📷</div>`:''}</div><button class="btn btn-danger" style="margin-top:14px" onclick="delLog('${id}')">🗑️ ${isAr()?'حذف هذا السجل':'Delete this log'}</button>`);
 };
 window.delLog=function(id){S.logs=S.logs.filter(x=>x.id!==id);save();closeSheet();toast(isAr()?'تم الحذف':'Deleted');render();};
 
@@ -2858,8 +2862,8 @@ function buildReportHTML(){
   if(meds.length){const orals=meds.filter(m=>m.kind!=='biologic');const adhAvg=orals.length?Math.round(orals.reduce((s,m)=>s+(medAdherence(m)||0),0)/orals.length):null;
     const rows=meds.map(m=>{
       if(m.kind==='biologic'){const due=medNextDue(m);const dd=due?Math.round((due-new Date().setHours(0,0,0,0))/864e5):null;
-        return `<tr><td>${m.name||(ar?'علاج حيوي':'Biologic')}</td><td>${ar?'حيوي · كل':'Biologic · q'} ${m.interval} ${ar?'يوم':'d'}</td><td>${due?(ar?'القادمة ':'next ')+due.toLocaleDateString():'—'}${dd!=null?` · ${dd} ${ar?'يوم':'d'}`:''}</td></tr>`;}
-      const adh=medAdherence(m);return `<tr><td>${m.name||(ar?'دواء يومي':'Daily med')}</td><td>${ar?'يومي':'Daily'} ${m.time||''}</td><td><b>${adh}%</b> ${ar?'(٣٠ يوم)':'(30d)'}</td></tr>`;}).join('');
+        return `<tr><td>${m.name?esc(m.name):(ar?'علاج حيوي':'Biologic')}</td><td>${ar?'حيوي · كل':'Biologic · q'} ${esc(m.interval)} ${ar?'يوم':'d'}</td><td>${due?(ar?'القادمة ':'next ')+due.toLocaleDateString():'—'}${dd!=null?` · ${dd} ${ar?'يوم':'d'}`:''}</td></tr>`;}
+      const adh=medAdherence(m);return `<tr><td>${m.name?esc(m.name):(ar?'دواء يومي':'Daily med')}</td><td>${ar?'يومي':'Daily'} ${esc(m.time)}</td><td><b>${adh}%</b> ${ar?'(٣٠ يوم)':'(30d)'}</td></tr>`;}).join('');
     medsBlock=`<h3>${ar?'الأدوية والالتزام (مُدخل ذاتيًا)':'Medications & adherence (self-entered)'}</h3>
       <div class="row2"><div style="flex:1"><table><thead><tr><th>${ar?'الدواء':'Medication'}</th><th>${ar?'النظام':'Regimen'}</th><th>${ar?'الالتزام / الجرعة':'Adherence / dose'}</th></tr></thead><tbody>${rows}</tbody></table></div>
       ${adhAvg!=null?`<div class="donut"><div>${rptDonut(adhAvg,RPT.teal)}</div><div class="dl">${ar?'الالتزام (٣٠ يوم)':'Adherence (30d)'}</div></div>`:''}</div>`;}
@@ -2911,7 +2915,7 @@ function buildReportHTML(){
   @media print{body{padding:18px}.ch,.box{break-inside:avoid}}</style></head><body>
   <div class="hd"><div><h1 style="display:flex;align-items:center;gap:8px"><span style="color:${RPT.teal}">${svgIcon('brand',22)}</span> Rafeeq</h1><div class="sub">${ar?'ملخّص للطبيب — وصفي فقط':'Clinician summary — descriptive only'}</div></div>
     <div style="text-align:${ar?'left':'right'};font-size:12px;color:#667"><b>${rangeStr}</b><br>${repRange} ${ar?'يوم':'days'} · ${totalMeas} ${ar?'قياس':'entries'}<br><span class="cap">${ar?'حُرّر':'generated'} ${new Date().toLocaleDateString()}</span></div></div>
-  <div class="pt"><span><b>${T('fullName')}:</b> ${u.name||'—'}</span><span><b>${T('diseaseType')}:</b> ${dz}</span><span><b>${ar?'العمر':'Age'}:</b> ${age}</span>${ctry?`<span><b>${T('joinFrom')}:</b> ${u.countryFlag||''} ${ctry}</span>`:''}</div>
+  <div class="pt"><span><b>${T('fullName')}:</b> ${u.name?esc(u.name):'—'}</span><span><b>${T('diseaseType')}:</b> ${dz}</span><span><b>${ar?'العمر':'Age'}:</b> ${age}</span>${ctry?`<span><b>${T('joinFrom')}:</b> ${u.countryFlag||''} ${ctry}</span>`:''}</div>
   <div class="grid">${kpis}</div>
   <h3>${ar?'الاتجاهات خلال الفترة':'Trends over the period'}</h3>
   <div class="chgrid">
@@ -3241,7 +3245,7 @@ route('supps',(n)=>{
      <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.55">ℹ️ ${ar?'نقص الحديد وب12 وفيتامين د والكالسيوم شائع في التهاب الأمعاء. هذه متابعة شخصية — لا تبدأ أو توقف مكمّلًا دون فريقك الطبي.':'Iron, B12, vitamin D and calcium deficiencies are common in IBD. This is personal tracking — don’t start or stop a supplement without your care team.'}</p></div>
      <button class="btn btn-primary" onclick="openAddSupp()">${svgIcon('plus',18)} ${ar?'إضافة مكمّل':'Add a supplement'}</button>
      ${arr.length?arr.map(s=>{const took=suppTakenToday(s);const adh=suppAdh(s);
-       return `<div class="card"><div class="between"><div class="row" style="gap:11px"><span class="ic" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon('leaf',20)}</span><div><b style="font-size:14.5px">${s.name}</b><div class="muted" style="font-size:12px">${[s.dose,s.freq===' weekly'?(ar?'أسبوعي':'weekly'):(ar?'يومي':'daily')].filter(Boolean).join(' · ')}</div></div></div><button class="btn-sm btn-ghost" onclick="delSupp('${s.id}')">${svgIcon('trash',15)}</button></div>
+       return `<div class="card"><div class="between"><div class="row" style="gap:11px"><span class="ic" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none">${svgIcon('leaf',20)}</span><div><b style="font-size:14.5px">${esc(s.name)}</b><div class="muted" style="font-size:12px">${[esc(s.dose),s.freq===' weekly'?(ar?'أسبوعي':'weekly'):(ar?'يومي':'daily')].filter(Boolean).join(' · ')}</div></div></div><button class="btn-sm btn-ghost" onclick="delSupp('${s.id}')">${svgIcon('trash',15)}</button></div>
        ${adh!=null?`<div class="between" style="margin-top:10px"><span class="muted" style="font-size:12px">${ar?'الالتزام (٣٠ يومًا)':'Adherence (30d)'}</span><b style="font-size:13px;color:${adh>=80?'var(--good)':adh>=50?'var(--warn)':'var(--bad)'}">${adh}%</b></div><div class="pbar" style="margin-top:6px"><i style="width:${adh}%"></i></div>`:''}
        <button class="btn ${took?'btn-ghost':'btn-primary'}" style="margin-top:10px" onclick="suppTake('${s.id}')">${took?svgIcon('check',16)+' '+(ar?'تم اليوم':'Taken today'):(ar?'سجّل جرعة اليوم':'Mark today taken')}</button></div>`;}).join('')
        :`<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('leaf',36)}</div><p class="muted" style="margin-top:8px">${ar?'لم تُضِف مكمّلات بعد':'No supplements added yet'}</p></div>`}
@@ -3397,7 +3401,7 @@ route('travel',(n)=>{
    </div>`;
 });
 window.travelLetter=function(){const ar=isAr();const u=S.user;const meds=(S.meds||[]);
-  const rows=meds.length?meds.map(m=>`<tr><td>${m.name||(m.kind==='biologic'?'Biologic':'Medication')}</td><td>${m.dose||'—'}</td><td>${m.kind==='biologic'?(ar?'حقن/تسريب':'injection/infusion')+' · '+(ar?'كل':'every')+' '+(m.interval||'—')+' '+(ar?'يوم':'d'):(ar?'فموي يومي':'oral daily')}</td><td>${m.since?fmtDate(m.since):'—'}</td></tr>`).join(''):`<tr><td colspan="4">—</td></tr>`;
+  const rows=meds.length?meds.map(m=>`<tr><td>${m.name?esc(m.name):(m.kind==='biologic'?'Biologic':'Medication')}</td><td>${m.dose?esc(m.dose):'—'}</td><td>${m.kind==='biologic'?(ar?'حقن/تسريب':'injection/infusion')+' · '+(ar?'كل':'every')+' '+(m.interval||'—')+' '+(ar?'يوم':'d'):(ar?'فموي يومي':'oral daily')}</td><td>${m.since?fmtDate(m.since):'—'}</td></tr>`).join(''):`<tr><td colspan="4">—</td></tr>`;
   const html=`<!DOCTYPE html><html dir="${ar?'rtl':'ltr'}"><head><meta charset="utf-8"><title>Medication Letter</title>
    <style>body{font-family:${ar?"'Segoe UI',Tahoma":'Arial'},sans-serif;color:#16202b;max-width:720px;margin:auto;padding:40px;line-height:1.6}
    h1{font-size:20px;color:#00897b;margin:0 0 4px}.muted{color:#667;font-size:13px}
@@ -3474,7 +3478,7 @@ route('grocery',(n)=>{
   n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'قائمة التسوّق':'Grocery list',rawSub:ar?'من وصفاتك':'from your recipes'})}
    <div class="content">
      <div class="card"><div class="row" style="gap:8px"><input class="input" id="gcAdd" placeholder="${ar?'أضِف عنصرًا…':'Add an item…'}" style="flex:1"><button class="btn btn-primary btn-sm" onclick="groceryAddCustom()">${svgIcon('plus',16)}</button></div></div>
-     ${g.length?`<div class="card">${g.map((it,i)=>`<div class="row" style="gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><button onclick="groceryToggle(${i})" style="flex:none;width:24px;height:24px;border-radius:7px;border:2px solid ${it.got?'var(--good)':'var(--line)'};background:${it.got?'var(--good)':'transparent'};color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer">${it.got?svgIcon('check',14):''}</button><span style="flex:1;font-size:13.5px;${it.got?'text-decoration:line-through;color:var(--muted)':''}">${it.item}</span><button class="btn-sm btn-ghost" onclick="groceryDel(${i})">${svgIcon('trash',14)}</button></div>`).join('')}</div>
+     ${g.length?`<div class="card">${g.map((it,i)=>`<div class="row" style="gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)"><button onclick="groceryToggle(${i})" style="flex:none;width:24px;height:24px;border-radius:7px;border:2px solid ${it.got?'var(--good)':'var(--line)'};background:${it.got?'var(--good)':'transparent'};color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer">${it.got?svgIcon('check',14):''}</button><span style="flex:1;font-size:13.5px;${it.got?'text-decoration:line-through;color:var(--muted)':''}">${esc(it.item)}</span><button class="btn-sm btn-ghost" onclick="groceryDel(${i})">${svgIcon('trash',14)}</button></div>`).join('')}</div>
        <button class="btn btn-ghost" onclick="groceryClear()">${svgIcon('trash',16)} ${ar?'إفراغ القائمة':'Clear list'}</button>`
        :`<div class="card center" style="padding:30px"><div style="color:var(--muted)">${svgIcon('list',36)}</div><p class="muted" style="margin-top:8px">${ar?'القائمة فارغة — أضِف من الوصفات':'List is empty — add from recipes'}</p><button class="btn btn-ghost" style="margin-top:10px" onclick="go('recipes')">${ar?'تصفّح الوصفات':'Browse recipes'}</button></div>`}
      <div style="height:8px"></div>
@@ -3865,7 +3869,9 @@ route('more',(n)=>{
      <div class="section-title">${isAr()?'البيانات':'Data'}</div>
      <div class="card">
        ${mLi('download',t('dataExport'),'',"doExport()")}
+       ${mLi('download',isAr()?'استيراد نسخة احتياطية':'Import a backup','',"document.getElementById('importFile').click()")}
        ${mLi('trash',t('dataDelete'),'',"confirmDataDelete()")}
+       <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="doImport(this)">
      </div>
 
      <div class="card tap" onclick="go('adminLogin')"><div class="row"><div class="ic" style="width:40px;height:40px;border-radius:11px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:18px">🛠️</div><div style="flex:1"><b style="font-size:14.5px">${t('adminEntry')}</b><div class="muted" style="font-size:12px">${isAr()?'للمسؤولين':'For administrators'}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></div>
@@ -3963,10 +3969,22 @@ const LEGAL={
 };
 window.openLegal=function(k){const c=LEGAL[k][S.lang];openSheet(`<h2 style="font-size:21px;margin:6px 0 14px">${c[0]}</h2><p style="font-size:14.5px;line-height:1.75;white-space:pre-wrap">${c[1]}</p>`);};
 
-window.doExport=()=>{const blob=new Blob([JSON.stringify({user:S.user,logs:S.logs,disc:S.disc},null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ibd-connect-data.json';a.click();toast(t('exportConfirm'));};
+window.doExport=()=>{/* full on-device backup — every field in the schema */
+  const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rafeeq-backup-'+todayKey()+'.json';a.click();toast(t('exportConfirm'));};
+window.doImport=(inp)=>{const f=inp&&inp.files&&inp.files[0];inp.value='';if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{try{const v=JSON.parse(rd.result);if(!v||typeof v!=='object'||Array.isArray(v))throw 0;
+    S=Object.assign(blank(),v);save();toast(isAr()?'تم استيراد بياناتك':'Your data was imported');STACK=[];navTab('today');
+  }catch(e){toast(isAr()?'ملف غير صالح':'Invalid backup file');}};
+  rd.onerror=()=>toast(isAr()?'تعذّرت القراءة':'Could not read file');
+  rd.readAsText(f);};
 window.confirmDataDelete=()=>{openSheet(`<div style="font-size:40px">⚠️</div><h2 style="font-size:19px;margin:8px 0">${t('dataDelete')}</h2><p class="muted" style="font-size:14px;line-height:1.6">${t('deleteWarn')}</p><button class="btn btn-danger" onclick="reallyDeleteData()">${t('confirmDelete')}</button><button class="btn btn-ghost" style="margin-top:10px" onclick="closeSheet()">${t('cancel')}</button>`);};
-window.reallyDeleteData=()=>{S.logs=[];S.disc=null;S.badges=[];S.reminders=[];save();closeSheet();toast(isAr()?'تم حذف البيانات':'Data deleted');navTab('today');};
+window.reallyDeleteData=()=>{/* clear ALL logged health data (profile kept; use Delete account for full wipe) */
+  S.logs=[];S.disc=null;S.discHistory=[];S.badges=[];S.reminders=[];
+  S.meds=[];S.labs=[];S.control=null;S.supplements=[];S.grocery=[];S.vaccines={};
+  S.seenDays=[];S.nudgeDismiss={};S.game={xp:0,quests:{},goalDays:[],lastLevel:1};
+  save();closeSheet();toast(isAr()?'تم حذف البيانات':'Data deleted');navTab('today');};
 window.confirmAccountDelete=()=>{openSheet(`<div style="font-size:40px">⚠️</div><h2 style="font-size:19px;margin:8px 0">${t('deleteAccount')}</h2><p class="muted" style="font-size:14px;line-height:1.6">${t('deleteWarn')}</p><button class="btn btn-danger" onclick="reallyDeleteAccount()">${t('confirmDelete')}</button><button class="btn btn-ghost" style="margin-top:10px" onclick="closeSheet()">${t('cancel')}</button>`);};
 window.reallyDeleteAccount=()=>{const lang=S.lang;reset();S.lang=lang;save();closeSheet();STACK=[];go('login',{replace:true});};
 
