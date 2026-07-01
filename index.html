@@ -2308,11 +2308,19 @@ window.saveMedChange=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)
   save();closeSheet();awardXp(2);toast(isAr()?'تم تسجيل التغيير':'Change logged');render();};
 function medChangeLabel(t){const m={start:{en:'Started',ar:'بدء'},dose:{en:'Dose change',ar:'تعديل جرعة'},stop:{en:'Stopped',ar:'إيقاف'},restart:{en:'Restarted',ar:'استئناف'},switch:{en:'Switched',ar:'تبديل'},note:{en:'Note',ar:'ملاحظة'}};return m[t]?(isAr()?m[t].ar:m[t].en):t;}
 function medExtra(m){const hist=(m.history||[]);const ds=m.dose?`${isAr()?'الجرعة':'Dose'}: ${m.dose}`:'';const since=m.since?`${isAr()?'منذ':'since'} ${fmtDate(m.since)}`:'';
-  return `<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:9px"><div class="between" style="align-items:center"><span class="muted" style="font-size:12px">${[ds,since].filter(Boolean).join(' · ')||(isAr()?'لا تفاصيل':'no details')}</span><button class="btn-sm btn-ghost" onclick="openMedChange('${m.id}')">${svgIcon('edit',14)} ${isAr()?'تسجيل تغيير':'Log change'}</button></div>
+  return `<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:9px"><div class="between" style="align-items:center"><span class="muted" style="font-size:12px">${[ds,since].filter(Boolean).join(' · ')||(isAr()?'لا تفاصيل':'no details')}</span><div class="row" style="gap:6px"><button class="btn-sm btn-ghost" onclick="medIcs('${m.id}')" title="${isAr()?'أضف للتقويم':'Add to calendar'}">📅</button><button class="btn-sm btn-ghost" onclick="openMedChange('${m.id}')">${svgIcon('edit',14)} ${isAr()?'تسجيل تغيير':'Log change'}</button></div></div>
   ${hist.length>1?`<div style="margin-top:8px">${hist.slice().reverse().map(h=>`<div class="row" style="gap:8px;align-items:flex-start;margin-bottom:6px"><span class="dot" style="background:var(--accent);margin-top:5px;flex:none"></span><div style="flex:1;min-width:0"><div style="font-size:12.5px"><b>${medChangeLabel(h.type)}</b>${h.dose?` · ${h.dose}`:''}</div><div class="muted" style="font-size:11px">${fmtDate(h.date)}${h.note?' · '+h.note:''}</div></div></div>`).join('')}</div>`:''}</div>`;}
 window.medTake=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;m.log=m.log||[];const k=todayKey();const i=m.log.indexOf(k);if(i>=0)m.log.splice(i,1);else{m.log.push(k);awardXp(3);}save();render();};
 window.medGiven=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;m.start=todayKey();m.log=m.log||[];m.log.push(todayKey());awardXp(5);save();toast(isAr()?'سُجّلت الجرعة':'Dose logged');render();};
 window.delMed=function(id){S.meds=(S.meds||[]).filter(x=>x.id!==id);save();render();};
+window.medIcs=function(id){const m=(S.meds||[]).find(x=>x.id===id);if(!m)return;const pad=x=>String(x).padStart(2,'0');
+  const stamp=d=>d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+'00Z';
+  let dt,rule;
+  if(m.kind==='biologic'){dt=medNextDue(m)||new Date();dt.setHours(9,0,0,0);rule='FREQ=DAILY;INTERVAL='+(m.interval||56);}
+  else{const p=(m.time||'20:00').split(':');dt=new Date();dt.setHours(+p[0],+p[1],0,0);if(dt<new Date())dt.setDate(dt.getDate()+1);rule='FREQ=DAILY';}
+  const title='Rafeeq — '+(m.name||(isAr()?'دواء':'Medication'))+(m.dose?' ('+m.dose+')':'');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Rafeeq//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:'+m.id+'@rafeeq','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(dt),'RRULE:'+rule,'SUMMARY:'+title,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:'+title,'END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const blob=new Blob([ics],{type:'text/calendar'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='rafeeq-med.ics';a.click();toast(isAr()?'أُضيف للتقويم':'Added to calendar');};
 window.addReminder=()=>{const time=$('#medTime').value;S.prefs.medTime=time;S.reminders.push({time,taken:false});save();toast(t('reminderSet'));render();};
 window.toggleTaken=(i)=>{S.reminders[i].taken=!S.reminders[i].taken;save();render();};
 

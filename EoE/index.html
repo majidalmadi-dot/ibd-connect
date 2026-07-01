@@ -233,6 +233,8 @@ function blank(){return{
   meds:[],                 // {id, on}
   diet:'',                 // current diet therapy index
   atopy:{},                // {asthma:true,...}
+  regimen:[],              // {id,name,dose,freq,time,remind}
+  reminders:[],            // {id,kind,label,time,days,enabled}
   seenDays:[]
 };}
 function deepMerge(b,o){if(b===null||typeof b!=='object'||Array.isArray(b))return o===undefined?b:o;const out=Object.assign({},b);if(o&&typeof o==='object'&&!Array.isArray(o)){for(const k in o){const x=b[k],y=o[k];out[k]=(x&&typeof x==='object'&&!Array.isArray(x)&&y&&typeof y==='object'&&!Array.isArray(y))?deepMerge(x,y):y;}}return out;}
@@ -431,6 +433,8 @@ route('more',(n)=>{const ar=isAr();n.innerHTML=`${topbar('moreT')}<div class="co
    <div class="card" style="text-align:center;padding:22px"><div class="logo-mark" style="width:64px;height:64px;font-size:30px;margin:0 auto 10px">م</div><b style="font-size:16px">${S.user.name?esc(S.user.name):'Maeen'}</b><div class="muted" style="font-size:12.5px">${t('tagline')}</div></div>
    <div class="card">
      ${mLi('💊',ar?'علاجي وحميتي':'My treatment & diet','go(\'treatment\')')}
+     ${mLi('💉',ar?'الجرعات والتذكيرات':'Doses & reminders','go(\'regimen\')')}
+     ${mLi('🔔',ar?'التذكيرات':'Reminders','go(\'reminders\')')}
      ${mLi('🫁',ar?'حالات تحسّسية مرافقة':'Allergic conditions','go(\'atopy\')')}
      ${mLi('📤',t('share'),'doShare()')}
    </div>
@@ -455,6 +459,7 @@ route('treatment',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:tr
    <div class="card">${MEDS.map(m=>`<div class="li"><div class="ic">💊</div><div class="tx"><b>${L(m.n)}</b><small>${L(m.note)}</small></div><button class="chip ${S.meds.includes(m.id)?'on':''}" onclick="toggleMed('${m.id}')">${S.meds.includes(m.id)?(ar?'مفعّل':'On'):(ar?'إضافة':'Add')}</button></div>`).join('')}</div>
    <div class="section-title">${ar?'حميتي العلاجية':'My diet therapy'}</div>
    <div class="card"><div class="chips">${DIETS.map((d,i)=>`<button class="chip ${S.diet===String(i)?'on':''}" onclick="setDiet(${i})">${L(d)}</button>`).join('')}</div></div>
+   <button class="btn btn-primary" onclick="go('regimen')">💉 ${ar?'الجرعات والتذكيرات':'Doses & reminders'}</button>
    <div class="disc-note">${ar?'سجّل ما وصفه طبيبك فقط. لا تبدأ أو توقف علاجًا دون استشارته.':'Record only what your doctor prescribed. Do not start or stop any treatment without them.'}</div>
   </div>`;});
 window.toggleMed=(id)=>{const i=S.meds.indexOf(id);if(i<0)S.meds.push(id);else S.meds.splice(i,1);save();render();};
@@ -490,9 +495,55 @@ window.doExport=()=>{const blob=new Blob([JSON.stringify(S,null,2)],{type:'appli
 window.confirmDelete=()=>{openSheet(`<div style="text-align:center;font-size:40px">⚠️</div><h2 style="text-align:center;font-size:18px">${t('del')}</h2><p class="muted center" style="font-size:13px">${isAr()?'سيُحذف كل ما سجّلته على هذا الجهاز. لا يمكن التراجع.':'This permanently clears everything you logged on this device.'}</p><button class="btn btn-danger" onclick="reallyDelete()">${isAr()?'حذف نهائي':'Delete everything'}</button><button class="btn btn-ghost" style="margin-top:10px" onclick="closeSheet()">${t('cancel')}</button>`);};
 window.reallyDelete=()=>{const lang=S.lang,theme=S.prefs.theme;S=blank();S.lang=lang;S.onboarded=true;S.prefs.theme=theme;save();closeSheet();toast(isAr()?'تم الحذف':'Deleted');navTab('today');};
 
+/* ============================================================ MEDICATION DOSES + REMINDERS ============================================================ */
+route('regimen',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'أدويتي والجرعات':'My medications & doses'})}<div class="content">
+   <div class="disc-note">${ar?'أدخل ما وصفه لك طبيبك تمامًا. معين لا يقترح جرعات ولا يغيّرها — إنه سجل وتذكير فقط.':'Enter exactly what your doctor prescribed. Maeen does not suggest or change doses — it is only a record and reminder.'}</div>
+   <button class="btn btn-primary" onclick="openRegimen()">＋ ${ar?'إضافة دواء':'Add a medication'}</button>
+   ${S.regimen.length?`<div class="card">${S.regimen.map(r=>`<div class="li"><div class="ic">💊</div><div class="tx"><b>${esc(r.name)}</b><small>${esc(r.dose||'')}${r.dose&&(r.freq||r.time)?' · ':''}${r.freq==='weekly'?(ar?'أسبوعيًا':'weekly'):r.freq==='daily'?(ar?'يوميًا':'daily'):''}${r.time?' · '+r.time:''}${r.remind?' · 🔔':''}</small></div><button class="chip" onclick="delRegimen('${r.id}')">${ar?'إزالة':'Remove'}</button></div>`).join('')}</div>`:`<div class="card center" style="padding:26px"><p class="muted">${ar?'لا أدوية بعد.':'No medications yet.'}</p></div>`}
+  </div>`;});
+window.openRegimen=()=>{const ar=isAr();openSheet(`<h2 style="margin:4px 0 12px">💊 ${ar?'إضافة دواء':'Add a medication'}</h2>
+  <div class="field"><label>${ar?'الدواء':'Medication'}</label><div class="chips" id="rg_med">${MEDS.map(m=>`<button class="chip" data-v="${m.id}" data-nm="${esc(L(m.n))}" onclick="pick('rg_med',this);document.getElementById('rg_name').value=this.getAttribute('data-nm')">${L(m.n)}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'الاسم (أو اكتب دواءً آخر)':'Name (or type another)'}</label><input class="input" id="rg_name" placeholder="${ar?'مثال: بوديزونيد':'e.g. Budesonide'}"></div>
+  <div class="field"><label>${ar?'الجرعة كما وصفها طبيبك':'Dose as prescribed by your doctor'}</label><input class="input" id="rg_dose" placeholder="${ar?'مثال: ١ ملغ':'e.g. 1 mg'}"></div>
+  <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:11px"><div class="field"><label>${ar?'التكرار':'Frequency'}</label><div class="chips" id="rg_freq">${[['daily',ar?'يومي':'Daily'],['weekly',ar?'أسبوعي':'Weekly']].map(([v,l])=>`<button class="chip" data-v="${v}" onclick="pick('rg_freq',this)">${l}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'الوقت':'Time'}</label><input class="input" id="rg_time" type="time" value="09:00"></div></div>
+  <div class="disc-note" style="margin:4px 0 12px">${ar?'تذكير: بعد الستيرويد المبلوع، تجنّب الأكل/الشرب نحو ٣٠ دقيقة واشطف فمك.':'Reminder: after swallowed steroids, avoid food/drink for ~30 min and rinse your mouth.'}</div>
+  <div class="li" style="border:none;padding:4px 2px"><div class="tx"><b>🔔 ${ar?'ذكّرني':'Remind me'}</b></div><button class="chip on" id="rg_rem" onclick="this.classList.toggle('on')">${ar?'مفعّل':'On'}</button></div>
+  <button class="btn btn-primary" style="margin-top:10px" onclick="saveRegimen()">${t('save')}</button>`);};
+window.saveRegimen=()=>{const ar=isAr();const name=($('#rg_name').value||'').trim();if(!name)return toast(ar?'أدخل اسم الدواء':'Enter a medication name');const freq=$('#rg_freq').dataset.val||'daily';const time=$('#rg_time').value||'09:00';const remind=$('#rg_rem').classList.contains('on');const r={id:rid(),name,dose:($('#rg_dose').value||'').trim(),freq,time,remind};S.regimen.push(r);
+  if(remind)S.reminders.push({id:'rm_'+r.id,kind:'med',label:(ar?'دواء: ':'Medication: ')+name+(r.dose?' ('+r.dose+')':''),time,days:'daily',enabled:true});
+  save();closeSheet();toast(t('saved'));render();};
+window.delRegimen=(id)=>{S.regimen=S.regimen.filter(r=>r.id!==id);S.reminders=S.reminders.filter(x=>x.id!=='rm_'+id);save();render();};
+
+const RKINDS=[['med','💊',['Medication','دواء']],['appt','🗓️',['Appointment','موعد']],['checkin','📝',['Daily check-in','تسجيل اليوم']],['diet','🥗',['Diet / meal','حمية / وجبة']]];
+route('reminders',(n)=>{const ar=isAr();const perm=(typeof Notification!=='undefined')?Notification.permission:'unsupported';
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'التذكيرات':'Reminders'})}<div class="content">
+   ${perm==='granted'?`<div class="disc-note">${ar?'الإشعارات مفعّلة ✓ — ستصلك التنبيهات أثناء فتح معين.':'Notifications enabled ✓ — you\'ll get alerts while Maeen is open.'}</div>`:perm==='unsupported'?'':`<button class="btn btn-ghost" onclick="askNotif()">🔔 ${ar?'تفعيل الإشعارات':'Enable notifications'}</button>`}
+   <button class="btn btn-primary" onclick="openReminder()">＋ ${ar?'تذكير جديد':'New reminder'}</button>
+   ${S.reminders.length?`<div class="card">${S.reminders.map(r=>{const k=RKINDS.find(x=>x[0]===r.kind)||['','🔔',['','']];return `<div class="li"><div class="ic">${k[1]}</div><div class="tx"><b>${esc(r.label)}</b><small>${r.time} · ${r.days==='daily'?(ar?'كل يوم':'Every day'):r.days}</small></div><button class="chip ${r.enabled?'on':''}" onclick="toggleReminder('${r.id}')">${r.enabled?(ar?'مفعّل':'On'):(ar?'موقف':'Off')}</button><button class="iconbtn" style="margin-inline-start:6px;min-width:34px;height:34px;font-size:14px" onclick="icsReminder('${r.id}')">📅</button><button class="iconbtn" style="margin-inline-start:6px;min-width:34px;height:34px;font-size:14px" onclick="delReminder('${r.id}')">✕</button></div>`;}).join('')}</div>`:`<div class="card center" style="padding:26px">${emptyArt()}<p class="muted">${ar?'لا تذكيرات بعد.':'No reminders yet.'}</p></div>`}
+   <div class="disc-note">${ar?'تعمل التذكيرات داخل التطبيق أثناء فتحه. للتنبيه الموثوق على هاتفك، اضغط 📅 لإضافة التذكير لتقويمك.':'In-app reminders fire while Maeen is open. For a reliable phone alert, tap 📅 to add the reminder to your calendar.'}</div>
+  </div>`;});
+window.askNotif=()=>{if(typeof Notification==='undefined')return;Notification.requestPermission().then(()=>{startReminderTick();render();});};
+window.openReminder=()=>{const ar=isAr();openSheet(`<h2 style="margin:4px 0 12px">🔔 ${ar?'تذكير جديد':'New reminder'}</h2>
+  <div class="field"><label>${ar?'النوع':'Type'}</label><div class="chips" id="rm_kind">${RKINDS.map(k=>`<button class="chip" data-v="${k[0]}" data-lb="${esc(L(k[2]))}" onclick="pick('rm_kind',this);document.getElementById('rm_lb').value=this.getAttribute('data-lb')">${k[1]} ${L(k[2])}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'النص':'Label'}</label><input class="input" id="rm_lb" placeholder="${ar?'مثال: تسجيل أعراض المساء':'e.g. Evening symptom check'}"></div>
+  <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:11px"><div class="field"><label>${ar?'الوقت':'Time'}</label><input class="input" id="rm_time" type="time" value="20:00"></div>
+  <div class="field"><label>${ar?'التكرار':'Repeat'}</label><div class="chips" id="rm_days">${[['daily',ar?'كل يوم':'Every day'],['weekdays',ar?'أيام العمل':'Weekdays']].map(([v,l])=>`<button class="chip ${v==='daily'?'on':''}" data-v="${v}" onclick="pick('rm_days',this)">${l}</button>`).join('')}</div></div></div>
+  <button class="btn btn-primary" onclick="saveReminder()">${t('save')}</button>`);$('#rm_days').dataset.val='daily';};
+window.saveReminder=()=>{const ar=isAr();const kind=$('#rm_kind').dataset.val||'med';const label=($('#rm_lb').value||'').trim()||(RKINDS.find(k=>k[0]===kind)?L(RKINDS.find(k=>k[0]===kind)[2]):'Reminder');const time=$('#rm_time').value||'20:00';const days=$('#rm_days').dataset.val||'daily';S.reminders.push({id:rid(),kind,label,time,days,enabled:true});save();closeSheet();if(typeof Notification!=='undefined'&&Notification.permission==='default')askNotif();else startReminderTick();toast(t('saved'));render();};
+window.toggleReminder=(id)=>{const r=S.reminders.find(x=>x.id===id);if(r){r.enabled=!r.enabled;save();render();}};
+window.delReminder=(id)=>{S.reminders=S.reminders.filter(x=>x.id!==id);save();render();};
+window.icsReminder=(id)=>{const r=S.reminders.find(x=>x.id===id);if(!r)return;const [hh,mm]=r.time.split(':');const dt=new Date();dt.setHours(+hh,+mm,0,0);if(dt<new Date())dt.setDate(dt.getDate()+1);const pad=x=>String(x).padStart(2,'0');const stamp=d=>d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+'00Z';const rule=r.days==='weekdays'?'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR':'FREQ=DAILY';
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Maeen//EN','BEGIN:VEVENT','UID:'+r.id+'@maeen','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(dt),'RRULE:'+rule,'SUMMARY:Maeen — '+r.label,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:'+r.label,'END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const blob=new Blob([ics],{type:'text/calendar'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='maeen-reminder.ics';a.click();toast(isAr()?'أُضيف للتقويم':'Added to calendar');};
+let _rtick=null,_fired={};
+function startReminderTick(){if(_rtick||typeof Notification==='undefined')return;_rtick=setInterval(()=>{if(Notification.permission!=='granted')return;const now=new Date();const hm=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');const dow=now.getDay();const key=todayKey()+hm;
+   S.reminders.forEach(r=>{if(!r.enabled||r.time!==hm)return;if(r.days==='weekdays'&&(dow===5||dow===6))return;if(_fired[r.id]===key)return;_fired[r.id]=key;try{new Notification('Maeen · معين',{body:r.label,icon:'maeen-192.png'});}catch(e){}});},30000);}
+
 /* ---------- boot ---------- */
 window.navTab=navTab;window.go=go;window.goBack=goBack;window.closeSheet=closeSheet;
 applyDir();
+if(typeof Notification!=='undefined'&&Notification.permission==='granted')startReminderTick();
 go('splash',{replace:true});
 </script>
 </body>
