@@ -172,7 +172,11 @@ const I18N={
   export:{en:'Export my data',ar:'تصدير بياناتي'},del:{en:'Delete my data',ar:'حذف بياناتي'},
   theme:{en:'Theme',ar:'المظهر'},language:{en:'Language',ar:'اللغة'},about:{en:'About & disclaimer',ar:'حول وإخلاء المسؤولية'},share:{en:'Share with my doctor',ar:'مشاركة مع طبيبي'},
   back:{en:'Back',ar:'رجوع'},myPlan:{en:'My pathway',ar:'مساري'},
-  bmi:{en:'BMI',ar:'مؤشر الكتلة'},tbwl:{en:'Total weight loss',ar:'نقص الوزن الكلي'},ewl:{en:'Excess weight loss',ar:'نقص الوزن الزائد'},waist:{en:'Waist',ar:'الخصر'},goal:{en:'Goal progress',ar:'التقدّم نحو الهدف'}
+  bmi:{en:'BMI',ar:'مؤشر الكتلة'},tbwl:{en:'Total weight loss',ar:'نقص الوزن الكلي'},ewl:{en:'Excess weight loss',ar:'نقص الوزن الزائد'},waist:{en:'Waist',ar:'الخصر'},goal:{en:'Goal progress',ar:'التقدّم نحو الهدف'},
+  toolsT:{en:'Tools',ar:'الأدوات'},toolsSub:{en:'Calculators, medications & reminders',ar:'حاسبات وأدوية وتذكيرات'},
+  age:{en:'Age (years)',ar:'العمر (سنوات)'},activity:{en:'Activity level',ar:'مستوى النشاط'},
+  actSed:{en:'Sedentary',ar:'خامل'},actLight:{en:'Lightly active',ar:'نشاط خفيف'},actMod:{en:'Moderately active',ar:'نشاط متوسط'},actHigh:{en:'Very active',ar:'نشاط عالٍ'},actAth:{en:'Athlete',ar:'رياضي'},
+  calc:{en:'Calculate',ar:'احسب'},add:{en:'Add',ar:'إضافة'},remove:{en:'Remove',ar:'إزالة'},done:{en:'Done',ar:'تم'},time:{en:'Time',ar:'الوقت'},everyDay:{en:'Every day',ar:'كل يوم'}
 };
 function isAr(){return S.lang==='ar';}
 function t(k){const e=I18N[k];return e?(isAr()?e.ar:e.en):k;}
@@ -289,13 +293,15 @@ const CATS={all:['All','الكل'],basics:['Basics','الأساسيات'],diet:[
 /* ---------- state ---------- */
 function blank(){return{
   lang:null, onboarded:false,
-  user:{name:'',sex:'',heightCm:null,startWeight:null,targetWeight:null,pathway:''},
-  prefs:{theme:'dark'},
+  user:{name:'',sex:'',age:null,activity:'',heightCm:null,startWeight:null,targetWeight:null,pathway:''},
+  prefs:{theme:'dark',pace:0.5},
   logs:[],                 // {id,type,t,...} meal/activity/med/symptom
   weights:[],              // {date, kg}
   waists:[],               // {date, cm}
   labs:[],                 // {date, key, val}
   meds:[],                 // ids of AOM meds currently on
+  regimen:[],              // {id,name,dose,freq,time,day,remind}  patient-entered
+  reminders:[],            // {id,kind,label,time,days,enabled}
   procedure:{type:'',date:'',phase:''}, // endoscopic/surgical journey
   vits:{},                 // {date: [ids taken]}
   seenDays:[]
@@ -367,7 +373,11 @@ window.toggleLangQuick=()=>{S.lang=isAr()?'en':'ar';save();render();};
 route('profile',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{rawTitle:t('profileT')})}<div class="content">
   <div class="disc-note">${t('profileSub')}</div>
   <div class="field"><label>${t('yourName')}</label><input class="input" id="nm" placeholder="${t('namePh')}" value="${esc(S.user.name)}"></div>
-  <div class="field"><label>${t('sex')}</label><div class="chips" id="sx">${[['male',t('male')],['female',t('female')]].map(([v,l])=>`<button class="chip ${S.user.sex===v?'on':''}" data-v="${v}" onclick="pick('sx',this)">${l}</button>`).join('')}</div></div>
+  <div class="grid2">
+   <div class="field"><label>${t('sex')}</label><div class="chips" id="sx">${[['male',t('male')],['female',t('female')]].map(([v,l])=>`<button class="chip ${S.user.sex===v?'on':''}" data-v="${v}" onclick="pick('sx',this)">${l}</button>`).join('')}</div></div>
+   <div class="field"><label>${t('age')}</label><input class="input" id="ag" inputmode="numeric" placeholder="40" value="${S.user.age||''}"></div>
+  </div>
+  <div class="field"><label>${t('activity')}</label><div class="chips" id="ac">${[['sed','actSed'],['light','actLight'],['mod','actMod'],['high','actHigh'],['ath','actAth']].map(([v,l])=>`<button class="chip ${S.user.activity===v?'on':''}" data-v="${v}" onclick="pick('ac',this)">${t(l)}</button>`).join('')}</div></div>
   <div class="grid2">
    <div class="field"><label>${t('height')}</label><input class="input" id="ht" inputmode="numeric" placeholder="170" value="${S.user.heightCm||''}"></div>
    <div class="field"><label>${t('curWeight')}</label><input class="input" id="cw" inputmode="decimal" placeholder="95" value="${latestWeight()||''}"></div>
@@ -379,8 +389,8 @@ route('profile',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{rawTitle:
   <div class="field"><label>${t('yourPathway')}</label><div class="chips" id="pw">${PATHWAYS.map(p=>`<button class="chip ${S.user.pathway===p.id?'on':''}" data-v="${p.id}" onclick="pick('pw',this)">${p.icon} ${L(p.n)}</button>`).join('')}</div></div>
   <button class="btn btn-primary" onclick="finishOnboard()">${t('continue')}</button>
  </div>`;
-  if(S.user.sex)$('#sx').dataset.val=S.user.sex;if(S.user.pathway)$('#pw').dataset.val=S.user.pathway;});
-window.finishOnboard=()=>{const g=id=>{const e=$('#'+id);return e?e.value.trim():'';};S.user.name=g('nm');const sx=$('#sx');if(sx&&sx.dataset.val)S.user.sex=sx.dataset.val;const h=parseFloat(g('ht'));if(!isNaN(h))S.user.heightCm=h;const cw=parseFloat(g('cw'));const sw=parseFloat(g('sw'));if(!isNaN(sw))S.user.startWeight=sw;else if(!isNaN(cw))S.user.startWeight=cw;if(!isNaN(cw)){S.weights=[{date:todayKey(),kg:cw}];}const tw=parseFloat(g('tw'));if(!isNaN(tw))S.user.targetWeight=tw;const pw=$('#pw');if(pw&&pw.dataset.val){S.user.pathway=pw.dataset.val;if(pw.dataset.val==='endoscopic'||pw.dataset.val==='surgery')S.procedure.type=pw.dataset.val;}S.onboarded=true;save();navTab('today');};
+  if(S.user.sex)$('#sx').dataset.val=S.user.sex;if(S.user.pathway)$('#pw').dataset.val=S.user.pathway;if(S.user.activity)$('#ac').dataset.val=S.user.activity;});
+window.finishOnboard=()=>{const g=id=>{const e=$('#'+id);return e?e.value.trim():'';};S.user.name=g('nm');const sx=$('#sx');if(sx&&sx.dataset.val)S.user.sex=sx.dataset.val;const ac=$('#ac');if(ac&&ac.dataset.val)S.user.activity=ac.dataset.val;const ag=parseInt(g('ag'),10);if(!isNaN(ag))S.user.age=ag;const h=parseFloat(g('ht'));if(!isNaN(h))S.user.heightCm=h;const cw=parseFloat(g('cw'));const sw=parseFloat(g('sw'));if(!isNaN(sw))S.user.startWeight=sw;else if(!isNaN(cw))S.user.startWeight=cw;if(!isNaN(cw)){S.weights=[{date:todayKey(),kg:cw}];}const tw=parseFloat(g('tw'));if(!isNaN(tw))S.user.targetWeight=tw;const pw=$('#pw');if(pw&&pw.dataset.val){S.user.pathway=pw.dataset.val;if(pw.dataset.val==='endoscopic'||pw.dataset.val==='surgery')S.procedure.type=pw.dataset.val;}S.onboarded=true;save();navTab('today');};
 
 function greeting(){const h=new Date().getHours();return h<12?t('goodMorning'):h<18?t('goodAfternoon'):t('goodEvening');}
 route('today',(n)=>{markDay();const ar=isAr();const st=streak();const recentLogs=allEvents().slice(0,5);const b=bmiVal();const bc=bmiCat(b);const gp=goalPct();const wv=S.weights.slice(-12).map(w=>w.kg);const my=pathwayById(S.user.pathway);
@@ -393,6 +403,10 @@ route('today',(n)=>{markDay();const ar=isAr();const st=streak();const recentLogs
    </div>
    ${gp!=null?`<div class="card"><div class="between"><div><b style="font-size:15px">${t('goal')}</b><div class="muted" style="font-size:12.5px;margin-top:3px">${ar?'من '+S.user.startWeight+' نحو '+S.user.targetWeight+' كجم':'from '+S.user.startWeight+' toward '+S.user.targetWeight+' kg'}</div></div><div style="width:96px;text-align:center">${ring(gp,'var(--accent)',Math.round(gp)+'%','')}</div></div></div>`:''}
    ${my?`<div class="pathcard tap" onclick="openPathway('${my.id}')" style="background:linear-gradient(140deg,var(--accent-d),transparent)"><div class="between"><div><small style="color:var(--accent);font-weight:700">${t('myPlan')}</small><b style="margin-top:2px">${my.icon} ${L(my.n)}</b><small>${L(my.d)}</small></div><div class="chev" style="align-self:center">${ar?'‹':'›'}</div></div></div>`:''}
+   <div class="grid2">
+     <div class="pathcard" onclick="go('tools')" style="background:linear-gradient(150deg,#0EA5E922,transparent)"><div class="pi">🧰</div><b>${t('toolsT')}</b><small>${ar?'حاسبات وأدوية':'Calculators & meds'}</small></div>
+     <div class="pathcard" onclick="go('reminders')" style="background:linear-gradient(150deg,#10B98122,transparent)"><div class="pi">🔔</div><b>${ar?'التذكيرات':'Reminders'}</b><small>${ar?'لا تفوّت جرعة':'Never miss a dose'}</small></div>
+   </div>
    <div class="section-title">${t('quickLog')}</div>
    <div class="chips" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
      ${quickBtns()}
@@ -541,6 +555,8 @@ window.toggleVit=(id)=>{const k=todayKey();const arr=S.vits[k]||[];const i=arr.i
 route('more',(n)=>{const ar=isAr();n.innerHTML=`${topbar('moreT')}<div class="content">
    <div class="card" style="text-align:center;padding:22px"><div class="logo-mark" style="width:64px;height:64px;font-size:30px;margin:0 auto 10px">ق</div><b style="font-size:16px">${S.user.name?esc(S.user.name):'Qawam'}</b><div class="muted" style="font-size:12.5px">${t('tagline')}</div></div>
    <div class="card">
+     ${mLi('🧰',t('toolsT'),'go(\'tools\')')}
+     ${mLi('🔔',ar?'التذكيرات':'Reminders','go(\'reminders\')')}
      ${mLi('🧭',t('pathwaysT'),'go(\'pathways\')')}
      ${mLi('💊',ar?'علاجي':'My treatment','go(\'treatment\')')}
      ${mLi('🧪',ar?'تحاليل المتابعة':'Follow-up labs','go(\'labs\')')}
@@ -567,6 +583,7 @@ window.toggleTheme=()=>{S.prefs.theme=S.prefs.theme==='light'?'dark':'light';sav
 route('treatment',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'علاجي':'My treatment'})}<div class="content">
    <div class="section-title">${ar?'أدوية إنقاص الوزن':'Weight-loss medications'}</div>
    <div class="card">${MEDS.map(m=>`<div class="li"><div class="ic">💊</div><div class="tx"><b>${L(m.n)}</b><small>${L(m.note)}</small></div><button class="chip ${S.meds.includes(m.id)?'on':''}" onclick="toggleMed('${m.id}')">${S.meds.includes(m.id)?(ar?'مفعّل':'On'):(ar?'إضافة':'Add')}</button></div>`).join('')}</div>
+   <button class="btn btn-primary" onclick="go('regimen')">💊 ${ar?'الجرعات والتذكيرات':'Doses & reminders'}</button>
    <div class="disc-note">${ar?'سجّل ما وصفه طبيبك فقط. لا تبدأ أو توقف أو تغيّر جرعة دون استشارته. هذا التطبيق لا يقدّم جرعات.':'Record only what your doctor prescribed. Do not start, stop or change a dose without them. This app does not give doses.'}</div>
    ${(S.user.pathway==='endoscopic'||S.user.pathway==='surgery')?`<button class="btn btn-ghost" onclick="go('journey')">🍽️ ${ar?'رحلة الغذاء والفيتامينات':'Diet phases & vitamins'}</button>`:''}
   </div>`;});
@@ -599,9 +616,129 @@ window.doExport=()=>{const blob=new Blob([JSON.stringify(S,null,2)],{type:'appli
 window.confirmDelete=()=>{openSheet(`<div style="text-align:center;font-size:40px">⚠️</div><h2 style="text-align:center;font-size:18px">${t('del')}</h2><p class="muted center" style="font-size:13px">${isAr()?'سيُحذف كل ما سجّلته على هذا الجهاز. لا يمكن التراجع.':'This permanently clears everything you logged on this device.'}</p><button class="btn btn-danger" onclick="reallyDelete()">${isAr()?'حذف نهائي':'Delete everything'}</button><button class="btn btn-ghost" style="margin-top:10px" onclick="closeSheet()">${t('cancel')}</button>`);};
 window.reallyDelete=()=>{const lang=S.lang,theme=S.prefs.theme;S=blank();S.lang=lang;S.onboarded=true;S.prefs.theme=theme;save();closeSheet();toast(isAr()?'تم الحذف':'Deleted');navTab('today');};
 
+/* ============================================================ TOOLS ============================================================ */
+const ACTF={sed:1.2,light:1.375,mod:1.55,high:1.725,ath:1.9};
+function bmr(kg,cm,age,sex){if(!kg||!cm||!age)return null;const base=10*kg+6.25*cm-5*age;return sex==='male'?base+5:sex==='female'?base-161:base-78;}
+function fmt(n){return n==null?'—':Math.round(n).toLocaleString(isAr()?'ar-SA':'en-US');}
+
+route('tools',(n)=>{const ar=isAr();const tools=[
+   ['calorie','🔥',['Energy & calories','الطاقة والسعرات'],['Estimate your daily energy use','قدّر استهلاكك اليومي للطاقة']],
+   ['healthyw','⚖️',['Healthy weight range','نطاق الوزن الصحي'],['For your height','حسب طولك']],
+   ['w2h','📐',['Waist-to-height ratio','نسبة الخصر للطول'],['A simple risk indicator','مؤشر خطر بسيط']],
+   ['projector','🎯',['Goal projector','متوقّع الهدف'],['A realistic timeline','جدول زمني واقعي']],
+   ['targets','🥩',['Protein & fluid targets','أهداف البروتين والسوائل'],['General daily reference','مرجع يومي عام']],
+   ['plate','🍽️',['The balanced plate','الطبق المتوازن'],['A simple portion guide','دليل حصص بسيط']]
+ ];
+  n.innerHTML=`${topbar('toolsT','toolsSub',{back:true})}<div class="content">
+   <div class="card tap" onclick="go('regimen')" style="background:linear-gradient(140deg,var(--accent-d),transparent)"><div class="between"><div><b style="font-size:15px">💊 ${ar?'أدويتي والجرعات':'My medications & doses'}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${ar?'سجّل ما وصفه طبيبك واضبط تذكيرًا':'Record what your doctor prescribed & set a reminder'}</div></div><div class="chev" style="align-self:center">${ar?'‹':'›'}</div></div></div>
+   <div class="card tap" onclick="go('reminders')"><div class="between"><div><b style="font-size:15px">🔔 ${ar?'التذكيرات':'Reminders'}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${ar?'وزن، دواء، نشاط، ماء، فيتامينات':'Weigh-in, medication, activity, water, vitamins'}</div></div><div class="chev" style="align-self:center">${ar?'‹':'›'}</div></div></div>
+   <div class="section-title">${ar?'الحاسبات':'Calculators'}</div>
+   <div class="grid2">${tools.map(([id,ic,nm,d])=>`<div class="pathcard" onclick="openTool('${id}')"><div class="pi">${ic}</div><b>${L(nm)}</b><small>${L(d)}</small></div>`).join('')}</div>
+   <div class="disc-note">${ar?'الحاسبات تقديرية للتثقيف فقط — ليست وصفة سعرات أو خطة علاجية. لخطة مخصّصة راجع أخصائي التغذية أو طبيبك.':'Calculators are estimates for education only — not a calorie prescription or a treatment plan. For a personalised plan see a dietitian or your doctor.'}</div>
+  </div>`;});
+window.openTool=function(id){const ar=isAr();
+  if(id==='calorie'){const u=S.user;openSheet(`<h2 style="margin:4px 0 10px">🔥 ${ar?'الطاقة والسعرات':'Energy & calories'}</h2>
+    <div class="grid2"><div class="field"><label>${t('sex')}</label><div class="chips" id="c_sx">${[['male',t('male')],['female',t('female')]].map(([v,l])=>`<button class="chip ${u.sex===v?'on':''}" data-v="${v}" onclick="pick('c_sx',this)">${l}</button>`).join('')}</div></div>
+    <div class="field"><label>${t('age')}</label><input class="input" id="c_ag" inputmode="numeric" value="${u.age||''}" placeholder="40"></div></div>
+    <div class="grid2"><div class="field"><label>${t('height')}</label><input class="input" id="c_ht" inputmode="numeric" value="${u.heightCm||''}" placeholder="170"></div>
+    <div class="field"><label>${ar?'الوزن (كجم)':'Weight (kg)'}</label><input class="input" id="c_wt" inputmode="decimal" value="${latestWeight()||''}" placeholder="90"></div></div>
+    <div class="field"><label>${t('activity')}</label><div class="chips" id="c_ac">${[['sed','actSed'],['light','actLight'],['mod','actMod'],['high','actHigh'],['ath','actAth']].map(([v,l])=>`<button class="chip ${u.activity===v?'on':''}" data-v="${v}" onclick="pick('c_ac',this)">${t(l)}</button>`).join('')}</div></div>
+    <button class="btn btn-primary" onclick="calcCalorie()">${t('calc')}</button>
+    <div id="c_out" style="margin-top:14px"></div>`);if(u.sex)$('#c_sx').dataset.val=u.sex;if(u.activity)$('#c_ac').dataset.val=u.activity;}
+  else if(id==='healthyw'){openSheet(`<h2 style="margin:4px 0 10px">⚖️ ${ar?'نطاق الوزن الصحي':'Healthy weight range'}</h2>
+    <div class="field"><label>${t('height')}</label><input class="input" id="h_ht" inputmode="numeric" value="${S.user.heightCm||''}" placeholder="170"></div>
+    <button class="btn btn-primary" onclick="calcHealthy()">${t('calc')}</button><div id="h_out" style="margin-top:14px"></div>`);}
+  else if(id==='w2h'){const wa=S.waists.length?S.waists[S.waists.length-1].cm:'';openSheet(`<h2 style="margin:4px 0 10px">📐 ${ar?'نسبة الخصر للطول':'Waist-to-height ratio'}</h2>
+    <div class="grid2"><div class="field"><label>${ar?'الخصر (سم)':'Waist (cm)'}</label><input class="input" id="r_wc" inputmode="decimal" value="${wa}" placeholder="94"></div>
+    <div class="field"><label>${t('height')}</label><input class="input" id="r_ht" inputmode="numeric" value="${S.user.heightCm||''}" placeholder="170"></div></div>
+    <button class="btn btn-primary" onclick="calcW2H()">${t('calc')}</button><div id="r_out" style="margin-top:14px"></div>`);}
+  else if(id==='projector'){const cur=latestWeight()||'';openSheet(`<h2 style="margin:4px 0 10px">🎯 ${ar?'متوقّع الهدف':'Goal projector'}</h2>
+    <div class="grid2"><div class="field"><label>${ar?'الوزن الحالي (كجم)':'Current weight (kg)'}</label><input class="input" id="p_cur" inputmode="decimal" value="${cur}" placeholder="95"></div>
+    <div class="field"><label>${t('targetWeight')}</label><input class="input" id="p_tgt" inputmode="decimal" value="${S.user.targetWeight||''}" placeholder="80"></div></div>
+    <div class="field"><label>${ar?'الوتيرة':'Pace'}</label><div class="chips" id="p_pace">${[[0.25,ar?'٠٫٢٥ كجم/أسبوع':'0.25 kg/wk'],[0.5,ar?'٠٫٥ كجم/أسبوع':'0.5 kg/wk'],[0.75,ar?'٠٫٧٥ كجم/أسبوع':'0.75 kg/wk']].map(([v,l])=>`<button class="chip ${S.prefs.pace===v?'on':''}" data-v="${v}" onclick="pick('p_pace',this)">${l}</button>`).join('')}</div></div>
+    <button class="btn btn-primary" onclick="calcProjector()">${t('calc')}</button><div id="p_out" style="margin-top:14px"></div>`);$('#p_pace').dataset.val=S.prefs.pace;}
+  else if(id==='targets'){const cur=latestWeight()||'';openSheet(`<h2 style="margin:4px 0 10px">🥩 ${ar?'أهداف البروتين والسوائل':'Protein & fluid targets'}</h2>
+    <div class="field"><label>${ar?'الوزن (كجم)':'Weight (kg)'}</label><input class="input" id="tg_wt" inputmode="decimal" value="${cur}" placeholder="90"></div>
+    <button class="btn btn-primary" onclick="calcTargets()">${t('calc')}</button><div id="tg_out" style="margin-top:14px"></div>`);}
+  else if(id==='plate'){openSheet(`<h2 style="margin:4px 0 12px">🍽️ ${ar?'الطبق المتوازن':'The balanced plate'}</h2>
+    <div class="card" style="background:var(--card2)"><div style="display:flex;gap:10px;margin-bottom:12px"><div style="flex:2;background:var(--accent);border-radius:10px;padding:14px 8px;text-align:center;color:#fff;font-weight:700;font-size:12.5px">½ ${ar?'خضار':'Vegetables'}</div><div style="flex:1;display:flex;flex-direction:column;gap:10px"><div style="background:var(--accent2);border-radius:10px;padding:8px;text-align:center;color:#fff;font-weight:700;font-size:12.5px">¼ ${ar?'بروتين':'Protein'}</div><div style="background:var(--amber,#F59E0B);border-radius:10px;padding:8px;text-align:center;color:#fff;font-weight:700;font-size:12.5px">¼ ${ar?'حبوب':'Grains'}</div></div></div>
+    <p class="muted" style="font-size:13px;line-height:1.7;margin:0">${ar?'اجعل نصف الطبق خضارًا، وربعه بروتينًا خالي الدهن، وربعه حبوبًا كاملة. أضِف قليلًا من الدهون الصحية، واختر الماء شرابًا.':'Fill half your plate with vegetables, a quarter with lean protein, and a quarter with whole grains. Add a little healthy fat, and make water your drink.'}</p></div>
+    <div class="disc-note">${ar?'دليل عام للحصص — عدّله مع فريقك، خاصة بعد الإجراءات حيث يأتي البروتين أولًا.':'A general portion guide — adapt it with your team, especially after procedures where protein comes first.'}</div>`);}
+};
+window.calcCalorie=()=>{const sx=$('#c_sx').dataset.val||S.user.sex;const age=parseInt($('#c_ag').value,10);const ht=parseFloat($('#c_ht').value);const wt=parseFloat($('#c_wt').value);const ac=$('#c_ac').dataset.val||'sed';const ar=isAr();
+  const b=bmr(wt,ht,age,sx);if(b==null)return toast(ar?'أكمل البيانات':'Fill in the details');const tdee=b*(ACTF[ac]||1.2);const floor=sx==='female'?1200:1500;const d1=Math.max(tdee-500,floor),d2=Math.max(tdee-750,floor);
+  $('#c_out').innerHTML=`<div class="grid2"><div class="kpi"><div class="v" style="color:var(--accent2)">${fmt(b)}</div><div class="l">${ar?'الأيض الأساسي (BMR)':'BMR (at rest)'}</div></div><div class="kpi"><div class="v" style="color:var(--accent)">${fmt(tdee)}</div><div class="l">${ar?'الطاقة اليومية (صيانة)':'daily energy (maintenance)'}</div></div></div>
+   <div class="card" style="margin-top:11px"><div class="section-title" style="margin:0 0 8px">${ar?'مثال لعجز لطيف':'Example of a gentle deficit'}</div>
+   <div class="li" style="border:none;padding:6px 2px"><div class="tx"><b>${fmt(d1)} ${ar?'سعرة/يوم':'kcal/day'}</b><small>${ar?'≈ ٠٫٥ كجم/أسبوع':'≈ 0.5 kg/week'}</small></div></div>
+   <div class="li" style="border:none;padding:6px 2px"><div class="tx"><b>${fmt(d2)} ${ar?'سعرة/يوم':'kcal/day'}</b><small>${ar?'≈ ٠٫٧٥ كجم/أسبوع':'≈ 0.75 kg/week'}</small></div></div></div>
+   <div class="disc-note" style="margin-top:10px">${ar?'تقدير تثقيفي فقط، وليس وصفة سعرات. لا تنزل تحت حدّ آمن دون إشراف. لخطة مخصّصة راجع أخصائي التغذية.':'An educational estimate only, not a calorie prescription. Do not go below a safe floor without supervision. For a personalised plan see a dietitian.'}</div>`;};
+window.calcHealthy=()=>{const ht=parseFloat($('#h_ht').value);const ar=isAr();if(!ht)return toast(ar?'أدخل الطول':'Enter height');const m=ht/100;const lo=18.5*m*m,hi=24.9*m*m;const w=latestWeight();let where='';if(w){const b=w/(m*m);where=`<div class="disc-note" style="margin-top:10px">${ar?'وزنك الحالي ':'Your current weight '}<b>${w} kg</b> — ${b<18.5?(ar?'تحت النطاق':'below range'):b<25?(ar?'داخل النطاق ✓':'within range ✓'):(ar?'فوق النطاق بـ '+ (w-hi).toFixed(1)+' كجم':(w-hi).toFixed(1)+' kg above range')}.</div>`;}
+  $('#h_out').innerHTML=`<div class="card center"><div class="section-title" style="margin:0 0 6px">${ar?'نطاق صحي لطولك':'Healthy range for your height'}</div><div style="font-size:26px;font-weight:800;color:var(--accent)">${lo.toFixed(0)}–${hi.toFixed(0)} kg</div><small class="muted">${ar?'يقابل مؤشر كتلة ١٨٫٥–٢٥':'corresponds to BMI 18.5–25'}</small></div>${where}
+   <div class="disc-note" style="margin-top:10px">${ar?'النطاق دليل عام؛ لا يقيس العضلات أو توزيع الدهون.':'A general guide; it does not measure muscle or fat distribution.'}</div>`;};
+window.calcW2H=()=>{const wc=parseFloat($('#r_wc').value);const ht=parseFloat($('#r_ht').value);const ar=isAr();if(!wc||!ht)return toast(ar?'أكمل البيانات':'Fill in both');const r=wc/ht;const band=r<0.5?[ar?'أقل خطرًا':'lower risk','var(--good)']:r<0.6?[ar?'خطر متزايد':'increased risk','var(--warn)']:[ar?'خطر أعلى':'higher risk','var(--bad)'];
+  $('#r_out').innerHTML=`<div class="card center"><div style="font-size:30px;font-weight:800;color:${band[1]}">${r.toFixed(2)}</div><div style="color:${band[1]};font-weight:700;font-size:13px">${band[0]}</div><small class="muted">${ar?'إبقاء الخصر أقل من نصف الطول هدف شائع':'keeping waist under half your height is a common aim'}</small></div>
+   <div class="disc-note" style="margin-top:10px">${ar?'مؤشر وصفي بسيط — ناقشه مع فريقك.':'A simple descriptive indicator — discuss it with your team.'}</div>`;};
+window.calcProjector=()=>{const cur=parseFloat($('#p_cur').value);const tgt=parseFloat($('#p_tgt').value);const pace=parseFloat($('#p_pace').dataset.val||0.5);const ar=isAr();if(!cur||!tgt)return toast(ar?'أكمل البيانات':'Fill in both');S.prefs.pace=pace;save();
+  if(tgt>=cur){$('#p_out').innerHTML=`<div class="disc-note">${ar?'هدفك يساوي وزنك الحالي أو أعلى منه — عدّل الهدف.':'Your goal is at or above your current weight — adjust the target.'}</div>`;return;}
+  const wks=Math.ceil((cur-tgt)/pace);const dt=new Date();dt.setDate(dt.getDate()+wks*7);const dstr=dt.toLocaleDateString(ar?'ar-SA':'en-GB',{month:'long',year:'numeric'});
+  $('#p_out').innerHTML=`<div class="grid2"><div class="kpi"><div class="v" style="color:var(--accent)">${(cur-tgt).toFixed(1)}<span style="font-size:12px"> kg</span></div><div class="l">${ar?'لتفقده':'to lose'}</div></div><div class="kpi"><div class="v">${wks}<span style="font-size:12px"> ${ar?'أسبوع':'wk'}</span></div><div class="l">${ar?'بالوتيرة المختارة':'at chosen pace'}</div></div></div>
+   <div class="card center" style="margin-top:11px"><div class="section-title" style="margin:0 0 4px">${ar?'وصول تقريبي':'Approximate arrival'}</div><b style="font-size:20px;color:var(--accent2)">${dstr}</b></div>
+   <div class="disc-note" style="margin-top:10px">${ar?'تقدير خطّي؛ التقدّم الحقيقي يتذبذب وتحدث فترات ثبات — وهذا طبيعي.':'A straight-line estimate; real progress fluctuates and plateaus happen — that is normal.'}</div>`;};
+window.calcTargets=()=>{const wt=parseFloat($('#tg_wt').value);const ar=isAr();if(!wt)return toast(ar?'أدخل الوزن':'Enter weight');const p1=Math.round(wt*1.0),p2=Math.round(wt*1.5),fl=Math.round(wt*30/1000*10)/10;const surg=S.user.pathway==='surgery'||S.user.pathway==='endoscopic';
+  $('#tg_out').innerHTML=`<div class="card"><div class="li" style="border-bottom:1px solid var(--line)"><div class="ic">🥩</div><div class="tx"><b>${ar?'البروتين':'Protein'}</b><small>${surg?(ar?'شائع بعد جراحة السمنة: ٦٠–٨٠ جم/يوم':'common after bariatric surgery: 60–80 g/day'):(ar?'عام: ~':'general: ~')+' '+p1+'–'+p2+' '+(ar?'جم/يوم':'g/day')}</small></div></div>
+   <div class="li"><div class="ic">💧</div><div class="tx"><b>${ar?'السوائل':'Fluids'}</b><small>${ar?'~':''}${fl} ${ar?'لتر/يوم تقريبًا (≈٣٠ مل/كجم)':'L/day approx (≈30 ml/kg)'}</small></div></div></div>
+   <div class="disc-note" style="margin-top:10px">${ar?'نطاقات مرجعية عامة — احتياجك يعتمد على مسارك وصحتك. أكّدها مع فريقك أو أخصائي التغذية.':'General reference ranges — your needs depend on your pathway and health. Confirm them with your team or dietitian.'}</div>`;};
+
+/* ---- MEDICATION REGIMEN (patient-entered doses) ---- */
+route('regimen',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'أدويتي والجرعات':'My medications & doses'})}<div class="content">
+   <div class="disc-note">${ar?'أدخل ما وصفه لك طبيبك تمامًا. قوام لا يقترح جرعات ولا يغيّرها — إنه مجرد سجل وتذكير.':'Enter exactly what your doctor prescribed. Qawam does not suggest or change doses — it is only a record and reminder.'}</div>
+   <button class="btn btn-primary" onclick="openRegimen()">＋ ${ar?'إضافة دواء':'Add a medication'}</button>
+   ${S.regimen.length?`<div class="card">${S.regimen.map(r=>`<div class="li"><div class="ic">💊</div><div class="tx"><b>${esc(r.name)}</b><small>${esc(r.dose||'')}${r.dose&&(r.freq||r.time)?' · ':''}${r.freq==='weekly'?(ar?'أسبوعيًا':'weekly'):r.freq==='daily'?(ar?'يوميًا':'daily'):''}${r.time?' · '+r.time:''}${r.remind?' · 🔔':''}</small></div><button class="chip" onclick="delRegimen('${r.id}')">${t('remove')}</button></div>`).join('')}</div>`:`<div class="card center" style="padding:26px"><p class="muted">${ar?'لا أدوية بعد.':'No medications yet.'}</p></div>`}
+  </div>`;});
+window.openRegimen=()=>{const ar=isAr();openSheet(`<h2 style="margin:4px 0 12px">💊 ${ar?'إضافة دواء':'Add a medication'}</h2>
+  <div class="field"><label>${ar?'الدواء':'Medication'}</label><div class="chips" id="rg_med">${MEDS.map(m=>`<button class="chip" data-v="${m.id}" data-nm="${esc(L(m.n))}" onclick="pick('rg_med',this);document.getElementById('rg_name').value=this.getAttribute('data-nm')">${L(m.n)}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'الاسم (أو اكتب دواءً آخر)':'Name (or type another)'}</label><input class="input" id="rg_name" placeholder="${ar?'مثال: سيماجلوتيد':'e.g. Semaglutide'}"></div>
+  <div class="field"><label>${ar?'الجرعة كما وصفها طبيبك':'Dose as prescribed by your doctor'}</label><input class="input" id="rg_dose" placeholder="${ar?'مثال: ١ ملغ':'e.g. 1 mg'}"></div>
+  <div class="grid2"><div class="field"><label>${ar?'التكرار':'Frequency'}</label><div class="chips" id="rg_freq">${[['daily',ar?'يومي':'Daily'],['weekly',ar?'أسبوعي':'Weekly']].map(([v,l])=>`<button class="chip" data-v="${v}" onclick="pick('rg_freq',this)">${l}</button>`).join('')}</div></div>
+  <div class="field"><label>${t('time')}</label><input class="input" id="rg_time" type="time" value="09:00"></div></div>
+  <div class="li" style="border:none;padding:4px 2px"><div class="tx"><b>🔔 ${ar?'ذكّرني':'Remind me'}</b></div><button class="chip on" id="rg_rem" onclick="this.classList.toggle('on')">${ar?'مفعّل':'On'}</button></div>
+  <div class="disc-note" style="margin:8px 0 12px">${ar?'التذكيرات تعمل أثناء فتح التطبيق؛ للتذكير الموثوق أضِفها لتقويم هاتفك من شاشة التذكيرات.':'Reminders fire while the app is open; for reliable alerts add them to your phone calendar from the Reminders screen.'}</div>
+  <button class="btn btn-primary" onclick="saveRegimen()">${t('save')}</button>`);};
+window.saveRegimen=()=>{const ar=isAr();const name=($('#rg_name').value||'').trim();if(!name)return toast(ar?'أدخل اسم الدواء':'Enter a medication name');const freq=$('#rg_freq').dataset.val||'daily';const time=$('#rg_time').value||'09:00';const remind=$('#rg_rem').classList.contains('on');const r={id:rid(),name,dose:($('#rg_dose').value||'').trim(),freq,time,remind};S.regimen.push(r);
+  if(remind){S.reminders.push({id:'rm_'+r.id,kind:'med',label:(ar?'دواء: ':'Medication: ')+name+(r.dose?' ('+r.dose+')':''),time,days:'daily',enabled:true});}
+  save();closeSheet();toast(t('saved'));render();};
+window.delRegimen=(id)=>{S.regimen=S.regimen.filter(r=>r.id!==id);S.reminders=S.reminders.filter(x=>x.id!=='rm_'+id);save();render();};
+
+/* ---- REMINDERS ---- */
+const RKINDS=[['weigh','⚖️',['Weigh-in','قياس الوزن']],['med','💊',['Medication','دواء']],['activity','🏃',['Activity','نشاط']],['water','💧',['Drink water','شرب الماء']],['vitamin','💊',['Vitamins','فيتامينات']]];
+route('reminders',(n)=>{const ar=isAr();const perm=(typeof Notification!=='undefined')?Notification.permission:'unsupported';
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'التذكيرات':'Reminders'})}<div class="content">
+   ${perm==='granted'?`<div class="disc-note" style="border-inline-start:3px solid var(--good)">${ar?'الإشعارات مفعّلة ✓ — ستصلك التنبيهات أثناء فتح قوام.':'Notifications enabled ✓ — you\'ll get alerts while Qawam is open.'}</div>`:perm==='unsupported'?'':`<button class="btn btn-ghost" onclick="askNotif()">🔔 ${ar?'تفعيل الإشعارات':'Enable notifications'}</button>`}
+   <button class="btn btn-primary" onclick="openReminder()">＋ ${ar?'تذكير جديد':'New reminder'}</button>
+   ${S.reminders.length?`<div class="card">${S.reminders.map(r=>{const k=RKINDS.find(x=>x[0]===r.kind)||['','🔔',['','']];return `<div class="li"><div class="ic">${k[1]}</div><div class="tx"><b>${esc(r.label)}</b><small>${r.time} · ${r.days==='daily'?t('everyDay'):r.days}</small></div><button class="chip ${r.enabled?'on':''}" onclick="toggleReminder('${r.id}')">${r.enabled?(ar?'مفعّل':'On'):(ar?'موقف':'Off')}</button><button class="iconbtn" style="margin-inline-start:6px;min-width:34px;height:34px;font-size:14px" onclick="icsReminder('${r.id}')" title="calendar">📅</button><button class="iconbtn" style="margin-inline-start:6px;min-width:34px;height:34px;font-size:14px" onclick="delReminder('${r.id}')">✕</button></div>`;}).join('')}</div>`:`<div class="card center" style="padding:26px">${emptyArt()}<p class="muted">${ar?'لا تذكيرات بعد.':'No reminders yet.'}</p></div>`}
+   <div class="disc-note">${ar?'تعمل التذكيرات داخل التطبيق أثناء فتحه. للتنبيه الموثوق على هاتفك، اضغط 📅 لإضافة التذكير لتقويمك.':'In-app reminders fire while Qawam is open. For a reliable phone alert, tap 📅 to add the reminder to your calendar.'}</div>
+  </div>`;});
+window.askNotif=()=>{if(typeof Notification==='undefined')return;Notification.requestPermission().then(()=>{startReminderTick();render();});};
+window.openReminder=()=>{const ar=isAr();openSheet(`<h2 style="margin:4px 0 12px">🔔 ${ar?'تذكير جديد':'New reminder'}</h2>
+  <div class="field"><label>${ar?'النوع':'Type'}</label><div class="chips" id="rm_kind">${RKINDS.map(k=>`<button class="chip" data-v="${k[0]}" data-lb="${esc(L(k[2]))}" onclick="pick('rm_kind',this);document.getElementById('rm_lb').value=this.getAttribute('data-lb')">${k[1]} ${L(k[2])}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'النص':'Label'}</label><input class="input" id="rm_lb" placeholder="${ar?'مثال: قياس الوزن الصباحي':'e.g. Morning weigh-in'}"></div>
+  <div class="grid2"><div class="field"><label>${t('time')}</label><input class="input" id="rm_time" type="time" value="08:00"></div>
+  <div class="field"><label>${ar?'التكرار':'Repeat'}</label><div class="chips" id="rm_days">${[['daily',ar?'كل يوم':'Every day'],['weekdays',ar?'أيام العمل':'Weekdays']].map(([v,l])=>`<button class="chip ${v==='daily'?'on':''}" data-v="${v}" onclick="pick('rm_days',this)">${l}</button>`).join('')}</div></div></div>
+  <button class="btn btn-primary" onclick="saveReminder()">${t('save')}</button>`);$('#rm_days').dataset.val='daily';};
+window.saveReminder=()=>{const ar=isAr();const kind=$('#rm_kind').dataset.val||'med';const label=($('#rm_lb').value||'').trim()||(RKINDS.find(k=>k[0]===kind)?L(RKINDS.find(k=>k[0]===kind)[2]):'Reminder');const time=$('#rm_time').value||'08:00';const days=$('#rm_days').dataset.val||'daily';S.reminders.push({id:rid(),kind,label,time,days,enabled:true});save();closeSheet();if(typeof Notification!=='undefined'&&Notification.permission==='default')askNotif();else startReminderTick();toast(t('saved'));render();};
+window.toggleReminder=(id)=>{const r=S.reminders.find(x=>x.id===id);if(r){r.enabled=!r.enabled;save();render();}};
+window.delReminder=(id)=>{S.reminders=S.reminders.filter(x=>x.id!==id);save();render();};
+window.icsReminder=(id)=>{const r=S.reminders.find(x=>x.id===id);if(!r)return;const [hh,mm]=r.time.split(':');const dt=new Date();dt.setHours(+hh,+mm,0,0);if(dt<new Date())dt.setDate(dt.getDate()+1);const pad=x=>String(x).padStart(2,'0');const stamp=d=>d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+'00Z';const rule=r.days==='weekdays'?'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR':'FREQ=DAILY';
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Qawam//EN','BEGIN:VEVENT','UID:'+r.id+'@qawam','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(dt),'RRULE:'+rule,'SUMMARY:Qawam — '+r.label,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:'+r.label,'END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const blob=new Blob([ics],{type:'text/calendar'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='qawam-reminder.ics';a.click();toast(isAr()?'أُضيف للتقويم':'Added to calendar');};
+let _rtick=null,_fired={};
+function startReminderTick(){if(_rtick||typeof Notification==='undefined')return;_rtick=setInterval(()=>{if(Notification.permission!=='granted')return;const now=new Date();const hm=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');const dow=now.getDay();const key=todayKey()+hm;
+   S.reminders.forEach(r=>{if(!r.enabled||r.time!==hm)return;if(r.days==='weekdays'&&(dow===5||dow===6))return;if(_fired[r.id]===key)return;_fired[r.id]=key;try{new Notification('Qawam · قوام',{body:r.label,icon:'qawam-192.png'});}catch(e){}});},30000);}
+
 /* ---------- boot ---------- */
 window.navTab=navTab;window.go=go;window.goBack=goBack;window.closeSheet=closeSheet;
 applyDir();
+if(typeof Notification!=='undefined'&&Notification.permission==='granted')startReminderTick();
 go('splash',{replace:true});
 </script>
 </body>
