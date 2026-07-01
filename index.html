@@ -3524,6 +3524,8 @@ route('fatiguekit',(n)=>{
        <button class="card tap" style="text-align:start;min-height:84px" onclick="startBreathing('box')"><div class="row" style="gap:10px"><span style="color:var(--accent)">${svgIcon('waves',22)}</span><div><b style="font-size:14px">${ar?'تنفّس الصندوق':'Box breathing'}</b><div class="muted" style="font-size:11.5px">4-4-4-4</div></div></div></button>
        <button class="card tap" style="text-align:start;min-height:84px" onclick="startBreathing('478')"><div class="row" style="gap:10px"><span style="color:var(--accent)">${svgIcon('moon',22)}</span><div><b style="font-size:14px">${ar?'تنفّس 4-7-8':'4-7-8 breathing'}</b><div class="muted" style="font-size:11.5px">${ar?'للاسترخاء':'for calm'}</div></div></div></button>
      </div>
+     <div class="dsec">${ar?'وقت الوجبات':'Mealtimes'}</div>
+     <button class="card tap" style="text-align:start;min-height:64px;width:100%" onclick="startMindful()"><div class="row" style="gap:10px"><span style="color:var(--accent)">${svgIcon('utensils',22)}</span><div><b style="font-size:14px">${ar?'الأكل الواعي':'Mindful eating'}</b><div class="muted" style="font-size:11.5px">${ar?'مؤقّت وجبة ~٢٠ دقيقة مع تذكير المضغ':'~20-min meal timer with chew cues'}</div></div></div></button>
      <div class="dsec">${ar?'إدارة الإرهاق':'Managing fatigue'}</div>
      <div class="card">${FATIGUE_TIPS.map(t=>`<div class="dtip"><span class="tk">${svgIcon('check',16)}</span><span>${dietLX(t)}</span></div>`).join('')}</div>
      <div class="dsec">${ar?'أدوات للتوتر (بأسلوب العلاج المعرفي)':'Stress tools (CBT-style)'}</div>
@@ -3546,6 +3548,14 @@ window.startBreathing=function(type){const ar=isAr();
   step();
 };
 window.stopBreathing=function(){clearTimeout(window.__brT);const o=document.getElementById('breathOv');if(o)o.remove();};
+window.startMindful=function(){const ar=isAr();let left=1200;const ov=document.createElement('div');ov.id='mindOv';
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(8,15,22,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;text-align:center;padding:24px';
+  ov.innerHTML=`<div style="color:#cfe3ff;font-size:14px;max-width:300px;line-height:1.6">${ar?'كُل ببطء، امضغ جيدًا، وضع الأدوات بين اللقمات. الأكل الواعي يساعد على الشبع وراحة الأمعاء.':'Eat slowly, chew well, and put utensils down between bites. Mindful eating supports fullness and gut comfort.'}</div><div id="mnDisp" style="color:#fff;font-size:60px;font-weight:800;letter-spacing:-2px">20:00</div><div id="mnCue" style="color:#8c7bf0;font-size:16px;font-weight:700;min-height:24px"></div><button class="btn btn-ghost" style="color:#fff;border:1px solid #4a5b78;max-width:180px" onclick="stopMindful()">${ar?'إنهاء':'Finish'}</button>`;
+  document.body.appendChild(ov);
+  window.__mnT=setInterval(()=>{left--;const d=document.getElementById('mnDisp');if(!d){clearInterval(window.__mnT);return;}d.textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');
+    const c=document.getElementById('mnCue');if(c&&left%30===0&&left>0){c.textContent=ar?'🍽️ لقمة صغيرة · امضغ · تنفّس':'🍽️ Small bite · chew · breathe';setTimeout(()=>{if(c)c.textContent='';},1500);}
+    if(left<=0){clearInterval(window.__mnT);if(d)d.textContent='✓';if(c)c.textContent=ar?'أحسنت — وجبة واعية':'Well done — a mindful meal';}},1000);};
+window.stopMindful=function(){clearInterval(window.__mnT);const o=document.getElementById('mindOv');if(o)o.remove();};
 
 /* ---- Travel mode + medication letter ---- */
 const TRAVEL_COLD=[

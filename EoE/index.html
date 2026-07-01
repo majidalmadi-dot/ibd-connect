@@ -235,6 +235,8 @@ function blank(){return{
   atopy:{},                // {asthma:true,...}
   regimen:[],              // {id,name,dose,freq,time,remind}
   reminders:[],            // {id,kind,label,time,days,enabled}
+  water:[],                // {date, ml}
+  journal:[],              // {date, mood, note}
   seenDays:[]
 };}
 function deepMerge(b,o){if(b===null||typeof b!=='object'||Array.isArray(b))return o===undefined?b:o;const out=Object.assign({},b);if(o&&typeof o==='object'&&!Array.isArray(o)){for(const k in o){const x=b[k],y=o[k];out[k]=(x&&typeof x==='object'&&!Array.isArray(x)&&y&&typeof y==='object'&&!Array.isArray(y))?deepMerge(x,y):y;}}return out;}
@@ -301,6 +303,8 @@ route('today',(n)=>{markDay();const st=streak();const recent=S.logs.slice().sort
   <div class="content">
    <div class="card tap" onclick="openEesai()" style="background:linear-gradient(140deg,var(--accent-d),transparent)">
      <div class="between"><div><b style="font-size:15.5px">${t('checkinT')}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${t('checkinSub')}</div></div><span style="font-size:24px">📝</span></div></div>
+   <div class="card tap" onclick="openTip()"><div class="row" style="gap:12px"><span style="font-size:22px">💡</span><div style="flex:1"><b style="font-size:13.5px">${isAr()?'نصيحة اليوم':'Tip of the day'}</b><div class="muted" style="font-size:12px;margin-top:2px">${L(TIPS[tipIndex()])}</div></div></div></div>
+   <div class="grid3"><button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:5px;padding:13px 6px" onclick="go('water')"><span style="font-size:21px">💧</span>${isAr()?'الماء':'Water'}</button><button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:5px;padding:13px 6px" onclick="go('mindful')"><span style="font-size:21px">🧘</span>${isAr()?'أكل واعٍ':'Mindful'}</button><button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:5px;padding:13px 6px" onclick="go('journal')"><span style="font-size:21px">📔</span>${isAr()?'يوميات':'Journal'}</button></div>
    <div class="grid3">
      <div class="kpi"><div class="v" style="color:var(--accent)">${st}</div><div class="l">${t('streak')}</div></div>
      <div class="kpi"><div class="v">${S.eesai.length?S.eesai[S.eesai.length-1].score:'—'}</div><div class="l">EEsAI</div></div>
@@ -432,6 +436,7 @@ route('article',(n,o)=>{const a=o.a;if(!a)return navTab('learn');n.innerHTML=`${
 route('more',(n)=>{const ar=isAr();n.innerHTML=`${topbar('moreT')}<div class="content">
    <div class="card" style="text-align:center;padding:22px"><div class="logo-mark" style="width:64px;height:64px;font-size:30px;margin:0 auto 10px">م</div><b style="font-size:16px">${S.user.name?esc(S.user.name):'Maeen'}</b><div class="muted" style="font-size:12.5px">${t('tagline')}</div></div>
    <div class="card">
+     ${mLi('🧘',ar?'العافية والعادات':'Wellness & habits','go(\'wellness\')')}
      ${mLi('💊',ar?'علاجي وحميتي':'My treatment & diet','go(\'treatment\')')}
      ${mLi('💉',ar?'الجرعات والتذكيرات':'Doses & reminders','go(\'regimen\')')}
      ${mLi('🔔',ar?'التذكيرات':'Reminders','go(\'reminders\')')}
@@ -539,6 +544,68 @@ window.icsReminder=(id)=>{const r=S.reminders.find(x=>x.id===id);if(!r)return;co
 let _rtick=null,_fired={};
 function startReminderTick(){if(_rtick||typeof Notification==='undefined')return;_rtick=setInterval(()=>{if(Notification.permission!=='granted')return;const now=new Date();const hm=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');const dow=now.getDay();const key=todayKey()+hm;
    S.reminders.forEach(r=>{if(!r.enabled||r.time!==hm)return;if(r.days==='weekdays'&&(dow===5||dow===6))return;if(_fired[r.id]===key)return;_fired[r.id]=key;try{new Notification('Maeen · معين',{body:r.label,icon:'maeen-192.png'});}catch(e){}});},30000);}
+
+/* ============================================================ WELLNESS & HABITS ============================================================ */
+function ring(pct,color,label,sub){color=color||'var(--accent)';const R=52,C=2*Math.PI*R,off=C*(1-Math.max(0,Math.min(100,pct))/100);return `<svg viewBox="0 0 140 140" width="100%" style="max-width:140px"><circle cx="70" cy="70" r="${R}" fill="none" stroke="var(--card2)" stroke-width="12"/><circle cx="70" cy="70" r="${R}" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}" transform="rotate(-90 70 70)"/><text x="70" y="66" text-anchor="middle" font-size="26" font-weight="800" fill="var(--txt)" font-family="inherit">${label}</text><text x="70" y="88" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="inherit">${sub||''}</text></svg>`;}
+const TIPS=[
+ ['Cut food into small pieces and chew thoroughly.','قطّع الطعام صغيرًا وامضغ جيدًا.'],
+ ['Eat slowly and put utensils down between bites.','كُل ببطء وضع الأدوات بين اللقمات.'],
+ ['Keep a drink handy and sip to help food down.','أبقِ مشروبًا قريبًا وارتشف لتمرير الطعام.'],
+ ['After swallowed steroids, avoid food and drink for ~30 minutes.','بعد الستيرويد المبلوع، تجنّب الأكل والشرب نحو ٣٠ دقيقة.'],
+ ['Add sauces or moisture to dry foods.','أضِف صلصات أو رطوبة للأطعمة الجافة.'],
+ ['Keep taking treatment even when you feel well.','استمر بالعلاج حتى عند شعورك بالتحسّن.'],
+ ['Attend follow-up endoscopies — they show tissue healing.','احضر مناظير المتابعة — تُظهر شفاء النسيج.'],
+ ['If food is stuck and you cannot swallow saliva, seek urgent care.','إن انحشر الطعام ولم تستطع بلع ريقك، اطلب رعاية عاجلة.'],
+ ['Note which foods feel harder to swallow.','دوّن الأطعمة الأصعب في البلع.'],
+ ['Manage other allergies (asthma, eczema) with your team.','أدِر الحساسيات الأخرى (ربو، إكزيما) مع فريقك.'],
+ ['Mealtime anxiety is common — slow, calm eating helps.','قلق الأكل شائع — الأكل البطيء الهادئ يساعد.'],
+ ['Stay hydrated steadily through the day.','حافظ على ترطيبك بثبات طوال اليوم.']
+];
+function tipIndex(){const d=new Date();return Math.floor((d-new Date(d.getFullYear(),0,0))/864e5)%TIPS.length;}
+window.openTip=()=>openTipN(tipIndex());
+window.openTipN=(i)=>{const ar=isAr();openSheet(`<div style="text-align:center;font-size:38px">💡</div><h2 style="text-align:center;margin:6px 0 4px">${ar?'نصيحة اليوم':'Tip of the day'}</h2><p style="text-align:center;font-size:16px;line-height:1.7;margin:10px 6px 16px">${L(TIPS[i])}</p><button class="btn btn-ghost" onclick="openTipN(${(i+1)%TIPS.length})">${ar?'نصيحة أخرى':'Another tip'} →</button>`);};
+
+const WGOAL=2000;
+function waterToday(){const k=todayKey();return S.water.filter(x=>x.date===k).reduce((a,b)=>a+b.ml,0);}
+window.addWater=(ml)=>{S.water.push({date:todayKey(),ml});save();render();};
+window.undoWater=()=>{const k=todayKey();for(let i=S.water.length-1;i>=0;i--){if(S.water[i].date===k){S.water.splice(i,1);break;}}save();render();};
+route('water',(n)=>{const ar=isAr();const c=waterToday();const pct=Math.min(100,Math.round(c/WGOAL*100));const days=lastNDays(7);const vals=days.map(d=>S.water.filter(x=>x.date===d).reduce((a,b)=>a+b.ml,0));
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'الماء':'Hydration'})}<div class="content">
+   <div class="card center">${ring(pct,'var(--accent2)',pct+'%',c+' / '+WGOAL+' ml')}<div class="muted" style="font-size:13px;margin-top:4px">${Math.round(c/250)} ${ar?'كوب اليوم (٢٥٠مل)':'cups today (250ml)'}</div></div>
+   <div class="grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px"><button class="btn btn-ghost" onclick="addWater(250)">＋ ${ar?'كوب':'Cup'}</button><button class="btn btn-ghost" onclick="addWater(500)">＋ ٥٠٠</button><button class="btn btn-ghost" onclick="undoWater()">↺</button></div>
+   <div class="card"><div class="section-title" style="margin:0 0 6px">${ar?'آخر ٧ أيام':'Last 7 days'}</div>${barChart(vals,days.map(d=>fmtDate(d+'T00:00')),'var(--accent2)',WGOAL)}</div>
+   <div class="disc-note">${ar?'الترطيب الجيّد يساعد على تمرير الطعام ويقلّل شعور الالتصاق. ارتشف بثبات.':'Good hydration helps food go down and reduces the stuck feeling. Sip steadily.'}</div>
+  </div>`;});
+
+let _mealTimer=null,_mealLeft=0;
+route('mindful',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'الأكل الواعي':'Mindful eating'})}<div class="content">
+   <div class="disc-note">${ar?'الأكل البطيء والمضغ الجيّد أساس في التهاب المريء اليوزيني — يقلّلان خطر انحشار الطعام. استهدف نحو ٢٠ دقيقة لكل وجبة.':'Slow eating and thorough chewing are central in EoE — they lower the risk of food impaction. Aim for about 20 minutes per meal.'}</div>
+   <div class="card center"><div id="mmDisp" style="font-size:52px;font-weight:800;letter-spacing:-2px;color:var(--accent)">20:00</div>
+     <div id="mmCue" style="font-size:14px;color:var(--muted);margin-top:4px;min-height:20px">${ar?'اضغط ابدأ':'Press start'}</div>
+     <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px"><button class="btn btn-primary" id="mmBtn" onclick="mealTimer()">${ar?'ابدأ':'Start'}</button><button class="btn btn-ghost" onclick="mealReset()">${ar?'إعادة':'Reset'}</button></div>
+   </div></div>`;updateMeal();});
+function fmtMMSS(s){const m=Math.floor(s/60),ss=s%60;return m+':'+String(ss).padStart(2,'0');}
+function updateMeal(){const d=$('#mmDisp');if(d)d.textContent=fmtMMSS(_mealLeft||1200);}
+window.mealTimer=()=>{const ar=isAr();if(_mealTimer){clearInterval(_mealTimer);_mealTimer=null;const b=$('#mmBtn');if(b)b.textContent=ar?'متابعة':'Resume';return;}if(!_mealLeft)_mealLeft=1200;const b=$('#mmBtn');if(b)b.textContent=ar?'إيقاف':'Pause';
+  _mealTimer=setInterval(()=>{_mealLeft--;const d=$('#mmDisp');if(d)d.textContent=fmtMMSS(Math.max(0,_mealLeft));const cue=$('#mmCue');if(cue&&_mealLeft%30===0&&_mealLeft>0){cue.textContent=ar?'🍽️ لقمة صغيرة · امضغ جيدًا · تنفّس':'🍽️ Small bite · chew well · breathe';cue.style.color='var(--accent)';setTimeout(()=>{if(cue)cue.style.color='var(--muted)';},1200);}if(_mealLeft<=0){clearInterval(_mealTimer);_mealTimer=null;if(d)d.textContent='✓';if(cue)cue.textContent=ar?'أحسنت — وجبة واعية':'Well done — a mindful meal';}},1000);};
+window.mealReset=()=>{if(_mealTimer){clearInterval(_mealTimer);_mealTimer=null;}_mealLeft=1200;const b=$('#mmBtn');if(b)b.textContent=isAr()?'ابدأ':'Start';const c=$('#mmCue');if(c)c.textContent=isAr()?'اضغط ابدأ':'Press start';updateMeal();};
+
+const MOODS=['😞','🙁','😐','🙂','😄'];
+route('journal',(n)=>{const ar=isAr();const today=S.journal.find(j=>j.date===todayKey());const hist=S.journal.slice().sort((a,b)=>a.date<b.date?1:-1);
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'يومياتي':'My journal'})}<div class="content">
+   <div class="card"><div class="section-title" style="margin:0 0 8px">${ar?'تسجيل اليوم':"Today's check-in"}</div>
+     <div class="field"><label>${ar?'كيف كان مزاجك؟':'How was your mood?'}</label><div class="scale" id="jMood">${MOODS.map((m,i)=>`<button data-v="${i}" onclick="pickScale('jMood',this)" class="${today&&today.mood===i?'on':''}" style="font-size:20px">${m}</button>`).join('')}</div></div>
+     <div class="field"><label>${ar?'كيف كان الأكل اليوم؟ (اختياري)':'How was eating today? (optional)'}</label><textarea class="input" id="jNote" placeholder="${ar?'أي شيء تود تذكّره…':'Anything to remember…'}">${today?esc(today.note||''):''}</textarea></div>
+     <button class="btn btn-primary" onclick="saveJournal()">${t('save')}</button></div>
+   ${hist.length?`<div class="section-title">${ar?'السجل':'History'}</div><div class="card">${hist.slice(0,14).map(j=>`<div class="li"><div class="ic">${MOODS[j.mood!=null?j.mood:2]}</div><div class="tx"><b>${j.note?esc(j.note.slice(0,44)):fmtDate(j.date+'T00:00')}</b><small>${fmtDate(j.date+'T00:00')}</small></div></div>`).join('')}</div>`:''}
+  </div>`;});
+window.saveJournal=()=>{const m=$('#jMood');const k=todayKey();S.journal=S.journal.filter(j=>j.date!==k);S.journal.push({date:k,mood:m.dataset.val!=null?+m.dataset.val:null,note:($('#jNote').value||'').trim()});save();toast(t('saved'));render();};
+
+route('wellness',(n)=>{const ar=isAr();const items=[['water','💧',['Hydration','الماء']],['mindful','🧘',['Mindful eating','الأكل الواعي']],['journal','📔',['Journal','اليوميات']]];
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'العافية والعادات':'Wellness & habits'})}<div class="content">
+   <div class="card tap" onclick="openTip()" style="background:linear-gradient(140deg,var(--accent-d),transparent)"><div class="row" style="gap:12px"><span style="font-size:26px">💡</span><div><b style="font-size:14.5px">${ar?'نصيحة اليوم':'Tip of the day'}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${L(TIPS[tipIndex()])}</div></div></div></div>
+   <div class="chips" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">${items.map(([r,ic,nm])=>`<button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:6px;padding:16px 6px" onclick="go('${r}')"><span style="font-size:22px">${ic}</span>${L(nm)}</button>`).join('')}</div>
+  </div>`;});
 
 /* ---------- boot ---------- */
 window.navTab=navTab;window.go=go;window.goBack=goBack;window.closeSheet=closeSheet;
