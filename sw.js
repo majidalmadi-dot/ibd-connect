@@ -1,6 +1,6 @@
 /* IBD Connect service worker — offline support + fresh-on-deploy.
    Bump CACHE on each release to invalidate old assets. */
-const CACHE = 'ibd-connect-v36';
+const CACHE = 'ibd-connect-v37';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png',
   // precache the charting lib so charts work on the very first offline launch
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'];
