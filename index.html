@@ -556,6 +556,10 @@ button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
 /* refined bottom sheet + backdrop */
 .sheet-bg{backdrop-filter:blur(3px)}
 .sheet{backdrop-filter:saturate(1.08);box-shadow:0 -12px 40px -18px rgba(0,0,0,.5)}
+.toast{display:flex;align-items:center;justify-content:center}
+.toast.ok{border-color:var(--good)}
+.tst-check{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:var(--good);color:#fff;font-size:12px;font-weight:800;margin-inline-end:8px;flex:none;animation:tstPop .5s var(--ease-spring)}
+@keyframes tstPop{0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.25) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
 /* slim, elegant scrollbars on desktop */
 @media (pointer:fine){
   ::-webkit-scrollbar{width:9px;height:9px}
@@ -1400,7 +1404,7 @@ function applyDir(){document.documentElement.lang=S.lang||'en';document.document
 /* ---------- DOM helpers ---------- */
 const $=s=>document.querySelector(s);
 function el(html){const d=document.createElement('div');d.innerHTML=html.trim();return d.firstChild;}
-function toast(msg){const e=$('#toast');e.textContent=msg;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1900);}
+function toast(msg){const e=$('#toast');const ok=/✓|🎉|تم|حفظ|Saved|Logged|Added|Nice|أحسنت|Copied|نُسخ|Exported|صُدّر|أُضيف/i.test(String(msg));e.innerHTML=(ok?'<span class="tst-check">✓</span>':'')+esc(String(msg));e.classList.toggle('ok',ok);e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1900);}
 function openSheet(html){$('#sheet').innerHTML='<div class="grip"></div>'+html;$('#sheetbg').classList.add('open');}
 function closeSheet(){$('#sheetbg').classList.remove('open');}
 $('#sheetbg').addEventListener('click',e=>{if(e.target.id==='sheetbg')closeSheet();});
