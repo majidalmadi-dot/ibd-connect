@@ -398,7 +398,10 @@ const ICONS={
  brain:'<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 1 5 3 3 0 0 0 3 3 2.5 2.5 0 0 0 3-2.5V6.5A2.5 2.5 0 0 0 9 4z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-1 5 3 3 0 0 1-3 3 2.5 2.5 0 0 1-3-2.5V6.5A2.5 2.5 0 0 1 15 4z"/>',
  leaf:'<path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16z"/><path d="M4 20c4-4 7-6 12-7"/>',
  microscope:'<path d="M6 18h12"/><path d="M9 18a5 5 0 0 0 8-4"/><path d="M10 6 8 8"/><rect x="8.5" y="3.5" width="4" height="6" rx="2" transform="rotate(45 10.5 6.5)"/><path d="M10 14h2"/>',
- baby:'<circle cx="12" cy="6" r="2.5"/><path d="M12 9v5M7 12h10M9 21l3-4 3 4"/>'
+ baby:'<circle cx="12" cy="6" r="2.5"/><path d="M12 9v5M7 12h10M9 21l3-4 3 4"/>',
+ calendar:'<rect x="4" y="5" width="16" height="16" rx="2.4"/><path d="M4 9.5h16M8 3.5v3.5M16 3.5v3.5"/>',
+ pin:'<path d="M12 21s7-6.2 7-11a7 7 0 0 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ smile:'<circle cx="12" cy="12" r="9"/><path d="M8.5 14s1.2 2 3.5 2 3.5-2 3.5-2"/><path d="M9 9.5h.01M15 9.5h.01"/>'
 };
 const ic=(n,s)=>`<svg class="svgi" viewBox="0 0 24 24" width="${s||24}" height="${s||24}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ICONS[n]||''}</svg>`;
 const UNSPLASH=(id,w)=>`https://images.unsplash.com/${id}?w=${w||900}&q=80&auto=format&fit=crop`;
@@ -468,6 +471,9 @@ const EVERYTHING=[
  {ic:'flame',en:['Trigger finder','See which foods and habits are linked to your tougher days vs better days — patterns in your own data.'],ar:['مكتشف المحفّزات','اعرف الأطعمة والعادات المرتبطة بأيامك الأصعب مقابل الأفضل — أنماط في بياناتك.']},
  {ic:'microscope',en:['Labs + photo capture','Log calprotectin, CRP, haemoglobin and more — or snap a photo of your report and read the numbers on-device.'],ar:['التحاليل + التقاط بالصورة','سجّل الكالبروتكتين وCRP والهيموغلوبين — أو صوّر تقريرك واقرأ الأرقام على جهازك.']},
  {ic:'pill',en:['Medications & biologics','Drug picker, dose, start date and a full change history, biologic injection cycles and adherence — names stay on your device.'],ar:['الأدوية والعلاجات الحيوية','اختيار الدواء والجرعة وتاريخ البدء وسجل التغييرات، ودورات الحقن والالتزام — الأسماء على جهازك فقط.']},
+ {ic:'calendar',en:['Appointments & calendar','Track upcoming and past appointments — clinic visits, blood & calprotectin tests, infusions and pick-ups — and export any to your phone calendar.'],ar:['المواعيد والتقويم','تابع مواعيدك القادمة والسابقة — زيارات العيادة وتحاليل الدم والكالبروتكتين والتسريب والاستلام — وصدّر أيًّا منها إلى تقويم هاتفك.']},
+ {ic:'pin',en:['Toilet finder','When you need one urgently, find the nearest public toilets on a live map — with distance and one-tap directions.'],ar:['محدد دورات المياه','عند الحاجة الملحّة، اعثر على أقرب دورات المياه العامة على خريطة حيّة — مع المسافة والاتجاهات بلمسة واحدة.']},
+ {ic:'smile',en:['Weekly check-in','A gentle “How did you feel this week?” with a mood and an optional note — right on your home screen.'],ar:['التسجيل الأسبوعي','سؤال لطيف «كيف شعرت هذا الأسبوع؟» مع مزاج وملاحظة اختيارية — على شاشتك الرئيسية مباشرة.']},
  {ic:'leaf',en:['Supplements & deficiencies','Track iron, B12, vitamin D, calcium and more — common gaps in IBD — with daily reminders.'],ar:['المكمّلات ونقص الفيتامينات','تابع الحديد وب12 وفيتامين د والكالسيوم — نواقص شائعة في المرض — مع تذكيرات يومية.']},
  {ic:'shield',en:['Vaccines & prevention','A checklist for immunosuppressed patients — flu, pneumococcal, hepatitis B, shingles, plus bone & skin checks.'],ar:['اللقاحات والوقاية','قائمة لمن لديهم مناعة منخفضة — الإنفلونزا والمكوّرات والكبد ب والحزام، مع فحوص العظام والجلد.']},
  {ic:'utensils',en:['Diet hub','FODMAP, Mediterranean, DASH and intermittent-fasting guidance — explained with familiar Saudi foods.'],ar:['مركز التغذية','إرشاد الفودماب والمتوسطي وداش والصيام المتقطّع — بأطعمة سعودية مألوفة.']},
