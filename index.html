@@ -1310,7 +1310,7 @@ function blank(){return{
   meds:[], labs:[], control:null, registry:{optedIn:false, lastSync:null},
   supplements:[], grocery:[], vaccines:{},
   badges:[], learn:JSON.parse(JSON.stringify(DEFAULT_LEARN)), tips:JSON.parse(JSON.stringify(DEFAULT_TIPS)),
-  seenDays:[], nudgeDismiss:{}, courses:{},
+  seenDays:[], nudgeDismiss:{}, courses:{}, appointments:[],
   game:{xp:0, quests:{}, goalDays:[], lastLevel:1}
 };}
 /* deep-merge saved state over defaults so newly-added nested fields aren't lost on upgrade
@@ -4073,7 +4073,9 @@ route('more',(n)=>{
      <div class="section-title">${isAr()?'العناية والمتابعة':'Care & tracking'}</div>
      <div class="card">
        ${mLi('pill',isAr()?'الأدوية والعلاجات':'Medications & treatments','',"go('meds')")}
+       ${mLi('calendar',isAr()?'المواعيد والتقويم':'Appointments & calendar',isAr()?'زياراتك وفحوصك القادمة':'upcoming visits & tests',"go('appointments')")}
        ${mLi('pulse',isAr()?'نتائج التحاليل':'Lab results','',"go('labs')")}
+       ${mLi('compass',isAr()?'محدد دورات المياه':'Toilet finder',isAr()?'أقرب دورة مياه عامة':'nearest public toilet',"go('toilet')")}
        ${mLi('utensils',isAr()?'الغذاء والتغذية':'Diet & Nutrition',isAr()?'فودماب · متوسطي · داش · صيام':'FODMAP · Med · DASH · fasting',"go('diet')")}
        ${mLi('leaf',isAr()?'فاحص الفودماب + باركود':'FODMAP checker + barcode',isAr()?'ابحث أو امسح طعامًا':'search or scan a food',"go('fodmapcheck')")}
        ${mLi('chart',isAr()?'مكتشف المحفّزات':'Trigger finder',isAr()?'أنماط في بياناتك':'patterns in your data',"go('triggers')")}
@@ -4718,6 +4720,57 @@ applyA11y();
 initLanding();
 if(window.__updateReady)showUpdate();
 initTelemetry();
+/* ============================================================ APPOINTMENTS & TOILET FINDER ============================================================ */
+const APPT_TYPES=[['clinic',['Clinic visit','زيارة عيادة']],['specialist',['Gastroenterologist','استشاري جهاز هضمي']],['blood',['Blood test','تحليل دم']],['calpro',['Calprotectin test','فحص الكالبروتكتين']],['infusion',['Infusion','تسريب وريدي']],['procedure',['Procedure / endoscopy','إجراء / منظار']],['pickup',['Medication pick-up','استلام دواء']],['other',['Other','أخرى']]];
+function apptTypeLabel(t){const x=APPT_TYPES.find(y=>y[0]===t);return x?L(x[1]):t;}
+let apptTab='upcoming';
+window.pickChip=(id,b)=>{const box=document.getElementById(id);box.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');box.dataset.val=b.dataset.v;};
+function apptCard(a){const ar=isAr();const d=new Date(a.date+'T'+(a.time||'09:00'));const dt=d.toLocaleDateString(ar?'ar-SA':'en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  return `<div class="card"><div class="between"><div class="row" style="gap:11px"><span style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent);flex:none;background:var(--bg2)">${svgIcon('calendar',22)}</span><div><b style="font-size:14.5px">${apptTypeLabel(a.type)}</b><div class="muted" style="font-size:12.5px">${dt}${a.time?' · '+a.time:''}</div>${a.note?`<div class="muted" style="font-size:12px;margin-top:2px">${esc(a.note)}</div>`:''}</div></div><button class="btn-sm btn-ghost" onclick="delAppt('${a.id}')">${svgIcon('trash',15)}</button></div><button class="btn btn-ghost" style="margin-top:10px" onclick="apptIcs('${a.id}')">${svgIcon('calendar',15)} ${ar?'أضف إلى تقويم الهاتف':'Add to phone calendar'}</button></div>`;}
+route('appointments',(n)=>{const ar=isAr();const now=todayKey();const all=(S.appointments||[]).slice().sort((a,b)=>(a.date+(a.time||''))<(b.date+(b.time||''))?-1:1);
+  const up=all.filter(a=>a.date>=now),past=all.filter(a=>a.date<now).reverse();const list=apptTab==='upcoming'?up:past;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'المواعيد والتقويم':'Appointments & calendar',rawSub:ar?'زياراتك وفحوصك':'your visits & tests'})}
+   <div class="content">
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.6">${ar?'أضف مواعيدك لتتبّعها وتصديرها إلى تقويم هاتفك. تُحفظ على جهازك فقط.':'Add your appointments to track them and export to your phone calendar. Stored only on your device.'}</p></div>
+     <div class="seg-tab">${[['upcoming',ar?'القادمة':'Upcoming'],['past',ar?'السابقة':'Past']].map(([v,l])=>`<button class="region-chip ${apptTab===v?'on':''}" onclick="apptTab='${v}';render()">${l}</button>`).join('')}</div>
+     <button class="btn btn-primary" onclick="openAppt()">${svgIcon('plus',18)} ${ar?'إضافة موعد':'Add appointment'}</button>
+     ${list.length?list.map(apptCard).join(''):`<div class="card center" style="padding:26px"><div style="color:var(--muted)">${svgIcon('calendar',34)}</div><p class="muted" style="margin-top:8px">${apptTab==='upcoming'?(ar?'لا مواعيد قادمة':'No upcoming appointments'):(ar?'لا مواعيد سابقة':'No past appointments')}</p></div>`}
+   </div>`;});
+window.openAppt=function(){const ar=isAr();openSheet(`<div class="row" style="gap:10px;margin-bottom:14px"><span style="color:var(--accent)">${svgIcon('calendar',24)}</span><h2 style="font-size:19px;margin:0;font-weight:800">${ar?'إضافة موعد':'Add appointment'}</h2></div>
+  <div class="field"><label>${ar?'النوع':'Type'}</label><div class="chips" id="apType">${APPT_TYPES.map(x=>`<button class="chip" data-v="${x[0]}" onclick="pickChip('apType',this)">${L(x[1])}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'التاريخ':'Date'}</label><input class="input" type="date" id="apDate" value="${todayKey()}"></div>
+  <div class="field"><label>${ar?'الوقت':'Time'}</label><input class="input" type="time" id="apTime" value="09:00"></div>
+  <div class="field"><label>${ar?'ملاحظة (اختياري)':'Note (optional)'}</label><input class="input" id="apNote" placeholder="${ar?'مثال: مستشفى الملك فيصل التخصصي':'e.g. King Faisal Specialist Hospital'}"></div>
+  <button class="btn btn-primary" onclick="saveAppt()">${ar?'حفظ':'Save'}</button>`);};
+window.saveAppt=function(){const ar=isAr();const ty=document.getElementById('apType').dataset.val;if(!ty)return toast(ar?'اختر النوع':'Pick a type');S.appointments=S.appointments||[];S.appointments.push({id:rid(),type:ty,date:document.getElementById('apDate').value||todayKey(),time:document.getElementById('apTime').value||'09:00',note:(document.getElementById('apNote').value||'').trim()});save();closeSheet();if(typeof awardXp==='function')awardXp(2);toast(ar?'تمت الإضافة':'Added');render();};
+window.delAppt=function(id){S.appointments=(S.appointments||[]).filter(a=>a.id!==id);save();render();};
+window.apptIcs=function(id){const a=(S.appointments||[]).find(x=>x.id===id);if(!a)return;const pad=x=>String(x).padStart(2,'0');const start=new Date(a.date+'T'+(a.time||'09:00'));const end=new Date(start.getTime()+30*60000);const stamp=d=>d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+'00Z';const title='Rafeeq — '+apptTypeLabel(a.type)+(a.note?' ('+a.note+')':'');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Rafeeq//EN','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:'+a.id+'@rafeeq','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(start),'DTEND:'+stamp(end),'SUMMARY:'+title,'BEGIN:VALARM','TRIGGER:-PT2H','ACTION:DISPLAY','DESCRIPTION:'+title,'END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const blob=new Blob([ics],{type:'text/calendar'});const el=document.createElement('a');el.href=URL.createObjectURL(blob);el.download='rafeeq-appointment.ics';el.click();toast(isAr()?'أُضيف للتقويم':'Added to calendar');};
+
+function haversine(a,b,c,d){const R=6371,r=Math.PI/180;const dLat=(c-a)*r,dLon=(d-b)*r;const x=Math.sin(dLat/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin(dLon/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x));}
+route('toilet',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'محدد دورات المياه':'Toilet finder',rawSub:ar?'أقرب دورات مياه عامة':'nearest public toilets'})}
+   <div class="content">
+     <div class="card" style="background:var(--bg2)"><p class="muted" style="font-size:12px;margin:0;line-height:1.6">${ar?'يستخدم موقعك للعثور على دورات مياه عامة قريبة من بيانات الخرائط المفتوحة (OpenStreetMap). التوفّر غير مضمون، وموقعك لا يُرفع لخوادمنا.':'Uses your location to find nearby public toilets from open map data (OpenStreetMap). Availability is not guaranteed, and your location is never sent to our servers.'}</p></div>
+     <button class="btn btn-primary" onclick="findToilets()">${svgIcon('compass',18)} ${ar?'ابحث عن أقرب دورات مياه':'Find nearest toilets'}</button>
+     <div id="toiletOut"></div>
+   </div>`;});
+window.findToilets=function(){var ar=isAr();var out=document.getElementById('toiletOut');
+  out.innerHTML='<div class="card center" style="padding:24px"><div class="spin" style="margin:0 auto"></div><p class="muted" style="margin-top:10px;font-size:13px">'+(ar?'جارٍ تحديد موقعك…':'Locating you…')+'</p></div>';
+  if(!navigator.geolocation){out.innerHTML='<div class="card">'+(ar?'تحديد الموقع غير مدعوم على هذا الجهاز.':'Location is not supported on this device.')+'</div>';return;}
+  navigator.geolocation.getCurrentPosition(function(pos){var lat=pos.coords.latitude,lon=pos.coords.longitude;
+    out.innerHTML='<div class="card center" style="padding:24px"><div class="spin" style="margin:0 auto"></div><p class="muted" style="margin-top:10px;font-size:13px">'+(ar?'جارٍ البحث عن دورات مياه قريبة…':'Searching nearby toilets…')+'</p></div>';
+    var mapsAll='https://www.google.com/maps/search/public+toilet/@'+lat+','+lon+',15z';
+    var q='[out:json][timeout:15];node["amenity"="toilets"](around:2500,'+lat+','+lon+');out 40;';
+    fetch('https://overpass-api.de/api/interpreter?data='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(dd){
+      var items=((dd&&dd.elements)||[]).filter(function(e){return e.lat;}).map(function(e){return {lat:e.lat,lon:e.lon,name:(e.tags&&(e.tags.name||e.tags['name:en']))||'',fee:e.tags&&e.tags.fee,wc:e.tags&&e.tags.wheelchair,dist:haversine(lat,lon,e.lat,e.lon)};}).sort(function(a,b){return a.dist-b.dist;}).slice(0,15);
+      if(!items.length){out.innerHTML='<div class="card center" style="padding:22px"><p class="muted">'+(ar?'لم نجد دورات مياه مسجّلة قريبة.':'No mapped toilets found nearby.')+'</p></div><a class="btn btn-ghost" target="_blank" rel="noopener" href="'+mapsAll+'">'+(ar?'ابحث في الخرائط':'Search Maps')+'</a>';return;}
+      var rows=items.map(function(it){var km=it.dist<1?Math.round(it.dist*1000)+(ar?' م':' m'):it.dist.toFixed(1)+(ar?' كم':' km');var nm=it.name||(ar?'دورة مياه عامة':'Public toilet');var extra=[];if(it.wc==='yes')extra.push('♿');if(it.fee==='no')extra.push(ar?'مجاني':'free');else if(it.fee==='yes')extra.push(ar?'برسوم':'fee');var badges=extra.join(' · ');
+        return '<a style="display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit" target="_blank" rel="noopener" href="https://www.google.com/maps/search/?api=1&query='+it.lat+','+it.lon+'"><span style="font-size:22px">🚻</span><span style="flex:1;min-width:0"><b style="font-size:14px;display:block">'+esc(nm)+'</b><small class="muted" style="font-size:12px">'+km+(badges?' · '+badges:'')+'</small></span><span class="chev">'+(ar?'‹':'›')+'</span></a>';}).join('');
+      out.innerHTML='<div class="card" style="padding:6px 14px">'+rows+'</div><a class="btn btn-ghost" target="_blank" rel="noopener" href="'+mapsAll+'">'+(ar?'المزيد في الخرائط':'More in Maps')+'</a>';
+    }).catch(function(){out.innerHTML='<div class="card"><p class="muted">'+(ar?'تعذّر جلب البيانات. جرّب فتح الخرائط.':'Could not fetch data. Try opening Maps.')+'</p></div><a class="btn btn-ghost" target="_blank" rel="noopener" href="'+mapsAll+'">'+(ar?'ابحث في الخرائط':'Search Maps')+'</a>';});
+  },function(){out.innerHTML='<div class="card"><p class="muted">'+(ar?'تعذّر الوصول لموقعك. فعّل صلاحية الموقع أو ابحث في الخرائط.':'Could not get your location. Enable location permission or search Maps.')+'</p></div><a class="btn btn-ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/public+toilet+near+me">'+(ar?'ابحث في الخرائط':'Search Maps')+'</a>';},{enableHighAccuracy:true,timeout:10000});};
+
 (async()=>{ if(/#clin=/.test(location.hash)){ const ok=await checkClinHash(); if(ok)return; } go('splash',{replace:true}); })();
 window.addEventListener('hashchange',()=>{ if(/#clin=/.test(location.hash)) checkClinHash(); });
 
