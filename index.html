@@ -1310,7 +1310,7 @@ function blank(){return{
   meds:[], labs:[], control:null, registry:{optedIn:false, lastSync:null},
   supplements:[], grocery:[], vaccines:{},
   badges:[], learn:JSON.parse(JSON.stringify(DEFAULT_LEARN)), tips:JSON.parse(JSON.stringify(DEFAULT_TIPS)),
-  seenDays:[], nudgeDismiss:{}, courses:{}, appointments:[],
+  seenDays:[], nudgeDismiss:{}, courses:{}, appointments:[], weekly:[],
   game:{xp:0, quests:{}, goalDays:[], lastLevel:1}
 };}
 /* deep-merge saved state over defaults so newly-added nested fields aren't lost on upgrade
@@ -1676,6 +1676,8 @@ route('today',(n)=>{
    <div class="content">
      ${!S.prefs.seenWelcome?`<div class="card welcome"><div class="between" style="align-items:flex-start"><div style="flex:1"><b style="font-size:15.5px">${t('welcomeT')}</b><p class="muted" style="font-size:13px;line-height:1.55;margin:6px 0 0">${t('welcomeBody')}</p></div></div><button class="btn btn-primary" style="margin-top:12px" onclick="dismissWelcome()">${t('gotIt')}</button></div>`:''}
      ${nudgeBanner()}
+     ${(()=>{const now=todayKey();const up=(S.appointments||[]).filter(a=>a.date>=now).sort((a,b)=>(a.date+(a.time||''))<(b.date+(b.time||''))?-1:1)[0];if(!up)return '';const dd=new Date(up.date+'T'+(up.time||'09:00'));const dstr=dd.toLocaleDateString(isAr()?'ar-SA':'en-GB',{weekday:'short',day:'numeric',month:'short'});const days=Math.round((new Date(up.date+'T00:00')-new Date(now+'T00:00'))/864e5);const when=days<=0?(isAr()?'اليوم':'today'):days===1?(isAr()?'غدًا':'tomorrow'):(isAr()?('بعد '+days+' يوم'):('in '+days+' days'));return `<button class="card tap" style="text-align:start;width:100%" onclick="go('appointments')"><div class="between"><div class="row" style="gap:11px"><span style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent);background:var(--bg2);flex:none">${svgIcon('calendar',22)}</span><div><div class="muted" style="font-size:11.5px">${isAr()?'الموعد القادم':'Next appointment'} · ${when}</div><b style="font-size:14.5px">${apptTypeLabel(up.type)}</b><div class="muted" style="font-size:12px">${dstr}${up.time?' · '+up.time:''}</div></div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>`;})()}
+     ${(()=>{const wk=weekKey();const done=(S.weekly||[]).find(x=>x.week===wk);if(done)return `<div class="card"><div class="between"><div><b style="font-size:14.5px">${isAr()?'تسجيلك الأسبوعي ✓':'Weekly check-in ✓'}</b><div class="muted" style="font-size:12px;margin-top:2px">${isAr()?'شكرًا لمشاركتك هذا الأسبوع':'Thanks for checking in this week'}</div></div><span style="font-size:30px">${WFACES[done.mood!=null?done.mood:2]}</span></div></div>`;return `<div class="card"><b style="font-size:14.5px">${isAr()?'كيف شعرت هذا الأسبوع؟':'How did you feel this week?'}</b><div class="row" style="gap:8px;margin-top:12px;justify-content:space-between">${WFACES.map((f,i)=>`<button onclick="openWeekly(${i})" style="flex:1;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 0;font-size:26px;cursor:pointer">${f}</button>`).join('')}</div></div>`;})()}
      <!-- Level / XP bar -->
      <div class="card tap" onclick="go('rewards')" style="padding:15px 16px">
        <div class="between">
@@ -4770,6 +4772,15 @@ window.findToilets=function(){var ar=isAr();var out=document.getElementById('toi
       out.innerHTML='<div class="card" style="padding:6px 14px">'+rows+'</div><a class="btn btn-ghost" target="_blank" rel="noopener" href="'+mapsAll+'">'+(ar?'المزيد في الخرائط':'More in Maps')+'</a>';
     }).catch(function(){out.innerHTML='<div class="card"><p class="muted">'+(ar?'تعذّر جلب البيانات. جرّب فتح الخرائط.':'Could not fetch data. Try opening Maps.')+'</p></div><a class="btn btn-ghost" target="_blank" rel="noopener" href="'+mapsAll+'">'+(ar?'ابحث في الخرائط':'Search Maps')+'</a>';});
   },function(){out.innerHTML='<div class="card"><p class="muted">'+(ar?'تعذّر الوصول لموقعك. فعّل صلاحية الموقع أو ابحث في الخرائط.':'Could not get your location. Enable location permission or search Maps.')+'</p></div><a class="btn btn-ghost" target="_blank" rel="noopener" href="https://www.google.com/maps/search/public+toilet+near+me">'+(ar?'ابحث في الخرائط':'Search Maps')+'</a>';},{enableHighAccuracy:true,timeout:10000});};
+
+/* ---- Weekly emotional check-in ---- */
+function weekKey(d){d=d||new Date();const dt=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));const day=dt.getUTCDay()||7;dt.setUTCDate(dt.getUTCDate()+4-day);const yStart=new Date(Date.UTC(dt.getUTCFullYear(),0,1));const wk=Math.ceil((((dt-yStart)/86400000)+1)/7);return dt.getUTCFullYear()+'-W'+String(wk).padStart(2,'0');}
+const WFACES=['😞','🙁','😐','🙂','😄'];
+window.openWeekly=function(mood){const ar=isAr();mood=(mood==null?2:mood);openSheet(`<div style="text-align:center;font-size:40px">${WFACES[mood]}</div><h2 style="text-align:center;margin:6px 0 4px">${ar?'كيف شعرت هذا الأسبوع؟':'How did you feel this week?'}</h2>
+  <div class="chips" id="wkMood" style="justify-content:center;margin:10px 0 14px">${WFACES.map((f,i)=>`<button class="chip ${i===mood?'on':''}" data-v="${i}" onclick="pickChip('wkMood',this)" style="font-size:22px">${f}</button>`).join('')}</div>
+  <div class="field"><label>${ar?'ما الذي أثّر على شعورك هذا الأسبوع؟ (اختياري)':'What happened this week to affect how you feel? (optional)'}</label><textarea class="input" id="wkNote" placeholder="${ar?'اكتب ملاحظة…':'Write a note…'}"></textarea></div>
+  <button class="btn btn-primary" onclick="saveWeekly()">${ar?'حفظ':'Save'}</button>`);document.getElementById('wkMood').dataset.val=mood;};
+window.saveWeekly=function(){const ar=isAr();const wk=weekKey();const mv=document.getElementById('wkMood').dataset.val;S.weekly=(S.weekly||[]).filter(x=>x.week!==wk);S.weekly.push({week:wk,mood:mv!=null?+mv:2,note:(document.getElementById('wkNote').value||'').trim(),date:todayKey()});save();if(typeof awardXp==='function')awardXp(3);closeSheet();toast(ar?'شكرًا لمشاركتك':'Thanks for sharing');render();};
 
 (async()=>{ if(/#clin=/.test(location.hash)){ const ok=await checkClinHash(); if(ok)return; } go('splash',{replace:true}); })();
 window.addEventListener('hashchange',()=>{ if(/#clin=/.test(location.hash)) checkClinHash(); });
