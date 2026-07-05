@@ -242,6 +242,13 @@ footer .disc{color:var(--faint);font-size:12px;margin-top:14px}
 </style>
 </head>
 <body>
+<a id="floatCta" class="float-cta" href="index.html" data-i18n="openApp">Open the app</a>
+<style>.float-cta{position:fixed;bottom:20px;left:50%;transform:translate(-50%,140%);z-index:300;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#04121A;font-weight:800;padding:13px 24px;border-radius:999px;text-decoration:none;box-shadow:0 12px 32px rgba(0,0,0,.45);opacity:0;transition:transform .45s cubic-bezier(.34,1.4,.5,1),opacity .3s;font-size:14.5px;letter-spacing:.2px}
+.float-cta::after{content:' ↗'}
+.float-cta.show{transform:translate(-50%,0);opacity:1}
+.float-cta:active{transform:translate(-50%,3px) scale(.97)}
+@media(prefers-reduced-motion:reduce){.float-cta{transition:opacity .3s}}</style>
+<script>(function(){var c=document.getElementById('floatCta');if(!c)return;function u(){var b=document.body.scrollHeight-window.innerHeight-window.scrollY;if(window.scrollY>440&&b>320)c.classList.add('show');else c.classList.remove('show');}window.addEventListener('scroll',u,{passive:true});window.addEventListener('resize',u);u();})();</script>
 
 <nav class="nav"><div class="wrap">
   <a class="brand" href="#top"><span class="m" style="color:var(--accent)"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg></span><span>Rafeeq</span></a>
