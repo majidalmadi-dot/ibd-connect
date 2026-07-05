@@ -141,6 +141,14 @@ button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
 .tst-check{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:var(--good);color:#fff;font-size:12px;font-weight:800;margin-inline-end:8px;flex:none;animation:tstPop .5s var(--ease-spring)}
 @keyframes tstPop{0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.25) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
 .ringfx{transition:stroke-dashoffset .95s cubic-bezier(.34,1,.4,1)}
+#fab{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom,0px));inset-inline-end:18px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;box-shadow:0 10px 26px rgba(0,0,0,.30),0 2px 6px rgba(0,0,0,.2);z-index:70;cursor:pointer;display:none;align-items:center;justify-content:center;transform:scale(.4);opacity:0;transition:transform .32s cubic-bezier(.34,1.4,.5,1),opacity .2s}
+#fab.show{display:flex;transform:scale(1);opacity:1}
+#fab:active{transform:scale(.9)}
+@media(min-width:760px){#fab{inset-inline-end:calc(50% - 230px)}}
+.hero{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 88%,#fff),var(--accent) 55%,color-mix(in srgb,var(--accent) 72%,#000));color:#fff;padding:calc(18px + env(safe-area-inset-top,0px)) 18px 22px;border-radius:0 0 22px 22px;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 30%,transparent)}
+.hero .hgreet{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.hero .hsub{font-size:13.5px;opacity:.92;margin-top:4px;font-weight:500}
+.hero .hero-gear{background:rgba(255,255,255,.18);color:#fff;border:none}
 @media (pointer:fine){
   ::-webkit-scrollbar{width:9px}
   ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--muted) 38%,transparent);border-radius:8px;border:2px solid transparent;background-clip:content-box}
@@ -153,6 +161,7 @@ button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
 <div id="app">
   <div id="screens"></div>
   <nav class="tabbar hidden" id="tabbar"></nav>
+  <button id="fab" aria-label="Quick log" onclick="openQuickAdd()"><span style="font-size:27px;line-height:1;font-weight:300;margin-top:-2px">＋</span></button>
   <div class="sheet-bg" id="sheetbg"><div class="sheet" id="sheet"></div></div>
   <div class="toast" id="toast"></div>
 </div>
@@ -309,7 +318,10 @@ function go(n,o){o=o||{};if(!o.replace&&CURRENT&&CURRENT!==n)STACK.push(CURRENT)
 function goBack(){if(STACK.length){CURRENT=STACK.pop();render();}else navTab('today');}
 const MAIN=['today','track','scores','learn','more'];
 function navTab(n){STACK=[];CURRENT=n;CURRENT_OPTS={};render();}
-function render(){applyDir();const host=$('#screens');host.innerHTML='';const fn=ROUTES[CURRENT]||ROUTES['today'];const node=el('<div class="screen active"></div>');fn(node,CURRENT_OPTS);host.appendChild(node);node.scrollTop=0;try{animNums(node);}catch(e){}const tb=$('#tabbar');if(MAIN.includes(CURRENT)){tb.classList.remove('hidden');renderTabs();}else tb.classList.add('hidden');}
+function render(){applyDir();const host=$('#screens');host.innerHTML='';const fn=ROUTES[CURRENT]||ROUTES['today'];const node=el('<div class="screen active"></div>');fn(node,CURRENT_OPTS);host.appendChild(node);node.scrollTop=0;try{animNums(node);}catch(e){}const tb=$('#tabbar');if(MAIN.includes(CURRENT)){tb.classList.remove('hidden');renderTabs();}else tb.classList.add('hidden');const fab=$('#fab');if(fab)fab.classList.toggle('show',CURRENT==='today');}
+window.openQuickAdd=function(){const ar=isAr();const items=[['dysphagia','😣'],['impaction','🚨'],['meal','🍽️'],['reflux','🔥'],['adapt','🧩'],['med','💊']];
+  openSheet(`<h2 style="margin:4px 0 4px">${ar?'تسجيل سريع':'Quick log'}</h2><p class="muted" style="font-size:12.5px;margin:0 0 14px">${ar?'اختر ما تريد تسجيله':'Pick what to log'}</p>
+   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">${items.map(([ty,ic])=>`<button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:6px;padding:15px 6px" onclick="closeSheet();setTimeout(()=>openLog('${ty}'),120)"><span style="font-size:24px">${ic}</span><span style="font-size:12px">${L((TYPE_META[ty]||['',['','']])[1])}</span></button>`).join('')}</div>`);};
 function renderTabs(){const tb=$('#tabbar');const items=[['today','🏠','tabToday'],['track','➕','tabTrack'],['scores','📊','tabScores'],['learn','📚','tabLearn'],['more','⋯','tabMore']];tb.innerHTML=items.map(([n,ic,lab])=>`<button class="tab ${CURRENT===n?'on':''}" onclick="navTab('${n}')"><span class="ic">${ic}</span>${t(lab)}</button>`).join('');}
 
 /* ---------- charts (inline SVG) ---------- */
@@ -331,16 +343,21 @@ window.setLang=l=>{S.lang=l;save();applyDir();go('consent',{replace:true});};
 route('consent',(n)=>{n.innerHTML=`${topbar(null,null,{rawTitle:t('consentT')})}<div class="content">
   <div class="card"><p style="font-size:14px;line-height:1.7;white-space:pre-wrap;margin:0">${t('consentBody')}</p></div>
   <div class="field"><label>${t('yourName')}</label><input class="input" id="nm" placeholder="${t('namePh')}" value="${esc(S.user.name)}"></div>
+  <div class="field"><label>${isAr()?'ما الذي يهمّك أكثر؟ (اختياري)':'What matters most to you? (optional)'}</label>
+    <div class="chips" id="focus">${FOCUS.map(f=>`<button class="chip${S.user.focus===f.id?' on':''}" data-v="${f.id}" onclick="pick('focus',this)">${f.ic} ${L(f.n)}</button>`).join('')}</div></div>
   <button class="btn btn-primary" onclick="finishOnboard()">${t('iUnderstand')}</button>
   <button class="btn btn-ghost" onclick="toggleLangQuick()">🌐 ${isAr()?'English':'العربية'}</button></div>`;});
-window.finishOnboard=()=>{S.user.name=($('#nm').value||'').trim();S.onboarded=true;save();navTab('today');};
+window.finishOnboard=()=>{S.user.name=($('#nm').value||'').trim();const fc=$('#focus');if(fc&&fc.dataset.val)S.user.focus=fc.dataset.val;S.onboarded=true;save();navTab('today');};
+const FOCUS=[{id:'symptoms',ic:'😣',n:['My symptoms','أعراضي']},{id:'meals',ic:'🍽️',n:['Foods that suit me','أطعمة تناسبني']},{id:'treatment',ic:'💊',n:['My plan','خطتي']},{id:'learn',ic:'📚',n:['Learning','التعلّم']}];
+function focusLine(){const ar=isAr();const st=streak();const m={symptoms:['Log how swallowing feels today','سجّل كيف كان البلع اليوم'],meals:['Notice which foods suit you','لاحظ الأطعمة التي تناسبك'],treatment:['Keep your plan on track','حافظ على خطتك'],learn:['Learn something new today','تعلّم شيئًا جديدًا اليوم']};if(S.user.focus&&m[S.user.focus])return L(m[S.user.focus]);if(st>1)return ar?`🔥 ${st} أيام متتالية`:`🔥 ${st}-day streak`;return t('tagline');}
+function heroToday(){const ar=isAr();const nm=S.user.name?', '+esc(S.user.name):'';return `<div class="hero"><div class="between" style="align-items:flex-start"><div><div class="hgreet">${greeting()}${nm}</div><div class="hsub">${focusLine()}</div></div><button class="iconbtn hero-gear" onclick="navTab('more')" aria-label="Settings">⚙️</button></div></div>`;}
 window.toggleLangQuick=()=>{S.lang=isAr()?'en':'ar';save();render();};
 
 function greeting(){const h=new Date().getHours();return h<12?t('goodMorning'):h<18?t('goodAfternoon'):t('goodEvening');}
 route('today',(n)=>{markDay();const st=streak();const recent=S.logs.slice().sort((a,b)=>new Date(b.t)-new Date(a.t)).slice(0,5);
   const eesaiVals=S.eesai.slice(-10).map(e=>e.score);
-  n.innerHTML=`${topbar(null,null,{rawTitle:greeting(),rawSub:S.user.name?esc(S.user.name):t('tagline'),right:`<button class="iconbtn" onclick="navTab('more')">⚙️</button>`})}
-  <div class="content">
+  n.innerHTML=`${heroToday()}
+  <div class="content" style="padding-top:14px">
    <div class="card tap" onclick="openEesai()" style="background:linear-gradient(140deg,var(--accent-d),transparent)">
      <div class="between"><div><b style="font-size:15.5px">${t('checkinT')}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${t('checkinSub')}</div></div><span style="font-size:24px">📝</span></div></div>
    <div class="card tap" onclick="openTip()"><div class="row" style="gap:12px"><span style="font-size:22px">💡</span><div style="flex:1"><b style="font-size:13.5px">${isAr()?'نصيحة اليوم':'Tip of the day'}</b><div class="muted" style="font-size:12px;margin-top:2px">${L(TIPS[tipIndex()])}</div></div></div></div>

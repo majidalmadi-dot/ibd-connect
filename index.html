@@ -560,6 +560,14 @@ button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
 .toast.ok{border-color:var(--good)}
 .tst-check{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:var(--good);color:#fff;font-size:12px;font-weight:800;margin-inline-end:8px;flex:none;animation:tstPop .5s var(--ease-spring)}
 @keyframes tstPop{0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.25) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
+#fab{position:fixed;bottom:calc(74px + env(safe-area-inset-bottom,0px));inset-inline-end:18px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;box-shadow:0 10px 26px rgba(0,0,0,.30),0 2px 6px rgba(0,0,0,.2);z-index:70;cursor:pointer;display:none;align-items:center;justify-content:center;transform:scale(.4);opacity:0;transition:transform .32s var(--ease-spring),opacity .2s}
+#fab.show{display:flex;transform:scale(1);opacity:1}
+#fab:active{transform:scale(.9)}
+@media(min-width:760px){#fab{inset-inline-end:calc(50% - 230px)}}
+.hero{background:linear-gradient(135deg,var(--accent),color-mix(in srgb,var(--accent) 55%,var(--accent2,var(--accent))));color:#fff;padding:calc(16px + env(safe-area-inset-top,0px)) 20px 20px;border-radius:0 0 22px 22px;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 30%,transparent)}
+.hero .hgreet{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.hero .hsub{font-size:13px;opacity:.92;margin-top:4px;font-weight:500}
+.hero .hero-gear{background:rgba(255,255,255,.18);color:#fff;border:none}
 /* slim, elegant scrollbars on desktop */
 @media (pointer:fine){
   ::-webkit-scrollbar{width:9px;height:9px}
@@ -701,6 +709,7 @@ html[dir=rtl] .lhero-sub,html[dir=rtl] .lx-lead,html[dir=rtl] .lcard p,html[dir=
           <!-- Screens injected here -->
           <div id="screens"></div>
           <nav class="tabbar hidden" id="tabbar"></nav>
+          <button id="fab" aria-label="Quick log" onclick="openQuickAdd()"><span style="font-size:27px;line-height:1;font-weight:300;margin-top:-2px">＋</span></button>
           <div class="sheet-bg" id="sheetbg"><div class="sheet" id="sheet"></div></div>
           <div class="toast" id="toast"></div>
           <div class="updatebar hidden" id="updatebar"></div>
@@ -1495,8 +1504,12 @@ function render(){
   const tb=$('#tabbar');
   if(MAIN_TABS.includes(CURRENT)){tb.classList.remove('hidden');renderTabs();}
   else tb.classList.add('hidden');
+  const fab=$('#fab');if(fab)fab.classList.toggle('show',CURRENT==='today');
   try{ if(typeof track==='function') track('view',{r:CURRENT}); }catch(e){}
 }
+window.openQuickAdd=function(){const ar=isAr();const items=[['symptom','🩹',['Symptom','عَرَض']],['bowel','🚽',['Bowel','الأمعاء']],['meal','🍽️',['Meal','وجبة']],['mood','😊',['Mood','المزاج']],['activity','🏃',['Activity','نشاط']],['water','💧',['Water','ماء']]];
+  openSheet(`<h2 style="margin:2px 0 4px">${ar?'تسجيل سريع':'Quick log'}</h2><p class="muted" style="font-size:12.5px;margin:0 0 14px">${ar?'اختر ما تريد تسجيله':'Pick what to log'}</p>
+   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">${items.map(([ty,ic,lab])=>`<button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:6px;padding:15px 6px" onclick="closeSheet();setTimeout(()=>openLogger('${ty}'),120)"><span style="font-size:24px">${ic}</span><span style="font-size:12px">${L(lab)}</span></button>`).join('')}</div>`);};
 let CURRENT_OPTS={};
 function navTab(name){STACK=[];CURRENT=name;CURRENT_OPTS={};render();}
 function renderTabs(){
@@ -1514,6 +1527,9 @@ function topbar(titleK,subK,opts){opts=opts||{};
   return `<div class="topbar">${left}<div style="flex:1"><h1>${opts.rawTitle||t(titleK)}</h1>${subK?`<div class="sub">${opts.rawSub||t(subK)}</div>`:''}</div>${right}</div>`;
 }
 function greeting(){const h=new Date().getHours();return h<12?t('goodMorning'):h<18?t('goodAfternoon'):t('goodEvening');}
+const FOCUS=[{id:'symptoms',ic:'🩹',n:['Track symptoms','متابعة الأعراض']},{id:'meds',ic:'💊',n:['Stay on my meds','الالتزام بالدواء']},{id:'diet',ic:'🍽️',n:['Food & triggers','الطعام والمحفزات']},{id:'wellbeing',ic:'🌿',n:['Energy & wellbeing','الطاقة والعافية']}];
+function focusLine(){const ar=isAr();let wk=0;try{wk=weekActiveDays();}catch(e){}const st=streak();const m={symptoms:['Log how you feel today','سجّل شعورك اليوم'],meds:['Keep your treatment on track','حافظ على انتظام علاجك'],diet:['Notice what your body responds to','لاحظ ما يتجاوب معه جسمك'],wellbeing:['A small step for your energy today','خطوة صغيرة لطاقتك اليوم']};if(S.user.focus&&m[S.user.focus])return L(m[S.user.focus]);if(st>1)return ar?`🔥 ${st} أيام متتالية`:`🔥 ${st}-day streak`;return new Date().toLocaleDateString(ar?'ar-SA':'en-GB',{weekday:'long',day:'numeric',month:'long'});}
+function heroToday(){const u=S.user;const nm=u.name?', '+esc(u.name.split(' ')[0]):'';return `<div class="hero"><div class="between" style="align-items:flex-start"><div><div class="hgreet">${greeting()}${nm}</div><div class="hsub">${focusLine()}</div></div><button class="iconbtn hero-gear" onclick="navTab('more')" aria-label="${t('more')||'Settings'}">${u.avatar||'🙂'}</button></div></div>`;}
 function scaleSel(id,n,colors,val,start){start=(start==null?1:start);let h='<div class="scale" id="'+id+'">';for(let i=start;i<=n;i++){const c=colors?(colors[i-start]||'var(--accent)'):'var(--accent)';h+=`<button data-v="${i}" class="${val===i?'on':''}" style="${val===i?`background:${c}`:''}" onclick="pickScale('${id}',${i},'${c}')">${i}</button>`;}h+='</div>';return h;}
 window.pickScale=function(id,v,c){const wrap=$('#'+id);[...wrap.children].forEach(b=>{b.classList.remove('on');b.style.background='';});const btn=wrap.querySelector(`[data-v="${v}"]`);btn.classList.add('on');btn.style.background=c;wrap.dataset.val=v;};
 function getScale(id){const w=$('#'+id);return w&&w.dataset.val!==undefined?+w.dataset.val:null;}
@@ -1621,6 +1637,8 @@ route('setup',(n)=>{
        <div class="chips" id="suDisease">${dz.map(([v,k])=>`<button class="chip ${u.disease===v?'on':''}" data-v="${v}" onclick="pickChip('suDisease',this)">${t(k)}</button>`).join('')}</div>
      </div>
      <div class="field"><label>${t('yearDiag')}</label><input class="input" id="suDiag" inputmode="numeric" placeholder="2021" value="${esc(u.diagYear)}"></div>
+     <div class="field"><label>${isAr()?'ما الذي يهمّك أكثر؟ (اختياري)':'What matters most to you? (optional)'}</label>
+       <div class="chips" id="suFocus">${FOCUS.map(f=>`<button class="chip ${u.focus===f.id?'on':''}" data-v="${f.id}" onclick="pickChip('suFocus',this)">${f.ic} ${L(f.n)}</button>`).join('')}</div></div>
      <div class="field"><label>${t('joinFrom')}</label>
        <button class="input" style="display:flex;align-items:center;justify-content:space-between;text-align:start" onclick="stashSetupGoCountry()">
          <span class="row" style="gap:10px">${u.country?`<span style="font-size:22px">${u.countryFlag}</span><span>${isAr()?(COUNTRIES.find(x=>x.c===u.country)||{}).ar:(COUNTRIES.find(x=>x.c===u.country)||{}).en}</span>`:`<span style="font-size:22px">🌍</span><span class="muted">${t('selectCountry')}</span>`}</span>
@@ -1631,12 +1649,13 @@ route('setup',(n)=>{
 window.pickChip=function(wrapId,btn){const w=$('#'+wrapId);[...w.children].forEach(c=>c.classList.remove('on'));btn.classList.add('on');w.dataset.val=btn.dataset.v;};
 window.stashSetupGoCountry=function(){const u=S.user;const g=id=>($('#'+id)||{}).value;
   u.name=(g('suName')||'').trim();u.year=(g('suYear')||'').trim();u.gender=g('suGender')||'';u.diagYear=(g('suDiag')||'').trim();
-  if($('#suDisease')&&$('#suDisease').dataset.val)u.disease=$('#suDisease').dataset.val;save();go('country');};
+  if($('#suDisease')&&$('#suDisease').dataset.val)u.disease=$('#suDisease').dataset.val;if($('#suFocus')&&$('#suFocus').dataset.val)u.focus=$('#suFocus').dataset.val;save();go('country');};
 window.setupNext=()=>{
   const name=$('#suName').value.trim();
   const disease=$('#suDisease').dataset.val||S.user.disease;
   if(!name||!disease)return toast(t('fillFields'));
   Object.assign(S.user,{name,year:$('#suYear').value.trim(),gender:$('#suGender').value,disease,diagYear:$('#suDiag').value.trim()});
+  if($('#suFocus')&&$('#suFocus').dataset.val)S.user.focus=$('#suFocus').dataset.val;
   S.onboarded=true;save();go('signup',{replace:true});
 };
 
@@ -1716,8 +1735,8 @@ route('today',(n)=>{
   const allClosed=g.every(x=>x.val>=x.goal);
   const stepGoal=S.prefs.stepGoal||8000, stepsNow=todaySteps(), stepPct=Math.min(stepsNow/stepGoal,1);
   const waterGoal=S.prefs.waterGoal||8, waterNow=todayWater();
-  n.innerHTML=`${topbar(null,null,{rawTitle:greeting()+(u.name?', '+u.name.split(' ')[0]:''),rawSub:new Date().toLocaleDateString(isAr()?'ar-SA':'en-GB',{weekday:'long',day:'numeric',month:'long'}),right})}
-   <div class="content">
+  n.innerHTML=`${heroToday()}
+   <div class="content" style="padding-top:14px">
      ${!S.prefs.seenWelcome?`<div class="card welcome"><div class="between" style="align-items:flex-start"><div style="flex:1"><b style="font-size:15.5px">${t('welcomeT')}</b><p class="muted" style="font-size:13px;line-height:1.55;margin:6px 0 0">${t('welcomeBody')}</p></div></div><button class="btn btn-primary" style="margin-top:12px" onclick="dismissWelcome()">${t('gotIt')}</button></div>`:''}
      ${nudgeBanner()}
      ${(()=>{const now=todayKey();const up=(S.appointments||[]).filter(a=>a.date>=now).sort((a,b)=>(a.date+(a.time||''))<(b.date+(b.time||''))?-1:1)[0];if(!up)return '';const dd=new Date(up.date+'T'+(up.time||'09:00'));const dstr=dd.toLocaleDateString(isAr()?'ar-SA':'en-GB',{weekday:'short',day:'numeric',month:'short'});const days=Math.round((new Date(up.date+'T00:00')-new Date(now+'T00:00'))/864e5);const when=days<=0?(isAr()?'اليوم':'today'):days===1?(isAr()?'غدًا':'tomorrow'):(isAr()?('بعد '+days+' يوم'):('in '+days+' days'));return `<button class="card tap" style="text-align:start;width:100%" onclick="go('appointments')"><div class="between"><div class="row" style="gap:11px"><span style="width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;color:var(--accent);background:var(--bg2);flex:none">${svgIcon('calendar',22)}</span><div><div class="muted" style="font-size:11.5px">${isAr()?'الموعد القادم':'Next appointment'} · ${when}</div><b style="font-size:14.5px">${apptTypeLabel(up.type)}</b><div class="muted" style="font-size:12px">${dstr}${up.time?' · '+up.time:''}</div></div></div><div class="chev">${isAr()?'‹':'›'}</div></div></button>`;})()}
