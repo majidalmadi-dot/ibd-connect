@@ -1226,6 +1226,12 @@ const I18N = {
   nudgeSteps:{en:"You're {n} steps from today's goal. A short walk closes the ring 🚶",ar:"تبقّى {n} خطوة لهدف اليوم. نزهة قصيرة تُغلق الحلقة 🚶"},
   nudgeHydra:{en:"Remember to stay hydrated today — small sips add up 💧",ar:"تذكّر الترطيب اليوم — الرشفات الصغيرة تتراكم 💧"},
   nudgeDisc:{en:"It's been a while since your last IBD-DISC self-check. Take a moment? 🧭",ar:"مضى وقت على آخر تقييم IBD-DISC. هل تأخذ لحظة؟ 🧭"},
+  nudgeComeback:{en:"Welcome back — it's been {n} days. A quick check-in picks up right where you left off. 👋",ar:"أهلًا بعودتك — مضت {n} أيام. تسجيل سريع يُكمل من حيث توقّفت. 👋"},
+  nudgeStreakRecover:{en:"Your {n}-day streak paused — log today to start a fresh one. You've got this 💪",ar:"توقّف تتابعك ({n} يومًا) — سجّل اليوم لتبدأ سلسلة جديدة. أنت قادر 💪"},
+  nudgeWeekly:{en:"Your weekly check-in is open — one tap tells the story of your week. 🗓️",ar:"تسجيلك الأسبوعي متاح — نقرة واحدة تحكي أسبوعك. 🗓️"},
+  nudgeResearch:{en:"Time for your programme check-in — it helps show whether the app is helping. 🔬",ar:"حان وقت قياس البرنامج — يساعد على إظهار ما إذا كان التطبيق يفيد. 🔬"},
+  comebackT:{en:"Good to see you again",ar:"سعيدون بعودتك"},
+  comebackBody:{en:"You logged {n} days before your break. Pick one quick thing to log and you're back in rhythm.",ar:"سجّلت {n} يومًا قبل توقّفك. اختر شيئًا سريعًا لتسجيله وتعود إلى إيقاعك."},
   nudgeContent:{en:"New content is waiting in Learn for you 📖",ar:"محتوى جديد بانتظارك في قسم تعلّم 📖"},
   dismiss:{en:"Dismiss",ar:"إخفاء"},
   // metrics dashboard
@@ -4855,6 +4861,16 @@ window.saveWeight=function(){const k=parseFloat(($('#wkIn')||{}).value)||0;if(!k
 /* ============================================================
    SMART NUDGES — contextual, dismissible, toggleable
    ============================================================ */
+function daysSinceLastLog(){let m=Infinity;(S.logs||[]).forEach(l=>{const a=daysAgo(l.t.slice(0,10));if(a<m)m=a;});return m;}
+function recentBrokenStreak(){
+  // length of the most recent consecutive-logging run that has since paused (gap 1..6 days). 0 if active today or away >6d.
+  if(logsOn(todayKey()).length>0)return 0;
+  let gap=0,i=0;for(i=0;i<7;i++){if(logsOn(todayKey(new Date(Date.now()-i*864e5))).length>0)break;gap++;}
+  if(i>=7||gap<1)return 0;
+  let len=0;for(let j=i;j<i+400;j++){if(logsOn(todayKey(new Date(Date.now()-j*864e5))).length>0)len++;else break;}
+  return len;
+}
+function lastControlDaysAgo(){const h=S.controlHistory||[];if(!h.length)return Infinity;return daysAgo(h[h.length-1].date.slice(0,10));}
 function getNudge(){
   if(!S.prefs.nudges)return null;
   const today=todayKey();const dz=S.nudgeDismiss||{};
@@ -4862,6 +4878,18 @@ function getNudge(){
   const cands=[];
   // streak at risk: had a streak through yesterday, nothing logged today
   const st=streak();
+  // ---- re-engagement (lapse-aware) ----
+  const dsl=daysSinceLastLog();
+  if((S.logs||[]).length>0 && dsl>=2 && dsl<400 && fresh('comeback'))
+    cands.push({id:'comeback',icon:'heart',text:t('nudgeComeback').replace('{n}',dsl),action:"navTab('track')",pri:9});
+  const brk=recentBrokenStreak();
+  if(brk>=3 && dsl<7 && fresh('streakrec'))
+    cands.push({id:'streakrec',icon:'flame',text:t('nudgeStreakRecover').replace('{n}',brk),action:"navTab('track')",pri:8});
+  if(S.research&&S.research.enrolled && lastControlDaysAgo()>=14 && fresh('research'))
+    cands.push({id:'research',icon:'pulse',text:t('nudgeResearch'),action:"window.__ctrlStart()",pri:7});
+  {const wk=weekKey();const wkDone=(S.weekly||[]).some(x=>x.week===wk);
+   if(!wkDone && new Date().getDay()>=3 && fresh('weekly'))
+     cands.push({id:'weekly',icon:'calendar',text:t('nudgeWeekly'),action:"openWeekly(2)",pri:6});}
   if(S.prefs.nudgeStreak&&logsOn(today).length===0){
     const yKey=todayKey(new Date(Date.now()-864e5));
     if(logsOn(yKey).length>0&&st>=1&&fresh('streak'))cands.push({id:'streak',icon:'flame',text:t('nudgeStreak').replace('{n}',st),action:"navTab('track')",pri:5});
