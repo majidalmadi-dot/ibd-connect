@@ -1360,7 +1360,8 @@ function blank(){return{
     stepGoal:8000,activeMinGoal:30,waterGoal:8,nudges:true,nudgeDaily:true,nudgeStreak:true,nudgeHydra:true,seenWelcome:false,
     bigText:false,pushOn:false},
   logs:[], disc:null, discHistory:[], reminders:[],
-  meds:[], labs:[], control:null, registry:{optedIn:false, lastSync:null},
+  meds:[], labs:[], control:null, controlHistory:[], registry:{optedIn:false, lastSync:null},
+  research:{enrolled:false, pid:null, consentAt:null, siteCode:null, baselineAt:null},
   supplements:[], grocery:[], vaccines:{},
   badges:[], learn:JSON.parse(JSON.stringify(DEFAULT_LEARN)), tips:JSON.parse(JSON.stringify(DEFAULT_TIPS)),
   seenDays:[], nudgeDismiss:{}, courses:{}, appointments:[], weekly:[],
@@ -2509,7 +2510,9 @@ route('control',(n)=>{
     const sum=Object.values(ctrlAns).reduce((a,b)=>a+b,0);const max=total*3;const pct=Math.round(sum/max*100);
     const band=pct>=70?'good':pct>=40?'warn':'bad';
     const msg=pct>=70?(isAr()?'تشير إجاباتك إلى أنك شعرت بحال جيدة عمومًا مؤخرًا.':'Your answers suggest you have generally been feeling well lately.'):pct>=40?(isAr()?'تشير إجاباتك إلى أن الأمور كانت متفاوتة مؤخرًا — قد يستحق متابعة ومشاركة فريقك.':'Your answers suggest things have been mixed lately — may be worth monitoring and sharing with your team.'):(isAr()?'تشير إجاباتك إلى أنك لم تكن في أفضل حال مؤخرًا. فكّر في التواصل مع فريقك الطبي.':'Your answers suggest you have not been at your best lately. Consider reaching out to your care team.');
-    S.control={date:new Date().toISOString(),score:pct};save();
+    S.control={date:new Date().toISOString(),score:pct};
+    S.controlHistory=S.controlHistory||[];S.controlHistory.push({date:S.control.date,score:pct});if(S.controlHistory.length>60)S.controlHistory=S.controlHistory.slice(-60);
+    save();track('pro_control',{});
     n.innerHTML=`${topbar(null,null,{back:true,rawTitle:isAr()?'ملخّص التأمّل':'Reflection summary'})}
      <div class="content" style="text-align:center">
        <div class="card"><div style="font-size:46px;font-weight:800;color:var(--${band==='good'?'good':band==='warn'?'warn':'bad'})">${pct}<span style="font-size:20px">/100</span></div>
@@ -2693,6 +2696,65 @@ window.exportEngagement=function(){
   track('export_engagement');
   toast(ar?'✓ نُسخت المقاييس المجهولة':'✓ Anonymized metrics copied & downloaded');
 };
+
+/* ===== Real-world-evidence programme: structured PRO capture + de-identified export =====
+   Optional, consent-gated. Bundles longitudinal PROs (IBD-Control, IBD-DISC, weekly mood)
+   with engagement KPIs under a random participant id. No name/email/notes ever leave. */
+function ageBand(){const y=parseInt(S.user&&S.user.year,10);if(!y)return null;const a=new Date().getFullYear()-y;if(a<18)return '<18';if(a<30)return '18-29';if(a<45)return '30-44';if(a<60)return '45-59';return '60+';}
+function buildEvidenceRecord(){
+  const e=computeEngagement();const r=S.research||{};
+  const disc=(S.discHistory||[]).map(h=>{const dom=h.answers||{};const total=Object.values(dom).reduce((a,b)=>a+(+b||0),0);return {date:h.date,total,domains:dom};});
+  return {
+    schema:1, app:'rafeeq',
+    participantId:r.pid||null, siteCode:r.siteCode||null, consentAt:r.consentAt||null, baselineAt:r.baselineAt||null,
+    demographics:{ disease:(S.user&&S.user.disease)||null, sex:(S.user&&S.user.gender)||null, ageBand:ageBand(), country:(S.user&&S.user.country)||null, diagYear:(S.user&&S.user.diagYear)||null },
+    pro:{ ibdControl:(S.controlHistory||[]).map(x=>({date:x.date,score:x.score})), disc:disc, weeklyMood:(S.weekly||[]).map(w=>({week:w.week,mood:w.mood})) },
+    engagement:{ firstSeen:S.metrics&&S.metrics.firstSeen, daysSince:e.daysSince, activeDays:e.activeDays, activeLast30:e.last30, currentStreak:e.streak, logsTotal:e.logsTotal, weeklyCheckins:e.weeklyDone, retention:{d1:e.d1,d7:e.d7,d30:e.d30} },
+    exportedAt:new Date().toISOString()
+  };
+}
+window.exportEvidence=function(){
+  const ar=isAr();const rec=buildEvidenceRecord();
+  if(!rec.participantId){toast(ar?'انضم أولًا لتوليد معرّف':'Enrol first to generate an ID');return;}
+  const txt=JSON.stringify(rec,null,2);
+  try{navigator.clipboard&&navigator.clipboard.writeText(txt);}catch(x){}
+  try{const b=new Blob([txt],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='rafeeq-evidence-'+rec.participantId+'.json';document.body.appendChild(a);a.click();a.remove();}catch(x){}
+  track('export_evidence');toast(ar?'✓ نُسخت بياناتك مجهولة الهوية':'✓ De-identified data copied & downloaded');
+};
+window.enrollResearch=function(){
+  const ar=isAr();S.research=S.research||{};S.research.enrolled=true;
+  S.research.pid=S.research.pid||('P-'+Math.random().toString(36).slice(2,8).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase());
+  S.research.consentAt=new Date().toISOString();if(!S.research.baselineAt)S.research.baselineAt=S.research.consentAt;
+  const sc=document.getElementById('siteCode');if(sc&&sc.value.trim())S.research.siteCode=sc.value.trim().toUpperCase();
+  save();track('research_enroll');try{closeSheet();}catch(e){}toast(ar?'✓ شكرًا لمساهمتك':'✓ Thank you for contributing');render();
+};
+window.withdrawResearch=function(){const ar=isAr();S.research={enrolled:false,pid:null,consentAt:null,siteCode:null,baselineAt:null};save();track('research_withdraw');toast(ar?'تم الانسحاب':'Withdrawn');render();};
+window.openEnroll=function(){const ar=isAr();
+  openSheet(`<h2 style="margin:4px 0 8px">${ar?'الانضمام لبرنامج التحسين':'Join the improvement programme'}</h2>
+   <p class="muted" style="font-size:13px;line-height:1.6;margin:0 0 12px">${ar?'برنامج اختياري لقياس ما إذا كان التطبيق يساعد فعلًا. تُصدَّر بياناتك مجهولة الهوية تمامًا (بلا اسم أو بريد أو ملاحظات) وتشاركها أنت مع فريق الدراسة. تبقى على جهازك ما لم تشاركها.':'An optional programme to measure whether the app actually helps. Your data is exported fully de-identified (no name, email, or notes) and you share it with the study team yourself. It stays on your device unless you share it.'}</p>
+   <div class="field"><label>${ar?'رمز الموقع (اختياري)':'Site code (optional)'}</label><input class="input" id="siteCode" placeholder="${ar?'مثال: KSU':'e.g. KSU'}" style="text-transform:uppercase" value="${esc((S.research&&S.research.siteCode)||'')}"></div>
+   <button class="btn btn-primary" onclick="enrollResearch()">${ar?'أوافق وأنضم':'I consent & join'}</button>
+   <p class="muted" style="font-size:11px;margin-top:10px">${ar?'يمكنك الانسحاب في أي وقت. هذا ليس رعاية طبية ولا يستبدل فريقك.':'You can withdraw anytime. This is not medical care and does not replace your team.'}</p>`);
+};
+route('research',(n)=>{const ar=isAr();const r=S.research||{};const on=!!r.enrolled;const rec=on?buildEvidenceRecord():null;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'البحث والأثر':'Research & evidence'})}
+   <div class="content">
+    <div class="card" style="background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent)"><div class="row" style="gap:12px"><span style="font-size:26px">${on?'🔬':'📈'}</span><div style="flex:1"><b style="font-size:15px">${on?(ar?'مشارِك · ':'Enrolled · ')+esc(r.pid):(ar?'غير مشارِك':'Not enrolled')}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${on?(ar?'شكرًا — مساهمتك تساعد على إثبات قيمة التطبيق.':'Thank you — your contribution helps prove the app’s value.'):(ar?'اختياري تمامًا.':'Completely optional.')}</div></div></div></div>
+    <div class="card"><p style="font-size:13.5px;line-height:1.6;margin:0">${ar?'يجمع هذا البرنامج مقاييسك المُبلّغ عنها ذاتيًا عبر الوقت (مؤشّر IBD-Control، تقييم IBD-DISC، الشعور الأسبوعي) مع مقاييس الاستخدام، ويصدّرها مجهولة الهوية لتقييم ما إذا كان استخدام التطبيق يقترن بتحسّن. تُدار الدراسة من الجمعية السعودية لأمراض الجهاز الهضمي وفق الموافقات الأخلاقية.':'This programme collects your self-reported measures over time (IBD-Control index, IBD-DISC self-check, weekly wellbeing) alongside usage metrics, and exports them de-identified to evaluate whether using the app is associated with improvement. The study is run by the Saudi Gastroenterology Association under ethics approval.'}</p></div>
+    ${on?`
+      <div class="grid2">
+        <div class="kpi"><div class="v">${rec.pro.ibdControl.length}</div><div class="l">${ar?'قياسات IBD-Control':'IBD-Control PROs'}</div></div>
+        <div class="kpi"><div class="v">${rec.pro.disc.length}</div><div class="l">${ar?'تقييمات DISC':'DISC self-checks'}</div></div>
+        <div class="kpi"><div class="v">${rec.pro.weeklyMood.length}</div><div class="l">${ar?'تسجيلات أسبوعية':'weekly check-ins'}</div></div>
+        <div class="kpi"><div class="v">${rec.engagement.daysSince}</div><div class="l">${ar?'أيام في البرنامج':'days in programme'}</div></div>
+      </div>
+      <button class="btn btn-primary" onclick="window.__ctrlStart()">${ar?'إجراء قياس اليوم':'Do today’s check-in'}</button>
+      <button class="btn btn-ghost" style="margin-top:10px" onclick="exportEvidence()">📤 ${ar?'تصدير بياناتي مجهولة الهوية':'Export my de-identified data'}</button>
+      <button class="btn btn-ghost" style="margin-top:10px" onclick="withdrawResearch()">${ar?'الانسحاب':'Withdraw'}</button>
+    `:`<button class="btn btn-primary" onclick="openEnroll()">${ar?'الانضمام (اختياري)':'Join (optional)'}</button>`}
+    <p class="muted" style="font-size:11px;margin-top:14px">${ar?'مجهول الهوية: لا اسم ولا بريد ولا ملاحظات. أنت من يشارك الملف. أداة غير طبية.':'De-identified: no name, email, or notes. You choose to share the file. Non-medical tool.'}</p>
+   </div>`;
+});
 function track(ev,props){
   recordEvent(ev,props);
   try{ if(window.plausible) window.plausible(ev, props?{props:props}:undefined); }catch(e){}
@@ -4312,6 +4374,7 @@ route('more',(n)=>{
        ${mLi('user',isAr()?'عرض للعائلة':'Family view','',"go('caregiver')")}
        ${mLi('heart',isAr()?'أين أجد متخصصًا':'Find a specialist','',"go('directory')")}
        ${mLi('globe',isAr()?'المساهمة في السجل الوطني':'Contribute to registry',S.registry&&S.registry.optedIn?(isAr()?'مُفعّل':'on'):'',"go('registry')")}
+       ${mLi('pulse',isAr()?'البحث والأثر':'Research & evidence',S.research&&S.research.enrolled?(isAr()?'مشارِك':'enrolled'):'',"go('research')")}
      </div>
 
      ${window.isStandalone&&window.isStandalone()?'':`<div class="card tap welcome" onclick="installApp()"><div class="row"><span class="ic" style="width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center">${svgIcon('download',22)}</span><div style="flex:1"><b style="font-size:14.5px">${t('installApp')}</b><div class="muted" style="font-size:12.5px">${t('installSub')}</div></div><div class="chev">${isAr()?'‹':'›'}</div></div></div>`}
