@@ -1365,7 +1365,8 @@ function blank(){return{
   badges:[], learn:JSON.parse(JSON.stringify(DEFAULT_LEARN)), tips:JSON.parse(JSON.stringify(DEFAULT_TIPS)),
   seenDays:[], nudgeDismiss:{}, courses:{}, appointments:[], weekly:[],
   game:{xp:0, quests:{}, goalDays:[], lastLevel:1},
-  metrics:{firstSeen:null, anonId:null, ev:[]}
+  metrics:{firstSeen:null, anonId:null, ev:[]},
+  cloud:{enabled:false, code:null, syncId:null, lastSync:null}
 };}
 /* deep-merge saved state over defaults so newly-added nested fields aren't lost on upgrade
    (arrays are replaced wholesale by the saved value, objects merge key-by-key) */
@@ -1381,7 +1382,7 @@ function deepMerge(base,over){
   return out;
 }
 function load(){try{const v=JSON.parse(localStorage.getItem(KEY));return v?deepMerge(blank(),v):seedDemo(blank());}catch(e){return seedDemo(blank());}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}try{cloudSchedulePush();}catch(e){}}
 function reset(){S=blank();save();}
 
 /* seed a little demo history so charts aren't empty on first run */
@@ -2742,6 +2743,91 @@ function loadSupabase(){
   });
   return __sbLoading;
 }
+/* ===== Opt-in END-TO-END-ENCRYPTED cloud backup (recovery-code based) =====
+   Data is encrypted on-device with a code the user holds; neither we nor Supabase
+   can read it. Server access is only via SECURITY DEFINER RPCs keyed by an
+   unguessable hash of the code. Local data is unaffected if backup is off. */
+function cryptoReady(){return !!(window.crypto&&window.crypto.subtle);}
+function _sb64(buf){const b=new Uint8Array(buf);let s='';const CH=0x8000;for(let i=0;i<b.length;i+=CH)s+=String.fromCharCode.apply(null,b.subarray(i,i+CH));return btoa(s);}
+function _unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0));}
+function _pbBase(code){return crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey','deriveBits']);}
+async function deriveEncKey(code){const b=await _pbBase(code);return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode('rafeeq-sync-enc-v1'),iterations:120000,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function deriveSyncId(code){const b=await _pbBase(code);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode('rafeeq-sync-id-v1'),iterations:120000,hash:'SHA-256'},b,256);return Array.from(new Uint8Array(bits)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function encBlob(obj,key){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj)));return _sb64(iv)+'.'+_sb64(ct);}
+async function decBlob(blob,key){const p=blob.split('.');const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:_unb64(p[0])},key,_unb64(p[1]));return JSON.parse(new TextDecoder().decode(pt));}
+function genRecoveryCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const out=[];for(let g=0;g<6;g++){let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];out.push(s);}return out.join('-');}
+function cloudSnapshot(){const c=Object.assign({},S);delete c.cloud;return c;}
+let _cloudTimer=null,_cloudBusy=false;
+async function cloudPush(silent){
+  try{
+    if(!S.cloud||!S.cloud.enabled||!S.cloud.code||!cryptoReady()||!cloudOn())return false;
+    if(_cloudBusy)return false;_cloudBusy=true;
+    const key=await deriveEncKey(S.cloud.code);const sid=S.cloud.syncId||await deriveSyncId(S.cloud.code);S.cloud.syncId=sid;
+    const blob=await encBlob(cloudSnapshot(),key);
+    const sb=await loadSupabase();if(!sb){_cloudBusy=false;return false;}
+    const r=await sb.rpc('snapshot_put',{p_sync_id:sid,p_blob:blob,p_schema:1});
+    _cloudBusy=false;
+    if(r&&r.error){if(!silent)toast(isAr()?'تعذّرت المزامنة':'Sync failed');return false;}
+    S.cloud.lastSync=new Date().toISOString();
+    try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){} // write without re-scheduling a push
+    if(!silent){toast(isAr()?'✓ تمّت المزامنة':'✓ Synced');if(CURRENT==='backup')render();}
+    return true;
+  }catch(e){_cloudBusy=false;return false;}
+}
+function cloudSchedulePush(){if(!S||!S.cloud||!S.cloud.enabled)return;clearTimeout(_cloudTimer);_cloudTimer=setTimeout(()=>cloudPush(true),6000);}
+async function cloudRestore(code){
+  code=(code||'').trim().toUpperCase();
+  if(!code)return toast(isAr()?'أدخل رمز الاسترداد':'Enter your recovery code');
+  if(!cryptoReady()||!cloudOn())return toast(isAr()?'غير متاح':'Not available here');
+  toast(isAr()?'جارٍ الاسترداد…':'Restoring…');
+  try{
+    const key=await deriveEncKey(code);const sid=await deriveSyncId(code);
+    const sb=await loadSupabase();if(!sb)return toast(isAr()?'تعذّر الاتصال':'Could not connect');
+    const r=await sb.rpc('snapshot_get',{p_sync_id:sid});
+    if(r&&r.error)return toast(isAr()?'تعذّر الاسترداد':'Restore failed');
+    const data=r&&r.data;if(!data||!data.length)return toast(isAr()?'لا توجد نسخة لهذا الرمز':'No backup found for that code');
+    const obj=await decBlob(data[0].blob,key);
+    S=deepMerge(S,obj);
+    S.cloud=Object.assign({},S.cloud,{enabled:true,code:code,syncId:sid,lastSync:new Date().toISOString()});
+    save();closeSheet();toast(isAr()?'✓ تمّ استرداد بياناتك':'✓ Your data was restored');navTab('today');
+  }catch(e){toast(isAr()?'رمز غير صحيح أو تالف':'Invalid or corrupted code');}
+}
+window.enableBackup=async function(){
+  if(!cryptoReady())return toast(isAr()?'التشفير غير مدعوم هنا':'Encryption not supported here');
+  const code=genRecoveryCode();
+  S.cloud={enabled:true,code:code,syncId:null,lastSync:null};save();
+  await cloudPush(true);
+  showRecoveryCode(code);track('cloud_enable');
+};
+window.showRecoveryCode=function(code){const ar=isAr();code=code||(S.cloud&&S.cloud.code)||'';
+  openSheet(`<h2 style="margin:4px 0 6px">${ar?'رمز الاسترداد':'Your recovery code'}</h2>
+   <p class="muted" style="font-size:13px;margin:0 0 12px">${ar?'احفظه في مكان آمن — إنه المفتاح الوحيد لبياناتك المشفّرة. لا يمكننا استعادته إن فقدته.':'Save it somewhere safe — it is the only key to your encrypted data. We cannot recover it if you lose it.'}</p>
+   <div style="font-family:ui-monospace,monospace;font-size:18px;letter-spacing:1px;text-align:center;background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:16px;word-break:break-all">${esc(code)}</div>
+   <button class="btn btn-primary" style="margin-top:14px" onclick="(navigator.clipboard&&navigator.clipboard.writeText('${code}'));toast('${ar?'نُسخ':'Copied'}')">${ar?'نسخ الرمز':'Copy code'}</button>
+   <button class="btn btn-ghost" style="margin-top:10px" onclick="closeSheet();render()">${ar?'حفظتُه':'I saved it'}</button>`);
+};
+window.disableBackup=function(){const ar=isAr();S.cloud={enabled:false,code:null,syncId:null,lastSync:null};save();toast(ar?'أُوقف النسخ السحابي':'Cloud backup turned off');render();};
+window.openRestore=function(){const ar=isAr();
+  openSheet(`<h2 style="margin:4px 0 8px">${ar?'استرداد بياناتك':'Restore your data'}</h2>
+   <p class="muted" style="font-size:13px;margin:0 0 12px">${ar?'أدخل رمز الاسترداد المكوّن من ٦ مجموعات.':'Enter your recovery code (six groups).'}</p>
+   <div class="field"><input class="input" id="rcCode" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div>
+   <button class="btn btn-primary" onclick="cloudRestore(document.getElementById('rcCode').value)">${ar?'استرداد':'Restore'}</button>
+   <p class="muted" style="font-size:11px;margin-top:10px">${ar?'سيُدمج مع بيانات هذا الجهاز.':'Merges with this device’s data.'}</p>`);
+};
+window.cloudSyncNow=function(){cloudPush(false);};
+route('backup',(n)=>{const ar=isAr();const c=S.cloud||{};const on=!!c.enabled;
+ n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'النسخ الاحتياطي السحابي':'Cloud backup'})}
+  <div class="content">
+   <div class="card" style="background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent)"><div class="row" style="gap:12px"><span style="font-size:26px">${on?'🔒':'☁️'}</span><div style="flex:1"><b style="font-size:15px">${on?(ar?'مُفعّل · مشفّر من طرف إلى طرف':'On · end-to-end encrypted'):(ar?'غير مُفعّل':'Off')}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${on&&c.lastSync?(ar?'آخر مزامنة: ':'Last sync: ')+new Date(c.lastSync).toLocaleString(ar?'ar-SA':'en-GB'):(ar?'بياناتك على هذا الجهاز فقط':'Your data is on this device only')}</div></div></div></div>
+   <div class="card"><p style="font-size:13.5px;line-height:1.6;margin:0">${ar?'اختياري ومشفّر من طرف إلى طرف: تُشفَّر بياناتك على جهازك برمز استرداد لا نراه أبدًا — لا نستطيع نحن ولا الخادم قراءتها. يتيح استعادة بياناتك على جهاز جديد إن فقدت هذا الجهاز.':'Optional and end-to-end encrypted: your data is encrypted on your device with a recovery code we never see — neither we nor the server can read it. Lets you restore on a new device if you lose this one.'}</p></div>
+   ${on?`<button class="btn btn-primary" onclick="cloudSyncNow()">🔄 ${ar?'مزامنة الآن':'Sync now'}</button>
+     <button class="btn btn-ghost" style="margin-top:10px" onclick="showRecoveryCode()">${ar?'إظهار رمز الاسترداد':'Show recovery code'}</button>
+     <button class="btn btn-ghost" style="margin-top:10px" onclick="disableBackup()">${ar?'إيقاف النسخ':'Turn off backup'}</button>`
+   :`<button class="btn btn-primary" onclick="enableBackup()">${ar?'تفعيل النسخ المشفّر':'Enable encrypted backup'}</button>
+     <button class="btn btn-ghost" style="margin-top:10px" onclick="openRestore()">${ar?'استرداد على هذا الجهاز':'Restore on this device'}</button>`}
+   <p class="muted" style="font-size:11px;margin-top:14px">${ar?'إن فقدت رمز الاسترداد تُفقد النسخة السحابية — بياناتك المحلية تبقى كما هي. يُخزَّن الرمز على هذا الجهاز للمزامنة التلقائية؛ أوقف النسخ على الأجهزة المشتركة.':'If you lose the recovery code, the cloud copy is unrecoverable — your local data is unaffected. The code is stored on this device for auto-sync; turn backup off on shared devices.'}</p>
+  </div>`;
+});
 function loadQR(){
   if(window.QRCode)return Promise.resolve(true);
   return new Promise((res)=>{const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s);});
@@ -4236,6 +4322,7 @@ route('more',(n)=>{
        ${mLi('globe',t('language'),isAr()?'العربية':'English','toggleLangSetting()')}
        ${mLi('bell',t('notifications'),'',"go('notifs')")}
        ${mLi('lock',t('privacy'),'',"go('privacy')")}
+       ${mLi('cloud',isAr()?'النسخ الاحتياطي السحابي':'Cloud backup',(S.cloud&&S.cloud.enabled?(isAr()?'مُفعّل · مشفّر':'On · encrypted'):(isAr()?'مُطفأ':'Off')),"go('backup')")}
        ${mLi('compass',t('insightsWellness'),'',"go('insights')")}
        ${mLi('sun',isAr()?'نص كبير':'Large text',(S.prefs.bigText?(isAr()?'مُفعّل':'On'):(isAr()?'مُطفأ':'Off')),"toggleBigText()")}
        ${mLi('key',t('changePw'),'',"go('changePw')")}
