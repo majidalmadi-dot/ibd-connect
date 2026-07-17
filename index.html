@@ -1364,7 +1364,8 @@ function blank(){return{
   supplements:[], grocery:[], vaccines:{},
   badges:[], learn:JSON.parse(JSON.stringify(DEFAULT_LEARN)), tips:JSON.parse(JSON.stringify(DEFAULT_TIPS)),
   seenDays:[], nudgeDismiss:{}, courses:{}, appointments:[], weekly:[],
-  game:{xp:0, quests:{}, goalDays:[], lastLevel:1}
+  game:{xp:0, quests:{}, goalDays:[], lastLevel:1},
+  metrics:{firstSeen:null, anonId:null, ev:[]}
 };}
 /* deep-merge saved state over defaults so newly-added nested fields aren't lost on upgrade
    (arrays are replaced wholesale by the saved value, objects merge key-by-key) */
@@ -2628,7 +2629,71 @@ function initTelemetry(){
   }catch(e){}
 }
 /* privacy-safe product analytics — these fire ONLY when Plausible is active (analytics opt-in + DNT honoured). No names, notes, doses or values are ever sent — event names only. */
+/* ===== On-device engagement analytics (always on, no network, no PII) =====
+   Measures real product usage locally so KPIs exist even for the privacy-default
+   majority who never opt into cloud analytics. Anonymized export builds the baseline. */
+var _mSave=0;
+function recordEvent(ev,props){
+  try{
+    if(!S.metrics)S.metrics={firstSeen:null,anonId:null,ev:[]};
+    const m=S.metrics;
+    if(!m.firstSeen)m.firstSeen=new Date().toISOString();
+    if(!m.anonId)m.anonId='r_'+Math.random().toString(36).slice(2,10);
+    // store only the event name + a whitelisted, non-PII prop (e.g. log type / screen id)
+    let p=null;
+    if(props){const k=props.type||props.r||props.id;if(k)p=String(k).slice(0,24);}
+    m.ev.push({e:String(ev).slice(0,40),t:Date.now(),p:p});
+    if(m.ev.length>800)m.ev=m.ev.slice(-800);
+    const now=Date.now();if(now-_mSave>3500){_mSave=now;save();}
+  }catch(e){}
+}
+function daysBetweenKeys(a,b){return Math.round((new Date(b+'T00:00')-new Date(a+'T00:00'))/864e5);}
+function computeEngagement(){
+  const m=(S.metrics&&S.metrics.ev)?S.metrics:{firstSeen:null,ev:[]};
+  const ev=m.ev||[];const now=Date.now();
+  const days=(S.seenDays||[]).slice().sort();
+  const firstT=m.firstSeen?new Date(m.firstSeen).getTime():(days[0]?new Date(days[0]+'T00:00').getTime():now);
+  const firstKey=days[0]||todayKey(new Date(firstT));
+  const daysSince=Math.max(0,Math.floor((now-firstT)/864e5));
+  const within=n=>days.filter(d=>(now-new Date(d+'T00:00').getTime())<n*864e5).length;
+  const retainedBy=n=>days.some(d=>daysBetweenKeys(firstKey,d)>=n); // returned on/after day n
+  const weeks=Math.max(1,Math.ceil((daysSince+1)/7));
+  const counts={};ev.forEach(x=>counts[x.e]=(counts[x.e]||0)+1);
+  const logTypes={};(S.logs||[]).forEach(l=>{logTypes[l.type]=(logTypes[l.type]||0)+1;});
+  const features={
+    logging:(S.logs||[]).length>0, weekly:(S.weekly||[]).length>0,
+    meds:(S.meds||[]).length>0, labs:(S.labs||[]).length>0,
+    disc:!!S.disc, appointments:(S.appointments||[]).length>0,
+    courses:Object.keys(S.courses||{}).length>0, supplements:(S.supplements||[]).length>0,
+    learn:(counts.read_article||0)>0, share:(counts.share_report||0)>0, push:!!(S.prefs&&S.prefs.pushOn)
+  };
+  return {
+    anonId:m.anonId||null, firstKey, daysSince,
+    activeDays:(S.seenDays||[]).length, last7:within(7), last30:within(30),
+    streak:(typeof streak==='function'?streak():0),
+    logsTotal:(S.logs||[]).length, weeklyDone:(S.weekly||[]).length, weeks,
+    checkinRate:Math.min(100,Math.round((S.weekly||[]).length/weeks*100)),
+    d1:retainedBy(1), d7:retainedBy(7), d30:retainedBy(30),
+    evCount:ev.length, counts, logTypes, features
+  };
+}
+window.exportEngagement=function(){
+  const e=computeEngagement();const ar=isAr();
+  const payload={app:'rafeeq',schema:1,anonId:e.anonId,firstSeen:S.metrics&&S.metrics.firstSeen,
+    daysSince:e.daysSince,activeDays:e.activeDays,activeLast7:e.last7,activeLast30:e.last30,
+    currentStreak:e.streak,logsTotal:e.logsTotal,weeklyCheckins:e.weeklyDone,checkinRatePct:e.checkinRate,
+    retention:{d1:e.d1,d7:e.d7,d30:e.d30},featuresUsed:Object.keys(e.features).filter(k=>e.features[k]),
+    eventCounts:e.counts,logTypeCounts:e.logTypes,exportedAt:new Date().toISOString()};
+  const txt=JSON.stringify(payload,null,2);
+  try{navigator.clipboard&&navigator.clipboard.writeText(txt);}catch(x){}
+  try{const b=new Blob([txt],{type:'application/json'});const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);a.download='rafeeq-engagement-'+(e.anonId||'anon')+'.json';
+    document.body.appendChild(a);a.click();a.remove();}catch(x){}
+  track('export_engagement');
+  toast(ar?'✓ نُسخت المقاييس المجهولة':'✓ Anonymized metrics copied & downloaded');
+};
 function track(ev,props){
+  recordEvent(ev,props);
   try{ if(window.plausible) window.plausible(ev, props?{props:props}:undefined); }catch(e){}
   // self-hosted, anonymous usage events on our own backend (no third party). Consent + DNT gated.
   try{
@@ -4370,20 +4435,46 @@ async function loadUsage(host){
 }
 function renderAdminBody(host){
   if(adminTab==='dashboard'){
-    const reg=128+Math.floor(S.logs.length/3);
+    const ar=isAr();const e=computeEngagement();
+    const FEAT=[['logging',['Logging','التسجيل']],['weekly',['Weekly check-in','التسجيل الأسبوعي']],['meds',['Medications','الأدوية']],['labs',['Labs','التحاليل']],['disc',['IBD-Disc','مؤشر ديسك']],['appointments',['Appointments','المواعيد']],['courses',['Courses','الدورات']],['learn',['Learn','التعلّم']],['share',['Report share','مشاركة التقرير']],['push',['Push','الإشعارات']]];
+    const LTN={symptom:['Symptom','عَرَض'],bowel:['Bowel','الأمعاء'],meal:['Meal','وجبة'],mood:['Mood','المزاج'],sleep:['Sleep','النوم'],activity:['Activity','نشاط'],water:['Water','ماء']};
+    const lt=Object.entries(e.logTypes).sort((a,b)=>b[1]-a[1]).slice(0,6);const ltMax=Math.max(1,...lt.map(x=>x[1]));
+    const yn=b=>b?`<span class="badge good">✓</span>`:`<span class="badge" style="opacity:.5">—</span>`;
     host.innerHTML=`
+      <div class="card" style="background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent)">
+        <div class="between"><div><b style="font-size:14.5px">${ar?'تحليلات على الجهاز':'On-device analytics'}</b>
+        <div class="muted" style="font-size:12px;margin-top:2px">${ar?'مقاييس حقيقية لهذا الجهاز — بلا شبكة، بلا بيانات شخصية':'Real metrics for this install — no network, no personal data'}</div></div>
+        <span style="font-size:22px">📊</span></div></div>
       <div class="grid2">
-        <div class="kpi"><div class="v">${reg}</div><div class="l">${t('regUsers')}</div></div>
-        <div class="kpi"><div class="v">${Math.round(reg*.62)}</div><div class="l">${t('activeUsers')}</div></div>
-        <div class="kpi"><div class="v">${S.logs.length+4210}</div><div class="l">${t('totalLogsAdmin')}</div></div>
-        <div class="kpi"><div class="v">${S.learn.length+S.tips.length}</div><div class="l">${t('contentItems')}</div></div>
+        <div class="kpi"><div class="v">${e.daysSince}</div><div class="l">${ar?'يوم منذ أول استخدام':'days since first use'}</div></div>
+        <div class="kpi"><div class="v">${e.activeDays}</div><div class="l">${ar?'أيام نشطة':'active days'}</div></div>
+        <div class="kpi"><div class="v">${e.streak}</div><div class="l">${ar?'السلسلة الحالية':'current streak'}</div></div>
+        <div class="kpi"><div class="v">${e.last7}<span style="font-size:12px">/7</span></div><div class="l">${ar?'نشِط آخر ٧ أيام':'active last 7d'}</div></div>
+        <div class="kpi"><div class="v">${e.logsTotal}</div><div class="l">${ar?'إجمالي التسجيلات':'total entries'}</div></div>
+        <div class="kpi"><div class="v">${e.checkinRate}%</div><div class="l">${ar?'إكمال التسجيل الأسبوعي':'weekly check-in rate'}</div></div>
       </div>
-      <div class="card"><div class="section-title" style="margin:0 0 10px">${isAr()?'النشاط الأسبوعي':'Weekly activity'}</div><canvas id="adChart" height="140"></canvas></div>
-      <div class="card"><div class="section-title" style="margin:0 0 8px">${isAr()?'توزيع نوع المرض':'Disease type split'}</div>
-        <div class="row" style="gap:18px;justify-content:center;padding:6px"><div class="center"><div class="big-num" style="font-size:24px;color:var(--accent2)">58%</div><div class="muted" style="font-size:12px">${t('uc')}</div></div><div class="center"><div class="big-num" style="font-size:24px;color:var(--purple)">34%</div><div class="muted" style="font-size:12px">${t('cd')}</div></div><div class="center"><div class="big-num" style="font-size:24px;color:var(--muted)">8%</div><div class="muted" style="font-size:12px">${t('ibdu')}</div></div></div></div>`;
+      <div class="card"><div class="section-title" style="margin:0 0 10px">${ar?'الاحتفاظ (عاد بعد اليوم N)':'Retention (returned after day N)'}</div>
+        <div class="row" style="gap:10px;justify-content:space-around">
+          <div class="center"><div style="font-size:20px">${e.d1?'✅':'⬜'}</div><div class="muted" style="font-size:12px">D1</div></div>
+          <div class="center"><div style="font-size:20px">${e.d7?'✅':'⬜'}</div><div class="muted" style="font-size:12px">D7</div></div>
+          <div class="center"><div style="font-size:20px">${e.d30?'✅':'⬜'}</div><div class="muted" style="font-size:12px">D30</div></div>
+          <div class="center"><div style="font-size:20px;font-weight:800">${e.evCount}</div><div class="muted" style="font-size:12px">${ar?'أحداث':'events'}</div></div>
+        </div></div>
+      <div class="card"><div class="section-title" style="margin:0 0 10px">${ar?'نشاط آخر ١٤ يوم':'Activity — last 14 days'}</div><canvas id="adChart" height="140"></canvas></div>
+      <div class="card"><div class="section-title" style="margin:0 0 10px">${ar?'ما الذي يُسجَّل':'What gets logged'}</div>
+        ${lt.length?lt.map(([k,v])=>`<div style="margin-bottom:9px"><div class="between" style="margin-bottom:4px"><span style="font-size:13px">${L(LTN[k]||[k,k])}</span><b style="font-size:12.5px">${v}</b></div><div class="pbar"><i style="width:${Math.round(v/ltMax*100)}%"></i></div></div>`).join(''):`<p class="muted" style="font-size:12.5px">${ar?'لا تسجيلات بعد':'No entries yet'}</p>`}</div>
+      <div class="card"><div class="section-title" style="margin:0 0 10px">${ar?'تبنّي الميزات':'Feature adoption'}</div>
+        <div class="row" style="flex-wrap:wrap;gap:8px">${FEAT.map(([k,lab])=>`<span class="chip" style="display:inline-flex;align-items:center;gap:6px">${yn(e.features[k])} ${L(lab)}</span>`).join('')}</div></div>
+      <div class="card">
+        <div class="between"><div><b style="font-size:14px">${ar?'تصدير مجهول للأساس':'Anonymized export (baseline)'}</b>
+        <div class="muted" style="font-size:12px;margin-top:2px">${ar?'مقاييس مجمّعة فقط — بلا اسم أو ملاحظات أو محتوى تسجيلات':'Aggregated metrics only — no name, notes, or entry content'}</div></div></div>
+        <button class="btn btn-primary" style="margin-top:12px" onclick="exportEngagement()">${ar?'📤 تصدير المقاييس المجهولة':'📤 Export anonymized metrics'}</button>
+        <p class="muted" style="font-size:11px;margin:10px 0 0">${ar?'اجمع هذه الملفات عبر الأجهزة لبناء خط أساس للتفاعل والاحتفاظ للدراسة.':'Collect these files across devices to build an engagement/retention baseline for the pilot. Aggregate cloud data is under the Usage tab (opt-in).'}</p>
+      </div>`;
     setTimeout(()=>{const C=window.Chart;if(!C||!$('#adChart'))return;destroyCharts();
-      const labels=lastNDays(7).map(d=>new Date(d+'T00:00').toLocaleDateString(isAr()?'ar-SA':'en-GB',{weekday:'short'}));
-      CHARTS.push(new C($('#adChart'),{type:'bar',data:{labels,datasets:[{data:labels.map(()=>40+Math.floor(Math.random()*60)),backgroundColor:'#00E0B8',borderRadius:6}]},options:chartBase()}));},60);
+      const days14=lastNDays(14);const evByDay={};((S.metrics&&S.metrics.ev)||[]).forEach(x=>{const k=todayKey(new Date(x.t));evByDay[k]=(evByDay[k]||0)+1;});
+      const labels=days14.map(d=>new Date(d+'T00:00').toLocaleDateString(isAr()?'ar-SA':'en-GB',{day:'numeric'}));
+      CHARTS.push(new C($('#adChart'),{type:'bar',data:{labels,datasets:[{data:days14.map(d=>evByDay[d]||0),backgroundColor:'#00E0B8',borderRadius:6}]},options:chartBase()}));},60);
   }
   else if(adminTab==='usage'){ loadUsage(host); }
   else if(adminTab==='manageLearn'){
@@ -4852,6 +4943,7 @@ window.openWeekly=function(mood){const ar=isAr();mood=(mood==null?2:mood);openSh
   <button class="btn btn-primary" onclick="saveWeekly()">${ar?'حفظ':'Save'}</button>`);document.getElementById('wkMood').dataset.val=mood;};
 window.saveWeekly=function(){const ar=isAr();const wk=weekKey();const mv=document.getElementById('wkMood').dataset.val;S.weekly=(S.weekly||[]).filter(x=>x.week!==wk);S.weekly.push({week:wk,mood:mv!=null?+mv:2,note:(document.getElementById('wkNote').value||'').trim(),date:todayKey()});save();if(typeof awardXp==='function')awardXp(3);closeSheet();toast(ar?'شكرًا لمشاركتك':'Thanks for sharing');render();};
 
+try{ track('app_open'); }catch(e){}
 (async()=>{ if(/#clin=/.test(location.hash)){ const ok=await checkClinHash(); if(ok)return; } go('splash',{replace:true}); })();
 window.addEventListener('hashchange',()=>{ if(/#clin=/.test(location.hash)) checkClinHash(); });
 
