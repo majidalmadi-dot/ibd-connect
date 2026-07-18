@@ -2,3 +2,15 @@ ibd-connect-rn
 node_modules
 *.pptx
 *.pdf
+*.md
+*.skill
+ibd-connect.html
+site
+netlify.toml
+.vercel-web
+design-tokens.json
+tokens.css
+
+# internal reports (never serve publicly)
+SGA_Apps_360_Critique.html
+SGA_Apps_360_Evaluation_2026.html

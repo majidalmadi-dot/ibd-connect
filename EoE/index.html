@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0B0F14">
+<title>Maeen · معين — your EoE companion</title>
+<meta name="description" content="Maeen (معين) — a bilingual, non-medical companion for eosinophilic esophagitis (EoE). Track dysphagia, triggers, diet and medication, see your scores, and learn. By the Saudi Gastroenterology Association.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="maeen-180.png">
+<link rel="icon" type="image/png" href="maeen-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Maeen">
+<meta name="application-name" content="Maeen">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Maeen · معين — your EoE companion">
+<meta property="og:description" content="A free, bilingual non-medical companion for eosinophilic esophagitis. By the Saudi Gastroenterology Association.">
+<meta property="og:image" content="https://ibd-connect.vercel.app/EoE/maeen-512.png">
+<meta name="twitter:card" content="summary">
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<style>
+:root{
+  --bg:#0B0F14;--bg2:#0F151D;--card:#141C26;--card2:#1B2530;--line:#243140;
+  --txt:#EAF2F8;--muted:#8DA0B2;--faint:#5A6B7B;
+  --accent:#9B7CFF;--accent2:#19A0FF;--accent-d:#241B45;
+  --good:#2BD67B;--warn:#FFB23E;--bad:#FF5C72;--rose:#FF6B9D;
+  --r:18px;--maxw:480px;--nav:rgba(15,21,29,.92);
+  --sh:0 1px 2px rgba(0,0,0,.18),0 12px 28px -18px rgba(0,0,0,.55);
+}
+html[data-mode=light]{
+  --bg:#F4F6FB;--bg2:#FFFFFF;--card:#FFFFFF;--card2:#EEF1F7;--line:#E1E6EF;
+  --txt:#161B2B;--muted:#5B637A;--faint:#828aa0;--nav:rgba(255,255,255,.85);
+  --accent-d:#ECE6FF;--sh:0 1px 2px rgba(20,26,45,.05),0 12px 26px -16px rgba(20,26,45,.2);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--txt);
+  font-family:'Inter','Segoe UI',system-ui,Arial,sans-serif;letter-spacing:-.01em;overflow:hidden}
+html[dir=rtl] body{font-family:'IBM Plex Sans Arabic','Segoe UI',Tahoma,Arial,sans-serif;letter-spacing:normal}
+#app{width:100%;max-width:var(--maxw);height:100vh;height:100dvh;background:var(--bg);position:relative;overflow:hidden;display:flex;flex-direction:column}
+@media(min-width:480px){#app{margin:0 auto;box-shadow:0 0 60px rgba(0,0,0,.5);border-left:1px solid var(--line);border-right:1px solid var(--line)}}
+#screens{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+.screen{flex:1;min-height:0;display:none;flex-direction:column;overflow-y:auto;overflow-x:hidden;padding-bottom:96px;animation:fade .3s ease}
+.screen.active{display:flex}
+.screen::-webkit-scrollbar{width:0}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+.content{padding:6px 18px 0;display:flex;flex-direction:column;gap:15px}
+.content>*{animation:rise .4s cubic-bezier(.2,.8,.2,1) both}
+.content>*:nth-child(2){animation-delay:.04s}.content>*:nth-child(3){animation-delay:.08s}.content>*:nth-child(4){animation-delay:.12s}.content>*:nth-child(n+5){animation-delay:.16s}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:calc(16px + env(safe-area-inset-top)) 18px 12px;background:linear-gradient(180deg,var(--bg) 82%,transparent);backdrop-filter:blur(6px)}
+.topbar h1{font-size:22px;font-weight:800;margin:0;letter-spacing:-.5px}
+.topbar .sub{font-size:12.5px;color:var(--muted);margin-top:1px}
+.iconbtn{min-width:40px;height:40px;border-radius:12px;background:var(--card);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;color:var(--txt)}
+.spacer{flex:1}
+.section-title{font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin:6px 2px -4px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:17px;box-shadow:var(--sh)}
+.card.tap{cursor:pointer;transition:.15s}.card.tap:active{transform:scale(.985);background:var(--card2)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px}
+.kpi .v{font-size:24px;font-weight:800;letter-spacing:-1px}
+.kpi .l{font-size:11px;color:var(--muted);margin-top:2px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:15px;border:none;border-radius:14px;font-weight:700;font-size:15.5px;cursor:pointer;transition:.15s;font-family:inherit}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.btn-ghost{background:var(--card);border:1px solid var(--line);color:var(--txt)}
+.btn-danger{background:rgba(255,92,114,.14);border:1px solid rgba(255,92,114,.4);color:#ff8b9b}
+.btn-sm{padding:10px 15px;font-size:13.5px;width:auto;border-radius:11px}
+.field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px}
+.field label{font-size:13px;color:var(--muted);font-weight:600;margin-inline-start:2px}
+.input{width:100%;padding:13px 14px;background:var(--bg2);border:1px solid var(--line);border-radius:13px;color:var(--txt);font-size:15px;font-family:inherit}
+.input:focus{outline:none;border-color:var(--accent)}
+textarea.input{resize:vertical;min-height:78px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:9px 14px;border-radius:11px;background:var(--bg2);border:1px solid var(--line);font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;transition:.15s;font-family:inherit}
+.chip.on{background:var(--accent-d);border-color:var(--accent);color:var(--accent)}
+.chip:active{transform:scale(.96)}
+.scale{display:flex;gap:6px;flex-wrap:wrap}
+.scale button{flex:1;min-width:30px;padding:11px 0;border-radius:10px;background:var(--bg2);border:1px solid var(--line);color:var(--muted);font-weight:700;font-size:14px;cursor:pointer;font-family:inherit}
+.scale button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.scale button:active{transform:scale(.92)}
+.li{display:flex;align-items:center;gap:13px;padding:13px 4px;border-bottom:1px solid var(--line)}
+.li:last-child{border-bottom:none}
+.li .ic{width:40px;height:40px;border-radius:11px;background:var(--card2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.li .tx{flex:1;min-width:0}.li .tx b{font-size:14.5px;font-weight:600;display:block}.li .tx small{font-size:12.5px;color:var(--muted)}
+.li .chev{color:var(--faint);font-size:16px}
+html[dir=rtl] .chev{transform:scaleX(-1)}
+.tabbar{position:absolute;bottom:0;left:0;right:0;min-height:76px;background:var(--nav);backdrop-filter:blur(16px);border-top:1px solid var(--line);display:flex;padding:8px 6px calc(14px + env(safe-area-inset-bottom));z-index:30}
+.tabbar.hidden{display:none}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--faint);font-size:10.5px;font-weight:600;cursor:pointer;background:none;border:none;border-radius:12px;font-family:inherit;position:relative}
+.tab .ic{font-size:21px;line-height:1}
+.tab.on{color:var(--accent)}
+.tab.on::before{content:"";position:absolute;top:1px;width:26px;height:3px;border-radius:3px;background:var(--accent)}
+.tab:active{transform:scale(.92)}
+.sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;align-items:flex-end;animation:fade .2s}
+.sheet-bg.open{display:flex}
+.sheet{width:100%;max-height:90%;overflow-y:auto;background:var(--bg2);border-radius:24px 24px 0 0;border-top:1px solid var(--line);padding:10px 18px calc(28px + env(safe-area-inset-bottom));animation:up .3s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+.grip{width:40px;height:4px;border-radius:3px;background:var(--line);margin:8px auto 14px}
+.toast{position:absolute;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card2);border:1px solid var(--accent);color:var(--txt);padding:12px 20px;border-radius:14px;font-size:14px;font-weight:600;z-index:80;opacity:0;transition:.3s;box-shadow:var(--sh);pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.pbar{height:7px;border-radius:6px;background:var(--bg2);overflow:hidden}
+.pbar i{display:block;height:100%;border-radius:6px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.badge{display:inline-block;padding:3px 9px;border-radius:8px;font-size:10.5px;font-weight:700}
+.badge.accent{background:var(--accent-d);color:var(--accent)}
+.splash{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:30px;background:radial-gradient(120% 80% at 50% 0%,#241b45 0%,var(--bg) 55%)}
+.logo-mark{width:92px;height:92px;border-radius:27px;display:flex;align-items:center;justify-content:center;font-size:44px;font-weight:800;color:#fff;background:linear-gradient(140deg,var(--accent),var(--accent2));box-shadow:0 20px 50px rgba(155,124,255,.35)}
+.disc-note{background:var(--card2);border-radius:12px;padding:11px 13px;font-size:11.5px;color:var(--muted);line-height:1.55}
+.center{text-align:center}.muted{color:var(--muted)}.row{display:flex;align-items:center}.between{display:flex;align-items:center;justify-content:space-between}
+.empty-art{width:84px;height:84px;margin:2px auto 8px;color:var(--accent);opacity:.9}
+.empty-art svg{width:100%;height:100%}
+a{color:var(--accent2)}
+/* ===== premium polish layer — best-app finishing touches ===== */
+:root{--ease-spring:cubic-bezier(.34,1.4,.5,1)}
+html{scroll-behavior:smooth}
+::selection{background:color-mix(in srgb,var(--accent) 30%,transparent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:10px}
+button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
+.btn{transition:transform .18s var(--ease-spring),box-shadow .2s ease,background .2s ease,filter .2s ease}
+.btn:active{transform:scale(.965)}
+.btn-primary{box-shadow:0 10px 24px -12px color-mix(in srgb,var(--accent) 60%,transparent)}
+.chip{transition:transform .18s var(--ease-spring),background .18s ease,color .18s ease,border-color .18s ease}
+.chip:active,.li:active,.scale button:active{transform:scale(.96)}
+.card.tap:active{transform:scale(.975)}
+.iconbtn{transition:transform .16s var(--ease-spring)}
+.iconbtn:active{transform:scale(.9)}
+.tab:active .ic{transform:scale(.86)}
+@media (hover:hover) and (pointer:fine){
+  .card.tap:hover{transform:translateY(-2px)}
+  .pathcard:hover{transform:translateY(-2px)}
+  .chip:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+  .btn:hover{filter:brightness(1.05)}
+}
+.sheet-bg{backdrop-filter:blur(3px)}
+.sheet{box-shadow:0 -12px 40px -18px rgba(0,0,0,.5)}
+.toast{transition:opacity .28s ease, transform .3s var(--ease-spring);display:flex;align-items:center;justify-content:center}
+.toast.ok{border-color:var(--good)}
+.tst-check{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:var(--good);color:#fff;font-size:12px;font-weight:800;margin-inline-end:8px;flex:none;animation:tstPop .5s var(--ease-spring)}
+@keyframes tstPop{0%{transform:scale(0) rotate(-30deg)}60%{transform:scale(1.25) rotate(4deg)}100%{transform:scale(1) rotate(0)}}
+.ringfx{transition:stroke-dashoffset .95s cubic-bezier(.34,1,.4,1)}
+#fab{position:fixed;bottom:calc(72px + env(safe-area-inset-bottom,0px));inset-inline-end:18px;width:56px;height:56px;border-radius:50%;background:var(--accent);color:#fff;border:none;box-shadow:0 10px 26px rgba(0,0,0,.30),0 2px 6px rgba(0,0,0,.2);z-index:70;cursor:pointer;display:none;align-items:center;justify-content:center;transform:scale(.4);opacity:0;transition:transform .32s cubic-bezier(.34,1.4,.5,1),opacity .2s}
+#fab.show{display:flex;transform:scale(1);opacity:1}
+#fab:active{transform:scale(.9)}
+@media(min-width:760px){#fab{inset-inline-end:calc(50% - 230px)}}
+.hero{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 88%,#fff),var(--accent) 55%,color-mix(in srgb,var(--accent) 72%,#000));color:#fff;padding:calc(18px + env(safe-area-inset-top,0px)) 18px 22px;border-radius:0 0 22px 22px;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 30%,transparent)}
+.hero .hgreet{font-size:22px;font-weight:800;letter-spacing:-.3px}
+.hero .hsub{font-size:13.5px;opacity:.92;margin-top:4px;font-weight:500}
+.hero .hero-gear{background:rgba(255,255,255,.18);color:#fff;border:none}
+@media (pointer:fine){
+  ::-webkit-scrollbar{width:9px}
+  ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--muted) 38%,transparent);border-radius:8px;border:2px solid transparent;background-clip:content-box}
+  ::-webkit-scrollbar-track{background:transparent}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn:active,.chip:active,.card.tap:active,.iconbtn:active,.card.tap:hover,.pathcard:hover{transform:none}}
+.theme-card{border-radius:18px;overflow:hidden;border:2px solid var(--line);cursor:pointer;transition:.18s;position:relative;aspect-ratio:.62}
+.theme-card.on{border-color:var(--accent);transform:translateY(-2px)}
+.theme-card .tprev{height:100%;display:flex;flex-direction:column;padding:10px;gap:6px}
+.theme-card .tbar{height:7px;border-radius:4px}
+.theme-card .tname{position:absolute;bottom:0;left:0;right:0;padding:8px 10px;font-size:12px;font-weight:700;background:linear-gradient(180deg,transparent,rgba(0,0,0,.55));color:#fff}
+.theme-card .tcheck{position:absolute;top:7px;inset-inline-end:7px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#04221d;display:none;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.theme-card.on .tcheck{display:flex}
+.card,.hero,.topbar,.tabbar,.kpi,.li{transition:background-color .35s ease,border-color .3s ease,color .25s ease}
+@media(prefers-reduced-motion:reduce){.card,.hero,.topbar,.tabbar,.kpi,.li{transition:none!important}}
+#app{position:relative}
+#screens{position:relative;z-index:1}
+#wallfx{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+#wallfx b{position:absolute;border-radius:50%;filter:blur(58px);opacity:.30;will-change:transform}
+#wallfx b:nth-child(1){width:46vmax;height:46vmax;background:var(--accent);top:-16vmax;inset-inline-start:-12vmax;animation:wfx1 34s ease-in-out infinite}
+#wallfx b:nth-child(2){width:40vmax;height:40vmax;background:var(--accent2);top:24vmax;inset-inline-end:-16vmax;animation:wfx2 44s ease-in-out infinite}
+#wallfx b:nth-child(3){width:34vmax;height:34vmax;background:var(--purple,var(--accent2));bottom:-14vmax;inset-inline-start:18vmax;animation:wfx3 38s ease-in-out infinite}
+@keyframes wfx1{50%{transform:translate(14vmax,16vmax) scale(1.15)}}
+@keyframes wfx2{50%{transform:translate(-16vmax,10vmax) scale(1.12)}}
+@keyframes wfx3{50%{transform:translate(12vmax,-14vmax) scale(1.2)}}
+html[data-mode="light"] #wallfx b{opacity:.17}
+html[data-anim="off"] #wallfx b{animation:none;opacity:.14}
+@media(prefers-reduced-motion:reduce){#wallfx b{animation:none}}
+#wallscrim{position:absolute;inset:0;z-index:0;pointer-events:none;display:none}
+html[data-wall="custom"] #wallscrim{display:block;background:linear-gradient(180deg,color-mix(in srgb,var(--bg) 42%,transparent),color-mix(in srgb,var(--bg) 72%,transparent))}
+html[data-wall="custom"] #wallfx b{opacity:.12}
+#app.flowbg{background-size:300% 300% !important;animation:flowmove 20s ease-in-out infinite}
+@keyframes flowmove{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+html[data-anim="off"] #app.flowbg{animation:none}
+@media(prefers-reduced-motion:reduce){#app.flowbg{animation:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="wallfx" aria-hidden="true"><b></b><b></b><b></b></div>
+  <div id="wallscrim" aria-hidden="true"></div>
+  <div id="screens"></div>
+  <nav class="tabbar hidden" id="tabbar"></nav>
+  <button id="fab" aria-label="Quick log" onclick="openQuickAdd()"><span style="font-size:27px;line-height:1;font-weight:300;margin-top:-2px">＋</span></button>
+  <div class="sheet-bg" id="sheetbg"><div class="sheet" id="sheet"></div></div>
+  <div class="toast" id="toast"></div>
+</div>
+<script>
+/* ============================================================
+   Maeen · معين — Eosinophilic Esophagitis (EoE) companion
+   Single-file, bilingual (AR/EN, RTL), non-medical, on-device.
+   Same architecture as the Rafeeq IBD app.
+   ============================================================ */
+const $=(s,r)=>(r||document).querySelector(s);
+const el=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstElementChild;};
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function rid(){return Math.random().toString(36).slice(2,10);}
+const KEY='maeen_eoe_v1';
+
+/* ---------- i18n ---------- */
+const I18N={
+  appName:{en:'Maeen',ar:'معين'},tagline:{en:'your EoE companion',ar:'رفيقك مع التهاب المريء اليوزيني'},
+  getStarted:{en:'Get started',ar:'لنبدأ'},chooseLang:{en:'Choose your language',ar:'اختر لغتك'},continue:{en:'Continue',ar:'متابعة'},
+  iUnderstand:{en:'I understand',ar:'موافق'},
+  consentT:{en:'Before we start',ar:'قبل أن نبدأ'},
+  consentBody:{en:"Maeen is a non-medical health companion for eosinophilic esophagitis (EoE). It helps you record symptoms, triggers, diet and treatment, see descriptive trends, and learn.\n\nIt does NOT provide medical advice, diagnosis, predictions, or treatment recommendations, and is not a medical device. All scores and charts are descriptive only.\n\nAlways consult your healthcare provider for any medical decision. If food is stuck and you cannot swallow your own saliva, or you have chest pain or trouble breathing, seek urgent care.",ar:"معين رفيق صحي غير طبي لالتهاب المريء اليوزيني. يساعدك على تسجيل الأعراض والمحفّزات والغذاء والعلاج، ورؤية اتجاهات وصفية، والتعلّم.\n\nلا يقدّم نصيحة طبية أو تشخيصًا أو تنبؤًا أو توصيات علاجية، وليس جهازًا طبيًا. كل الدرجات والرسوم وصفية فقط.\n\nاستشر دائمًا مقدّم الرعاية الصحية. إذا انحشر الطعام ولم تستطع بلع ريقك، أو شعرت بألم في الصدر أو صعوبة تنفّس، اطلب رعاية عاجلة."},
+  yourName:{en:'Your name',ar:'اسمك'},namePh:{en:'e.g. Sara',ar:'مثال: سارة'},
+  tabToday:{en:'Today',ar:'اليوم'},tabTrack:{en:'Track',ar:'تتبّع'},tabScores:{en:'Scores',ar:'الدرجات'},tabLearn:{en:'Learn',ar:'تعلّم'},tabMore:{en:'More',ar:'المزيد'},
+  goodMorning:{en:'Good morning',ar:'صباح الخير'},goodAfternoon:{en:'Good afternoon',ar:'مساء الخير'},goodEvening:{en:'Good evening',ar:'مساء الخير'},
+  checkinT:{en:'Daily check-in',ar:'تسجيل اليوم'},checkinSub:{en:'How was swallowing today?',ar:'كيف كان البلع اليوم؟'},
+  quickLog:{en:'Quick log',ar:'تسجيل سريع'},
+  logDysphagia:{en:'Dysphagia',ar:'صعوبة بلع'},logImpaction:{en:'Food stuck',ar:'انحشار طعام'},logMeal:{en:'Meal / trigger',ar:'وجبة / محفّز'},logReflux:{en:'Reflux',ar:'ارتجاع'},logAdapt:{en:'Eating tactic',ar:'حيلة أكل'},logMed:{en:'Medication',ar:'دواء'},
+  recent:{en:'Recent activity',ar:'النشاط الأخير'},noLogs:{en:'No entries yet — tap a quick-log button to start.',ar:'لا سجلات بعد — اضغط زر تسجيل سريع للبدء.'},
+  streak:{en:'day streak',ar:'يوم متتابع'},
+  trackT:{en:'Track',ar:'تتبّع'},trackSub:{en:'Log symptoms, food and treatment',ar:'سجّل الأعراض والطعام والعلاج'},
+  scoresT:{en:'Scores',ar:'الدرجات'},scoresSub:{en:'Descriptive self-assessment',ar:'تقييم ذاتي وصفي'},
+  learnT:{en:'Learn',ar:'تعلّم'},learnSub:{en:'Understand EoE',ar:'افهم المرض'},
+  moreT:{en:'More',ar:'المزيد'},
+  severity:{en:'Severity',ar:'الشدة'},frequency:{en:'How often today',ar:'كم مرة اليوم'},notes:{en:'Notes (optional)',ar:'ملاحظات (اختياري)'},notesPh:{en:'Anything to remember…',ar:'أي شيء تود تذكّره…'},save:{en:'Save',ar:'حفظ'},cancel:{en:'Cancel',ar:'إلغاء'},saved:{en:'Saved',ar:'تم الحفظ'},loggedOk:{en:'Logged ✓',ar:'تم التسجيل ✓'},
+  minRead:{en:'min read',ar:'دقيقة قراءة'},
+  none:{en:'None',ar:'لا شيء'},mild:{en:'Mild',ar:'خفيف'},moderate:{en:'Moderate',ar:'متوسط'},severe:{en:'Severe',ar:'شديد'},
+  export:{en:'Export my data',ar:'تصدير بياناتي'},del:{en:'Delete my data',ar:'حذف بياناتي'},
+  theme:{en:'Theme',ar:'المظهر'},language:{en:'Language',ar:'اللغة'},about:{en:'About & disclaimer',ar:'حول وإخلاء المسؤولية'},share:{en:'Share with my doctor',ar:'مشاركة مع طبيبي'},
+  back:{en:'Back',ar:'رجوع'}
+};
+function isAr(){return S.lang==='ar';}
+function t(k){const e=I18N[k];return e?(isAr()?e.ar:e.en):k;}
+function L(arr){return isAr()?(arr[1]||arr[0]):arr[0];}
+
+/* ---------- EoE domain data ---------- */
+// Eating-difficulty by food consistency (EEsAI-style, descriptive 0-4 impact)
+const CONSIST=[['Soft foods (yogurt, eggs)','أطعمة طريّة (زبادي، بيض)'],['Solid meat / chicken','لحوم / دجاج صلبة'],['Rice / bread','أرز / خبز'],['Raw vegetables / fruit','خضار / فواكه نيئة'],['Dry / crumbly (biscuit)','جافّة / متفتّتة (بسكويت)'],['Tablets / pills','أقراص / حبوب']];
+// EEsAI behaviour items
+const EBEH=[['I avoided certain foods','تجنّبت أطعمة معيّنة'],['I changed how I prepared food (cut small, sauce)','غيّرت طريقة التحضير (تقطيع، صلصة)'],['I ate more slowly than others','أكلت أبطأ من غيري'],['I drank fluids to wash food down','شربت سوائل لتمرير الطعام']];
+// Six-food elimination triggers (+common others)
+const TRIGGERS=[['Milk / dairy','حليب / ألبان'],['Wheat / gluten','قمح / غلوتين'],['Egg','بيض'],['Soy / legumes','صويا / بقوليات'],['Nuts / peanuts','مكسّرات / فول سوداني'],['Fish / shellfish','سمك / محار'],['Beef / lamb','لحم بقر / غنم'],['Other','أخرى']];
+// Eating adaptations (IMPACT coping behaviours)
+const ADAPT=[['Cut food into small pieces','قطّعت الطعام لقطع صغيرة'],['Chewed very thoroughly','مضغت جيدًا جدًا'],['Drank to wash food down','شربت لتمرير الطعام'],['Avoided hard / dry foods','تجنّبت الأطعمة الصلبة/الجافة'],['Ate slowly','أكلت ببطء'],['Used sauces / lubrication','استخدمت الصلصات للترطيب']];
+// Treatments — the "3 D's"
+const MEDS=[
+ {id:'ppi',n:['Proton-pump inhibitor (PPI)','مثبّط مضخة البروتون'],note:['e.g. omeprazole, esomeprazole','مثل أوميبرازول، إيزوميبرازول']},
+ {id:'budesonide',n:['Swallowed budesonide','بوديزونيد مبلوع'],note:['Swallow, then no food/drink 30 min','ابلع، ثم لا طعام/شراب ٣٠ دقيقة']},
+ {id:'fluticasone',n:['Swallowed fluticasone','فلوتيكازون مبلوع'],note:['Spray & swallow, then no food/drink 30 min','رُذّ وابلع، ثم لا طعام/شراب ٣٠ دقيقة']},
+ {id:'dupilumab',n:['Dupilumab (biologic injection)','دوبيلوماب (حقنة حيوية)'],note:['Usually weekly','عادة أسبوعيًا']},
+];
+const DIETS=[['No diet therapy','بدون حمية علاجية'],['Six-food elimination','حذف الأطعمة الستة'],['Four-food elimination','حذف الأطعمة الأربعة'],['One-food (milk) elimination','حذف غذاء واحد (الحليب)'],['Elemental diet','حمية عنصرية'],['Reintroduction phase','مرحلة إعادة الإدخال']];
+const ATOPY=[['Asthma','الربو'],['Eczema','الإكزيما'],['Allergic rhinitis','التهاب الأنف التحسّسي'],['Food allergy','حساسية غذائية']];
+// EREFS endoscopy domains (clinician-reported; patient records results)
+const EREFS=[{k:'edema',n:['Edema','وذمة'],max:1},{k:'rings',n:['Rings','حلقات'],max:3},{k:'exudates',n:['Exudates','إفرازات بيضاء'],max:2},{k:'furrows',n:['Furrows','أخاديد'],max:2},{k:'stricture',n:['Stricture','تضيّق'],max:1}];
+
+/* ---------- Education library ---------- */
+const ART=[
+ {id:'march',icon:'🌿',cat:'basics',min:4,t:['EoE and the allergic march','المرض والمسيرة التحسّسية'],body:['EoE is an allergic condition and rarely travels alone. Many people with EoE also have asthma, eczema, hay fever (allergic rhinitis) or food allergies — a pattern doctors call the atopic march, where allergic conditions appear across a lifetime. This is why your team may ask about these conditions and involve an allergist. Managing your other allergies well can support your overall care, and understanding the link helps make sense of your diagnosis. It does not mean one condition caused the other — they share an underlying allergic tendency.','التهاب المريء اليوزيني حالة تحسّسية ونادرًا ما يأتي وحده. كثير من المصابين لديهم أيضًا ربو أو إكزيما أو حساسية أنف أو حساسية غذائية — نمط يسمّيه الأطباء «المسيرة التحسّسية» حيث تظهر الحالات التحسّسية عبر العمر. لذا قد يسأل فريقك عن هذه الحالات ويشرك طبيب حساسية. إدارة حساسياتك الأخرى جيدًا تدعم رعايتك العامة، وفهم الارتباط يوضّح تشخيصك. لا يعني ذلك أن حالة سبّبت الأخرى — بل تشتركان في ميل تحسّسي كامن.']},
+ {id:'dupi',icon:'💉',cat:'treatment',min:4,t:['Dupilumab explained','شرح دوبيلوماب'],body:['Dupilumab is a biologic — an injectable medicine that blocks part of the allergic-inflammation pathway (interleukin signalling) that drives EoE. It is approved for eosinophilic esophagitis and is usually given as a regular injection under the skin, often weekly. It may be used when other treatments have not worked well, or as an option your doctor considers based on your case. Like any medicine it has possible side effects — most commonly injection-site reactions — which your team will discuss. Never start, stop or change a biologic without your doctor, and keep your follow-up appointments.','دوبيلوماب علاج حيوي — دواء يُحقن يحجب جزءًا من مسار الالتهاب التحسّسي (إشارات الإنترلوكين) المسبّب للمرض. معتمد لالتهاب المريء اليوزيني ويُعطى عادة حقنة منتظمة تحت الجلد، غالبًا أسبوعيًا. قد يُستخدم عندما لا تنجح العلاجات الأخرى جيدًا، أو كخيار يدرسه طبيبك حسب حالتك. وكأي دواء له آثار محتملة — أشيعها تفاعلات موضع الحقن — يناقشها فريقك. لا تبدأ أو توقف أو تغيّر علاجًا حيويًا دون طبيبك، وحافظ على مواعيد متابعتك.']},
+ {id:'report',icon:'📄',cat:'diagnosis',min:4,t:['Understanding your endoscopy report','فهم تقرير المنظار'],body:['After an upper endoscopy your report may mention what the doctor saw and what the biopsies showed. Visual findings are often summarised with EREFS — Edema, Rings, Exudates, Furrows and Strictures — which describe how the esophagus looks. The biopsy result gives the peak eosinophil count per high-power field (hpf); 15 or more usually supports an EoE diagnosis, and treatment often aims to bring it well below that. You can record both your EREFS scores and eosinophil counts in the Scores tab to watch them improve over time. Ask your team to walk you through your own report — it is your best guide to whether treatment is working.','بعد المنظار العلوي قد يذكر تقريرك ما رآه الطبيب وما أظهرته الخزعات. تُلخَّص المشاهدات غالبًا بـEREFS — وذمة، حلقات، إفرازات، أخاديد، تضيّق — تصف مظهر المريء. وتعطي الخزعة ذروة عدد الحمضات لكل حقل مجهري عالي القوة؛ و١٥ فأكثر يدعم عادة التشخيص، ويهدف العلاج غالبًا لخفضه دون ذلك بكثير. يمكنك تسجيل درجات EREFS وعدد الحمضات في تبويب الدرجات لمتابعة تحسّنها. اطلب من فريقك شرح تقريرك — فهو أفضل دليل على نجاح العلاج.']},
+ {id:'travel',icon:'✈️',cat:'living',min:3,t:['Eating out & travel with EoE','الأكل خارجًا والسفر مع المرض'],body:['Restaurants and travel take extra planning when foods can stick or trigger symptoms. Choose moist, tender dishes, ask how food is prepared, and if you follow an elimination diet, ask about ingredients and hidden triggers such as milk or wheat. Eat slowly, cut food small, keep a drink handy, and never rush a meal in a busy place. Carry your medications and, when travelling, a note about your condition and a plan for what to do if food gets stuck. Knowing where the nearest care is abroad brings peace of mind.','المطاعم والسفر يحتاجان تخطيطًا إضافيًا حين قد ينحشر الطعام أو يثير الأعراض. اختر أطباقًا رطبة طريّة، واسأل عن طريقة التحضير، وإن اتّبعت حمية إقصاء فاسأل عن المكوّنات والمحفّزات الخفية كالحليب أو القمح. كُل ببطء، وقطّع صغيرًا، وأبقِ مشروبًا قريبًا، ولا تتعجّل وجبة في مكان مزدحم. احمل أدويتك، وعند السفر ورقة بحالتك وخطة لما تفعله إن انحشر الطعام. ومعرفة أقرب رعاية بالخارج تمنحك راحة البال.']},
+ {id:'nourish',icon:'🥦',cat:'diet',min:4,t:['Staying nourished on elimination diets','التغذية الجيدة في حميات الإقصاء'],body:['Removing foods to calm EoE works best when the rest of your diet stays complete and enjoyable. Milk, wheat, egg, soy, nuts and fish are common eliminations — and each can be replaced: fortified plant milks and other calcium sources for dairy, gluten-free grains for wheat, and beans, poultry or fish for protein where allowed. A dietitian is invaluable here, especially for children, to protect calcium, vitamin D, iron and overall growth. Plan meals and read labels so restriction never means poor nutrition. The goal is the fewest restrictions that keep you well — not endless avoidance.','إزالة الأطعمة لتهدئة المرض تنجح أكثر حين يبقى باقي غذائك كاملًا وممتعًا. الحليب والقمح والبيض والصويا والمكسّرات والسمك من الإقصاءات الشائعة — ولكلٍّ بديل: حليب نباتي مدعّم ومصادر كالسيوم أخرى للألبان، وحبوب خالية من الغلوتين للقمح، والبقوليات أو الدواجن أو السمك للبروتين حيث يُسمح. أخصائي التغذية لا يُقدَّر بثمن هنا، خاصة للأطفال، لحماية الكالسيوم وفيتامين د والحديد والنمو. خطّط الوجبات واقرأ الملصقات كي لا يعني التقييد سوء تغذية. الهدف أقل القيود التي تُبقيك بخير — لا التجنّب اللانهائي.']},
+ {id:'what',icon:'📘',cat:'basics',min:4,t:['What is EoE?','ما هو التهاب المريء اليوزيني؟'],body:[
+   "Eosinophilic esophagitis (EoE) is a chronic, allergic/immune condition where a type of white blood cell — the eosinophil — builds up in the lining of the esophagus (the food pipe). This inflammation makes the esophagus stiff and narrow, so food can move slowly or get stuck.\n\nEoE is often linked with other allergic conditions such as asthma, eczema and hay fever. It is a long-term condition that is managed, not cured — but with the right treatment most people swallow comfortably again.",
+   "التهاب المريء اليوزيني حالة مناعية/تحسّسية مزمنة تتراكم فيها خلية دم بيضاء (اليوزيني/الحمضات) في بطانة المريء (أنبوب الطعام). يجعل هذا الالتهاب المريء متيبّسًا وضيّقًا، فيتحرّك الطعام ببطء أو ينحشر.\n\nيرتبط غالبًا بحالات تحسّسية أخرى كالربو والإكزيما وحساسية الأنف. حالة مزمنة تُدار ولا تُشفى تمامًا — ومع العلاج المناسب يعود معظم الناس للبلع بارتياح."]},
+ {id:'symptoms',icon:'🔎',cat:'basics',min:3,t:['Symptoms & red flags','الأعراض والعلامات التحذيرية'],body:[
+   "In adults and teens the most common symptom is dysphagia — food feeling slow or stuck when swallowing. People often adapt without realising: cutting food small, chewing a lot, drinking to wash food down, or avoiding dry/tough foods.\n\nOther symptoms: chest or upper-tummy pain, heartburn that does not settle, regurgitation. In young children: feeding difficulty, vomiting, poor weight gain.\n\nRED FLAG — food impaction: if food is stuck and will not pass, and especially if you cannot swallow your own saliva, this is an emergency. Seek urgent care.",
+   "لدى البالغين والمراهقين أكثر عَرَض شيوعًا هو عُسر البلع — الإحساس ببطء الطعام أو انحشاره عند البلع. يتأقلم الناس دون أن يدركوا: تقطيع الطعام صغيرًا، المضغ كثيرًا، الشرب لتمريره، أو تجنّب الجاف/القاسي.\n\nأعراض أخرى: ألم بالصدر أو أعلى البطن، حُرقة لا تهدأ، قَلَس. لدى الأطفال الصغار: صعوبة تغذية، قيء، ضعف اكتساب وزن.\n\nعلامة خطر — انحشار الطعام: إذا انحشر الطعام ولم يمرّ، خاصة إن لم تستطع بلع ريقك، فهذه حالة طارئة. اطلب رعاية عاجلة."]},
+ {id:'diagnosis',icon:'🩺',cat:'diagnosis',min:4,t:['How EoE is diagnosed','كيف يُشخَّص المرض'],body:[
+   "EoE is diagnosed with an upper endoscopy (a thin camera) plus biopsies (tiny tissue samples). Two things are needed: symptoms of esophageal dysfunction, and at least 15 eosinophils per high-power field (eos/hpf) on biopsy, after other causes are excluded.\n\nDuring endoscopy the doctor scores what they see using EREFS — Edema, Rings, Exudates, Furrows and Strictures. Several biopsies are taken from different levels. You can record your biopsy eosinophil count and EREFS in the Scores tab to watch them over time.",
+   "يُشخَّص بالمنظار العلوي (كاميرا دقيقة) مع أخذ خزعات (عيّنات نسيج صغيرة). يلزم أمران: أعراض خلل وظيفي بالمريء، ووجود ١٥ خلية يوزينية على الأقل لكل حقل مجهري عالي القوة في الخزعة، بعد استبعاد الأسباب الأخرى.\n\nأثناء المنظار يسجّل الطبيب ما يراه عبر EREFS — وذمة، حلقات، إفرازات، أخاديد، تضيّق. تُؤخذ عدة خزعات من مستويات مختلفة. يمكنك تسجيل عدد اليوزينيات وEREFS في تبويب الدرجات لمتابعتها."]},
+ {id:'treat',icon:'💊',cat:'treatment',min:5,t:["The 3 D's: Drugs, Diet, Dilation","العلاجات الثلاثة: الدواء، الحمية، التوسيع"],body:[
+   "EoE treatment rests on three pillars — the “3 D’s”:\n\n• DRUGS — proton-pump inhibitors (PPIs); swallowed topical steroids (budesonide or fluticasone) that coat the esophagus; and dupilumab, a biologic injection. Your doctor chooses based on your case.\n\n• DIET — removing trigger foods (most often milk, wheat, egg, soy, nuts, fish/shellfish) to calm inflammation, then carefully reintroducing them to find your triggers.\n\n• DILATION — gently stretching a narrowed esophagus during endoscopy if a stricture is causing food to stick.\n\nTreatment is long-term: when it stops, inflammation usually returns, so follow-up matters.",
+   "يقوم العلاج على ثلاثة أعمدة — «العلاجات الثلاثة»:\n\n• الدواء — مثبّطات مضخة البروتون؛ ستيرويدات موضعية مبلوعة (بوديزونيد أو فلوتيكازون) تغلّف المريء؛ ودوبيلوماب، حقنة حيوية. يختار طبيبك حسب حالتك.\n\n• الحمية — إزالة الأطعمة المحفّزة (غالبًا الحليب، القمح، البيض، الصويا، المكسّرات، السمك/المحار) لتهدئة الالتهاب، ثم إعادتها بحذر لتحديد محفّزاتك.\n\n• التوسيع — توسيع لطيف للمريء الضيّق أثناء المنظار إن كان التضيّق يسبّب انحشار الطعام.\n\nالعلاج طويل الأمد: عند إيقافه يعود الالتهاب عادة، لذا المتابعة مهمّة."]},
+ {id:'meds',icon:'💉',cat:'treatment',min:4,t:['Medications explained','شرح الأدوية'],body:[
+   "PPIs reduce acid and, in many people, also calm esophageal inflammation.\n\nSwallowed topical steroids (budesonide, fluticasone) are designed to coat the esophagus, not go to the lungs. Take them as directed and then avoid eating or drinking for about 30 minutes so the medicine stays in contact. Rinse your mouth to lower the chance of oral thrush.\n\nDupilumab is a biologic injection (often weekly) that blocks part of the allergic pathway; it is approved for EoE. Diet therapy can be used instead of, or alongside, medicines. Never start, stop or change a treatment without your doctor.",
+   "تقلّل مثبّطات مضخة البروتون الحمض، وتهدّئ لدى كثيرين التهاب المريء أيضًا.\n\nالستيرويدات الموضعية المبلوعة (بوديزونيد، فلوتيكازون) مصمّمة لتغليف المريء لا للوصول للرئتين. تناولها حسب التعليمات ثم تجنّب الأكل أو الشرب نحو ٣٠ دقيقة ليبقى الدواء ملامسًا. اشطف فمك لتقليل احتمال فطريات الفم.\n\nدوبيلوماب حقنة حيوية (غالبًا أسبوعيًا) تحجب جزءًا من المسار التحسّسي؛ معتمد للمرض. يمكن استخدام الحمية بدلًا من الأدوية أو معها. لا تبدأ أو توقف أو تغيّر علاجًا دون طبيبك."]},
+ {id:'diet',icon:'🥗',cat:'diet',min:5,t:['Elimination diets','حِميات الإقصاء'],body:[
+   "Diet therapy removes foods that drive the inflammation. The classic approach removes six common triggers — milk, wheat, egg, soy, nuts, and fish/shellfish (the “six-food elimination diet”). Some start smaller (one- or four-food) and step up only if needed.\n\nAfter the esophagus heals on repeat endoscopy, foods are reintroduced one at a time, with endoscopy/biopsy checks, to find which food(s) are your personal triggers — so you only avoid what you must.\n\nThis is best done with a dietitian, especially for children, to keep nutrition complete. Use the Track tab to log meals and suspected triggers.",
+   "تزيل الحمية الأطعمة التي تغذّي الالتهاب. الطريقة الكلاسيكية تحذف ستة محفّزات شائعة — الحليب، القمح، البيض، الصويا، المكسّرات، والسمك/المحار («حمية حذف الأطعمة الستة»). يبدأ البعض أصغر (غذاء واحد أو أربعة) ويتدرّج عند الحاجة.\n\nبعد شفاء المريء في منظار المتابعة، تُعاد الأطعمة واحدًا تلو الآخر مع فحوص منظار/خزعة لتحديد محفّزك الشخصي — فتتجنّب ما يلزم فقط.\n\nيُفضّل ذلك مع أخصائي تغذية، خاصة للأطفال، للحفاظ على تغذية كاملة. استخدم تبويب التتبّع لتسجيل الوجبات والمحفّزات المشتبهة."]},
+ {id:'tips',icon:'🍽️',cat:'living',min:3,t:['Eating tips & adaptations','نصائح الأكل والتأقلم'],body:[
+   "Small habits make meals safer and calmer:\n\n• Cut food into small pieces and chew thoroughly.\n• Eat slowly and don’t rush; put utensils down between bites.\n• Keep water or a drink handy and sip to help food down.\n• Add sauces or moisture to dry foods.\n• Be careful with tough meat, dry bread, rice, and raw fibrous fruit/veg if these stick.\n• Take pills with plenty of water, sitting upright.\n\nLog which tactics you use in the Track tab — over time you’ll see what helps you most.",
+   "عادات صغيرة تجعل الوجبات أأمن وأهدأ:\n\n• قطّع الطعام صغيرًا وامضغ جيدًا.\n• كُل ببطء ولا تتعجّل؛ ضَع الأدوات بين اللقمات.\n• أبقِ ماءً قريبًا وارتشف لتمرير الطعام.\n• أضِف صلصات أو رطوبة للأطعمة الجافة.\n• احذر اللحم القاسي والخبز الجاف والأرز والفواكه/الخضار الليفية النيئة إن كانت تنحشر.\n• تناول الحبوب بكثير من الماء وأنت جالس مستقيمًا.\n\nسجّل الحيل التي تستخدمها في تبويب التتبّع — ستلاحظ مع الوقت ما يفيدك أكثر."]},
+ {id:'impaction',icon:'🚨',cat:'living',min:3,t:['Food impaction — what to do','انحشار الطعام — ماذا تفعل'],body:[
+   "Food impaction means a piece of food is stuck and will not pass. It is the most common emergency in EoE.\n\nIf it happens:\n• Stay calm and stop eating.\n• Do not force more food or large drinks down.\n• Small sips of water may help; if it passes, you’re okay — but tell your doctor.\n• If the food will NOT pass, and especially if you cannot swallow your own saliva (drooling), or you have chest pain or trouble breathing — go to the emergency department now.\n\nNever try to push a stuck piece down with more food. Repeated impactions are a sign your EoE needs review.",
+   "انحشار الطعام يعني علوق قطعة طعام دون أن تمرّ. وهو أكثر طارئ شيوعًا في المرض.\n\nإن حدث:\n• اهدأ وتوقّف عن الأكل.\n• لا تدفع مزيدًا من الطعام أو مشروبات كبيرة.\n• رشفات ماء صغيرة قد تساعد؛ إن مرّت فأنت بخير — لكن أخبر طبيبك.\n• إن لم يمرّ الطعام، خاصة إن لم تستطع بلع ريقك (سيلان لعاب)، أو لديك ألم صدر أو صعوبة تنفّس — اذهب للطوارئ الآن.\n\nلا تحاول دفع القطعة بمزيد من الطعام. تكرار الانحشار علامة أن مرضك يحتاج مراجعة."]},
+ {id:'living',icon:'🌿',cat:'living',min:4,t:['Living well with EoE','التعايش الجيد مع المرض'],body:[
+   "EoE is a marathon, not a sprint. A few things help you stay in control:\n\n• Keep taking treatment even when you feel well — symptoms can improve before the inflammation does.\n• Attend follow-up endoscopies; they show whether treatment is truly working at the tissue level.\n• Manage other allergies (asthma, eczema, rhinitis) with your team.\n• Track symptoms and triggers so visits are productive and decisions are based on your real pattern.\n• Look after mood and mealtime anxiety — eating stress is common and valid.\n\nShare a summary from this app with your doctor to support each visit.",
+   "المرض ماراثون لا سباق قصير. أمور تساعدك على البقاء مسيطرًا:\n\n• استمر بالعلاج حتى عند الشعور بالتحسّن — قد تتحسّن الأعراض قبل الالتهاب.\n• احضر مناظير المتابعة؛ تُظهر إن كان العلاج فعّالًا نسيجيًا.\n• أدِر الحساسيات الأخرى (ربو، إكزيما، التهاب أنف) مع فريقك.\n• تابع الأعراض والمحفّزات لتكون الزيارات مثمرة والقرارات مبنية على نمطك الحقيقي.\n• اعتنِ بالمزاج وقلق الأكل — توتّر الطعام شائع ومفهوم.\n\nشارك ملخّصًا من التطبيق مع طبيبك لدعم كل زيارة."]},
+ {id:'kids',icon:'🧒',cat:'basics',min:3,t:['EoE in children','المرض عند الأطفال'],body:[
+   "In children EoE can look different. Babies and toddlers may refuse food, gag or vomit, have tummy pain, or gain weight slowly. Older children may say food gets stuck or simply become very slow, picky eaters.\n\nDiagnosis still needs endoscopy and biopsy. Treatment uses the same tools — PPIs, swallowed steroids, dupilumab (approved down to young ages by weight), and diet — always guided by a pediatric team and dietitian to protect growth.\n\nWatch for choking, drooling, or inability to swallow saliva, which need urgent care.",
+   "عند الأطفال قد يبدو المرض مختلفًا. الرُّضّع والصغار قد يرفضون الطعام أو يتقيّؤون أو يعانون ألم بطن أو بطء اكتساب وزن. الأكبر قد يقولون إن الطعام ينحشر أو يصبحون بطيئين انتقائيين في الأكل.\n\nيظل التشخيص يحتاج منظارًا وخزعة. يستخدم العلاج الأدوات نفسها — مثبّطات المضخة، ستيرويدات مبلوعة، دوبيلوماب (معتمد لأعمار صغيرة حسب الوزن)، والحمية — دائمًا بإشراف فريق أطفال وأخصائي تغذية لحماية النمو.\n\nانتبه للاختناق أو سيلان اللعاب أو عدم القدرة على بلع الريق، فهي تحتاج رعاية عاجلة."]},
+];
+const CATS={all:['All','الكل'],basics:['Basics','الأساسيات'],diagnosis:['Diagnosis','التشخيص'],treatment:['Treatment','العلاج'],diet:['Diet','الحمية'],living:['Living well','التعايش']};
+
+/* ---------- state ---------- */
+function blank(){return{
+  lang:null, onboarded:false,
+  user:{name:''},
+  prefs:{theme:'dark'},
+  logs:[],                 // {id,type,t,...}
+  eesai:[],                // {date, items:{consistency...}, beh:{...}, score}
+  dsq:[],                  // {date, freq, stuck}
+  erefs:[],                // {date, edema,rings,exudates,furrows,stricture, total}
+  eos:[],                  // {date, count}
+  meds:[],                 // {id, on}
+  diet:'',                 // current diet therapy index
+  atopy:{},                // {asthma:true,...}
+  regimen:[],              // {id,name,dose,freq,time,remind}
+  reminders:[],            // {id,kind,label,time,days,enabled}
+  water:[],                // {date, ml}
+  journal:[],              // {date, mood, note}
+  courses:{},              // {courseId:{done:[dayIdx...]}}
+  seenDays:[],
+  nudgeDismiss:{},
+  metrics:{firstSeen:null, anonId:null, ev:[]},
+  cloud:{enabled:false, code:null, syncId:null, lastSync:null},
+  research:{enrolled:false, pid:null, consentAt:null, siteCode:null, baselineAt:null}
+};}
+function deepMerge(b,o){if(b===null||typeof b!=='object'||Array.isArray(b))return o===undefined?b:o;const out=Object.assign({},b);if(o&&typeof o==='object'&&!Array.isArray(o)){for(const k in o){const x=b[k],y=o[k];out[k]=(x&&typeof x==='object'&&!Array.isArray(x)&&y&&typeof y==='object'&&!Array.isArray(y))?deepMerge(x,y):y;}}return out;}
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));return v?deepMerge(blank(),v):blank();}catch(e){return blank();}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}try{cloudSchedulePush();}catch(e){}}
+let S=load();
+
+/* ---------- date helpers ---------- */
+function todayKey(d){d=d||new Date();return d.toISOString().slice(0,10);}
+function daysAgo(k){return Math.round((Date.now()-new Date(k+'T00:00').getTime())/864e5);}
+function lastNDays(n){const a=[];for(let i=n-1;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);a.push(todayKey(d));}return a;}
+function fmtDate(iso){const d=new Date(iso);return d.toLocaleDateString(isAr()?'ar-SA':'en-GB',{day:'numeric',month:'short'});}
+function fmtTime(iso){return new Date(iso).toLocaleTimeString(isAr()?'ar-SA':'en-GB',{hour:'2-digit',minute:'2-digit'});}
+function streak(){let n=0;for(let i=0;i<400;i++){const d=new Date();d.setDate(d.getDate()-i);if(S.seenDays.includes(todayKey(d)))n++;else if(i>0)break;}return n;}
+function markDay(){const k=todayKey();if(!S.seenDays.includes(k)){S.seenDays.push(k);save();}}
+
+/* ---------- UI helpers ---------- */
+function toast(m){const e=$('#toast');const ok=/✓|🎉|تم|حفظ|Saved|Logged|Added|Nice|أحسنت|Copied|نُسخ|Exported|صُدّر|أُضيف/i.test(String(m));e.innerHTML=(ok?'<span class="tst-check">✓</span>':'')+esc(String(m));e.classList.toggle('ok',ok);e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800);}
+function openSheet(h){$('#sheet').innerHTML='<div class="grip"></div>'+h;$('#sheetbg').classList.add('open');}
+function closeSheet(){$('#sheetbg').classList.remove('open');}
+$('#sheetbg').addEventListener('click',e=>{if(e.target.id==='sheetbg')closeSheet();});
+function topbar(titleK,subK,opts){opts=opts||{};const left=opts.back?`<button class="iconbtn" onclick="goBack()">${isAr()?'›':'‹'}</button>`:'';const right=opts.right||'';return `<div class="topbar">${left}<div style="flex:1"><h1>${opts.rawTitle||t(titleK)}</h1>${subK||opts.rawSub?`<div class="sub">${opts.rawSub||t(subK)}</div>`:''}</div>${right}</div>`;}
+function applyTheme(){document.documentElement.setAttribute('data-mode',S.prefs.theme==='light'?'light':'dark');const m=$('meta[name=theme-color]');if(m)m.setAttribute('content',S.prefs.theme==='light'?'#F4F6FB':'#0B0F14');}
+function applyDir(){document.documentElement.lang=S.lang||'en';document.documentElement.dir=isAr()?'rtl':'ltr';applyTheme();}
+
+/* ---------- router ---------- */
+const ROUTES={};let CURRENT='splash',STACK=[],CURRENT_OPTS={};
+function route(n,fn){ROUTES[n]=fn;}
+function go(n,o){o=o||{};if(!o.replace&&CURRENT&&CURRENT!==n)STACK.push(CURRENT);CURRENT=n;CURRENT_OPTS=o;render();}
+function goBack(){if(STACK.length){CURRENT=STACK.pop();render();}else navTab('today');}
+const MAIN=['today','track','scores','learn','more'];
+function navTab(n){STACK=[];CURRENT=n;CURRENT_OPTS={};render();}
+function render(){applyDir();const host=$('#screens');host.innerHTML='';const fn=ROUTES[CURRENT]||ROUTES['today'];const node=el('<div class="screen active"></div>');fn(node,CURRENT_OPTS);host.appendChild(node);node.scrollTop=0;try{animNums(node);}catch(e){}const tb=$('#tabbar');if(MAIN.includes(CURRENT)){tb.classList.remove('hidden');renderTabs();}else tb.classList.add('hidden');const fab=$('#fab');if(fab)fab.classList.toggle('show',CURRENT==='today');}
+window.openQuickAdd=function(){const ar=isAr();const items=[['dysphagia','😣'],['impaction','🚨'],['meal','🍽️'],['reflux','🔥'],['adapt','🧩'],['med','💊']];
+  openSheet(`<h2 style="margin:4px 0 4px">${ar?'تسجيل سريع':'Quick log'}</h2><p class="muted" style="font-size:12.5px;margin:0 0 14px">${ar?'اختر ما تريد تسجيله':'Pick what to log'}</p>
+   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">${items.map(([ty,ic])=>`<button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:6px;padding:15px 6px" onclick="closeSheet();setTimeout(()=>openLog('${ty}'),120)"><span style="font-size:24px">${ic}</span><span style="font-size:12px">${L((TYPE_META[ty]||['',['','']])[1])}</span></button>`).join('')}</div>`);};
+function renderTabs(){const tb=$('#tabbar');const items=[['today','🏠','tabToday'],['track','➕','tabTrack'],['scores','📊','tabScores'],['learn','📚','tabLearn'],['more','⋯','tabMore']];tb.innerHTML=items.map(([n,ic,lab])=>`<button class="tab ${CURRENT===n?'on':''}" onclick="navTab('${n}')"><span class="ic">${ic}</span>${t(lab)}</button>`).join('');}
+
+/* ---------- charts (inline SVG) ---------- */
+function sparkline(vals,color,W,H){W=W||300;H=H||70;color=color||'var(--accent)';if(!vals.length)return '';const mx=Math.max(...vals,1),mn=Math.min(...vals,0);const X=i=>10+i*(W-20)/Math.max(vals.length-1,1);const Y=v=>H-12-(v-mn)/(mx-mn||1)*(H-24);const pts=vals.map((v,i)=>`${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ');const dots=vals.map((v,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="2.4" fill="${color}"/>`).join('');const gid='sp'+Math.random().toString(36).slice(2,8);const areaPts='10,'+(H-2)+' '+pts+' '+(W-10)+','+(H-2);return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet"><defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${color}" stop-opacity="0.28"/><stop offset="1" stop-color="${color}" stop-opacity="0"/></linearGradient></defs><polygon points="${areaPts}" fill="url(#${gid})"/><polyline fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" points="${pts}"/>${dots}</svg>`;}
+function barChart(vals,labels,color,ref){const W=320,H=120,n=vals.length;color=color||'var(--accent2)';const mx=Math.max(...vals,ref||0,1);const bw=(W-30)/n*.62;const X=i=>20+i*(W-30)/n+((W-30)/n-bw)/2;const Y=v=>H-20-v/mx*(H-34);let bars=vals.map((v,i)=>`<rect x="${X(i).toFixed(1)}" y="${Y(v).toFixed(1)}" width="${bw.toFixed(1)}" height="${(H-20-Y(v)).toFixed(1)}" rx="3" fill="${color}"/>`).join('');let rl='';if(ref){rl=`<line x1="20" y1="${Y(ref).toFixed(1)}" x2="${W-10}" y2="${Y(ref).toFixed(1)}" stroke="var(--bad)" stroke-width="1.4" stroke-dasharray="4 3"/><text x="${W-12}" y="${(Y(ref)-3).toFixed(1)}" text-anchor="end" font-size="9" fill="var(--bad)">${ref}</text>`;}const xl=labels?labels.map((l,i)=>`<text x="${(X(i)+bw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" font-size="8" fill="var(--faint)">${l}</text>`).join(''):'';return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" font-family="inherit">${bars}${rl}${xl}</svg>`;}
+function radar(vals,maxes,labels){const N=vals.length,cx=150,cy=140,R=92;const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/N;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];};let grid='';[.25,.5,.75,1].forEach(g=>{grid+=`<polygon points="${Array.from({length:N}).map((_,i)=>pt(i,R*g).join(',')).join(' ')}" fill="none" stroke="var(--line)" stroke-width="1"/>`;});let spokes='';for(let i=0;i<N;i++){const[x,y]=pt(i,R);spokes+=`<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--line)"/>`;}const poly=`<polygon points="${vals.map((v,i)=>pt(i,R*(v/(maxes[i]||1))).join(',')).join(' ')}" fill="var(--accent)" fill-opacity=".3" stroke="var(--accent)" stroke-width="2"/>`;const dots=vals.map((v,i)=>{const[x,y]=pt(i,R*(v/(maxes[i]||1)));return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="var(--accent)"/>`;}).join('');const labs=labels.map((d,i)=>{const[x,y]=pt(i,R+16);return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" font-size="9.5" fill="var(--muted)" text-anchor="middle">${d}</text>`;}).join('');return `<svg viewBox="0 0 300 280" width="100%" style="max-width:320px" font-family="inherit">${grid}${spokes}${poly}${dots}${labs}</svg>`;}
+function heatmap(){const days=lastNDays(35);return `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px">${days.map(d=>{const c=S.logs.filter(l=>l.t.slice(0,10)===d).length;const lvl=c===0?0:c<2?1:c<4?2:3;const col=['var(--card2)','#3a2a55','#6d4aa8','var(--accent)'][lvl];return `<div title="${d}" style="aspect-ratio:1;border-radius:5px;background:${col};border:1px solid var(--line)"></div>`;}).join('')}</div>`;}
+
+/* ============================================================ SCREENS ============================================================ */
+route('splash',(n)=>{n.innerHTML=`<div class="splash"><div class="logo-mark">م</div><div><h1 style="font-size:30px;margin:0">${t('appName')} · معين</h1><p class="muted" style="margin:6px 0 0">${t('tagline')}</p></div><div class="spin" style="width:26px;height:26px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:rot 1s linear infinite"></div></div><style>@keyframes rot{to{transform:rotate(360deg)}}</style>`;
+  setTimeout(()=>{if(!S.lang)go('lang',{replace:true});else if(!S.onboarded)go('consent',{replace:true});else navTab('today');},900);});
+
+route('lang',(n)=>{n.innerHTML=`<div class="splash" style="background:var(--bg)"><div class="logo-mark">م</div><h1 style="margin:0">Maeen · معين</h1><p class="muted" style="margin:0">Choose your language · اختر لغتك</p>
+  <div style="display:flex;flex-direction:column;gap:12px;width:100%;max-width:300px;margin-top:10px">
+   <button class="btn btn-primary" onclick="setLang('en')">English</button>
+   <button class="btn btn-ghost" onclick="setLang('ar')">العربية</button></div></div>`;});
+window.setLang=l=>{S.lang=l;save();applyDir();go('consent',{replace:true});};
+
+route('consent',(n)=>{n.innerHTML=`${topbar(null,null,{rawTitle:t('consentT')})}<div class="content">
+  <div class="card"><p style="font-size:14px;line-height:1.7;white-space:pre-wrap;margin:0">${t('consentBody')}</p></div>
+  <div class="field"><label>${t('yourName')}</label><input class="input" id="nm" placeholder="${t('namePh')}" value="${esc(S.user.name)}"></div>
+  <div class="field"><label>${isAr()?'ما الذي يهمّك أكثر؟ (اختياري)':'What matters most to you? (optional)'}</label>
+    <div class="chips" id="focus">${FOCUS.map(f=>`<button class="chip${S.user.focus===f.id?' on':''}" data-v="${f.id}" onclick="pick('focus',this)">${f.ic} ${L(f.n)}</button>`).join('')}</div></div>
+  <button class="btn btn-primary" onclick="finishOnboard()">${t('iUnderstand')}</button>
+  <button class="btn btn-ghost" onclick="toggleLangQuick()">🌐 ${isAr()?'English':'العربية'}</button></div>`;});
+window.finishOnboard=()=>{S.user.name=($('#nm').value||'').trim();const fc=$('#focus');if(fc&&fc.dataset.val)S.user.focus=fc.dataset.val;S.onboarded=true;save();navTab('today');};
+const FOCUS=[{id:'symptoms',ic:'😣',n:['My symptoms','أعراضي']},{id:'meals',ic:'🍽️',n:['Foods that suit me','أطعمة تناسبني']},{id:'treatment',ic:'💊',n:['My plan','خطتي']},{id:'learn',ic:'📚',n:['Learning','التعلّم']}];
+function focusLine(){const ar=isAr();const st=streak();const m={symptoms:['Log how swallowing feels today','سجّل كيف كان البلع اليوم'],meals:['Notice which foods suit you','لاحظ الأطعمة التي تناسبك'],treatment:['Keep your plan on track','حافظ على خطتك'],learn:['Learn something new today','تعلّم شيئًا جديدًا اليوم']};if(S.user.focus&&m[S.user.focus])return L(m[S.user.focus]);if(st>1)return ar?`🔥 ${st} أيام متتالية`:`🔥 ${st}-day streak`;return t('tagline');}
+function heroToday(){const ar=isAr();const nm=S.user.name?', '+esc(S.user.name):'';return `<div class="hero"><div class="between" style="align-items:flex-start"><div><div class="hgreet">${greeting()}${nm}</div><div class="hsub">${focusLine()}</div></div><button class="iconbtn hero-gear" onclick="navTab('more')" aria-label="Settings">⚙️</button></div></div>`;}
+window.toggleLangQuick=()=>{S.lang=isAr()?'en':'ar';save();render();};
+
+function greeting(){const h=new Date().getHours();return h<12?t('goodMorning'):h<18?t('goodAfternoon'):t('goodEvening');}
+route('today',(n)=>{markDay();const st=streak();const recent=S.logs.slice().sort((a,b)=>new Date(b.t)-new Date(a.t)).slice(0,5);
+  const eesaiVals=S.eesai.slice(-10).map(e=>e.score);
+  n.innerHTML=`${heroToday()}
+  <div class="content" style="padding-top:14px">
+   ${nudgeBanner()}
+   <div class="card tap" onclick="openEesai()" style="background:linear-gradient(140deg,var(--accent-d),transparent)">
+     <div class="between"><div><b style="font-size:15.5px">${t('checkinT')}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${t('checkinSub')}</div></div><span style="font-size:24px">📝</span></div></div>
+   <div class="card tap" onclick="openTip()"><div class="row" style="gap:12px"><span style="font-size:22px">💡</span><div style="flex:1"><b style="font-size:13.5px">${isAr()?'نصيحة اليوم':'Tip of the day'}</b><div class="muted" style="font-size:12px;margin-top:2px">${L(TIPS[tipIndex()])}</div></div></div></div>
+   <div class="grid3"><button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:5px;padding:13px 6px" onclick="go('water')"><span style="font-size:21px">💧</span>${isAr()?'الماء':'Water'}</button><button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:5px;padding:13px 6px" onclick="go('mindful')"><span style="font-size:21px">🧘</span>${isAr()?'أكل واعٍ':'Mindful'}</button><button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:5px;padding:13px 6px" onclick="go('journal')"><span style="font-size:21px">📔</span>${isAr()?'يوميات':'Journal'}</button></div>
+   <div class="grid3">
+     <div class="kpi"><div class="v" style="color:var(--accent)">${st}</div><div class="l">${t('streak')}</div></div>
+     <div class="kpi"><div class="v">${S.eesai.length?S.eesai[S.eesai.length-1].score:'—'}</div><div class="l">EEsAI</div></div>
+     <div class="kpi"><div class="v">${S.logs.filter(l=>l.t.slice(0,10)===todayKey()).length}</div><div class="l">${isAr()?'سجلات اليوم':'logs today'}</div></div>
+   </div>
+   ${weekCard()}
+   <div class="section-title">${t('quickLog')}</div>
+   <div class="chips" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+     ${[['dysphagia','😣','logDysphagia'],['impaction','🚨','logImpaction'],['meal','🍽️','logMeal'],['reflux','🔥','logReflux'],['adapt','🧩','logAdapt'],['med','💊','logMed']].map(([ty,ic,lab])=>`<button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:5px;padding:13px 6px" onclick="openLog('${ty}')"><span style="font-size:21px">${ic}</span>${t(lab)}</button>`).join('')}
+   </div>
+   ${eesaiVals.length>1?`<div class="card"><div class="section-title" style="margin:0 0 8px">${isAr()?'اتجاه الأعراض (EEsAI)':'Symptom trend (EEsAI)'}</div>${sparkline(eesaiVals)}</div>`:''}
+   <div class="section-title">${t('recent')}</div>
+   <div class="card">${recent.length?recent.map(liRow).join(''):`<p class="muted" style="padding:8px">${t('noLogs')}</p>`}</div>
+  </div>`;});
+
+function weekActiveDays(){let n=0;const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const on=S.seenDays.includes(todayKey(d));if(on)n++;days.push(on);}return {n,days};}
+function weekCard(){const ar=isAr();const wk=weekActiveDays();const st=streak();
+  const cut=new Date();cut.setDate(cut.getDate()-7);let hi='';
+  const es=S.eesai.filter(e=>new Date(e.date||e.t||todayKey())>=cut);
+  if(es.length>=2){const d=es[es.length-1].score-es[0].score;const better=d<0;hi=ar?`مؤشر EEsAI ${better?'تحسّن':'تغيّر'} بمقدار ${Math.abs(d)} هذا الأسبوع`:`Your EEsAI ${better?'improved':'changed'} by ${Math.abs(d)} this week`;}
+  else {const logs=S.logs.filter(l=>new Date(l.t)>=cut).length;hi=logs?(ar?`سجّلت ${logs} إدخالاً هذا الأسبوع`:`You logged ${logs} ${logs===1?'entry':'entries'} this week`):(ar?'ابدأ بتسجيل يومك':'Start logging your day');}
+  const dots=wk.days.map(on=>`<span style="width:15px;height:15px;border-radius:50%;display:inline-block;background:${on?'var(--accent)':'var(--card2)'};border:1.5px solid ${on?'var(--accent)':'var(--line)'}"></span>`).join('');
+  return `<div class="card tap" onclick="navTab('trends')" style="background:linear-gradient(140deg,color-mix(in srgb,var(--accent) 16%,transparent),transparent)">
+   <div class="between" style="align-items:flex-start"><div><small style="color:var(--accent);font-weight:800;letter-spacing:.3px">${ar?'أسبوعك':'YOUR WEEK'}</small><b style="display:block;font-size:15px;margin-top:2px">${wk.n}/7 ${ar?'أيام نشطة':'active days'} ${st>1?`· 🔥 ${st}`:''}</b></div><div class="chev" style="align-self:center">${ar?'‹':'›'}</div></div>
+   <div class="row" style="gap:7px;margin:11px 0 4px">${dots}</div>
+   <div class="muted" style="font-size:12.5px;margin-top:6px">${hi}</div></div>`;}
+const TYPE_META={dysphagia:['😣',['Dysphagia','صعوبة بلع']],impaction:['🚨',['Food stuck','انحشار طعام']],meal:['🍽️',['Meal','وجبة']],reflux:['🔥',['Reflux / heartburn','ارتجاع / حُرقة']],adapt:['🧩',['Eating tactic','حيلة أكل']],med:['💊',['Medication','دواء']],chest:['💢',['Chest pain','ألم صدر']]};
+function liRow(l){const m=TYPE_META[l.type]||['•',['Log','سجل']];let sub='';if(l.sev!=null)sub=[t('none'),t('mild'),t('moderate'),t('severe')][l.sev]||'';if(l.type==='meal'&&l.triggers)sub=l.triggers.map(i=>L(TRIGGERS[i])).join(', ');if(l.type==='adapt'&&l.items)sub=l.items.map(i=>L(ADAPT[i])).join(', ');if(l.type==='med'&&l.med)sub=L((MEDS.find(x=>x.id===l.med)||{n:['','']}).n);if(l.notes)sub=(sub?sub+' · ':'')+esc(l.notes.slice(0,40));return `<div class="li"><div class="ic">${m[0]}</div><div class="tx"><b>${L(m[1])}</b><small>${sub||fmtDate(l.t)}</small></div><small class="muted">${fmtTime(l.t)}</small></div>`;}
+function addLog(o){o.id=rid();o.t=o.t||new Date().toISOString();S.logs.push(o);save();try{track('log',{type:o.type});}catch(e){}}
+
+/* ---- loggers ---- */
+let _tmp={};
+window.openLog=function(ty){_tmp={};const ar=isAr();
+  if(ty==='dysphagia'||ty==='reflux'||ty==='impaction'){
+    const sevQ=ty==='impaction'?(ar?'هل مرّ الطعام في النهاية؟':'Did the food eventually pass?'):t('severity');
+    openSheet(`<h2 style="margin:4px 0 14px">${TYPE_META[ty][0]} ${L(TYPE_META[ty][1])}</h2>
+     ${ty==='impaction'?`<div class="disc-note" style="background:rgba(255,92,114,.12);color:var(--bad);margin-bottom:14px">${ar?'إن لم تستطع بلع ريقك أو لديك ألم صدر/صعوبة تنفّس — اطلب رعاية عاجلة الآن.':'If you cannot swallow saliva, or have chest pain / trouble breathing — seek urgent care now.'}</div>`:''}
+     <div class="field"><label>${sevQ}</label>${ty==='impaction'?`<div class="chips" id="impPass">${[[1,ar?'نعم، مرّ':'Yes, passed'],[0,ar?'لا، احتجت مساعدة':'No, needed help']].map(([v,l])=>`<button class="chip" data-v="${v}" onclick="pick('impPass',this)">${l}</button>`).join('')}</div>`:`<div class="scale" id="sev">${[0,1,2,3].map(i=>`<button data-v="${i}" onclick="pickScale('sev',this)">${[t('none'),t('mild'),t('moderate'),t('severe')][i]}</button>`).join('')}</div>`}</div>
+     ${ty==='dysphagia'?`<div class="field"><label>${ar?'مع أي طعام؟':'With which food?'}</label><div class="chips" id="dCons">${CONSIST.map((c,i)=>`<button class="chip" data-v="${i}" onclick="pickMulti('dCons',this)">${L(c)}</button>`).join('')}</div></div>`:''}
+     <div class="field"><label>${t('notes')}</label><textarea class="input" id="nt" placeholder="${t('notesPh')}"></textarea></div>
+     <button class="btn btn-primary" onclick="saveSimple('${ty}')">${t('save')}</button>`);
+  } else if(ty==='meal'){
+    openSheet(`<h2 style="margin:4px 0 14px">🍽️ ${L(['Meal / trigger','وجبة / محفّز'])}</h2>
+     <div class="field"><label>${ar?'ماذا أكلت؟':'What did you eat?'}</label><textarea class="input" id="desc" placeholder="${ar?'صف الوجبة…':'Describe the meal…'}"></textarea></div>
+     <div class="field"><label>${ar?'محفّزات محتملة':'Possible triggers'}</label><div class="chips" id="trg">${TRIGGERS.map((c,i)=>`<button class="chip" data-v="${i}" onclick="pickMulti('trg',this)">${L(c)}</button>`).join('')}</div></div>
+     <div class="field"><label>${ar?'هل سبّبت أعراضًا؟':'Did it cause symptoms?'}</label><div class="scale" id="sev">${[0,1,2,3].map(i=>`<button data-v="${i}" onclick="pickScale('sev',this)">${[t('none'),t('mild'),t('moderate'),t('severe')][i]}</button>`).join('')}</div></div>
+     <button class="btn btn-primary" onclick="saveMeal()">${t('save')}</button>`);
+  } else if(ty==='adapt'){
+    openSheet(`<h2 style="margin:4px 0 14px">🧩 ${L(['Eating tactics used','حيل الأكل المستخدمة'])}</h2>
+     <div class="field"><label>${ar?'اختر ما فعلته':'Select what you did'}</label><div class="chips" id="adp">${ADAPT.map((c,i)=>`<button class="chip" data-v="${i}" onclick="pickMulti('adp',this)">${L(c)}</button>`).join('')}</div></div>
+     <button class="btn btn-primary" onclick="saveAdapt()">${t('save')}</button>`);
+  } else if(ty==='med'){
+    openSheet(`<h2 style="margin:4px 0 14px">💊 ${L(['Medication taken','دواء تم تناوله'])}</h2>
+     <div class="field"><label>${ar?'اختر الدواء':'Choose medication'}</label><div class="chips" id="md">${MEDS.map(m=>`<button class="chip" data-v="${m.id}" onclick="pick('md',this)">${L(m.n)}</button>`).join('')}</div></div>
+     <div class="disc-note">${ar?'تذكير: بعد الستيرويد المبلوع، تجنّب الأكل/الشرب نحو ٣٠ دقيقة واشطف فمك.':'Reminder: after swallowed steroids, avoid food/drink for ~30 min and rinse your mouth.'}</div>
+     <button class="btn btn-primary" style="margin-top:14px" onclick="saveMed()">${t('save')}</button>`);
+  }
+};
+window.pickScale=(id,b)=>{$('#'+id).querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');$('#'+id).dataset.val=b.dataset.v;};
+window.pick=(id,b)=>{$('#'+id).querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');$('#'+id).dataset.val=b.dataset.v;};
+window.pickMulti=(id,b)=>{b.classList.toggle('on');};
+function getMulti(id){return [...$('#'+id).querySelectorAll('.chip.on')].map(x=>+x.dataset.v);}
+window.saveSimple=(ty)=>{const o={type:ty,notes:($('#nt')&&$('#nt').value||'').trim()};const sev=$('#sev');if(sev&&sev.dataset.val!=null)o.sev=+sev.dataset.val;const ip=$('#impPass');if(ip&&ip.dataset.val!=null)o.passed=+ip.dataset.val;const dc=$('#dCons');if(dc)o.cons=getMulti('dCons');addLog(o);closeSheet();toast(t('loggedOk'));render();};
+window.saveMeal=()=>{addLog({type:'meal',desc:($('#desc').value||'').trim(),triggers:getMulti('trg'),sev:$('#sev').dataset.val!=null?+$('#sev').dataset.val:null});closeSheet();toast(t('loggedOk'));render();};
+window.saveAdapt=()=>{addLog({type:'adapt',items:getMulti('adp')});closeSheet();toast(t('loggedOk'));render();};
+window.saveMed=()=>{const m=$('#md');if(!m.dataset.val)return toast(isAr()?'اختر دواء':'Pick a medication');addLog({type:'med',med:m.dataset.val});closeSheet();toast(t('loggedOk'));render();};
+
+/* ---- TRACK tab ---- */
+route('track',(n)=>{const ar=isAr();const byDay={};S.logs.slice().sort((a,b)=>new Date(b.t)-new Date(a.t)).forEach(l=>{const k=l.t.slice(0,10);(byDay[k]=byDay[k]||[]).push(l);});const keys=Object.keys(byDay);
+  n.innerHTML=`${topbar('trackT','trackSub')}<div class="content">
+   <div class="grid3">${[['dysphagia','😣','logDysphagia'],['impaction','🚨','logImpaction'],['meal','🍽️','logMeal'],['reflux','🔥','logReflux'],['adapt','🧩','logAdapt'],['med','💊','logMed']].map(([ty,ic,lab])=>`<button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:5px;padding:13px 6px" onclick="openLog('${ty}')"><span style="font-size:21px">${ic}</span>${t(lab)}</button>`).join('')}</div>
+   <button class="btn btn-ghost" onclick="go('triggers')">🧪 ${ar?'محلّل المحفّزات':'Trigger finder'}</button>
+   ${keys.length?keys.map(k=>`<div><div class="section-title">${fmtDate(k+'T00:00')} · ${daysAgo(k)===0?(ar?'اليوم':'today'):daysAgo(k)+' '+(ar?'يوم':'d')}</div><div class="card">${byDay[k].map(liRow).join('')}</div></div>`).join(''):`<div class="card center" style="padding:30px">${emptyArt()}<p class="muted">${t('noLogs')}</p></div>`}
+  </div>`;});
+function emptyArt(){return `<div class="empty-art"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M24 18h27M24 32h27M24 46h27"/><circle cx="13" cy="18" r="2.3"/><circle cx="13" cy="32" r="2.3"/><circle cx="13" cy="46" r="2.3"/></svg></div>`;}
+
+route('triggers',(n)=>{const ar=isAr();const meals=S.logs.filter(l=>l.type==='meal'&&l.triggers&&l.triggers.length);const counts={};TRIGGERS.forEach((_,i)=>counts[i]={tot:0,sym:0});meals.forEach(m=>{m.triggers.forEach(i=>{counts[i].tot++;if((m.sev||0)>=2)counts[i].sym++;});});const rows=TRIGGERS.map((c,i)=>({n:L(c),...counts[i],rate:counts[i].tot?Math.round(counts[i].sym/counts[i].tot*100):0})).filter(r=>r.tot>0).sort((a,b)=>b.rate-a.rate);
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'محلّل المحفّزات':'Trigger finder'})}<div class="content">
+   <div class="disc-note">${ar?'ارتباط وصفي فقط بين الأطعمة المسجّلة والأعراض — ليس إثباتًا للسبب. أكّد محفّزاتك مع طبيبك عبر حمية الإقصاء وإعادة الإدخال.':'Descriptive association only between logged foods and symptoms — not proof of cause. Confirm your triggers with your doctor via elimination and reintroduction.'}</div>
+   ${rows.length?`<div class="card">${rows.map(r=>`<div style="margin-bottom:12px"><div class="between" style="margin-bottom:4px"><span style="font-size:13.5px">${r.n}</span><b style="font-size:13px;color:${r.rate>=50?'var(--bad)':r.rate>=25?'var(--warn)':'var(--good)'}">${r.rate}%</b></div><div class="pbar"><i style="width:${r.rate}%"></i></div><small class="muted">${r.sym}/${r.tot} ${ar?'وجبات مع أعراض':'meals with symptoms'}</small></div>`).join('')}</div>`:`<div class="card center" style="padding:26px"><p class="muted">${ar?'سجّل وجبات مع محفّزاتها لرؤية الأنماط.':'Log meals with their triggers to see patterns.'}</p></div>`}
+  </div>`;});
+
+/* ---- SCORES tab ---- */
+route('scores',(n)=>{const ar=isAr();const eesai=S.eesai.slice(-12);const erefs=S.erefs[S.erefs.length-1];const eos=S.eos.slice(-8);
+  n.innerHTML=`${topbar('scoresT','scoresSub')}<div class="content">
+   <div class="disc-note">${ar?'كل الدرجات وصفية للمتابعة والنقاش مع فريقك — وليست تشخيصًا.':'All scores are descriptive, to track and discuss with your team — not a diagnosis.'}</div>
+   <div class="card tap" onclick="openEesai()"><div class="between"><div><b>EEsAI · ${ar?'مؤشّر أعراض البلع':'swallowing symptom index'}</b><div class="muted" style="font-size:12px;margin-top:2px">${ar?'تقييم ذاتي (٠–١٠٠، أعلى = أصعب)':'self-report (0–100, higher = worse)'}</div></div><b style="font-size:24px;color:var(--accent)">${S.eesai.length?S.eesai[S.eesai.length-1].score:'—'}</b></div>
+     ${eesai.length>1?`<div style="margin-top:10px">${sparkline(eesai.map(e=>e.score))}</div>`:''}</div>
+   <div class="card tap" onclick="openDsq()"><div class="between"><div><b>DSQ · ${ar?'يوميات البلع':'dysphagia diary'}</b><div class="muted" style="font-size:12px;margin-top:2px">${ar?'تسجيل يومي قصير':'quick daily log'}</div></div><b style="font-size:24px;color:var(--accent2)">${S.dsq.length?S.dsq[S.dsq.length-1].score:'—'}</b></div></div>
+   <div class="card tap" onclick="openErefs()"><div class="between"><div><b>EREFS · ${ar?'درجة المنظار':'endoscopy score'}</b><div class="muted" style="font-size:12px;margin-top:2px">${ar?'سجّل نتيجة منظارك':'record your endoscopy result'}</div></div><b style="font-size:24px;color:var(--accent)">${erefs?erefs.total+'/9':'—'}</b></div>
+     ${erefs?`<div class="center" style="margin-top:6px">${radar(EREFS.map(d=>erefs[d.k]||0),EREFS.map(d=>d.max),EREFS.map(d=>L(d.n)))}</div>`:''}</div>
+   <div class="card tap" onclick="openEos()"><div class="between"><div><b>${ar?'عدد اليوزينيات (خزعة)':'Eosinophil count (biopsy)'}</b><div class="muted" style="font-size:12px;margin-top:2px">${ar?'الحد التشخيصي ≥ ١٥/حقل':'diagnostic ≥ 15/hpf'}</div></div><b style="font-size:24px;color:var(--rose)">${S.eos.length?S.eos[S.eos.length-1].count:'—'}</b></div>
+     ${eos.length?`<div style="margin-top:10px">${barChart(eos.map(e=>e.count),eos.map(e=>fmtDate(e.date+'T00:00')),'var(--rose)',15)}</div>`:''}</div>
+   <div class="card"><div class="section-title" style="margin:0 0 8px">${ar?'نشاط التسجيل (٥ أسابيع)':'Logging activity (5 weeks)'}</div>${heatmap()}</div>
+  </div>`;});
+
+let discAns={};
+window.openEesai=function(){discAns={};const ar=isAr();const last=S.eesai[S.eesai.length-1];
+ openSheet(`<h2 style="margin:4px 0 6px">EEsAI</h2><p class="muted" style="font-size:12px;margin:0 0 14px">${ar?'كيف كان البلع آخر ٧ أيام؟ (٠ = بلا صعوبة، ٤ = صعوبة شديدة)':'How was swallowing the last 7 days? (0 = no trouble, 4 = severe trouble)'}</p>
+  <div id="eesaiForm">
+   <div class="section-title" style="margin:0 0 8px">${ar?'حسب نوع الطعام':'By food type'}</div>
+   ${CONSIST.map((c,i)=>`<div style="margin-bottom:12px"><div style="font-size:13px;margin-bottom:6px">${L(c)}</div><div class="scale" id="c${i}">${[0,1,2,3,4].map(v=>`<button data-v="${v}" onclick="setAns('c${i}',${v},this)">${v}</button>`).join('')}</div></div>`).join('')}
+   <div class="section-title" style="margin:8px 0 8px">${ar?'سلوكيات':'Behaviours'}</div>
+   ${EBEH.map((c,i)=>`<div style="margin-bottom:12px"><div style="font-size:13px;margin-bottom:6px">${L(c)}</div><div class="scale" id="b${i}">${[0,1,2,3,4].map(v=>`<button data-v="${v}" onclick="setAns('b${i}',${v},this)">${v}</button>`).join('')}</div></div>`).join('')}
+  </div>
+  <div class="disc-note" style="margin:8px 0 14px">${ar?'أداة تأمّل ذاتي — ليست تشخيصًا. ناقش النتيجة مع فريقك.':'A self-reflection aid — not a diagnosis. Discuss the result with your team.'}</div>
+  <button class="btn btn-primary" onclick="saveEesai()">${t('save')}</button>`);};
+window.setAns=(id,v,b)=>{discAns[id]=v;$('#'+id).querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');};
+window.saveEesai=()=>{const keys=[...CONSIST.map((_,i)=>'c'+i),...EBEH.map((_,i)=>'b'+i)];const vals=keys.map(k=>discAns[k]);if(vals.some(v=>v==null))return toast(isAr()?'أكمل كل البنود':'Answer all items');const score=Math.round(vals.reduce((a,b)=>a+b,0)/(keys.length*4)*100);S.eesai.push({date:todayKey(),score,answers:{...discAns}});save();try{track('pro_eesai');}catch(e){}closeSheet();toast(isAr()?'تم — الدرجة '+score:'Saved — score '+score);render();};
+
+window.openDsq=function(){const ar=isAr();openSheet(`<h2 style="margin:4px 0 14px">DSQ · ${ar?'يوميات البلع':'Dysphagia diary'}</h2>
+  <div class="field"><label>${ar?'كم مرة شعرت أن الطعام بطيء أو عالق اليوم؟':'How often did food feel slow or stuck today?'}</label><div class="scale" id="dq">${[[0,ar?'أبدًا':'Never'],[1,ar?'مرة':'Once'],[2,ar?'بضع':'A few'],[3,ar?'معظم الوجبات':'Most meals'],[4,ar?'كل وجبة':'Every meal']].map(([v,l])=>`<button data-v="${v}" onclick="pickScale('dq',this)" style="font-size:11px">${l}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'هل احتجت ماءً أو تقيّأت لتمرير الطعام؟':'Did you need water or to regurgitate to clear food?'}</label><div class="chips" id="dst">${[[0,t('none')],[1,t('mild')],[2,t('severe')]].map(([v,l])=>`<button class="chip" data-v="${v}" onclick="pick('dst',this)">${l}</button>`).join('')}</div></div>
+  <button class="btn btn-primary" onclick="saveDsq()">${t('save')}</button>`);};
+window.saveDsq=()=>{const f=$('#dq'),st=$('#dst');if(f.dataset.val==null)return toast(isAr()?'أجب':'Answer first');const freq=+f.dataset.val,stuck=st.dataset.val!=null?+st.dataset.val:0;S.dsq.push({date:todayKey(),freq,stuck,score:freq*20});save();closeSheet();toast(t('saved'));render();};
+
+window.openErefs=function(){const ar=isAr();openSheet(`<h2 style="margin:4px 0 6px">EREFS</h2><p class="muted" style="font-size:12px;margin:0 0 14px">${ar?'انسخ الدرجات من تقرير منظارك (يسجّلها الطبيب).':'Copy the scores from your endoscopy report (graded by your doctor).'}</p>
+  ${EREFS.map(d=>`<div class="field"><label>${L(d.n)} (0–${d.max})</label><div class="scale" id="er_${d.k}">${Array.from({length:d.max+1}).map((_,v)=>`<button data-v="${v}" onclick="pickScale('er_${d.k}',this)">${v}</button>`).join('')}</div></div>`).join('')}
+  <button class="btn btn-primary" onclick="saveErefs()">${t('save')}</button>`);};
+window.saveErefs=()=>{const o={date:todayKey()};let tot=0,ok=true;EREFS.forEach(d=>{const e=$('#er_'+d.k);if(e.dataset.val==null)ok=false;else{o[d.k]=+e.dataset.val;tot+=o[d.k];}});if(!ok)return toast(isAr()?'أكمل كل البنود':'Fill all items');o.total=tot;S.erefs.push(o);save();closeSheet();toast(isAr()?'تم — '+tot+'/9':'Saved — '+tot+'/9');render();};
+
+window.openEos=function(){const ar=isAr();openSheet(`<h2 style="margin:4px 0 14px">${ar?'عدد اليوزينيات':'Eosinophil count'}</h2>
+  <div class="field"><label>${ar?'الذروة (خلايا/حقل عالي القوة)':'Peak (eosinophils per high-power field)'}</label><input class="input" id="eosc" inputmode="numeric" placeholder="e.g. 22"></div>
+  <div class="field"><label>${ar?'التاريخ':'Date'}</label><input class="input" id="eosd" type="date" value="${todayKey()}"></div>
+  <div class="disc-note">${ar?'≥ ١٥ خلية/حقل عادةً ما يدعم التشخيص؛ الهدف من العلاج غالبًا < ١٥ أو ≤ ٦.':'≥ 15/hpf usually supports the diagnosis; the treatment target is often < 15 or ≤ 6.'}</div>
+  <button class="btn btn-primary" style="margin-top:14px" onclick="saveEos()">${t('save')}</button>`);};
+window.saveEos=()=>{const c=parseInt($('#eosc').value,10);if(isNaN(c))return toast(isAr()?'أدخل رقمًا':'Enter a number');S.eos.push({date:$('#eosd').value||todayKey(),count:c});S.eos.sort((a,b)=>a.date<b.date?-1:1);save();closeSheet();toast(t('saved'));render();};
+
+/* ---- LEARN tab ---- */
+let learnCat='all';
+route('learn',(n)=>{const ar=isAr();const items=ART.filter(a=>learnCat==='all'||a.cat===learnCat);
+  n.innerHTML=`${topbar('learnT','learnSub')}<div class="content">
+   <div class="card tap" onclick="go('courses')" style="background:linear-gradient(140deg,var(--accent-d),transparent)"><div class="between"><div><b style="font-size:15px">🎓 ${ar?'البرامج':'Courses'}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${ar?'دروس يومية: التعايش · الحمية العلاجية':'daily lessons: living with EoE · diet therapy'}</div></div><div class="chev" style="align-self:center">${ar?'‹':'›'}</div></div></div>
+   <div class="chips" style="overflow-x:auto;flex-wrap:nowrap">${Object.keys(CATS).map(c=>`<button class="chip ${learnCat===c?'on':''}" style="white-space:nowrap" onclick="setCat('${c}')">${L(CATS[c])}</button>`).join('')}</div>
+   <div class="card">${items.map(a=>`<div class="li" onclick="openArticle('${a.id}')"><div class="ic">${a.icon}</div><div class="tx"><b>${L(a.t)}</b><small>${a.min} ${t('minRead')} · ${L(CATS[a.cat])}</small></div><div class="chev">${ar?'‹':'›'}</div></div>`).join('')}</div>
+  </div>`;});
+window.setCat=c=>{learnCat=c;render();};
+window.openArticle=function(id){const a=ART.find(x=>x.id===id);if(!a)return;CURRENT_OPTS={a};go('article',{a});};
+route('article',(n,o)=>{const a=o.a;if(!a)return navTab('learn');n.innerHTML=`${topbar(null,null,{back:true,rawTitle:L(a.t)})}<div class="content"><div class="card"><div style="font-size:40px;text-align:center;margin-bottom:8px">${a.icon}</div><p style="font-size:15px;line-height:1.8;white-space:pre-wrap;margin:0">${L(a.body)}</p></div><div class="disc-note">${isAr()?'محتوى تثقيفي عام — ليس نصيحة طبية فردية. استشر فريقك.':'General education — not individual medical advice. Consult your team.'}</div></div>`;});
+
+/* ---- MORE tab ---- */
+route('more',(n)=>{const ar=isAr();n.innerHTML=`${topbar('moreT')}<div class="content">
+   <div class="card" style="text-align:center;padding:22px"><div class="logo-mark" style="width:64px;height:64px;font-size:30px;margin:0 auto 10px">م</div><b style="font-size:16px">${S.user.name?esc(S.user.name):'Maeen'}</b><div class="muted" style="font-size:12.5px">${t('tagline')}</div></div>
+   <div class="card">
+     ${mLi('🧘',ar?'العافية والعادات':'Wellness & habits','go(\'wellness\')')}
+     ${mLi('💊',ar?'علاجي وحميتي':'My treatment & diet','go(\'treatment\')')}
+     ${mLi('💉',ar?'الجرعات والتذكيرات':'Doses & reminders','go(\'regimen\')')}
+     ${mLi('🔔',ar?'التذكيرات':'Reminders','go(\'reminders\')')}
+     ${mLi('🫁',ar?'حالات تحسّسية مرافقة':'Allergic conditions','go(\'atopy\')')}
+     ${mLi('📤',t('share'),'doShare()')}
+   </div>
+   <div class="section-title">${ar?'الإعدادات':'Settings'}</div>
+   <div class="card">
+     ${mLi('🎨',ar?'السمات والخلفية':'Themes & wallpaper','go(\'theme\')')}
+     ${mLi('🌐',t('language'),'toggleLangQuick()',isAr()?'العربية':'English')}
+     ${mLi('ℹ️',t('about'),'go(\'about\')')}
+   </div>
+   <div class="section-title">${ar?'البيانات':'Data'}</div>
+   <div class="card">
+     ${mLi('☁️',ar?'النسخ الاحتياطي السحابي':'Cloud backup','go(\'backup\')',S.cloud&&S.cloud.enabled?(ar?'مُفعّل':'On'):(ar?'مُطفأ':'Off'))}
+     ${mLi('🔬',ar?'البحث والأثر':'Research & evidence','go(\'research\')',S.research&&S.research.enrolled?(ar?'مشارِك':'enrolled'):'')}
+     ${mLi('📊',ar?'التفاعل والمقاييس':'Engagement & KPIs','go(\'engagement\')')}
+     ${mLi('⬇️',t('export'),'doExport()')}
+     ${mLi('🗑️',t('del'),'confirmDelete()')}
+   </div>
+   <p class="center muted" style="font-size:11px;margin-top:6px">Maeen · معين — Saudi Gastroenterology Association</p>
+  </div>`;});
+function mLi(ic,lab,onclick,right){return `<div class="li" style="cursor:pointer" onclick="${onclick}"><div class="ic">${ic}</div><div class="tx"><b>${lab}</b></div>${right?`<small class="muted">${right}</small>`:''}<div class="chev">${isAr()?'‹':'›'}</div></div>`;}
+window.toggleTheme=()=>{S.prefs.theme=S.prefs.theme==='light'?'dark':'light';save();render();};
+
+route('treatment',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'علاجي وحميتي':'My treatment & diet'})}<div class="content">
+   <div class="section-title">${ar?'أدويتي الحالية':'My current medications'}</div>
+   <div class="card">${MEDS.map(m=>`<div class="li"><div class="ic">💊</div><div class="tx"><b>${L(m.n)}</b><small>${L(m.note)}</small></div><button class="chip ${S.meds.includes(m.id)?'on':''}" onclick="toggleMed('${m.id}')">${S.meds.includes(m.id)?(ar?'مفعّل':'On'):(ar?'إضافة':'Add')}</button></div>`).join('')}</div>
+   <div class="section-title">${ar?'حميتي العلاجية':'My diet therapy'}</div>
+   <div class="card"><div class="chips">${DIETS.map((d,i)=>`<button class="chip ${S.diet===String(i)?'on':''}" onclick="setDiet(${i})">${L(d)}</button>`).join('')}</div></div>
+   <button class="btn btn-primary" onclick="go('regimen')">💉 ${ar?'الجرعات والتذكيرات':'Doses & reminders'}</button>
+   <div class="disc-note">${ar?'سجّل ما وصفه طبيبك فقط. لا تبدأ أو توقف علاجًا دون استشارته.':'Record only what your doctor prescribed. Do not start or stop any treatment without them.'}</div>
+  </div>`;});
+window.toggleMed=(id)=>{const i=S.meds.indexOf(id);if(i<0)S.meds.push(id);else S.meds.splice(i,1);save();render();};
+window.setDiet=(i)=>{S.diet=String(i);save();render();};
+
+route('atopy',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'حالات تحسّسية مرافقة':'Allergic conditions'})}<div class="content">
+   <div class="disc-note">${ar?'يرتبط التهاب المريء اليوزيني غالبًا بحالات تحسّسية أخرى. تتبّعها مع فريقك.':'EoE is often linked with other allergic conditions. Track them with your team.'}</div>
+   <div class="card"><div class="chips">${ATOPY.map((a,i)=>`<button class="chip ${S.atopy['a'+i]?'on':''}" onclick="toggleAtopy(${i})">${L(a)}</button>`).join('')}</div></div>
+  </div>`;});
+window.toggleAtopy=(i)=>{S.atopy['a'+i]=!S.atopy['a'+i];save();render();};
+
+route('about',(n)=>{n.innerHTML=`${topbar(null,null,{back:true,rawTitle:t('about')})}<div class="content"><div class="card"><p style="font-size:14px;line-height:1.75;white-space:pre-wrap;margin:0">${t('consentBody')}</p></div></div>`;});
+
+/* ---- share / export / delete ---- */
+window.doShare=function(){const ar=isAr();const e=S.eesai[S.eesai.length-1],er=S.erefs[S.erefs.length-1],eo=S.eos[S.eos.length-1];
+ const lines=[
+  (ar?'ملخّص Maeen (للقراءة فقط):':'Maeen summary (read-only):'),
+  (ar?'الاسم: ':'Name: ')+(S.user.name||'—'),
+  'EEsAI: '+(e?e.score+'/100 ('+e.date+')':'—'),
+  'DSQ: '+(S.dsq.length?S.dsq[S.dsq.length-1].score+'/100':'—'),
+  'EREFS: '+(er?er.total+'/9 ('+er.date+')':'—'),
+  (ar?'اليوزينيات: ':'Eos: ')+(eo?eo.count+'/hpf ('+eo.date+')':'—'),
+  (ar?'الحمية: ':'Diet: ')+(S.diet!==''?L(DIETS[+S.diet]):'—'),
+  (ar?'سجلات آخر ١٤ يومًا: ':'Logs (14d): ')+S.logs.filter(l=>daysAgo(l.t.slice(0,10))<=14).length
+ ].join('\n');
+ openSheet(`<h2 style="margin:4px 0 12px">📤 ${t('share')}</h2><div class="card" style="background:var(--card2)"><pre style="white-space:pre-wrap;font-size:12.5px;margin:0;font-family:inherit;color:var(--txt)">${esc(lines)}</pre></div>
+  <button class="btn btn-primary" style="margin-top:14px" onclick="copyShare()">${ar?'نسخ الملخّص':'Copy summary'}</button>
+  ${navigator.share?`<button class="btn btn-ghost" style="margin-top:10px" onclick="navigator.share({title:'Maeen',text:document.getElementById('shareTxt').value})">${ar?'مشاركة':'Share'}</button>`:''}
+  <textarea id="shareTxt" style="position:absolute;left:-9999px">${esc(lines)}</textarea>
+  <div class="disc-note" style="margin-top:12px">${ar?'بيانات يبلّغ عنها المريض، وصفية فقط، ليست تشخيصًا — كمحفّز للنقاش أثناء الزيارة.':'Patient-reported, descriptive only, not a diagnosis — a conversation aid for your visit.'}</div>`);};
+window.copyShare=()=>{const v=$('#shareTxt').value;if(navigator.clipboard)navigator.clipboard.writeText(v);toast(isAr()?'نُسخ':'Copied');};
+window.doExport=()=>{const blob=new Blob([JSON.stringify(S,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='maeen-eoe-'+todayKey()+'.json';a.click();toast(isAr()?'تم التصدير':'Exported');};
+window.confirmDelete=()=>{openSheet(`<div style="text-align:center;font-size:40px">⚠️</div><h2 style="text-align:center;font-size:18px">${t('del')}</h2><p class="muted center" style="font-size:13px">${isAr()?'سيُحذف كل ما سجّلته على هذا الجهاز. لا يمكن التراجع.':'This permanently clears everything you logged on this device.'}</p><button class="btn btn-danger" onclick="reallyDelete()">${isAr()?'حذف نهائي':'Delete everything'}</button><button class="btn btn-ghost" style="margin-top:10px" onclick="closeSheet()">${t('cancel')}</button>`);};
+window.reallyDelete=()=>{const lang=S.lang,theme=S.prefs.theme;S=blank();S.lang=lang;S.onboarded=true;S.prefs.theme=theme;save();closeSheet();toast(isAr()?'تم الحذف':'Deleted');navTab('today');};
+
+/* ============================================================ MEDICATION DOSES + REMINDERS ============================================================ */
+route('regimen',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'أدويتي والجرعات':'My medications & doses'})}<div class="content">
+   <div class="disc-note">${ar?'أدخل ما وصفه لك طبيبك تمامًا. معين لا يقترح جرعات ولا يغيّرها — إنه سجل وتذكير فقط.':'Enter exactly what your doctor prescribed. Maeen does not suggest or change doses — it is only a record and reminder.'}</div>
+   <button class="btn btn-primary" onclick="openRegimen()">＋ ${ar?'إضافة دواء':'Add a medication'}</button>
+   ${S.regimen.length?`<div class="card">${S.regimen.map(r=>`<div class="li"><div class="ic">💊</div><div class="tx"><b>${esc(r.name)}</b><small>${esc(r.dose||'')}${r.dose&&(r.freq||r.time)?' · ':''}${r.freq==='weekly'?(ar?'أسبوعيًا':'weekly'):r.freq==='daily'?(ar?'يوميًا':'daily'):''}${r.time?' · '+r.time:''}${r.remind?' · 🔔':''}</small></div><button class="chip" onclick="delRegimen('${r.id}')">${ar?'إزالة':'Remove'}</button></div>`).join('')}</div>`:`<div class="card center" style="padding:26px"><p class="muted">${ar?'لا أدوية بعد.':'No medications yet.'}</p></div>`}
+  </div>`;});
+window.openRegimen=()=>{const ar=isAr();openSheet(`<h2 style="margin:4px 0 12px">💊 ${ar?'إضافة دواء':'Add a medication'}</h2>
+  <div class="field"><label>${ar?'الدواء':'Medication'}</label><div class="chips" id="rg_med">${MEDS.map(m=>`<button class="chip" data-v="${m.id}" data-nm="${esc(L(m.n))}" onclick="pick('rg_med',this);document.getElementById('rg_name').value=this.getAttribute('data-nm')">${L(m.n)}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'الاسم (أو اكتب دواءً آخر)':'Name (or type another)'}</label><input class="input" id="rg_name" placeholder="${ar?'مثال: بوديزونيد':'e.g. Budesonide'}"></div>
+  <div class="field"><label>${ar?'الجرعة كما وصفها طبيبك':'Dose as prescribed by your doctor'}</label><input class="input" id="rg_dose" placeholder="${ar?'مثال: ١ ملغ':'e.g. 1 mg'}"></div>
+  <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:11px"><div class="field"><label>${ar?'التكرار':'Frequency'}</label><div class="chips" id="rg_freq">${[['daily',ar?'يومي':'Daily'],['weekly',ar?'أسبوعي':'Weekly']].map(([v,l])=>`<button class="chip" data-v="${v}" onclick="pick('rg_freq',this)">${l}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'الوقت':'Time'}</label><input class="input" id="rg_time" type="time" value="09:00"></div></div>
+  <div class="disc-note" style="margin:4px 0 12px">${ar?'تذكير: بعد الستيرويد المبلوع، تجنّب الأكل/الشرب نحو ٣٠ دقيقة واشطف فمك.':'Reminder: after swallowed steroids, avoid food/drink for ~30 min and rinse your mouth.'}</div>
+  <div class="li" style="border:none;padding:4px 2px"><div class="tx"><b>🔔 ${ar?'ذكّرني':'Remind me'}</b></div><button class="chip on" id="rg_rem" onclick="this.classList.toggle('on')">${ar?'مفعّل':'On'}</button></div>
+  <button class="btn btn-primary" style="margin-top:10px" onclick="saveRegimen()">${t('save')}</button>`);};
+window.saveRegimen=()=>{const ar=isAr();const name=($('#rg_name').value||'').trim();if(!name)return toast(ar?'أدخل اسم الدواء':'Enter a medication name');const freq=$('#rg_freq').dataset.val||'daily';const time=$('#rg_time').value||'09:00';const remind=$('#rg_rem').classList.contains('on');const r={id:rid(),name,dose:($('#rg_dose').value||'').trim(),freq,time,remind};S.regimen.push(r);
+  if(remind)S.reminders.push({id:'rm_'+r.id,kind:'med',label:(ar?'دواء: ':'Medication: ')+name+(r.dose?' ('+r.dose+')':''),time,days:'daily',enabled:true});
+  save();closeSheet();toast(t('saved'));render();};
+window.delRegimen=(id)=>{S.regimen=S.regimen.filter(r=>r.id!==id);S.reminders=S.reminders.filter(x=>x.id!=='rm_'+id);save();render();};
+
+const RKINDS=[['med','💊',['Medication','دواء']],['appt','🗓️',['Appointment','موعد']],['checkin','📝',['Daily check-in','تسجيل اليوم']],['diet','🥗',['Diet / meal','حمية / وجبة']]];
+route('reminders',(n)=>{const ar=isAr();const perm=(typeof Notification!=='undefined')?Notification.permission:'unsupported';
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'التذكيرات':'Reminders'})}<div class="content">
+   ${perm==='granted'?`<div class="disc-note">${ar?'الإشعارات مفعّلة ✓ — ستصلك التنبيهات أثناء فتح معين.':'Notifications enabled ✓ — you\'ll get alerts while Maeen is open.'}</div>`:perm==='unsupported'?'':`<button class="btn btn-ghost" onclick="askNotif()">🔔 ${ar?'تفعيل الإشعارات':'Enable notifications'}</button>`}
+   <button class="btn btn-primary" onclick="openReminder()">＋ ${ar?'تذكير جديد':'New reminder'}</button>
+   ${S.reminders.length?`<div class="card">${S.reminders.map(r=>{const k=RKINDS.find(x=>x[0]===r.kind)||['','🔔',['','']];return `<div class="li"><div class="ic">${k[1]}</div><div class="tx"><b>${esc(r.label)}</b><small>${r.time} · ${r.days==='daily'?(ar?'كل يوم':'Every day'):r.days}</small></div><button class="chip ${r.enabled?'on':''}" onclick="toggleReminder('${r.id}')">${r.enabled?(ar?'مفعّل':'On'):(ar?'موقف':'Off')}</button><button class="iconbtn" style="margin-inline-start:6px;min-width:34px;height:34px;font-size:14px" onclick="icsReminder('${r.id}')">📅</button><button class="iconbtn" style="margin-inline-start:6px;min-width:34px;height:34px;font-size:14px" onclick="delReminder('${r.id}')">✕</button></div>`;}).join('')}</div>`:`<div class="card center" style="padding:26px">${emptyArt()}<p class="muted">${ar?'لا تذكيرات بعد.':'No reminders yet.'}</p></div>`}
+   <div class="disc-note">${ar?'تعمل التذكيرات داخل التطبيق أثناء فتحه. للتنبيه الموثوق على هاتفك، اضغط 📅 لإضافة التذكير لتقويمك.':'In-app reminders fire while Maeen is open. For a reliable phone alert, tap 📅 to add the reminder to your calendar.'}</div>
+  </div>`;});
+window.askNotif=()=>{if(typeof Notification==='undefined')return;Notification.requestPermission().then(()=>{startReminderTick();render();});};
+window.openReminder=()=>{const ar=isAr();openSheet(`<h2 style="margin:4px 0 12px">🔔 ${ar?'تذكير جديد':'New reminder'}</h2>
+  <div class="field"><label>${ar?'النوع':'Type'}</label><div class="chips" id="rm_kind">${RKINDS.map(k=>`<button class="chip" data-v="${k[0]}" data-lb="${esc(L(k[2]))}" onclick="pick('rm_kind',this);document.getElementById('rm_lb').value=this.getAttribute('data-lb')">${k[1]} ${L(k[2])}</button>`).join('')}</div></div>
+  <div class="field"><label>${ar?'النص':'Label'}</label><input class="input" id="rm_lb" placeholder="${ar?'مثال: تسجيل أعراض المساء':'e.g. Evening symptom check'}"></div>
+  <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:11px"><div class="field"><label>${ar?'الوقت':'Time'}</label><input class="input" id="rm_time" type="time" value="20:00"></div>
+  <div class="field"><label>${ar?'التكرار':'Repeat'}</label><div class="chips" id="rm_days">${[['daily',ar?'كل يوم':'Every day'],['weekdays',ar?'أيام العمل':'Weekdays']].map(([v,l])=>`<button class="chip ${v==='daily'?'on':''}" data-v="${v}" onclick="pick('rm_days',this)">${l}</button>`).join('')}</div></div></div>
+  <button class="btn btn-primary" onclick="saveReminder()">${t('save')}</button>`);$('#rm_days').dataset.val='daily';};
+window.saveReminder=()=>{const ar=isAr();const kind=$('#rm_kind').dataset.val||'med';const label=($('#rm_lb').value||'').trim()||(RKINDS.find(k=>k[0]===kind)?L(RKINDS.find(k=>k[0]===kind)[2]):'Reminder');const time=$('#rm_time').value||'20:00';const days=$('#rm_days').dataset.val||'daily';S.reminders.push({id:rid(),kind,label,time,days,enabled:true});save();closeSheet();if(typeof Notification!=='undefined'&&Notification.permission==='default')askNotif();else startReminderTick();toast(t('saved'));render();};
+window.toggleReminder=(id)=>{const r=S.reminders.find(x=>x.id===id);if(r){r.enabled=!r.enabled;save();render();}};
+window.delReminder=(id)=>{S.reminders=S.reminders.filter(x=>x.id!==id);save();render();};
+window.icsReminder=(id)=>{const r=S.reminders.find(x=>x.id===id);if(!r)return;const [hh,mm]=r.time.split(':');const dt=new Date();dt.setHours(+hh,+mm,0,0);if(dt<new Date())dt.setDate(dt.getDate()+1);const pad=x=>String(x).padStart(2,'0');const stamp=d=>d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+'00Z';const rule=r.days==='weekdays'?'FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR':'FREQ=DAILY';
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Maeen//EN','BEGIN:VEVENT','UID:'+r.id+'@maeen','DTSTAMP:'+stamp(new Date()),'DTSTART:'+stamp(dt),'RRULE:'+rule,'SUMMARY:Maeen — '+r.label,'BEGIN:VALARM','TRIGGER:PT0M','ACTION:DISPLAY','DESCRIPTION:'+r.label,'END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const blob=new Blob([ics],{type:'text/calendar'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='maeen-reminder.ics';a.click();toast(isAr()?'أُضيف للتقويم':'Added to calendar');};
+let _rtick=null,_fired={};
+function startReminderTick(){if(_rtick||typeof Notification==='undefined')return;_rtick=setInterval(()=>{if(Notification.permission!=='granted')return;const now=new Date();const hm=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');const dow=now.getDay();const key=todayKey()+hm;
+   S.reminders.forEach(r=>{if(!r.enabled||r.time!==hm)return;if(r.days==='weekdays'&&(dow===5||dow===6))return;if(_fired[r.id]===key)return;_fired[r.id]=key;try{new Notification('Maeen · معين',{body:r.label,icon:'maeen-192.png'});}catch(e){}});},30000);}
+
+/* ============================================================ WELLNESS & HABITS ============================================================ */
+function ring(pct,color,label,sub){color=color||'var(--accent)';const R=52,C=2*Math.PI*R,off=C*(1-Math.max(0,Math.min(100,pct))/100);return `<svg viewBox="0 0 140 140" width="100%" style="max-width:140px"><circle cx="70" cy="70" r="${R}" fill="none" stroke="var(--card2)" stroke-width="12"/><circle cx="70" cy="70" r="${R}" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round" stroke-dasharray="${C.toFixed(1)}" stroke-dashoffset="${C.toFixed(1)}" class="ringfx" data-off="${off.toFixed(1)}" transform="rotate(-90 70 70)"/><text x="70" y="66" text-anchor="middle" font-size="26" font-weight="800" fill="var(--txt)" font-family="inherit">${label}</text><text x="70" y="88" text-anchor="middle" font-size="10" fill="var(--muted)" font-family="inherit">${sub||''}</text></svg>`;}
+const TIPS=[
+ ['Cut food into small pieces and chew thoroughly.','قطّع الطعام صغيرًا وامضغ جيدًا.'],
+ ['Eat slowly and put utensils down between bites.','كُل ببطء وضع الأدوات بين اللقمات.'],
+ ['Keep a drink handy and sip to help food down.','أبقِ مشروبًا قريبًا وارتشف لتمرير الطعام.'],
+ ['After swallowed steroids, avoid food and drink for ~30 minutes.','بعد الستيرويد المبلوع، تجنّب الأكل والشرب نحو ٣٠ دقيقة.'],
+ ['Add sauces or moisture to dry foods.','أضِف صلصات أو رطوبة للأطعمة الجافة.'],
+ ['Keep taking treatment even when you feel well.','استمر بالعلاج حتى عند شعورك بالتحسّن.'],
+ ['Attend follow-up endoscopies — they show tissue healing.','احضر مناظير المتابعة — تُظهر شفاء النسيج.'],
+ ['If food is stuck and you cannot swallow saliva, seek urgent care.','إن انحشر الطعام ولم تستطع بلع ريقك، اطلب رعاية عاجلة.'],
+ ['Note which foods feel harder to swallow.','دوّن الأطعمة الأصعب في البلع.'],
+ ['Manage other allergies (asthma, eczema) with your team.','أدِر الحساسيات الأخرى (ربو، إكزيما) مع فريقك.'],
+ ['Mealtime anxiety is common — slow, calm eating helps.','قلق الأكل شائع — الأكل البطيء الهادئ يساعد.'],
+ ['Stay hydrated steadily through the day.','حافظ على ترطيبك بثبات طوال اليوم.']
+];
+function tipIndex(){const d=new Date();return Math.floor((d-new Date(d.getFullYear(),0,0))/864e5)%TIPS.length;}
+window.openTip=()=>openTipN(tipIndex());
+window.openTipN=(i)=>{const ar=isAr();openSheet(`<div style="text-align:center;font-size:38px">💡</div><h2 style="text-align:center;margin:6px 0 4px">${ar?'نصيحة اليوم':'Tip of the day'}</h2><p style="text-align:center;font-size:16px;line-height:1.7;margin:10px 6px 16px">${L(TIPS[i])}</p><button class="btn btn-ghost" onclick="openTipN(${(i+1)%TIPS.length})">${ar?'نصيحة أخرى':'Another tip'} →</button>`);};
+
+const WGOAL=2000;
+function waterToday(){const k=todayKey();return S.water.filter(x=>x.date===k).reduce((a,b)=>a+b.ml,0);}
+window.addWater=(ml)=>{S.water.push({date:todayKey(),ml});save();render();};
+window.undoWater=()=>{const k=todayKey();for(let i=S.water.length-1;i>=0;i--){if(S.water[i].date===k){S.water.splice(i,1);break;}}save();render();};
+route('water',(n)=>{const ar=isAr();const c=waterToday();const pct=Math.min(100,Math.round(c/WGOAL*100));const days=lastNDays(7);const vals=days.map(d=>S.water.filter(x=>x.date===d).reduce((a,b)=>a+b.ml,0));
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'الماء':'Hydration'})}<div class="content">
+   <div class="card center">${ring(pct,'var(--accent2)',pct+'%',c+' / '+WGOAL+' ml')}<div class="muted" style="font-size:13px;margin-top:4px">${Math.round(c/250)} ${ar?'كوب اليوم (٢٥٠مل)':'cups today (250ml)'}</div></div>
+   <div class="grid3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px"><button class="btn btn-ghost" onclick="addWater(250)">＋ ${ar?'كوب':'Cup'}</button><button class="btn btn-ghost" onclick="addWater(500)">＋ ٥٠٠</button><button class="btn btn-ghost" onclick="undoWater()">↺</button></div>
+   <div class="card"><div class="section-title" style="margin:0 0 6px">${ar?'آخر ٧ أيام':'Last 7 days'}</div>${barChart(vals,days.map(d=>fmtDate(d+'T00:00')),'var(--accent2)',WGOAL)}</div>
+   <div class="disc-note">${ar?'الترطيب الجيّد يساعد على تمرير الطعام ويقلّل شعور الالتصاق. ارتشف بثبات.':'Good hydration helps food go down and reduces the stuck feeling. Sip steadily.'}</div>
+  </div>`;});
+
+let _mealTimer=null,_mealLeft=0;
+route('mindful',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'الأكل الواعي':'Mindful eating'})}<div class="content">
+   <div class="disc-note">${ar?'الأكل البطيء والمضغ الجيّد أساس في التهاب المريء اليوزيني — يقلّلان خطر انحشار الطعام. استهدف نحو ٢٠ دقيقة لكل وجبة.':'Slow eating and thorough chewing are central in EoE — they lower the risk of food impaction. Aim for about 20 minutes per meal.'}</div>
+   <div class="card center"><div id="mmDisp" style="font-size:52px;font-weight:800;letter-spacing:-2px;color:var(--accent)">20:00</div>
+     <div id="mmCue" style="font-size:14px;color:var(--muted);margin-top:4px;min-height:20px">${ar?'اضغط ابدأ':'Press start'}</div>
+     <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px"><button class="btn btn-primary" id="mmBtn" onclick="mealTimer()">${ar?'ابدأ':'Start'}</button><button class="btn btn-ghost" onclick="mealReset()">${ar?'إعادة':'Reset'}</button></div>
+   </div></div>`;updateMeal();});
+function fmtMMSS(s){const m=Math.floor(s/60),ss=s%60;return m+':'+String(ss).padStart(2,'0');}
+function updateMeal(){const d=$('#mmDisp');if(d)d.textContent=fmtMMSS(_mealLeft||1200);}
+window.mealTimer=()=>{const ar=isAr();if(_mealTimer){clearInterval(_mealTimer);_mealTimer=null;const b=$('#mmBtn');if(b)b.textContent=ar?'متابعة':'Resume';return;}if(!_mealLeft)_mealLeft=1200;const b=$('#mmBtn');if(b)b.textContent=ar?'إيقاف':'Pause';
+  _mealTimer=setInterval(()=>{_mealLeft--;const d=$('#mmDisp');if(d)d.textContent=fmtMMSS(Math.max(0,_mealLeft));const cue=$('#mmCue');if(cue&&_mealLeft%30===0&&_mealLeft>0){cue.textContent=ar?'🍽️ لقمة صغيرة · امضغ جيدًا · تنفّس':'🍽️ Small bite · chew well · breathe';cue.style.color='var(--accent)';setTimeout(()=>{if(cue)cue.style.color='var(--muted)';},1200);}if(_mealLeft<=0){clearInterval(_mealTimer);_mealTimer=null;if(d)d.textContent='✓';if(cue)cue.textContent=ar?'أحسنت — وجبة واعية':'Well done — a mindful meal';}},1000);};
+window.mealReset=()=>{if(_mealTimer){clearInterval(_mealTimer);_mealTimer=null;}_mealLeft=1200;const b=$('#mmBtn');if(b)b.textContent=isAr()?'ابدأ':'Start';const c=$('#mmCue');if(c)c.textContent=isAr()?'اضغط ابدأ':'Press start';updateMeal();};
+
+const MOODS=['😞','🙁','😐','🙂','😄'];
+route('journal',(n)=>{const ar=isAr();const today=S.journal.find(j=>j.date===todayKey());const hist=S.journal.slice().sort((a,b)=>a.date<b.date?1:-1);
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'يومياتي':'My journal'})}<div class="content">
+   <div class="card"><div class="section-title" style="margin:0 0 8px">${ar?'تسجيل اليوم':"Today's check-in"}</div>
+     <div class="field"><label>${ar?'كيف كان مزاجك؟':'How was your mood?'}</label><div class="scale" id="jMood">${MOODS.map((m,i)=>`<button data-v="${i}" onclick="pickScale('jMood',this)" class="${today&&today.mood===i?'on':''}" style="font-size:20px">${m}</button>`).join('')}</div></div>
+     <div class="field"><label>${ar?'كيف كان الأكل اليوم؟ (اختياري)':'How was eating today? (optional)'}</label><textarea class="input" id="jNote" placeholder="${ar?'أي شيء تود تذكّره…':'Anything to remember…'}">${today?esc(today.note||''):''}</textarea></div>
+     <button class="btn btn-primary" onclick="saveJournal()">${t('save')}</button></div>
+   ${hist.length?`<div class="section-title">${ar?'السجل':'History'}</div><div class="card">${hist.slice(0,14).map(j=>`<div class="li"><div class="ic">${MOODS[j.mood!=null?j.mood:2]}</div><div class="tx"><b>${j.note?esc(j.note.slice(0,44)):fmtDate(j.date+'T00:00')}</b><small>${fmtDate(j.date+'T00:00')}</small></div></div>`).join('')}</div>`:''}
+  </div>`;});
+window.saveJournal=()=>{const m=$('#jMood');const k=todayKey();S.journal=S.journal.filter(j=>j.date!==k);S.journal.push({date:k,mood:m.dataset.val!=null?+m.dataset.val:null,note:($('#jNote').value||'').trim()});save();toast(t('saved'));render();};
+
+route('wellness',(n)=>{const ar=isAr();const items=[['water','💧',['Hydration','الماء']],['mindful','🧘',['Mindful eating','الأكل الواعي']],['journal','📔',['Journal','اليوميات']]];
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'العافية والعادات':'Wellness & habits'})}<div class="content">
+   <div class="card tap" onclick="go('courses')" style="background:linear-gradient(140deg,var(--accent-d),transparent)"><div class="between"><div class="row" style="gap:12px"><span style="font-size:24px">🎓</span><div><b style="font-size:14.5px">${ar?'البرامج':'Courses'}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${ar?'دروس يومية قصيرة':'short daily lessons'}</div></div></div><div class="chev" style="align-self:center">${ar?'‹':'›'}</div></div></div>
+   <div class="card tap" onclick="openTip()"><div class="row" style="gap:12px"><span style="font-size:26px">💡</span><div><b style="font-size:14.5px">${ar?'نصيحة اليوم':'Tip of the day'}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${L(TIPS[tipIndex()])}</div></div></div></div>
+   <div class="chips" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">${items.map(([r,ic,nm])=>`<button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:6px;padding:16px 6px" onclick="go('${r}')"><span style="font-size:22px">${ic}</span>${L(nm)}</button>`).join('')}</div>
+  </div>`;});
+
+/* ============================================================ COURSES (Noom-style multi-day programs) ============================================================ */
+const COURSES=[
+ {id:'living',icon:'🍽️',color:'var(--accent)',t:['Living with EoE','التعايش مع التهاب المريء اليوزيني'],sub:['8 days to understand & manage EoE','٨ أيام لفهم المرض وإدارته'],days:[
+  {t:['What EoE is','ما هو التهاب المريء اليوزيني'],b:['Eosinophilic esophagitis is a chronic allergic condition where eosinophils build up in the esophagus, making it stiff and narrow so food can slow or stick. It’s managed long-term, not cured — and with the right care most people swallow comfortably again.','التهاب المريء اليوزيني حالة تحسّسية مزمنة تتراكم فيها الحمضات في المريء فيصبح متيبّسًا وضيّقًا فيبطؤ الطعام أو ينحشر. يُدار طويلًا ولا يُشفى تمامًا — ومع الرعاية المناسبة يعود معظم الناس للبلع بارتياح.']},
+  {t:['Recognising symptoms','التعرّف على الأعراض'],b:['The main symptom in adults is dysphagia — food feeling slow or stuck. Many adapt without realising: cutting food small, chewing a lot, drinking to wash food down. Noticing your patterns makes clinic visits far more useful.','أكثر عَرَض شيوعًا لدى البالغين هو عُسر البلع — إحساس ببطء الطعام أو انحشاره. يتأقلم كثيرون دون أن يدركوا: تقطيع صغير، مضغ كثير، شرب لتمرير الطعام. ملاحظة أنماطك تجعل زيارات العيادة أنفع بكثير.']},
+  {t:['Food impaction: the emergency','انحشار الطعام: الحالة الطارئة'],b:['If food is stuck and won’t pass — especially if you cannot swallow your own saliva, or you have chest pain or trouble breathing — seek urgent care now. Never try to push a stuck piece down with more food.','إذا انحشر الطعام ولم يمرّ — خاصة إن لم تستطع بلع ريقك، أو لديك ألم صدر أو صعوبة تنفّس — اطلب رعاية عاجلة الآن. لا تحاول أبدًا دفع القطعة العالقة بمزيد من الطعام.']},
+  {t:['Eating tactics','حِيَل الأكل'],b:['Cut food into small pieces, chew thoroughly, eat slowly, sip drinks to help food down, add sauces to dry foods, and be careful with tough meat, dry bread and rice. Small habits make every meal calmer and safer.','قطّع الطعام صغيرًا، وامضغ جيدًا، وكُل ببطء، وارتشف لتمرير الطعام، وأضِف صلصات للأطعمة الجافة، واحذر اللحم القاسي والخبز الجاف والأرز. عادات صغيرة تجعل كل وجبة أهدأ وأأمن.']},
+  {t:['The 3 D’s of treatment','العلاجات الثلاثة'],b:['Treatment rests on Drugs (PPIs, swallowed steroids, dupilumab), Diet (removing trigger foods), and Dilation (gently stretching a narrowing). Your doctor tailors the mix to your case — all three aim to calm inflammation and keep you swallowing.','يقوم العلاج على الدواء (مثبّطات المضخة، الستيرويدات المبلوعة، دوبيلوماب)، والحمية (إزالة المحفّزات)، والتوسيع (توسيع لطيف للتضيّق). يخصّص طبيبك المزيج لحالتك — وكلها تهدف لتهدئة الالتهاب وإبقائك تبلع.']},
+  {t:['Taking medication well','تناول الدواء جيدًا'],b:['Swallowed steroids coat the esophagus: take them as directed, then have no food or drink for about 30 minutes, and rinse your mouth. Keep treatment going even when you feel well — symptoms often improve before the inflammation does.','الستيرويدات المبلوعة تغلّف المريء: تناولها حسب التعليمات، ثم لا طعام ولا شراب نحو ٣٠ دقيقة، واشطف فمك. استمر بالعلاج حتى عند شعورك بالتحسّن — فالأعراض تتحسّن غالبًا قبل الالتهاب.']},
+  {t:['Tracking your scores','متابعة درجاتك'],b:['Recording your EEsAI symptom index, EREFS endoscopy score and biopsy eosinophil count over time shows whether treatment is truly working at the tissue level. Bring a summary from the app to every visit.','تسجيل مؤشّر أعراض EEsAI ودرجة منظار EREFS وعدد الحمضات في الخزعة عبر الوقت يُظهر إن كان العلاج فعّالًا نسيجيًا. أحضِر ملخّصًا من التطبيق لكل زيارة.']},
+  {t:['Living well','التعايش الجيّد'],b:['EoE is a marathon, not a sprint. Attend follow-up endoscopies, manage other allergies, look after mealtime anxiety, and stay connected to your team. You’re building lifelong skills — keep going.','المرض ماراثون لا سباق قصير. احضر مناظير المتابعة، وأدِر الحساسيات الأخرى، واعتنِ بقلق الأكل، وابقَ على تواصل مع فريقك. أنت تبني مهارات مدى الحياة — واصل.']}
+ ]},
+ {id:'elim',icon:'🥗',color:'var(--accent2)',t:['Elimination diet & reintroduction','حمية الإقصاء وإعادة الإدخال'],sub:['6 days on diet therapy','٦ أيام عن الحمية العلاجية'],days:[
+  {t:['How diet therapy works','كيف تعمل الحمية العلاجية'],b:['Removing foods that drive inflammation can calm EoE. The classic six-food elimination removes milk, wheat, egg, soy, nuts and fish/shellfish; some start smaller and step up. It’s best done with a dietitian to keep nutrition complete.','إزالة الأطعمة التي تغذّي الالتهاب قد تهدّئ المرض. تحذف حمية الأطعمة الستة الكلاسيكية الحليب والقمح والبيض والصويا والمكسّرات والسمك/المحار؛ ويبدأ البعض أصغر ويتدرّج. يُفضّل مع أخصائي تغذية للحفاظ على تغذية كاملة.']},
+  {t:['Starting elimination','بدء الإقصاء'],b:['Choose your approach with your team, read food labels carefully, and plan meals so nutrition stays complete — especially important for children. Log your meals in the app as you go.','اختر أسلوبك مع فريقك، واقرأ ملصقات الأطعمة بعناية، وخطّط الوجبات لتبقى التغذية كاملة — وهو مهم خصوصًا للأطفال. سجّل وجباتك في التطبيق أثناء ذلك.']},
+  {t:['The healing check','فحص الشفاء'],b:['After weeks on the diet, a repeat endoscopy and biopsy check whether the esophagus has healed. Symptoms alone aren’t enough — the tissue tells the real story of whether it’s working.','بعد أسابيع على الحمية، يتحقّق منظار وخزعة المتابعة من شفاء المريء. الأعراض وحدها لا تكفي — النسيج يروي الحقيقة عن نجاحها.']},
+  {t:['Reintroducing foods','إعادة إدخال الأطعمة'],b:['Foods are added back one at a time, with endoscopy/biopsy checks, to find which are your personal triggers — so you end up avoiding only what you truly must.','تُعاد الأطعمة واحدًا تلو الآخر مع فحوص منظار/خزعة لتحديد محفّزاتك الشخصية — فتتجنّب في النهاية ما يلزم فعلًا فقط.']},
+  {t:['Finding your triggers','تحديد محفّزاتك'],b:['Milk is the most common single trigger. Use the app’s trigger finder to spot patterns between logged foods and symptoms — then confirm them with your team through testing, not by guessing.','الحليب أشيع محفّز مفرد. استخدم محلّل المحفّزات في التطبيق لرصد الأنماط بين الأطعمة المسجّلة والأعراض — ثم أكّدها مع فريقك عبر الفحص لا بالتخمين.']},
+  {t:['Sustaining it','الاستدامة'],b:['Once your triggers are known, keep the smallest effective set of restrictions, stay well-nourished, and re-check with your team over time. Diet therapy is a long-term partnership, not a one-off.','بمجرد معرفة محفّزاتك، أبقِ أقل مجموعة قيود فعّالة، وحافظ على تغذية جيّدة، وأعِد الفحص مع فريقك دوريًا. الحمية العلاجية شراكة طويلة الأمد لا حدثًا لمرة واحدة.']}
+ ]}
+];
+function courseById(id){return COURSES.find(c=>c.id===id);}
+function cDone(id){return (S.courses[id]&&S.courses[id].done)||[];}
+function cNext(id){const c=courseById(id);const done=cDone(id);for(let i=0;i<c.days.length;i++)if(!done.includes(i))return i;return c.days.length-1;}
+route('courses',(n)=>{const ar=isAr();n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'البرامج':'Courses',rawSub:ar?'دروس يومية قصيرة':'short daily lessons'})}<div class="content">
+   ${COURSES.map(c=>{const done=cDone(c.id).length,tot=c.days.length,pct=Math.round(done/tot*100);return `<div class="card tap" onclick="go('course',{id:'${c.id}'})"><div class="row" style="gap:13px"><div style="width:46px;height:46px;border-radius:13px;background:color-mix(in srgb,${c.color} 18%,transparent);display:flex;align-items:center;justify-content:center;font-size:24px;flex:none">${c.icon}</div><div style="flex:1;min-width:0"><b style="font-size:15px">${L(c.t)}</b><div class="muted" style="font-size:12.5px">${L(c.sub)}</div><div class="pbar" style="margin-top:8px"><i style="width:${pct}%"></i></div><div class="muted" style="font-size:11.5px;margin-top:5px">${done}/${tot} ${ar?'يوم':'days'} · ${done===0?(ar?'ابدأ':'Start'):done>=tot?(ar?'اكتمل ✓':'Complete ✓'):(ar?'متابعة':'Continue')}</div></div><div class="chev">${ar?'‹':'›'}</div></div></div>`;}).join('')}
+   <div class="disc-note">${ar?'محتوى تثقيفي عام — ليس نصيحة طبية فردية. قرارات العلاج مع فريقك.':'General education — not individual medical advice. Treatment decisions are made with your team.'}</div>
+  </div>`;});
+route('course',(n,o)=>{const ar=isAr();const c=courseById((o&&o.id)||(CURRENT_OPTS&&CURRENT_OPTS.id));if(!c)return go('courses');const done=cDone(c.id);const nx=cNext(c.id);
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:L(c.t)})}<div class="content">
+   <div class="card"><div class="row" style="gap:13px"><div style="font-size:34px">${c.icon}</div><div><b style="font-size:16px">${L(c.t)}</b><div class="muted" style="font-size:12.5px">${L(c.sub)}</div></div></div><div class="pbar" style="margin-top:12px"><i style="width:${Math.round(done.length/c.days.length*100)}%"></i></div><div class="muted" style="font-size:12px;margin-top:6px">${done.length}/${c.days.length} ${ar?'مكتمل':'completed'}</div></div>
+   <button class="btn btn-primary" onclick="go('lesson',{id:'${c.id}',day:${nx}})">${done.length===0?(ar?'ابدأ اليوم ١':'Start day 1'):done.length>=c.days.length?(ar?'راجع الدروس':'Review lessons'):(ar?'متابعة · اليوم ':'Continue · Day ')+(nx+1)}</button>
+   <div class="card">${c.days.map((d,i)=>{const isDone=done.includes(i);return `<div class="li" style="cursor:pointer" onclick="go('lesson',{id:'${c.id}',day:${i}})"><div class="ic" style="background:${isDone?c.color:'var(--card2)'};color:${isDone?'#fff':'var(--muted)'};font-weight:800">${isDone?'✓':(i+1)}</div><div class="tx"><b style="font-weight:600">${L(d.t)}</b><small>${ar?'اليوم':'Day'} ${i+1}</small></div><div class="chev">${ar?'‹':'›'}</div></div>`;}).join('')}</div>
+  </div>`;});
+route('lesson',(n,o)=>{const ar=isAr();const oo=o&&o.id?o:(CURRENT_OPTS||{});const c=courseById(oo.id);if(!c)return go('courses');const i=oo.day||0;const d=c.days[i];const done=cDone(c.id).includes(i);const last=i>=c.days.length-1;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:(ar?'اليوم ':'Day ')+(i+1)+'/'+c.days.length})}<div class="content">
+   <div class="card"><div class="row" style="gap:10px;margin-bottom:10px"><div style="width:38px;height:38px;border-radius:11px;background:color-mix(in srgb,${c.color} 18%,transparent);display:flex;align-items:center;justify-content:center;font-size:20px">${c.icon}</div><div><div class="muted" style="font-size:11.5px">${L(c.t)}</div><b style="font-size:17px;letter-spacing:-.3px">${L(d.t)}</b></div></div><p style="font-size:15.5px;line-height:1.85;margin:0">${L(d.b)}</p></div>
+   <button class="btn ${done?'btn-ghost':'btn-primary'}" onclick="toggleLesson('${c.id}',${i})">${done?(ar?'✓ مكتمل — إلغاء':'✓ Completed — undo'):(ar?'وضع علامة مكتمل':'Mark complete')}</button>
+   <div class="grid2" style="display:grid;grid-template-columns:1fr 1fr;gap:9px">${i>0?`<button class="btn btn-ghost" onclick="go('lesson',{id:'${c.id}',day:${i-1}})">${ar?'› السابق':'‹ Previous'}</button>`:'<div></div>'}${!last?`<button class="btn btn-ghost" onclick="go('lesson',{id:'${c.id}',day:${i+1}})">${ar?'التالي ‹':'Next ›'}</button>`:`<button class="btn btn-ghost" onclick="go('course',{id:'${c.id}'})">${ar?'نظرة عامة':'Overview'}</button>`}</div>
+  </div>`;});
+window.toggleLesson=(id,day)=>{const st=S.courses[id]||{done:[]};const k=st.done.indexOf(day);if(k<0){st.done.push(day);toast(isAr()?'🎉 أحسنت':'🎉 Nice!');}else st.done.splice(k,1);S.courses[id]=st;save();const c=courseById(id);if(k<0&&day<c.days.length-1)go('lesson',{id,day:day+1});else render();};
+
+/* ---------- animated number count-ups (best-app motion) ---------- */
+function animNums(root){var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;root.querySelectorAll('.ringfx').forEach(function(c){var o=c.getAttribute('data-off');if(o==null)return;if(rm){c.style.strokeDashoffset=o;return;}requestAnimationFrame(function(){requestAnimationFrame(function(){c.style.strokeDashoffset=o;});});});if(rm)return;root.querySelectorAll('.kpi .v').forEach(function(el){if(el.children.length)return;var raw=el.textContent.trim().replace(/,/g,'');if(!/^\d+(\.\d+)?$/.test(raw))return;var to=parseFloat(raw);if(!(to>0)||to>100000)return;var dec=raw.indexOf('.')>=0?1:0;var t0=performance.now();(function step(t){var k=Math.min((t-t0)/520,1);var e2=1-Math.pow(1-k,3);el.textContent=(to*e2).toFixed(dec);if(k<1)requestAnimationFrame(step);else el.textContent=raw;})(performance.now());});}
+
+/* ================= PLATFORM MODULE (ported from Rafeeq, adapted for Maeen) =================
+   On-device analytics · E2E-encrypted cloud backup · PRO/evidence export · re-engagement.
+   Non-medical, privacy-first: measurement is on-device; cloud is opt-in & end-to-end encrypted. */
+const CLOUD={ url:'https://uuscistqaqqaebjjwoml.supabase.co', anon:'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV1c2Npc3RxYXFxYWViamp3b21sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIwMTkzNzIsImV4cCI6MjA5NzU5NTM3Mn0.PVEQ0FFQe3_SL71Ah3cP-2wTBBX93d_wKuDYacwQsMs' };
+function cloudOn(){return !!(CLOUD.url&&CLOUD.anon);}
+let __sb=null,__sbLoading=null;
+function loadSupabase(){ if(__sb)return Promise.resolve(__sb); if(!cloudOn())return Promise.resolve(null); if(__sbLoading)return __sbLoading;
+  __sbLoading=new Promise((res)=>{const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js';s.onload=()=>{try{__sb=window.supabase.createClient(CLOUD.url,CLOUD.anon);}catch(e){__sb=null;}res(__sb);};s.onerror=()=>res(null);document.head.appendChild(s);}); return __sbLoading; }
+
+/* ---- on-device analytics ---- */
+let _mSave=0;
+function recordEvent(ev,props){try{
+  if(!S.metrics)S.metrics={firstSeen:null,anonId:null,ev:[]};const m=S.metrics;
+  if(!m.firstSeen)m.firstSeen=new Date().toISOString();
+  if(!m.anonId)m.anonId='m_'+Math.random().toString(36).slice(2,10);
+  let p=null;if(props){const k=props.type||props.r||props.id;if(k)p=String(k).slice(0,24);}
+  m.ev.push({e:String(ev).slice(0,40),t:Date.now(),p});if(m.ev.length>800)m.ev=m.ev.slice(-800);
+  const now=Date.now();if(now-_mSave>3500){_mSave=now;save();}
+}catch(e){}}
+function track(ev,props){recordEvent(ev,props);}
+window.track=track;
+/* Crash diagnostics (Sentry) — PII-scrubbed: no user, app state, breadcrumbs, request bodies, or cookies are sent; only the error + stack, tagged app=maeen. Respects Do-Not-Track. Never sends health data, names, doses or values. User can disable via S.prefs.crashReports=false. */
+const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'maeen',release:'maeen-eoe-v17'};
+function telemetryOn(){try{if(S&&S.prefs&&S.prefs.crashReports===false)return false;}catch(e){}if(navigator.doNotTrack==='1'||window.doNotTrack==='1'||navigator.doNotTrack==='yes')return false;return true;}
+function initTelemetry(){try{if(!telemetryOn()||window.__snLoaded||!TELEMETRY.sentryDsn)return;window.__snLoaded=1;var s=document.createElement('script');s.src='https://browser.sentry-cdn.com/8.0.0/bundle.min.js';s.crossOrigin='anonymous';s.onload=function(){try{Sentry.init({dsn:TELEMETRY.sentryDsn,release:TELEMETRY.release,environment:'production',sampleRate:1.0,tracesSampleRate:0,sendDefaultPii:false,initialScope:{tags:{app:TELEMETRY.app}},beforeSend:function(ev){try{if(ev.request){delete ev.request.data;delete ev.request.cookies;delete ev.request.query_string;}delete ev.user;if(ev.contexts){delete ev.contexts.state;}}catch(e){}return ev;},beforeBreadcrumb:function(){return null;}});}catch(e){}};document.head.appendChild(s);}catch(e){}}
+window.initTelemetry=initTelemetry;
+function engagedDays(){const s=new Set();(S.logs||[]).forEach(l=>s.add(l.t.slice(0,10)));(S.eesai||[]).forEach(x=>s.add((x.date||'').slice(0,10)));(S.journal||[]).forEach(x=>s.add((x.date||'').slice(0,10)));(S.water||[]).forEach(x=>s.add((x.date||'').slice(0,10)));s.delete('');return [...s].sort();}
+function daysSinceEngage(){const d=engagedDays();if(!d.length)return Infinity;return daysAgo(d[d.length-1]);}
+function recentBrokenStreak(){const set=new Set(engagedDays());if(set.has(todayKey()))return 0;let gap=0,i=0;for(i=0;i<7;i++){if(set.has(todayKey(new Date(Date.now()-i*864e5))))break;gap++;}if(i>=7||gap<1)return 0;let len=0;for(let j=i;j<i+400;j++){if(set.has(todayKey(new Date(Date.now()-j*864e5))))len++;else break;}return len;}
+function lastEesaiDaysAgo(){const h=S.eesai||[];if(!h.length)return Infinity;return daysAgo((h[h.length-1].date||todayKey()).slice(0,10));}
+function computeEngagement(){
+  const m=(S.metrics&&S.metrics.ev)?S.metrics:{firstSeen:null,ev:[]};const ev=m.ev||[];const now=Date.now();
+  const days=(S.seenDays||[]).slice().sort();const firstT=m.firstSeen?new Date(m.firstSeen).getTime():(days[0]?new Date(days[0]+'T00:00').getTime():now);
+  const firstKey=days[0]||todayKey(new Date(firstT));const daysSince=Math.max(0,Math.floor((now-firstT)/864e5));
+  const within=n=>days.filter(d=>(now-new Date(d+'T00:00').getTime())<n*864e5).length;
+  const retainedBy=n=>days.some(d=>Math.round((new Date(d+'T00:00')-new Date(firstKey+'T00:00'))/864e5)>=n);
+  const counts={};ev.forEach(x=>counts[x.e]=(counts[x.e]||0)+1);
+  const logTypes={};(S.logs||[]).forEach(l=>logTypes[l.type]=(logTypes[l.type]||0)+1);
+  const features={logging:(S.logs||[]).length>0,eesai:(S.eesai||[]).length>0,journal:(S.journal||[]).length>0,water:(S.water||[]).length>0,meds:(S.meds||[]).length>0,reminders:(S.reminders||[]).length>0,courses:Object.keys(S.courses||{}).length>0};
+  return {anonId:m.anonId||null,firstKey,daysSince,activeDays:(S.seenDays||[]).length,last7:within(7),last30:within(30),streak:(typeof streak==='function'?streak():0),eesaiCount:(S.eesai||[]).length,logsTotal:(S.logs||[]).length,d1:retainedBy(1),d7:retainedBy(7),d30:retainedBy(30),evCount:ev.length,counts,logTypes,features};
+}
+window.exportEngagement=function(){const e=computeEngagement();const ar=isAr();
+  const payload={app:'maeen',schema:1,anonId:e.anonId,firstSeen:S.metrics&&S.metrics.firstSeen,daysSince:e.daysSince,activeDays:e.activeDays,activeLast7:e.last7,activeLast30:e.last30,currentStreak:e.streak,eesaiCount:e.eesaiCount,logsTotal:e.logsTotal,retention:{d1:e.d1,d7:e.d7,d30:e.d30},featuresUsed:Object.keys(e.features).filter(k=>e.features[k]),eventCounts:e.counts,logTypeCounts:e.logTypes,exportedAt:new Date().toISOString()};
+  const txt=JSON.stringify(payload,null,2);try{navigator.clipboard&&navigator.clipboard.writeText(txt);}catch(x){}
+  try{const b=new Blob([txt],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='maeen-engagement-'+(e.anonId||'anon')+'.json';document.body.appendChild(a);a.click();a.remove();}catch(x){}
+  track('export_engagement');toast(ar?'✓ نُسخت المقاييس المجهولة':'✓ Anonymized metrics copied & downloaded');};
+route('engagement',(n)=>{const ar=isAr();const e=computeEngagement();
+  const FEAT=[['logging',['Logging','التسجيل']],['eesai',['EEsAI check-ins','قياسات EEsAI']],['journal',['Journal','اليوميات']],['water',['Hydration','الترطيب']],['meds',['Medications','الأدوية']],['reminders',['Reminders','التذكيرات']],['courses',['Courses','الدورات']]];
+  const days14=lastNDays(14);const evByDay={};((S.metrics&&S.metrics.ev)||[]).forEach(x=>{const k=todayKey(new Date(x.t));evByDay[k]=(evByDay[k]||0)+1;});
+  const yn=b=>b?'<span style="color:var(--good);font-weight:800">✓</span>':'<span style="opacity:.5">—</span>';
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'التفاعل والمقاييس':'Engagement & KPIs'})}
+   <div class="content">
+    <div class="card" style="background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent)"><b>${ar?'تحليلات على الجهاز':'On-device analytics'}</b><div class="muted" style="font-size:12px;margin-top:2px">${ar?'مقاييس حقيقية لهذا الجهاز — بلا شبكة ولا بيانات شخصية':'Real metrics for this install — no network, no personal data'}</div></div>
+    <div class="grid3">
+      <div class="kpi"><div class="v">${e.daysSince}</div><div class="l">${ar?'يوم':'days'}</div></div>
+      <div class="kpi"><div class="v">${e.activeDays}</div><div class="l">${ar?'أيام نشطة':'active'}</div></div>
+      <div class="kpi"><div class="v">${e.streak}</div><div class="l">${ar?'سلسلة':'streak'}</div></div>
+      <div class="kpi"><div class="v">${e.last7}<span style="font-size:12px">/7</span></div><div class="l">${ar?'آخر ٧':'last 7d'}</div></div>
+      <div class="kpi"><div class="v">${e.eesaiCount}</div><div class="l">EEsAI</div></div>
+      <div class="kpi"><div class="v">${e.evCount}</div><div class="l">${ar?'أحداث':'events'}</div></div>
+    </div>
+    <div class="card"><div class="section-title" style="margin:0 0 8px">${ar?'الاحتفاظ':'Retention'}</div><div class="row" style="gap:10px;justify-content:space-around"><div class="center"><div style="font-size:20px">${e.d1?'✅':'⬜'}</div><div class="muted" style="font-size:12px">D1</div></div><div class="center"><div style="font-size:20px">${e.d7?'✅':'⬜'}</div><div class="muted" style="font-size:12px">D7</div></div><div class="center"><div style="font-size:20px">${e.d30?'✅':'⬜'}</div><div class="muted" style="font-size:12px">D30</div></div></div></div>
+    <div class="card"><div class="section-title" style="margin:0 0 8px">${ar?'نشاط آخر ١٤ يوم':'Activity — last 14 days'}</div>${barChart(days14.map(d=>evByDay[d]||0),days14.map(d=>d.slice(8)),'var(--accent)')}</div>
+    <div class="card"><div class="section-title" style="margin:0 0 8px">${ar?'تبنّي الميزات':'Feature adoption'}</div><div class="row" style="flex-wrap:wrap;gap:8px">${FEAT.map(([k,lab])=>`<span class="chip">${yn(e.features[k])} ${L(lab)}</span>`).join('')}</div></div>
+    <div class="card"><b style="font-size:14px">${ar?'تصدير مجهول':'Anonymized export'}</b><div class="muted" style="font-size:12px;margin-top:2px">${ar?'مقاييس مجمّعة فقط':'Aggregated metrics only'}</div><button class="btn btn-primary" style="margin-top:12px" onclick="exportEngagement()">${ar?'📤 تصدير':'📤 Export'}</button></div>
+   </div>`;});
+
+/* ---- E2E-encrypted cloud backup (Maeen salts) ---- */
+function cryptoReady(){return !!(window.crypto&&window.crypto.subtle);}
+function _sb64(buf){const b=new Uint8Array(buf);let s='';const CH=0x8000;for(let i=0;i<b.length;i+=CH)s+=String.fromCharCode.apply(null,b.subarray(i,i+CH));return btoa(s);}
+function _unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0));}
+function _pbBase(code){return crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey','deriveBits']);}
+async function deriveEncKey(code){const b=await _pbBase(code);return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode('maeen-sync-enc-v1'),iterations:120000,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function deriveSyncId(code){const b=await _pbBase(code);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode('maeen-sync-id-v1'),iterations:120000,hash:'SHA-256'},b,256);return Array.from(new Uint8Array(bits)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+async function encBlob(obj,key){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj)));return _sb64(iv)+'.'+_sb64(ct);}
+async function decBlob(blob,key){const p=blob.split('.');const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:_unb64(p[0])},key,_unb64(p[1]));return JSON.parse(new TextDecoder().decode(pt));}
+function genRecoveryCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const out=[];for(let g=0;g<6;g++){let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];out.push(s);}return out.join('-');}
+function cloudSnapshot(){const c=Object.assign({},S);delete c.cloud;return c;}
+let _cloudTimer=null,_cloudBusy=false;
+async function cloudPush(silent){try{
+  if(!S.cloud||!S.cloud.enabled||!S.cloud.code||!cryptoReady()||!cloudOn())return false;if(_cloudBusy)return false;_cloudBusy=true;
+  const key=await deriveEncKey(S.cloud.code);const sid=S.cloud.syncId||await deriveSyncId(S.cloud.code);S.cloud.syncId=sid;
+  const blob=await encBlob(cloudSnapshot(),key);const sb=await loadSupabase();if(!sb){_cloudBusy=false;return false;}
+  const r=await sb.rpc('snapshot_put',{p_sync_id:sid,p_blob:blob,p_schema:1});_cloudBusy=false;
+  if(r&&r.error){if(!silent)toast(isAr()?'تعذّرت المزامنة':'Sync failed');return false;}
+  S.cloud.lastSync=new Date().toISOString();try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}
+  if(!silent){toast(isAr()?'✓ تمّت المزامنة':'✓ Synced');if(CURRENT==='backup')render();}return true;
+}catch(e){_cloudBusy=false;return false;}}
+function cloudSchedulePush(){if(!S||!S.cloud||!S.cloud.enabled)return;clearTimeout(_cloudTimer);_cloudTimer=setTimeout(()=>cloudPush(true),6000);}
+async function cloudRestore(code){code=(code||'').trim().toUpperCase();if(!code)return toast(isAr()?'أدخل رمز الاسترداد':'Enter your recovery code');if(!cryptoReady()||!cloudOn())return toast(isAr()?'غير متاح':'Not available');
+  toast(isAr()?'جارٍ الاسترداد…':'Restoring…');try{const key=await deriveEncKey(code);const sid=await deriveSyncId(code);const sb=await loadSupabase();if(!sb)return toast(isAr()?'تعذّر الاتصال':'Could not connect');
+   const r=await sb.rpc('snapshot_get',{p_sync_id:sid});if(r&&r.error)return toast(isAr()?'تعذّر الاسترداد':'Restore failed');const data=r&&r.data;if(!data||!data.length)return toast(isAr()?'لا توجد نسخة لهذا الرمز':'No backup found for that code');
+   const obj=await decBlob(data[0].blob,key);S=deepMerge(S,obj);S.cloud=Object.assign({},S.cloud,{enabled:true,code:code,syncId:sid,lastSync:new Date().toISOString()});save();closeSheet();toast(isAr()?'✓ تمّ استرداد بياناتك':'✓ Your data was restored');navTab('today');
+  }catch(e){toast(isAr()?'رمز غير صحيح':'Invalid or corrupted code');}}
+window.enableBackup=async function(){if(!cryptoReady())return toast(isAr()?'التشفير غير مدعوم هنا':'Encryption not supported here');const code=genRecoveryCode();S.cloud={enabled:true,code:code,syncId:null,lastSync:null};save();await cloudPush(true);showRecoveryCode(code);track('cloud_enable');};
+window.showRecoveryCode=function(code){const ar=isAr();code=code||(S.cloud&&S.cloud.code)||'';openSheet(`<h2 style="margin:4px 0 6px">${ar?'رمز الاسترداد':'Your recovery code'}</h2><p class="muted" style="font-size:13px;margin:0 0 12px">${ar?'احفظه بأمان — هو المفتاح الوحيد لبياناتك المشفّرة. لا يمكننا استعادته إن فقدته.':'Save it safely — it is the only key to your encrypted data. We cannot recover it if you lose it.'}</p><div style="font-family:ui-monospace,monospace;font-size:18px;letter-spacing:1px;text-align:center;background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:16px;word-break:break-all">${esc(code)}</div><button class="btn btn-primary" style="margin-top:14px" onclick="(navigator.clipboard&&navigator.clipboard.writeText('${code}'));toast('${ar?'نُسخ':'Copied'}')">${ar?'نسخ الرمز':'Copy code'}</button><button class="btn btn-ghost" style="margin-top:10px" onclick="closeSheet();render()">${ar?'حفظتُه':'I saved it'}</button>`);};
+window.disableBackup=function(){const ar=isAr();S.cloud={enabled:false,code:null,syncId:null,lastSync:null};save();toast(ar?'أُوقف النسخ السحابي':'Cloud backup turned off');render();};
+window.openRestore=function(){const ar=isAr();openSheet(`<h2 style="margin:4px 0 8px">${ar?'استرداد بياناتك':'Restore your data'}</h2><p class="muted" style="font-size:13px;margin:0 0 12px">${ar?'أدخل رمز الاسترداد.':'Enter your recovery code.'}</p><div class="field"><input class="input" id="rcCode" placeholder="XXXX-XXXX-XXXX-XXXX-XXXX-XXXX" style="font-family:ui-monospace,monospace;text-transform:uppercase"></div><button class="btn btn-primary" onclick="cloudRestore(document.getElementById('rcCode').value)">${ar?'استرداد':'Restore'}</button>`);};
+window.cloudSyncNow=function(){cloudPush(false);};
+route('backup',(n)=>{const ar=isAr();const c=S.cloud||{};const on=!!c.enabled;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'النسخ الاحتياطي السحابي':'Cloud backup'})}
+   <div class="content">
+    <div class="card" style="background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent)"><div class="row" style="gap:12px"><span style="font-size:26px">${on?'🔒':'☁️'}</span><div style="flex:1"><b style="font-size:15px">${on?(ar?'مُفعّل · مشفّر من طرف إلى طرف':'On · end-to-end encrypted'):(ar?'غير مُفعّل':'Off')}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${on&&c.lastSync?(ar?'آخر مزامنة: ':'Last sync: ')+new Date(c.lastSync).toLocaleString(ar?'ar-SA':'en-GB'):(ar?'بياناتك على هذا الجهاز فقط':'Your data is on this device only')}</div></div></div></div>
+    <div class="card"><p style="font-size:13.5px;line-height:1.6;margin:0">${ar?'اختياري ومشفّر من طرف إلى طرف: تُشفَّر بياناتك على جهازك برمز لا نراه أبدًا. يتيح استعادتها على جهاز جديد.':'Optional and end-to-end encrypted: your data is encrypted on your device with a code we never see. Lets you restore on a new device.'}</p></div>
+    ${on?`<button class="btn btn-primary" onclick="cloudSyncNow()">🔄 ${ar?'مزامنة الآن':'Sync now'}</button><button class="btn btn-ghost" style="margin-top:10px" onclick="showRecoveryCode()">${ar?'إظهار رمز الاسترداد':'Show recovery code'}</button><button class="btn btn-ghost" style="margin-top:10px" onclick="disableBackup()">${ar?'إيقاف النسخ':'Turn off backup'}</button>`:`<button class="btn btn-primary" onclick="enableBackup()">${ar?'تفعيل النسخ المشفّر':'Enable encrypted backup'}</button><button class="btn btn-ghost" style="margin-top:10px" onclick="openRestore()">${ar?'استرداد على هذا الجهاز':'Restore on this device'}</button>`}
+    <p class="muted" style="font-size:11px;margin-top:14px">${ar?'إن فقدت الرمز تُفقد النسخة السحابية — بياناتك المحلية تبقى. يُخزَّن الرمز على هذا الجهاز؛ أوقف النسخ على الأجهزة المشتركة.':'If you lose the code, the cloud copy is unrecoverable — local data is unaffected. The code is stored on this device; turn backup off on shared devices.'}</p>
+   </div>`;});
+
+/* ---- PRO / evidence (EEsAI is the PRO) ---- */
+function buildEvidenceRecord(){const e=computeEngagement();const r=S.research||{};
+  return {schema:1,app:'maeen',participantId:r.pid||null,siteCode:r.siteCode||null,consentAt:r.consentAt||null,baselineAt:r.baselineAt||null,
+    demographics:{focus:(S.user&&S.user.focus)||null,atopy:Object.keys(S.atopy||{}).filter(k=>S.atopy[k]),dietTherapy:(S.diet===0||S.diet)?S.diet:null},
+    pro:{ eesai:(S.eesai||[]).map(x=>({date:x.date,score:x.score})), dsq:(S.dsq||[]).map(x=>({date:x.date,freq:x.freq,stuck:x.stuck})), eos:(S.eos||[]).map(x=>({date:x.date,count:x.count})), journalMood:(S.journal||[]).map(x=>({date:x.date,mood:x.mood})) },
+    engagement:{firstSeen:S.metrics&&S.metrics.firstSeen,daysSince:e.daysSince,activeDays:e.activeDays,activeLast30:e.last30,currentStreak:e.streak,eesaiCount:e.eesaiCount,logsTotal:e.logsTotal,retention:{d1:e.d1,d7:e.d7,d30:e.d30}},
+    exportedAt:new Date().toISOString()};}
+window.exportEvidence=function(){const ar=isAr();const rec=buildEvidenceRecord();if(!rec.participantId){toast(ar?'انضم أولًا':'Enrol first');return;}
+  const txt=JSON.stringify(rec,null,2);try{navigator.clipboard&&navigator.clipboard.writeText(txt);}catch(x){}
+  try{const b=new Blob([txt],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='maeen-evidence-'+rec.participantId+'.json';document.body.appendChild(a);a.click();a.remove();}catch(x){}
+  track('export_evidence');toast(ar?'✓ نُسخت بياناتك مجهولة الهوية':'✓ De-identified data copied & downloaded');};
+window.enrollResearch=function(){const ar=isAr();S.research=S.research||{};S.research.enrolled=true;S.research.pid=S.research.pid||('P-'+Math.random().toString(36).slice(2,8).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase());S.research.consentAt=new Date().toISOString();if(!S.research.baselineAt)S.research.baselineAt=S.research.consentAt;const sc=document.getElementById('siteCode');if(sc&&sc.value.trim())S.research.siteCode=sc.value.trim().toUpperCase();save();track('research_enroll');try{closeSheet();}catch(e){}toast(ar?'✓ شكرًا لمساهمتك':'✓ Thank you for contributing');render();};
+window.withdrawResearch=function(){const ar=isAr();S.research={enrolled:false,pid:null,consentAt:null,siteCode:null,baselineAt:null};save();track('research_withdraw');toast(ar?'تم الانسحاب':'Withdrawn');render();};
+window.openEnroll=function(){const ar=isAr();openSheet(`<h2 style="margin:4px 0 8px">${ar?'الانضمام لبرنامج التحسين':'Join the improvement programme'}</h2><p class="muted" style="font-size:13px;line-height:1.6;margin:0 0 12px">${ar?'برنامج اختياري لقياس ما إذا كان التطبيق يساعد. تُصدَّر بياناتك مجهولة الهوية (بلا اسم أو ملاحظات) وتشاركها أنت. تبقى على جهازك ما لم تشاركها.':'Optional programme to measure whether the app helps. Your data is exported de-identified (no name or notes) and you share it. It stays on your device unless you share it.'}</p><div class="field"><label>${ar?'رمز الموقع (اختياري)':'Site code (optional)'}</label><input class="input" id="siteCode" placeholder="${ar?'مثال: KSU':'e.g. KSU'}" style="text-transform:uppercase" value="${esc((S.research&&S.research.siteCode)||'')}"></div><button class="btn btn-primary" onclick="enrollResearch()">${ar?'أوافق وأنضم':'I consent & join'}</button><p class="muted" style="font-size:11px;margin-top:10px">${ar?'يمكنك الانسحاب في أي وقت. أداة غير طبية.':'You can withdraw anytime. Non-medical tool.'}</p>`);};
+route('research',(n)=>{const ar=isAr();const r=S.research||{};const on=!!r.enrolled;const rec=on?buildEvidenceRecord():null;
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'البحث والأثر':'Research & evidence'})}
+   <div class="content">
+    <div class="card" style="background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,transparent),transparent)"><div class="row" style="gap:12px"><span style="font-size:26px">${on?'🔬':'📈'}</span><div style="flex:1"><b style="font-size:15px">${on?(ar?'مشارِك · ':'Enrolled · ')+esc(r.pid):(ar?'غير مشارِك':'Not enrolled')}</b><div class="muted" style="font-size:12.5px;margin-top:2px">${on?(ar?'شكرًا — مساهمتك تساعد على إثبات قيمة التطبيق.':'Thank you — your contribution helps prove the app’s value.'):(ar?'اختياري تمامًا.':'Completely optional.')}</div></div></div></div>
+    <div class="card"><p style="font-size:13.5px;line-height:1.6;margin:0">${ar?'يجمع البرنامج قياساتك عبر الوقت (EEsAI، استبيان البلع، الشعور) مع الاستخدام ويصدّرها مجهولة الهوية. تُدار الدراسة من الجمعية السعودية لأمراض الجهاز الهضمي وفق الموافقات الأخلاقية.':'The programme collects your measures over time (EEsAI, dysphagia questionnaire, wellbeing) with usage and exports them de-identified. The study is run by the Saudi Gastroenterology Association under ethics approval.'}</p></div>
+    ${on?`<div class="grid3"><div class="kpi"><div class="v">${rec.pro.eesai.length}</div><div class="l">EEsAI</div></div><div class="kpi"><div class="v">${rec.pro.dsq.length}</div><div class="l">${ar?'استبيان البلع':'DSQ'}</div></div><div class="kpi"><div class="v">${rec.engagement.daysSince}</div><div class="l">${ar?'أيام':'days'}</div></div></div>
+      <button class="btn btn-primary" onclick="openEesai()">${ar?'إجراء قياس EEsAI':'Do an EEsAI check-in'}</button>
+      <button class="btn btn-ghost" style="margin-top:10px" onclick="exportEvidence()">📤 ${ar?'تصدير بياناتي مجهولة الهوية':'Export my de-identified data'}</button>
+      <button class="btn btn-ghost" style="margin-top:10px" onclick="withdrawResearch()">${ar?'الانسحاب':'Withdraw'}</button>`
+    :`<button class="btn btn-primary" onclick="openEnroll()">${ar?'الانضمام (اختياري)':'Join (optional)'}</button>`}
+    <p class="muted" style="font-size:11px;margin-top:14px">${ar?'مجهول الهوية: لا اسم ولا ملاحظات. أنت من يشارك الملف.':'De-identified: no name or notes. You choose to share the file.'}</p>
+   </div>`;});
+
+/* ---- re-engagement nudges (engagement-based) ---- */
+function getNudge(){
+  if(S.prefs&&S.prefs.nudges===false)return null;
+  const today=todayKey();const dz=S.nudgeDismiss||{};const fresh=id=>dz[id]!==today;const cands=[];
+  const dsl=daysSinceEngage();
+  if(engagedDays().length>0&&dsl>=2&&dsl<400&&fresh('comeback'))cands.push({id:'comeback',icon:'👋',text:isAr()?('أهلًا بعودتك — مضت '+dsl+' أيام. تسجيل سريع يُكمل من حيث توقّفت.'):('Welcome back — it\'s been '+dsl+' days. A quick check-in picks up where you left off.'),action:"openEesai()",pri:9});
+  const brk=recentBrokenStreak();
+  if(brk>=3&&dsl<7&&fresh('streakrec'))cands.push({id:'streakrec',icon:'🔥',text:isAr()?('توقّف تتابعك ('+brk+' أيام) — سجّل اليوم لتبدأ سلسلة جديدة.'):('Your '+brk+'-day streak paused — log today to start a fresh one.'),action:"navTab('today')",pri:8});
+  if(S.research&&S.research.enrolled&&lastEesaiDaysAgo()>=14&&fresh('research'))cands.push({id:'research',icon:'🔬',text:isAr()?'حان وقت قياس EEsAI — يساعد على إظهار ما إذا كان التطبيق يفيد.':'Time for an EEsAI check-in — it helps show whether the app is helping.',action:"openEesai()",pri:7});
+  if(lastEesaiDaysAgo()>=10&&!(S.research&&S.research.enrolled)&&fresh('eesai'))cands.push({id:'eesai',icon:'📝',text:isAr()?'مضى وقت على آخر قياس EEsAI — هل تأخذ لحظة؟':'It\'s been a while since your last EEsAI check-in. Take a moment?',action:"openEesai()",pri:5});
+  if(!cands.length)return null;cands.sort((a,b)=>b.pri-a.pri);return cands[0];
+}
+function nudgeBanner(){const nd=getNudge();if(!nd)return '';
+  return `<div id="nudgeBan" class="card tap" style="display:flex;align-items:center;gap:11px;border-inline-start:3px solid var(--accent)"><span style="font-size:20px">${nd.icon}</span><div style="flex:1;font-size:13px" onclick="${nd.action}">${nd.text}</div><button onclick="dismissNudge('${nd.id}')" style="background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer">✕</button></div>`;}
+window.dismissNudge=function(id){S.nudgeDismiss=S.nudgeDismiss||{};S.nudgeDismiss[id]=todayKey();save();render();};
+
+/* ===== theme gallery (ported from Rafeeq) ===== */
+const THEMES=[
+  {id:'maeen',en:'Maeen',ar:'معين',like:'Signature',mode:'dark',cat:'brand',vars:{'--bg':'#0B0F14','--bg2':'#0F151D','--card':'#141C26','--card2':'#1B2530','--line':'#243140','--txt':'#EAF2F8','--muted':'#8DA0B2','--faint':'#5A6B7B','--accent':'#9B7CFF','--accent2':'#19A0FF','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#2BD67B','--accent-d':'#221B3E','--nav':'rgba(15,21,29,.9)'},wall:'radial-gradient(120% 90% at 50% -10%,#2a1d5a 0%,#0B0F14 55%)'},
+  {id:'whoop',en:'Midnight',ar:'منتصف الليل',like:'WHOOP',mode:'dark',
+   vars:{'--bg':'#0B0F14','--bg2':'#0F151D','--card':'#141C26','--card2':'#1B2530','--line':'#243140','--txt':'#EAF2F8','--muted':'#8DA0B2','--faint':'#5A6B7B','--accent':'#00E0B8','--accent2':'#19A0FF','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#2BD67B','--accent-d':'#0B3B36','--nav':'rgba(15,21,29,.9)'},
+   wall:'radial-gradient(120% 80% at 50% -10%,#0d2b2a 0%,#0B0F14 55%)'},
+  {id:'oura',en:'Aura',ar:'الهالة',like:'Oura',mode:'dark',
+   vars:{'--bg':'#0E0D12','--bg2':'#15131C','--card':'#1C1926','--card2':'#262232','--line':'#332D42','--txt':'#F1ECF6','--muted':'#A89CB8','--faint':'#6E6480','--accent':'#E8B07A','--accent2':'#C58BF2','--purple':'#C58BF2','--warn':'#F2C24B','--bad':'#FF6B8A','--good':'#7FD1A6','--accent-d':'#2A2030','--nav':'rgba(21,19,28,.92)'},
+   wall:'radial-gradient(120% 90% at 80% -10%,#3a2a1a 0%,#0E0D12 55%)'},
+  {id:'calm',en:'Deep Calm',ar:'هدوء عميق',like:'Calm',mode:'dark',
+   vars:{'--bg':'#0A1730','--bg2':'#0E1F40','--card':'#13294F','--card2':'#1B3361','--line':'#274377','--txt':'#E7F0FF','--muted':'#93AAD0','--faint':'#5E769E','--accent':'#4FA8FF','--accent2':'#7BD8FF','--purple':'#9BA8FF','--warn':'#FFC061','--bad':'#FF7C92','--good':'#5FD0C0','--accent-d':'#10294F','--nav':'rgba(14,31,64,.92)'},
+   wall:'radial-gradient(120% 90% at 50% -10%,#123a6b 0%,#0A1730 55%)'},
+  {id:'forest',en:'Forest',ar:'الغابة',like:'Fitbit',mode:'dark',
+   vars:{'--bg':'#0A1410','--bg2':'#0F1D17','--card':'#14271E','--card2':'#1D3528','--line':'#274A37','--txt':'#E8F5EC','--muted':'#8FB6A0','--faint':'#5C7E6A','--accent':'#46D08A','--accent2':'#8FD14F','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#46D08A','--accent-d':'#12271C','--nav':'rgba(15,29,23,.92)'},
+   wall:'radial-gradient(120% 90% at 50% -10%,#103a26 0%,#0A1410 55%)'},
+  {id:'apple',en:'Clean',ar:'نظيف',like:'Apple Health',mode:'light',
+   vars:{'--bg':'#F2F4F8','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EDF1F6','--line':'#DCE3EC','--txt':'#0F1722','--muted':'#5C6B7D','--faint':'#6E7A88','--accent':'#0A84FF','--accent2':'#30C758','--purple':'#7C5CFF','--warn':'#FF9F0A','--bad':'#FF3B30','--good':'#30C758','--accent-d':'#DCEBFF','--nav':'rgba(255,255,255,.82)'},
+   wall:'linear-gradient(180deg,#E4EEFB 0%,#F2F4F8 40%)'},
+  {id:'headspace',en:'Sunshine',ar:'إشراق',like:'Headspace',mode:'light',
+   vars:{'--bg':'#FFF7EC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FBEFDD','--line':'#F0E2CC','--txt':'#2A2014','--muted':'#6E5C44','--faint':'#897962','--accent':'#E0691E','--accent2':'#4F86FF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FFE6D2','--nav':'rgba(255,255,255,.82)'},
+   wall:'linear-gradient(180deg,#FFEAD2 0%,#FFF7EC 40%)'},
+  {id:'flo',en:'Blossom',ar:'زهر',like:'Flo',mode:'light',
+   vars:{'--bg':'#FFF0F5','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCE6EF','--line':'#F3D7E3','--txt':'#2A1620','--muted':'#7E5868','--faint':'#9A7A8A','--accent':'#F0468A','--accent2':'#9B7CFF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FCE0EC','--nav':'rgba(255,255,255,.82)'},
+   wall:'radial-gradient(120% 80% at 80% -10%,#ffd6e6 0%,#FFF0F5 55%)'},
+  {id:'mint',en:'Fresh Mint',ar:'نعناع',like:'Clue',mode:'light',
+   vars:{'--bg':'#ECF7F0','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E3F2E9','--line':'#D3EADC','--txt':'#0F2418','--muted':'#4E6B5A','--faint':'#6E9080','--accent':'#1FA85F','--accent2':'#0AAFA0','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#1FA85F','--accent-d':'#D6F1E1','--nav':'rgba(255,255,255,.82)'},
+   wall:'linear-gradient(180deg,#D9F2E3 0%,#ECF7F0 40%)'},
+  {id:'nebula',en:'Nebula',ar:'سديم',like:'Samsung Health',mode:'dark',
+   vars:{'--bg':'#0C0A1A','--bg2':'#131029','--card':'#1A1636','--card2':'#241E47','--line':'#332A5C','--txt':'#EFEAFB','--muted':'#AA9CCC','--faint':'#75699B','--accent':'#A78BFA','--accent2':'#5EB0FF','--purple':'#C58BF2','--warn':'#FFC061','--bad':'#FF6B8A','--good':'#5FD0A0','--accent-d':'#241B45','--nav':'rgba(19,16,41,.92)'},
+   wall:'radial-gradient(120% 90% at 50% -10%,#2a1d5a 0%,#0C0A1A 55%)'},
+  {id:'sandstone',en:'Sandstone',ar:'حجر رملي',like:'Vision 2030',mode:'light',
+   vars:{'--bg':'#F6F1E9','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#F1E8D9','--line':'#E6DAC6','--txt':'#241B12','--muted':'#6B5C49','--faint':'#8A7A64','--accent':'#9A6620','--accent2':'#2F8F77','--purple':'#7C5CFF','--warn':'#C9831F','--bad':'#C24A33','--good':'#2F8F77','--accent-d':'#F0E2C9','--nav':'rgba(255,255,255,.82)'},
+   wall:'linear-gradient(180deg,#EFE4D0 0%,#F6F1E9 40%)'},
+  /* ===== Illustrated / personality themes (original art — no third-party IP) ===== */
+  {id:'sakura',en:'Sakura Dream',ar:'حلم الساكورا',like:'Anime',mode:'light',cat:'anime',
+   vars:{'--bg':'#FFF0F6','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCE4F0','--line':'#F3D3E5','--txt':'#2A1622','--muted':'#7C5468','--faint':'#9A748A','--accent':'#F0468A','--accent2':'#A66BFF','--purple':'#A66BFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#2FA86A','--accent-d':'#FCDCEC','--nav':'rgba(255,255,255,.82)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFD9E8"/><stop offset=".55" stop-color="#F3E3FF"/><stop offset="1" stop-color="#FFF0F6"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><circle cx="315" cy="120" r="64" fill="#FFC2DB" opacity="0.7"/><circle cx="315" cy="120" r="94" fill="#FFC2DB" opacity="0.22"/><g fill="#FF9EC4"><path d="M60 90c6-10 18-6 16 4 8-6 16 4 8 10 4 10-8 14-14 6-8 6-16-4-10-12-6-2-6-12 0-8z"/><path d="M150 210c5-8 15-5 13 3 7-5 13 3 7 8 3 8-7 11-11 5-7 5-13-3-8-10z" opacity="0.7"/><path d="M300 300c5-8 15-5 13 3 7-5 13 3 7 8 3 8-7 11-11 5-7 5-13-3-8-10z" opacity="0.6"/><path d="M225 130c4-7 13-4 11 3 6-4 11 3 6 7 3 7-6 9-9 4-6 4-11-3-7-8z" opacity="0.6"/></g><path d="M0 650c80-40 150-30 220 0s130 18 180-12v170H0z" fill="#FFD1E4" opacity="0.55"/></svg>`},
+  {id:'neon',en:'Neon City',ar:'مدينة النيون',like:'Anime',mode:'dark',cat:'anime',
+   vars:{'--bg':'#0A0714','--bg2':'#120A22','--card':'#180F2E','--card2':'#221640','--line':'#33235C','--txt':'#ECE6FF','--muted':'#A99BD6','--faint':'#7B6BA0','--accent':'#17E1E6','--accent2':'#FF4FD8','--purple':'#B36BFF','--warn':'#FFC061','--bad':'#FF5C72','--good':'#37E0B0','--accent-d':'#16233A','--nav':'rgba(18,10,34,.92)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#1A0B3A"/><stop offset=".55" stop-color="#0E0722"/><stop offset="1" stop-color="#0A0714"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><circle cx="300" cy="150" r="60" fill="#FF4FD8" opacity="0.3"/><circle cx="300" cy="150" r="32" fill="#FF7FE4" opacity="0.6"/><g fill="#0A0714" stroke="#17E1E6" stroke-width="1.5"><rect x="30" y="380" width="46" height="260"/><rect x="86" y="320" width="40" height="320"/><rect x="140" y="410" width="44" height="230"/><rect x="196" y="350" width="50" height="290"/><rect x="258" y="300" width="42" height="340"/><rect x="312" y="400" width="46" height="240"/></g><g fill="#FF4FD8"><rect x="40" y="410" width="6" height="6"/><rect x="96" y="360" width="6" height="6"/><rect x="206" y="390" width="6" height="6"/><rect x="270" y="340" width="6" height="6"/><rect x="322" y="440" width="6" height="6"/></g><g stroke="#17E1E6" stroke-width="1" opacity="0.35"><line x1="0" y1="660" x2="400" y2="660"/><line x1="0" y1="710" x2="400" y2="710"/><line x1="200" y1="640" x2="40" y2="800"/><line x1="200" y1="640" x2="360" y2="800"/></g></svg>`},
+  {id:'shonen',en:'Shonen Sunset',ar:'غروب شونين',like:'Anime',mode:'dark',cat:'anime',
+   vars:{'--bg':'#1C1436','--bg2':'#241A46','--card':'#2C2050','--card2':'#382863','--line':'#463473','--txt':'#F4ECFF','--muted':'#B7A6D6','--faint':'#8574A8','--accent':'#FF7A2E','--accent2':'#37B6FF','--purple':'#B36BFF','--warn':'#FFC061','--bad':'#FF6B6B','--good':'#37D9A0','--accent-d':'#3A2740','--nav':'rgba(36,26,70,.92)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#241A46"/><stop offset=".45" stop-color="#5A2E5E"/><stop offset=".8" stop-color="#FF7A2E"/><stop offset="1" stop-color="#FFB05A"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><circle cx="200" cy="470" r="82" fill="#FFE08A" opacity="0.95"/><circle cx="200" cy="470" r="112" fill="#FFCF6B" opacity="0.28"/><g stroke="#FFFFFF" stroke-width="2" opacity="0.16"><line x1="200" y1="470" x2="0" y2="380"/><line x1="200" y1="470" x2="0" y2="560"/><line x1="200" y1="470" x2="400" y2="380"/><line x1="200" y1="470" x2="400" y2="560"/><line x1="200" y1="470" x2="40" y2="20"/><line x1="200" y1="470" x2="360" y2="20"/></g><path d="M0 620c60-18 120 8 200 0s150-20 200-4v190H0z" fill="#2A1636" opacity="0.7"/></svg>`},
+  {id:'kawaii',en:'Pastel Sky',ar:'سماء الباستيل',like:'Anime',mode:'light',cat:'anime',
+   vars:{'--bg':'#EFFAFF','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EAF4FA','--line':'#DCEAF2','--txt':'#243040','--muted':'#5B6B7C','--faint':'#7A8A9A','--accent':'#FF8FB3','--accent2':'#3FC9C0','--purple':'#B98BFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#2FA86A','--accent-d':'#FFE3EC','--nav':'rgba(255,255,255,.82)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D9F7FF"/><stop offset=".5" stop-color="#F0E6FF"/><stop offset="1" stop-color="#FFF0F7"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><g fill="#FFFFFF" opacity="0.9"><ellipse cx="90" cy="140" rx="60" ry="30"/><ellipse cx="130" cy="150" rx="46" ry="26"/><ellipse cx="300" cy="240" rx="54" ry="28"/><ellipse cx="255" cy="250" rx="40" ry="22"/></g><path d="M320 90l6 14 15 1-11 10 3 15-13-8-13 8 3-15-11-10 15-1z" fill="#FFCF6B"/><g fill="#B98BFF" opacity="0.7"><path d="M70 330l4 9 10 1-7 7 2 10-9-5-9 5 2-10-7-7 10-1z"/><path d="M330 430l3 7 8 1-6 6 2 8-7-4-7 4 2-8-6-6 8-1z"/></g></svg>`},
+  {id:'mountain',en:'Mountain Dawn',ar:'فجر الجبال',like:'Nature',mode:'light',cat:'nature',
+   vars:{'--bg':'#EEF4F6','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E6EEF1','--line':'#D6E2E6','--txt':'#14232A','--muted':'#4E6670','--faint':'#6E868F','--accent':'#E07A3E','--accent2':'#2F8FA8','--purple':'#7C5CFF','--warn':'#D9902A','--bad':'#DB4A3A','--good':'#2F9C7A','--accent-d':'#F6E1D2','--nav':'rgba(255,255,255,.82)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE7C2"/><stop offset=".45" stop-color="#FFD6E0"/><stop offset="1" stop-color="#EAF3F7"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><circle cx="200" cy="200" r="56" fill="#FFB37A" opacity="0.9"/><path d="M0 520l90-130 70 90 60-120 90 150 90-80v420H0z" fill="#7FA8B0" opacity="0.5"/><path d="M0 600l110-90 80 70 90-100 110 120v240H0z" fill="#4E7A86" opacity="0.7"/></svg>`},
+  {id:'ocean',en:'Ocean Deep',ar:'أعماق المحيط',like:'Nature',mode:'dark',cat:'nature',
+   vars:{'--bg':'#08283C','--bg2':'#0B3350','--card':'#0F3E5E','--card2':'#164E70','--line':'#256084','--txt':'#E4F3FA','--muted':'#8FBAD0','--faint':'#5E8AA2','--accent':'#2FC9E0','--accent2':'#37E0B0','--purple':'#8FA8FF','--warn':'#FFC061','--bad':'#FF6B7E','--good':'#37E0B0','--accent-d':'#123C50','--nav':'rgba(11,51,80,.92)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0A2A44"/><stop offset=".5" stop-color="#0A3A54"/><stop offset="1" stop-color="#08283C"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><g fill="#2FA0C0" opacity="0.22"><path d="M0 300c60-30 120 30 200 0s140-30 200 0v60c-60 30-120-30-200 0s-140 30-200 0z"/><path d="M0 440c60-30 120 30 200 0s140-30 200 0v60c-60 30-120-30-200 0s-140 30-200 0z"/></g><g fill="#7FE0F0" opacity="0.5"><circle cx="80" cy="200" r="5"/><circle cx="150" cy="140" r="3"/><circle cx="300" cy="180" r="4"/><circle cx="330" cy="120" r="3"/><circle cx="220" cy="240" r="4"/></g></svg>`},
+  {id:'aurora',en:'Aurora',ar:'الشفق القطبي',like:'Nature',mode:'dark',cat:'nature',
+   vars:{'--bg':'#040B18','--bg2':'#08152A','--card':'#0C1E38','--card2':'#132A48','--line':'#1F3A5C','--txt':'#E6F0FA','--muted':'#93AEC8','--faint':'#5E7898','--accent':'#37E0A0','--accent2':'#9B7CFF','--purple':'#9B7CFF','--warn':'#FFC061','--bad':'#FF6B7E','--good':'#37E0A0','--accent-d':'#0E2A40','--nav':'rgba(8,21,42,.92)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#071427"/><stop offset="1" stop-color="#040B18"/></linearGradient><linearGradient id="a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#37E0A0" stop-opacity="0"/><stop offset=".5" stop-color="#37E0A0" stop-opacity=".55"/><stop offset="1" stop-color="#9B7CFF" stop-opacity="0"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><g fill="#FFFFFF"><circle cx="60" cy="90" r="1.5"/><circle cx="140" cy="60" r="1"/><circle cx="250" cy="100" r="1.5"/><circle cx="330" cy="70" r="1"/><circle cx="300" cy="160" r="1"/><circle cx="90" cy="180" r="1"/></g><path d="M-20 120c80 40 120-40 200-20s180 60 240 20v170c-80 40-160-40-240-20S60 330-20 290z" fill="url(#a)" opacity="0.85"/><path d="M-20 230c80 40 140-30 220-10s160 50 220 10v130c-80 40-160-30-240-10S60 420-20 380z" fill="url(#a)" opacity="0.5"/></svg>`},
+  {id:'ramadan',en:'Ramadan Night',ar:'ليلة رمضان',like:'Seasonal',mode:'dark',cat:'seasonal',
+   vars:{'--bg':'#0A1128','--bg2':'#0F1A3A','--card':'#152249','--card2':'#1E2E5E','--line':'#2C3E78','--txt':'#EAF0FF','--muted':'#9FB0D8','--faint':'#6E7EA8','--accent':'#F5D06B','--accent2':'#5B8DEF','--purple':'#9B7CFF','--warn':'#F5C24B','--bad':'#FF6B7E','--good':'#4FD0A0','--accent-d':'#1B2A54','--nav':'rgba(15,26,58,.92)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14224E"/><stop offset=".6" stop-color="#0C1636"/><stop offset="1" stop-color="#0A1128"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><path d="M300 118a58 58 0 1 0 0 100 46 46 0 1 1 0-100z" fill="#F5D06B"/><g fill="#FFFFFF"><circle cx="70" cy="90" r="1.6"/><circle cx="130" cy="140" r="1.2"/><circle cx="200" cy="80" r="1.6"/><circle cx="160" cy="200" r="1.2"/><circle cx="90" cy="240" r="1.4"/><circle cx="250" cy="270" r="1.2"/></g><g fill="#F5D06B" opacity="0.5"><path d="M60 380l6-14 6 14v46l-6 8-6-8z"/><path d="M120 420l5-12 5 12v40l-5 7-5-7z"/></g><path d="M0 580l40-40h60l40 40 60-50 60 50 40-30h60v290H0z" fill="#0A1128" opacity="0.8"/></svg>`},
+  {id:'dune',en:'Desert Dune',ar:'كثبان الصحراء',like:'Seasonal',mode:'light',cat:'seasonal',
+   vars:{'--bg':'#F6EAD4','--bg2':'#FFFDF7','--card':'#FFFDF7','--card2':'#F2E6CE','--line':'#E6D6B6','--txt':'#2A2012','--muted':'#6E5C40','--faint':'#8C7A5C','--accent':'#C07A28','--accent2':'#2F8F77','--purple':'#7C5CFF','--warn':'#C9831F','--bad':'#C24A33','--good':'#2F8F77','--accent-d':'#F0E0C0','--nav':'rgba(255,253,247,.82)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCE7C0"/><stop offset=".5" stop-color="#F7D8A6"/><stop offset="1" stop-color="#EBC38A"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><circle cx="120" cy="150" r="50" fill="#FFF1D6" opacity="0.9"/><path d="M0 470c120-50 220 20 400-20v380H0z" fill="#E0AE6E" opacity="0.65"/><path d="M0 570c140-40 260 30 400-10v280H0z" fill="#CE945A" opacity="0.7"/><path d="M0 670c120-30 260 20 400-6v166H0z" fill="#B87C46" opacity="0.75"/></svg>`},
+  {id:'cloudnine',en:'Cloud Nine',ar:'سحابة هادئة',like:'Calm',mode:'light',cat:'calm',
+   vars:{'--bg':'#EEF5FC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E8F0F8','--line':'#DAE6F0','--txt':'#1A2733','--muted':'#54677A','--faint':'#74889A','--accent':'#4F9CE8','--accent2':'#6BD0C8','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#2FA86A','--accent-d':'#DCEBFB','--nav':'rgba(255,255,255,.82)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFE6FF"/><stop offset="1" stop-color="#EEF5FC"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><g fill="#FFFFFF" opacity="0.9"><ellipse cx="110" cy="150" rx="70" ry="34"/><ellipse cx="160" cy="165" rx="54" ry="28"/><ellipse cx="300" cy="270" rx="66" ry="32"/><ellipse cx="250" cy="285" rx="48" ry="24"/><ellipse cx="80" cy="380" rx="50" ry="24" opacity="0.7"/></g></svg>`},
+  {id:'vapor',en:'Vaporwave',ar:'فيبورويف',like:'Retro',mode:'dark',cat:'retro',
+   vars:{'--bg':'#1A0E33','--bg2':'#241442','--card':'#2A1A4E','--card2':'#362260','--line':'#4A2E7A','--txt':'#F6EAFF','--muted':'#C0A6E0','--faint':'#8E74B8','--accent':'#FF6EC7','--accent2':'#2FE8E8','--purple':'#B36BFF','--warn':'#FFC061','--bad':'#FF5C72','--good':'#37E0B0','--accent-d':'#2E1B50','--nav':'rgba(36,20,66,.92)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1B4A"/><stop offset=".5" stop-color="#7A2E7E"/><stop offset=".72" stop-color="#FF6EC7"/><stop offset="1" stop-color="#1A0E33"/></linearGradient><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFE08A"/><stop offset="1" stop-color="#FF5FA2"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><circle cx="200" cy="290" r="90" fill="url(#s)"/><g fill="#7A2E7E"><rect x="100" y="320" width="200" height="6"/><rect x="100" y="336" width="200" height="8"/><rect x="100" y="355" width="200" height="10"/><rect x="100" y="378" width="200" height="12"/></g><g stroke="#2FE8E8" stroke-width="1.4" opacity="0.7"><line x1="0" y1="520" x2="400" y2="520"/><line x1="-100" y1="620" x2="500" y2="620"/><line x1="-260" y1="760" x2="660" y2="760"/><line x1="200" y1="500" x2="-160" y2="800"/><line x1="200" y1="500" x2="560" y2="800"/><line x1="200" y1="500" x2="60" y2="800"/><line x1="200" y1="500" x2="340" y2="800"/></g></svg>`},
+  {id:'oled',en:'OLED Black',ar:'أسود عميق',like:'AMOLED',mode:'dark',cat:'retro',
+   vars:{'--bg':'#000000','--bg2':'#0A0A0C','--card':'#0E0F12','--card2':'#16181C','--line':'#24272E','--txt':'#F2F4F8','--muted':'#9AA3AE','--faint':'#6A727C','--accent':'#00E0B8','--accent2':'#19A0FF','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#2BD67B','--accent-d':'#0A2622','--nav':'rgba(0,0,0,.9)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><rect width="400" height="800" fill="#000000"/><circle cx="200" cy="90" r="150" fill="#00E0B8" opacity="0.10"/><circle cx="330" cy="400" r="120" fill="#19A0FF" opacity="0.07"/></svg>`},
+  {id:'terminal',en:'Retro Terminal',ar:'طرفية كلاسيكية',like:'CRT',mode:'dark',cat:'retro',
+   vars:{'--bg':'#03110A','--bg2':'#06180E','--card':'#08200F','--card2':'#0C2C16','--line':'#164A28','--txt':'#C8FFDC','--muted':'#6FD59A','--faint':'#3E8C60','--accent':'#16FF7A','--accent2':'#37E0FF','--purple':'#9B7CFF','--warn':'#E0C64B','--bad':'#FF6B6B','--good':'#16FF7A','--accent-d':'#0A2A16','--nav':'rgba(6,24,14,.92)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><rect width="400" height="800" fill="#03110A"/><circle cx="200" cy="120" r="160" fill="#16FF7A" opacity="0.08"/><g fill="#16FF7A" opacity="0.16" font-family="monospace" font-size="13"><text x="24" y="200">10110 01001</text><text x="24" y="230">&gt;_ sync ok</text><text x="24" y="260">01101 11010</text></g></svg>`},
+  {id:'mono',en:'Ink',ar:'حبر',like:'Mono',mode:'light',cat:'calm',
+   vars:{'--bg':'#F5F5F6','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EFEFF1','--line':'#E0E0E3','--txt':'#16181C','--muted':'#55595F','--faint':'#7C8087','--accent':'#1F2937','--accent2':'#6B7280','--purple':'#6B7280','--warn':'#B4741A','--bad':'#B23B33','--good':'#2E7D5B','--accent-d':'#E8E8EB','--nav':'rgba(255,255,255,.85)'},
+   art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F4F4F5"/><stop offset="1" stop-color="#FAFAFB"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><circle cx="310" cy="120" r="70" fill="#E4E4E6"/><circle cx="70" cy="300" r="40" fill="#EAEAEC"/></svg>`},
+  {id:'flowaurora',en:'Living Aurora',ar:'شفق حيّ',like:'Live',mode:'dark',cat:'nature',flow:true,vars:{'--bg':'#08201c','--bg2':'#0c2a26','--card':'#102f2a','--card2':'#17403a','--line':'#255049','--txt':'#EAF5F0','--muted':'#8FB6AC','--faint':'#5C7E76','--accent':'#37E0B0','--accent2':'#4FA8FF','--purple':'#9B7CFF','--warn':'#FFC061','--bad':'#FF6B7E','--good':'#37E0B0','--accent-d':'#123c34','--nav':'rgba(12,42,38,.9)'},wall:'linear-gradient(125deg,#06231f,#0b3b4a,#123a6b,#2a1d5a,#06231f)'},
+  {id:'flowsunset',en:'Sunset Drift',ar:'انسياب الغروب',like:'Live',mode:'dark',cat:'seasonal',flow:true,vars:{'--bg':'#221636','--bg2':'#2a1c42','--card':'#32224e','--card2':'#3e2a60','--line':'#4c3673','--txt':'#F6ECFF','--muted':'#C0A6E0','--faint':'#8E74B8','--accent':'#FF7A4D','--accent2':'#FF5FA2','--purple':'#B36BFF','--warn':'#FFC061','--bad':'#FF6B6B','--good':'#37D9A0','--accent-d':'#3a2740','--nav':'rgba(42,28,66,.9)'},wall:'linear-gradient(125deg,#241a46,#5a2e5e,#8a3a4e,#c85a2e,#241a46)'},
+  {id:'flowocean',en:'Deep Current',ar:'تيار عميق',like:'Live',mode:'dark',cat:'nature',flow:true,vars:{'--bg':'#062033','--bg2':'#0a2c44','--card':'#0e3752','--card2':'#154865','--line':'#245f80','--txt':'#E4F3FA','--muted':'#8FBAD0','--faint':'#5E8AA2','--accent':'#2FC9E0','--accent2':'#37E0B0','--purple':'#8FA8FF','--warn':'#FFC061','--bad':'#FF6B7E','--good':'#37E0B0','--accent-d':'#123c50','--nav':'rgba(10,44,68,.9)'},wall:'linear-gradient(125deg,#062033,#0a3a54,#0e5a6e,#123a6b,#062033)'},
+];
+const CATMAP={whoop:'brand',nebula:'brand',calm:'calm',apple:'calm',mint:'calm',forest:'nature',sandstone:'seasonal',headspace:'more',flo:'more',oura:'more'};
+const CAT_ORDER=[['brand',['Brand & signature','السمة والهوية'],'🩵'],['anime',['Anime & vibrant','أنمي وحيوية'],'✨'],['nature',['Nature','الطبيعة'],'🌿'],['seasonal',['Seasonal & Saudi','مواسم وسعودية'],'🌙'],['retro',['Bold & retro','جريء وكلاسيكي'],'🕹️'],['calm',['Calm & minimal','هدوء وبساطة'],'☁️'],['more',['More looks','مظاهر أخرى'],'🎨']];
+function themeCat(th){return th.cat||CATMAP[th.id]||'more';}
+function wallCss(th){ if(th.art){return 'url("data:image/svg+xml,'+encodeURIComponent(th.art)+'") center top / cover no-repeat, '+(th.base||th.vars['--bg']); } return th.wall||th.vars['--bg']; }
+function applyTheme(){const th=THEMES.find(x=>x.id===(S.prefs.theme||'maeen'))||THEMES[0];
+  const r=document.documentElement;Object.entries(th.vars).forEach(([k,v])=>r.style.setProperty(k,v));
+  const app=$('#app');const cw=S.prefs&&S.prefs.customWall;if(app){app.style.background=cw?('url("'+cw+'") center center / cover no-repeat'):(th.flow?th.wall:wallCss(th));app.classList.toggle('flowbg',!cw&&!!th.flow);}r.setAttribute('data-wall',cw?'custom':'');
+  const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',th.vars['--bg']);
+  if(S.prefs&&S.prefs.accent){r.style.setProperty('--accent',S.prefs.accent);r.style.setProperty('--accent-d','color-mix(in srgb, '+S.prefs.accent+' 15%, var(--card))');}
+  r.setAttribute('data-mode',th.mode);r.setAttribute('data-anim',(S.prefs&&S.prefs.ambient===false)?'off':'on');}
+function themePreview(th){const v=th.vars;
+  return `<div class="tprev" style="background:${wallCss(th)}">
+    <div style="background:${v['--card']};border:1px solid ${v['--line']};border-radius:8px;padding:6px;flex:1;display:flex;flex-direction:column;gap:5px">
+      <div class="tbar" style="background:${v['--accent']};width:60%"></div>
+      <div class="tbar" style="background:${v['--line']};width:90%"></div>
+      <div class="tbar" style="background:${v['--line']};width:75%"></div>
+      <div style="flex:1"></div>
+      <div style="display:flex;gap:4px"><span style="width:14px;height:14px;border-radius:50%;background:${v['--accent']}"></span><span style="width:14px;height:14px;border-radius:50%;background:${v['--accent2']}"></span></div>
+    </div></div>`;}
+route('theme',(n)=>{const ar=isAr();
+  const grid=arr=>`<div class="grid3" style="gap:12px">${arr.map(th=>`<div class="theme-card ${S.prefs.theme===th.id?'on':''}" onclick="setTheme('${th.id}')">${themePreview(th)}<div class="tcheck">✓</div><div class="tname">${isAr()?th.ar:th.en}${th.like?`<br><span style="font-weight:400;opacity:.7;font-size:9px">${th.like}</span>`:''}</div></div>`).join('')}</div>`;
+  const sections=CAT_ORDER.map(([cat,lab,ic])=>{const arr=THEMES.filter(th=>themeCat(th)===cat);if(!arr.length)return '';return `<div class="section-title">${ic} ${ar?lab[1]:lab[0]}</div>${grid(arr)}`;}).join('');
+  n.innerHTML=`${topbar(null,null,{back:true,rawTitle:ar?'السمات والخلفية':'Themes & wallpaper'})}
+   <div class="content">
+     ${accentRow()}
+     ${sections}
+     <div style="height:14px"></div>
+   </div>`;
+});
+const ACCENTS=[['','',''],['#00E0B8','Teal','فيروزي'],['#19A0FF','Blue','أزرق'],['#9B7CFF','Purple','بنفسجي'],['#F0468A','Pink','وردي'],['#FF7A2E','Orange','برتقالي'],['#2BD67B','Green','أخضر'],['#FF5C72','Red','أحمر'],['#F5C24B','Gold','ذهبي']];
+window.pickWallpaper=function(){var inp=document.createElement('input');inp.type='file';inp.accept='image/*';inp.onchange=function(){var f=inp.files&&inp.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var img=new Image();img.onload=function(){var max=1080;var w=img.width,h=img.height;var s=Math.min(1,max/Math.max(w,h));var c=document.createElement('canvas');c.width=Math.round(w*s);c.height=Math.round(h*s);var x=c.getContext('2d');x.drawImage(img,0,0,c.width,c.height);var url=c.toDataURL('image/jpeg',0.72);if(url.length>2200000){var s2=Math.min(1,860/Math.max(w,h));c.width=Math.round(w*s2);c.height=Math.round(h*s2);x.drawImage(img,0,0,c.width,c.height);url=c.toDataURL('image/jpeg',0.62);}S.prefs.customWall=url;try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){toast(isAr()?'الصورة كبيرة جدًا':'Image is too large');return;}applyTheme();render();toast(isAr()?'✓ تم ضبط خلفيتك':'✓ Your wallpaper is set');};img.src=rd.result;};rd.readAsDataURL(f);};inp.click();};
+window.clearWallpaper=function(){if(S.prefs)delete S.prefs.customWall;save();applyTheme();render();toast(isAr()?'أُزيلت الخلفية':'Wallpaper removed');};
+window.setAmbient=function(on){S.prefs.ambient=on;save();document.documentElement.setAttribute('data-anim',on?'on':'off');render();};
+window.setAccent=function(hex){if(hex){S.prefs.accent=hex;}else if(S.prefs){delete S.prefs.accent;}save();applyTheme();render();};
+window.surpriseTheme=function(){var th=THEMES[Math.floor(Math.random()*THEMES.length)];setTheme(th.id);};
+function accentRow(){var ar=isAr();var cur=(S.prefs&&S.prefs.accent)||'';
+  var sw=ACCENTS.map(function(a){var hex=a[0];var on=cur===hex;var isDef=!hex;
+    var bg=hex?('background:'+hex):('background:linear-gradient(135deg,var(--accent),var(--accent2))');
+    var border=on?'3px solid var(--txt)':'2px solid var(--line)';
+    var mark=isDef?'🎨':(on?'✓':'');
+    var arg=hex?("'"+hex+"'"):'null';
+    return '<button onclick="setAccent('+arg+')" aria-label="'+(isDef?(ar?'حسب السمة':'Theme default'):(ar?a[2]:a[1]))+'" style="width:34px;height:34px;border-radius:50%;'+bg+';border:'+border+';cursor:pointer;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px">'+mark+'</button>';
+  }).join('');
+  return '<div class="card"><div class="between" style="margin-bottom:8px"><b style="font-size:14.5px">'+(ar?'اجعلها لك':'Make it yours')+'</b><div class="row" style="gap:7px"><button onclick="setAmbient(!(S.prefs&&S.prefs.ambient!==false))" style="padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--txt);font-weight:700;cursor:pointer;font-size:12.5px">'+((S.prefs&&S.prefs.ambient===false)?('✨ '+(ar?'مطفأ':'Off')):('✨ '+(ar?'مضيء':'On')))+'</button><button onclick="surpriseTheme()" style="padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--txt);font-weight:700;cursor:pointer;font-size:12.5px">🎲 '+(ar?'فاجئني':'Surprise me')+'</button></div></div><div class="muted" style="font-size:12px;margin-bottom:10px">'+(ar?'لون مميّز يُطبّق فوق أي سمة':'A signature accent applied over any theme')+'</div><div class="row" style="gap:9px;flex-wrap:wrap">'+sw+'</div><div class="row" style="gap:8px;margin-top:11px;flex-wrap:wrap"><button onclick="pickWallpaper()" style="padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--txt);font-weight:700;cursor:pointer;font-size:12.5px">🖼️ '+(ar?'استخدم صورتي':'Use my photo')+'</button>'+((S.prefs&&S.prefs.customWall)?('<button onclick="clearWallpaper()" style="padding:8px 13px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--muted);font-weight:700;cursor:pointer;font-size:12.5px">'+(ar?'إزالة الصورة':'Remove photo')+'</button>'):'')+'</div></div>';
+}
+
+window.setTheme=function(id){S.prefs.theme=id;save();applyTheme();render();toast(isAr()?'تم الحفظ':'Saved');};
+
+/* ---------- boot ---------- */
+window.navTab=navTab;window.go=go;window.goBack=goBack;window.closeSheet=closeSheet;
+applyDir();
+if(typeof applyTheme==='function')applyTheme();
+if(typeof Notification!=='undefined'&&Notification.permission==='granted')startReminderTick();
+try{track('app_open');}catch(e){}
+try{initTelemetry();}catch(e){}
+go('splash',{replace:true});
+</script>
+</body>
+</html>

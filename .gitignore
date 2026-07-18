@@ -19,3 +19,7 @@ deploy-*.zip
 # Large source deck (not code)
 *.pptx
 *.pptx.pdf
+*.docx
+*.pdf
+*.zip
+SGA_Apps_360_*.html
