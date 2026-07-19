@@ -457,6 +457,9 @@ function applyTheme(){document.documentElement.setAttribute('data-mode',S.prefs.
 function applyDir(){document.documentElement.lang=S.lang||'en';document.documentElement.dir=isAr()?'rtl':'ltr';applyTheme();}
 
 /* ---------- router ---------- */
+//<<GEN router>>
+/* SHARED MODULE — edit shared/router.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
+/* Hash router + render pipeline (incl. a11y focus-on-nav). 'today','track','progress','learn','more' = per-app bottom-tab id list. renderTabs stays per-app. */
 const ROUTES={};let CURRENT='splash',STACK=[],CURRENT_OPTS={};
 function route(n,fn){ROUTES[n]=fn;}
 function go(n,o){o=o||{};if(!o.replace&&CURRENT&&CURRENT!==n)STACK.push(CURRENT);CURRENT=n;CURRENT_OPTS=o;window.__navFocus=true;render();}
@@ -466,6 +469,7 @@ function navTab(n){STACK=[];CURRENT=n;CURRENT_OPTS={};window.__navFocus=true;ren
 function render(){applyDir();const host=$('#screens');host.innerHTML='';const fn=ROUTES[CURRENT]||ROUTES['today'];const node=el('<div class="screen active"></div>');fn(node,CURRENT_OPTS);host.appendChild(node);node.scrollTop=0;try{animNums(node);}catch(e){}const tb=$('#tabbar');if(MAIN.includes(CURRENT)){tb.classList.remove('hidden');renderTabs();}else tb.classList.add('hidden');const fab=$('#fab');if(fab)fab.classList.toggle('show',CURRENT==='today');
   try{var sl=$('#skiplink');if(sl)sl.textContent=isAr()?'تخطَّ إلى المحتوى':'Skip to content';if(tb)tb.setAttribute('aria-label',isAr()?'التنقّل الرئيسي':'Primary');var mc=$('#screens');if(mc)mc.setAttribute('aria-label',isAr()?'المحتوى الرئيسي':'Main content');}catch(e){}
   if(window.__navFocus){window.__navFocus=false;try{var hh=node.querySelector('h1,h2');if(hh){hh.setAttribute('tabindex','-1');hh.focus({preventScroll:true});}else{$('#screens').focus({preventScroll:true});}}catch(e){}}}
+//<</GEN router>>
 window.openQuickAdd=function(){const ar=isAr();const items=[['weight','⚖️',['Weight','الوزن']],['meal','🍽️',['Meal','وجبة']],['activity','🏃',['Activity','نشاط']],['med','💊',['Medication','دواء']],['symptom','🩹',['Symptom','عَرَض']],['waist','📏',['Waist','الخصر']]];
   openSheet(`<h2 style="margin:4px 0 4px">${ar?'تسجيل سريع':'Quick log'}</h2><p class="muted" style="font-size:12.5px;margin:0 0 14px">${ar?'اختر ما تريد تسجيله':'Pick what to log'}</p>
    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">${items.map(([ty,ic,lab])=>`<button class="chip" style="flex-direction:column;display:flex;align-items:center;gap:6px;padding:15px 6px" onclick="closeSheet();setTimeout(()=>openLog('${ty}'),120)"><span style="font-size:24px">${ic}</span><span style="font-size:12px">${L(lab)}</span></button>`).join('')}</div>`);};
@@ -1207,7 +1211,7 @@ window.track=track;
 //<<GEN telemetry>>
 /* Crash diagnostics (Sentry) — PII-scrubbed: no user, app state, breadcrumbs, request bodies, or cookies are sent; only the error + stack, tagged app=qawam. Respects Do-Not-Track. Never sends health data, names, doses or values. User can disable via S.prefs.crashReports=false. */
 /* SHARED MODULE — edit shared/telemetry.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
-const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'qawam',release:'qawam-v24'};
+const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'qawam',release:'qawam-v25'};
 function telemetryOn(){try{if(S&&S.prefs&&S.prefs.crashReports===false)return false;}catch(e){}if(navigator.doNotTrack==='1'||window.doNotTrack==='1'||navigator.doNotTrack==='yes')return false;return true;}
 function initTelemetry(){try{if(!telemetryOn()||window.__snLoaded||!TELEMETRY.sentryDsn)return;window.__snLoaded=1;var s=document.createElement('script');s.src='https://browser.sentry-cdn.com/8.0.0/bundle.min.js';s.crossOrigin='anonymous';s.onload=function(){try{Sentry.init({dsn:TELEMETRY.sentryDsn,release:TELEMETRY.release,environment:'production',sampleRate:1.0,tracesSampleRate:0,sendDefaultPii:false,initialScope:{tags:{app:TELEMETRY.app}},beforeSend:function(ev){try{if(ev.request){delete ev.request.data;delete ev.request.cookies;delete ev.request.query_string;}delete ev.user;if(ev.contexts){delete ev.contexts.state;}}catch(e){}return ev;},beforeBreadcrumb:function(){return null;}});}catch(e){}};document.head.appendChild(s);}catch(e){}}
 window.initTelemetry=initTelemetry;
@@ -1346,6 +1350,9 @@ window.dismissNudge=function(id){S.nudgeDismiss=S.nudgeDismiss||{};S.nudgeDismis
 /* ===== theme gallery (ported from Rafeeq) ===== */
 const THEMES=[
   {id:'qawam',en:'Qawam',ar:'قوام',like:'Signature',mode:'dark',cat:'brand',vars:{'--bg':'#0B0F14','--bg2':'#0F151D','--card':'#141C26','--card2':'#1B2530','--line':'#243140','--txt':'#EAF2F8','--muted':'#8DA0B2','--faint':'#5A6B7B','--accent':'#10B981','--accent2':'#0EA5E9','--purple':'#8B5CF6','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#2BD67B','--accent-d':'#0E3A2E','--nav':'rgba(15,21,29,.9)'},wall:'radial-gradient(120% 90% at 50% -10%,#0d3a2e 0%,#0B0F14 55%)'},
+//<<GEN themes>>
+/* SHARED MODULE — edit shared/themes.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
+/* Theme palette (non-brand). The per-app brand/Signature theme stays in the app file as the first THEMES element. */
   {id:'whoop',en:'Midnight',ar:'منتصف الليل',like:'WHOOP',mode:'dark',
    vars:{'--bg':'#0B0F14','--bg2':'#0F151D','--card':'#141C26','--card2':'#1B2530','--line':'#243140','--txt':'#EAF2F8','--muted':'#8DA0B2','--faint':'#5A6B7B','--accent':'#00E0B8','--accent2':'#19A0FF','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#2BD67B','--accent-d':'#0B3B36','--nav':'rgba(15,21,29,.9)'},
    wall:'radial-gradient(120% 80% at 50% -10%,#0d2b2a 0%,#0B0F14 55%)'},
@@ -1422,6 +1429,7 @@ const THEMES=[
   {id:'flowaurora',en:'Living Aurora',ar:'شفق حيّ',like:'Live',mode:'dark',cat:'nature',flow:true,vars:{'--bg':'#08201c','--bg2':'#0c2a26','--card':'#102f2a','--card2':'#17403a','--line':'#255049','--txt':'#EAF5F0','--muted':'#8FB6AC','--faint':'#5C7E76','--accent':'#37E0B0','--accent2':'#4FA8FF','--purple':'#9B7CFF','--warn':'#FFC061','--bad':'#FF6B7E','--good':'#37E0B0','--accent-d':'#123c34','--nav':'rgba(12,42,38,.9)'},wall:'linear-gradient(125deg,#06231f,#0b3b4a,#123a6b,#2a1d5a,#06231f)'},
   {id:'flowsunset',en:'Sunset Drift',ar:'انسياب الغروب',like:'Live',mode:'dark',cat:'seasonal',flow:true,vars:{'--bg':'#221636','--bg2':'#2a1c42','--card':'#32224e','--card2':'#3e2a60','--line':'#4c3673','--txt':'#F6ECFF','--muted':'#C0A6E0','--faint':'#8E74B8','--accent':'#FF7A4D','--accent2':'#FF5FA2','--purple':'#B36BFF','--warn':'#FFC061','--bad':'#FF6B6B','--good':'#37D9A0','--accent-d':'#3a2740','--nav':'rgba(42,28,66,.9)'},wall:'linear-gradient(125deg,#241a46,#5a2e5e,#8a3a4e,#c85a2e,#241a46)'},
   {id:'flowocean',en:'Deep Current',ar:'تيار عميق',like:'Live',mode:'dark',cat:'nature',flow:true,vars:{'--bg':'#062033','--bg2':'#0a2c44','--card':'#0e3752','--card2':'#154865','--line':'#245f80','--txt':'#E4F3FA','--muted':'#A2C8DB','--faint':'#5E8AA2','--accent':'#2FC9E0','--accent2':'#37E0B0','--purple':'#8FA8FF','--warn':'#FFC061','--bad':'#FF6B7E','--good':'#37E0B0','--accent-d':'#123c50','--nav':'rgba(10,44,68,.9)'},wall:'linear-gradient(125deg,#062033,#0a3a54,#0e5a6e,#123a6b,#062033)'},
+//<</GEN themes>>
 ];
 const CATMAP={whoop:'brand',nebula:'brand',calm:'calm',apple:'calm',mint:'calm',forest:'nature',sandstone:'seasonal',headspace:'more',flo:'more',oura:'more'};
 const CAT_ORDER=[['brand',['Brand & signature','السمة والهوية'],'🩵'],['anime',['Anime & vibrant','أنمي وحيوية'],'✨'],['nature',['Nature','الطبيعة'],'🌿'],['seasonal',['Seasonal & Saudi','مواسم وسعودية'],'🌙'],['retro',['Bold & retro','جريء وكلاسيكي'],'🕹️'],['calm',['Calm & minimal','هدوء وبساطة'],'☁️'],['more',['More looks','مظاهر أخرى'],'🎨']];
