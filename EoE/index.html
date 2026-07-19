@@ -794,7 +794,7 @@ window.track=track;
 //<<GEN telemetry>>
 /* Crash diagnostics (Sentry) — PII-scrubbed: no user, app state, breadcrumbs, request bodies, or cookies are sent; only the error + stack, tagged app=maeen. Respects Do-Not-Track. Never sends health data, names, doses or values. User can disable via S.prefs.crashReports=false. */
 /* SHARED MODULE — edit shared/telemetry.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
-const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'maeen',release:'maeen-eoe-v20'};
+const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'maeen',release:'maeen-eoe-v21'};
 function telemetryOn(){try{if(S&&S.prefs&&S.prefs.crashReports===false)return false;}catch(e){}if(navigator.doNotTrack==='1'||window.doNotTrack==='1'||navigator.doNotTrack==='yes')return false;return true;}
 function initTelemetry(){try{if(!telemetryOn()||window.__snLoaded||!TELEMETRY.sentryDsn)return;window.__snLoaded=1;var s=document.createElement('script');s.src='https://browser.sentry-cdn.com/8.0.0/bundle.min.js';s.crossOrigin='anonymous';s.onload=function(){try{Sentry.init({dsn:TELEMETRY.sentryDsn,release:TELEMETRY.release,environment:'production',sampleRate:1.0,tracesSampleRate:0,sendDefaultPii:false,initialScope:{tags:{app:TELEMETRY.app}},beforeSend:function(ev){try{if(ev.request){delete ev.request.data;delete ev.request.cookies;delete ev.request.query_string;}delete ev.user;if(ev.contexts){delete ev.contexts.state;}}catch(e){}return ev;},beforeBreadcrumb:function(){return null;}});}catch(e){}};document.head.appendChild(s);}catch(e){}}
 window.initTelemetry=initTelemetry;
@@ -845,10 +845,16 @@ function cryptoReady(){return !!(window.crypto&&window.crypto.subtle);}
 function _sb64(buf){const b=new Uint8Array(buf);let s='';const CH=0x8000;for(let i=0;i<b.length;i+=CH)s+=String.fromCharCode.apply(null,b.subarray(i,i+CH));return btoa(s);}
 function _unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0));}
 function _pbBase(code){return crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey','deriveBits']);}
+//<<GEN backup-crypto>>
+/* SHARED MODULE — edit shared/backup-crypto.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
+/* E2E backup crypto: PBKDF2-SHA256 (120k) → AES-GCM-256. Per-app salts keep the three apps' backups isolated
+   (same recovery code yields a different key + sync-id per app). maeen is substituted at build time — the salt
+   strings must stay byte-identical to what shipped, or existing user backups become unreadable. */
 async function deriveEncKey(code){const b=await _pbBase(code);return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode('maeen-sync-enc-v1'),iterations:120000,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
 async function deriveSyncId(code){const b=await _pbBase(code);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode('maeen-sync-id-v1'),iterations:120000,hash:'SHA-256'},b,256);return Array.from(new Uint8Array(bits)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function encBlob(obj,key){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj)));return _sb64(iv)+'.'+_sb64(ct);}
 async function decBlob(blob,key){const p=blob.split('.');const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:_unb64(p[0])},key,_unb64(p[1]));return JSON.parse(new TextDecoder().decode(pt));}
+//<</GEN backup-crypto>>
 function genRecoveryCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const out=[];for(let g=0;g<6;g++){let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];out.push(s);}return out.join('-');}
 function cloudSnapshot(){const c=Object.assign({},S);delete c.cloud;return c;}
 let _cloudTimer=null,_cloudBusy=false;
