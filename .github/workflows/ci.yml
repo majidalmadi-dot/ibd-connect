@@ -8,6 +8,8 @@ on:
       - 'index.html'
       - 'EoE/index.html'
       - 'Qawam/index.html'
+      - 'shared/**'
+      - 'build.mjs'
       - 'ci/**'
       - '.github/workflows/ci.yml'
   pull_request:
@@ -15,6 +17,8 @@ on:
       - 'index.html'
       - 'EoE/index.html'
       - 'Qawam/index.html'
+      - 'shared/**'
+      - 'build.mjs'
       - 'ci/**'
   workflow_dispatch: {}
 
@@ -26,6 +30,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      - name: Check shared modules are built (de-triplication)
+        run: node build.mjs --check
       - name: Install gate dependencies
         working-directory: ci
         run: npm ci || npm install

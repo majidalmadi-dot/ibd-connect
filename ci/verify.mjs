@@ -62,6 +62,13 @@ const only = process.argv[2] ? process.argv[2].toLowerCase() : null;
 const targets = only ? APPS.filter(a => a.id === only) : APPS;
 if (!targets.length) { console.error(`Unknown app "${only}". Use: rafeeq | maeen | qawam`); process.exit(1); }
 
+// 0) shared-module freshness: fail if a generated region is stale (deploy from a committed, built tree)
+if (!only) {
+  try {
+    execFileSync(process.execPath, [resolve(ROOT, 'build.mjs'), '--check'], { stdio: 'inherit' });
+  } catch { console.log(RED('\n✖ Shared modules are stale — run `node build.mjs` and commit.')); process.exit(1); }
+}
+
 let failures = 0;
 for (const app of targets) {
   const path = resolve(ROOT, app.file);

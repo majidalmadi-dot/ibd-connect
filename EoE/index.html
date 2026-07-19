@@ -791,11 +791,14 @@ function recordEvent(ev,props){try{
 }catch(e){}}
 function track(ev,props){recordEvent(ev,props);}
 window.track=track;
+//<<GEN telemetry>>
 /* Crash diagnostics (Sentry) — PII-scrubbed: no user, app state, breadcrumbs, request bodies, or cookies are sent; only the error + stack, tagged app=maeen. Respects Do-Not-Track. Never sends health data, names, doses or values. User can disable via S.prefs.crashReports=false. */
-const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'maeen',release:'maeen-eoe-v17'};
+/* SHARED MODULE — edit shared/telemetry.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
+const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'maeen',release:'maeen-eoe-v20'};
 function telemetryOn(){try{if(S&&S.prefs&&S.prefs.crashReports===false)return false;}catch(e){}if(navigator.doNotTrack==='1'||window.doNotTrack==='1'||navigator.doNotTrack==='yes')return false;return true;}
 function initTelemetry(){try{if(!telemetryOn()||window.__snLoaded||!TELEMETRY.sentryDsn)return;window.__snLoaded=1;var s=document.createElement('script');s.src='https://browser.sentry-cdn.com/8.0.0/bundle.min.js';s.crossOrigin='anonymous';s.onload=function(){try{Sentry.init({dsn:TELEMETRY.sentryDsn,release:TELEMETRY.release,environment:'production',sampleRate:1.0,tracesSampleRate:0,sendDefaultPii:false,initialScope:{tags:{app:TELEMETRY.app}},beforeSend:function(ev){try{if(ev.request){delete ev.request.data;delete ev.request.cookies;delete ev.request.query_string;}delete ev.user;if(ev.contexts){delete ev.contexts.state;}}catch(e){}return ev;},beforeBreadcrumb:function(){return null;}});}catch(e){}};document.head.appendChild(s);}catch(e){}}
 window.initTelemetry=initTelemetry;
+//<</GEN telemetry>>
 function engagedDays(){const s=new Set();(S.logs||[]).forEach(l=>s.add(l.t.slice(0,10)));(S.eesai||[]).forEach(x=>s.add((x.date||'').slice(0,10)));(S.journal||[]).forEach(x=>s.add((x.date||'').slice(0,10)));(S.water||[]).forEach(x=>s.add((x.date||'').slice(0,10)));s.delete('');return [...s].sort();}
 function daysSinceEngage(){const d=engagedDays();if(!d.length)return Infinity;return daysAgo(d[d.length-1]);}
 function recentBrokenStreak(){const set=new Set(engagedDays());if(set.has(todayKey()))return 0;let gap=0,i=0;for(i=0;i<7;i++){if(set.has(todayKey(new Date(Date.now()-i*864e5))))break;gap++;}if(i>=7||gap<1)return 0;let len=0;for(let j=i;j<i+400;j++){if(set.has(todayKey(new Date(Date.now()-j*864e5))))len++;else break;}return len;}

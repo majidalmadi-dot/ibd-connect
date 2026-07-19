@@ -14,6 +14,8 @@ cd "$(dirname "$0")"
 VERCEL="${VERCEL:-vercel}"
 target="${1:-all}"
 
+echo "▶ Stamping shared modules (build step)…"
+node build.mjs
 echo "▶ Running pre-deploy gate…"
 if [ ! -d ci/node_modules ]; then
   echo "  installing gate deps (ci/)…"
