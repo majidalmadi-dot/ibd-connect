@@ -29,8 +29,8 @@ const CHECK = process.argv.includes('--check');
 // RELEASE is derived from the app's service-worker cache name at build time.
 const APPS = [
   { id: 'rafeeq', file: 'index.html',       sw: 'sw.js',       tokens: { APP: 'rafeeq' }, modules: ['backup-crypto'] },
-  { id: 'maeen',  file: 'EoE/index.html',   sw: 'EoE/sw.js',   tokens: { APP: 'maeen'  }, modules: ['telemetry', 'backup-crypto'] },
-  { id: 'qawam',  file: 'Qawam/index.html', sw: 'Qawam/sw.js', tokens: { APP: 'qawam'  }, modules: ['telemetry', 'backup-crypto'] },
+  { id: 'maeen',  file: 'EoE/index.html',   sw: 'EoE/sw.js',   tokens: { APP: 'maeen'  }, modules: ['telemetry', 'backup-crypto', 'shell-ui'] },
+  { id: 'qawam',  file: 'Qawam/index.html', sw: 'Qawam/sw.js', tokens: { APP: 'qawam'  }, modules: ['telemetry', 'backup-crypto', 'shell-ui'] },
 ];
 
 const RED = s => `\x1b[31m${s}\x1b[0m`, GREEN = s => `\x1b[32m${s}\x1b[0m`, DIM = s => `\x1b[2m${s}\x1b[0m`, YEL = s => `\x1b[33m${s}\x1b[0m`;

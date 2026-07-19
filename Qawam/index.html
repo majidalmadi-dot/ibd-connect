@@ -442,11 +442,15 @@ function ewl(){const s=S.user.startWeight,w=latestWeight(),iw=idealWeight();if(!
 function goalPct(){const s=S.user.startWeight,w=latestWeight(),g=S.user.targetWeight;if(!s||!w||!g||(s-g)<=0)return null;return Math.max(0,Math.min(100,(s-w)/(s-g)*100));}
 
 /* ---------- UI helpers ---------- */
+//<<GEN shell-ui>>
+/* SHARED MODULE — edit shared/shell-ui.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
+/* Shell UI: toast + accessible bottom-sheet dialog (role=dialog/aria-modal, focus-in, focus-return, Escape-to-close). Identical across apps. */
 function toast(m){const e=$('#toast');const ok=/✓|🎉|تم|حفظ|Saved|Logged|Added|Nice|أحسنت|Copied|نُسخ|Exported|صُدّر|أُضيف/i.test(String(m));e.innerHTML=(ok?'<span class="tst-check">✓</span>':'')+esc(String(m));e.classList.toggle('ok',ok);e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800);}
 var __sheetOpener=null;
 function openSheet(h){var sb=$('#sheetbg'),s=$('#sheet');__sheetOpener=document.activeElement;s.setAttribute('role','dialog');s.setAttribute('aria-modal','true');s.setAttribute('tabindex','-1');s.innerHTML='<div class="grip" aria-hidden="true"></div>'+h;sb.classList.add('open');setTimeout(function(){try{var f=s.querySelector('input,select,textarea,button,[href]');(f||s).focus({preventScroll:true});}catch(e){}},50);}
 function closeSheet(){$('#sheetbg').classList.remove('open');try{if(__sheetOpener&&__sheetOpener.focus)__sheetOpener.focus({preventScroll:true});}catch(e){}__sheetOpener=null;}
 document.addEventListener('keydown',function(e){if(e.key==='Escape'){var sb=$('#sheetbg');if(sb&&sb.classList.contains('open'))closeSheet();}});
+//<</GEN shell-ui>>
 $('#sheetbg').addEventListener('click',e=>{if(e.target.id==='sheetbg')closeSheet();});
 function topbar(titleK,subK,opts){opts=opts||{};const left=opts.back?`<button class="iconbtn" aria-label="${isAr()?'رجوع':'Back'}" onclick="goBack()"><span aria-hidden="true">${isAr()?'›':'‹'}</span></button>`:'';const right=opts.right||'';return `<div class="topbar">${left}<div style="flex:1"><h1>${opts.rawTitle||t(titleK)}</h1>${subK||opts.rawSub?`<div class="sub">${opts.rawSub||t(subK)}</div>`:''}</div>${right}</div>`;}
 function applyTheme(){document.documentElement.setAttribute('data-mode',S.prefs.theme==='light'?'light':'dark');const m=$('meta[name=theme-color]');if(m)m.setAttribute('content',S.prefs.theme==='light'?'#F1F7F5':'#0B0F14');}
@@ -1203,7 +1207,7 @@ window.track=track;
 //<<GEN telemetry>>
 /* Crash diagnostics (Sentry) — PII-scrubbed: no user, app state, breadcrumbs, request bodies, or cookies are sent; only the error + stack, tagged app=qawam. Respects Do-Not-Track. Never sends health data, names, doses or values. User can disable via S.prefs.crashReports=false. */
 /* SHARED MODULE — edit shared/telemetry.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
-const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'qawam',release:'qawam-v23'};
+const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'qawam',release:'qawam-v24'};
 function telemetryOn(){try{if(S&&S.prefs&&S.prefs.crashReports===false)return false;}catch(e){}if(navigator.doNotTrack==='1'||window.doNotTrack==='1'||navigator.doNotTrack==='yes')return false;return true;}
 function initTelemetry(){try{if(!telemetryOn()||window.__snLoaded||!TELEMETRY.sentryDsn)return;window.__snLoaded=1;var s=document.createElement('script');s.src='https://browser.sentry-cdn.com/8.0.0/bundle.min.js';s.crossOrigin='anonymous';s.onload=function(){try{Sentry.init({dsn:TELEMETRY.sentryDsn,release:TELEMETRY.release,environment:'production',sampleRate:1.0,tracesSampleRate:0,sendDefaultPii:false,initialScope:{tags:{app:TELEMETRY.app}},beforeSend:function(ev){try{if(ev.request){delete ev.request.data;delete ev.request.cookies;delete ev.request.query_string;}delete ev.user;if(ev.contexts){delete ev.contexts.state;}}catch(e){}return ev;},beforeBreadcrumb:function(){return null;}});}catch(e){}};document.head.appendChild(s);}catch(e){}}
 window.initTelemetry=initTelemetry;

@@ -1,0 +1,7 @@
+/* SHARED MODULE — edit shared/shell-ui.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
+/* Shell UI: toast + accessible bottom-sheet dialog (role=dialog/aria-modal, focus-in, focus-return, Escape-to-close). Identical across apps. */
+function toast(m){const e=$('#toast');const ok=/✓|🎉|تم|حفظ|Saved|Logged|Added|Nice|أحسنت|Copied|نُسخ|Exported|صُدّر|أُضيف/i.test(String(m));e.innerHTML=(ok?'<span class="tst-check">✓</span>':'')+esc(String(m));e.classList.toggle('ok',ok);e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),1800);}
+var __sheetOpener=null;
+function openSheet(h){var sb=$('#sheetbg'),s=$('#sheet');__sheetOpener=document.activeElement;s.setAttribute('role','dialog');s.setAttribute('aria-modal','true');s.setAttribute('tabindex','-1');s.innerHTML='<div class="grip" aria-hidden="true"></div>'+h;sb.classList.add('open');setTimeout(function(){try{var f=s.querySelector('input,select,textarea,button,[href]');(f||s).focus({preventScroll:true});}catch(e){}},50);}
+function closeSheet(){$('#sheetbg').classList.remove('open');try{if(__sheetOpener&&__sheetOpener.focus)__sheetOpener.focus({preventScroll:true});}catch(e){}__sheetOpener=null;}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){var sb=$('#sheetbg');if(sb&&sb.classList.contains('open'))closeSheet();}});
