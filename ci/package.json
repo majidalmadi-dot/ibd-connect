@@ -1,0 +1,16 @@
+{
+  "name": "sga-apps-ci",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Pre-deploy gate (parse-check + jsdom smoke) for Rafeeq / Maeen / Qawam PWAs.",
+  "type": "module",
+  "scripts": {
+    "verify": "node verify.mjs",
+    "verify:rafeeq": "node verify.mjs rafeeq",
+    "verify:maeen": "node verify.mjs maeen",
+    "verify:qawam": "node verify.mjs qawam"
+  },
+  "dependencies": {
+    "jsdom": "^24.1.0"
+  }
+}

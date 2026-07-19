@@ -1,0 +1,33 @@
+name: CI gate (parse + jsdom smoke)
+
+# Runs the same gate as deploy.sh on every push / PR that touches an app file,
+# so a broken build is caught in GitHub even when it wasn't caught locally.
+on:
+  push:
+    paths:
+      - 'index.html'
+      - 'EoE/index.html'
+      - 'Qawam/index.html'
+      - 'ci/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'EoE/index.html'
+      - 'Qawam/index.html'
+      - 'ci/**'
+  workflow_dispatch: {}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install gate dependencies
+        working-directory: ci
+        run: npm ci || npm install
+      - name: Run parse-check + jsdom smoke (all apps)
+        run: node ci/verify.mjs

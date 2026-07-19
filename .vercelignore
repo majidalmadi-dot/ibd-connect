@@ -14,3 +14,6 @@ tokens.css
 # internal reports (never serve publicly)
 SGA_Apps_360_Critique.html
 SGA_Apps_360_Evaluation_2026.html
+ci
+.github
+deploy.sh
