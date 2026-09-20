@@ -2,5 +2,18 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "buildCommand": null,
-  "outputDirectory": "."
+  "outputDirectory": ".",
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "ibd-connect.vercel.app"
+        }
+      ],
+      "destination": "https://rafeeq.saudigastro.com/:path*",
+      "permanent": true
+    }
+  ]
 }

@@ -1,0 +1,71 @@
+{
+  "$description": "Rafeeq design tokens (Saudi Gastroenterology Association). Import into Figma with the free Tokens Studio plugin: create sets 'global', 'light', 'dark'; apply 'global' + one theme. Also mirrors the app's CSS variables.",
+  "global": {
+    "color": {
+      "teal":   { "300": { "value": "#1FB6A6", "type": "color" }, "500": { "value": "#00897B", "type": "color" }, "600": { "value": "#006B61", "type": "color" } },
+      "navy":   { "700": { "value": "#17406F", "type": "color" }, "900": { "value": "#0E2A47", "type": "color" } },
+      "ink":    { "900": { "value": "#16202B", "type": "color" } },
+      "gray":   { "200": { "value": "#E2EAE8", "type": "color" }, "500": { "value": "#5B6B79", "type": "color" } },
+      "surface":{ "0":   { "value": "#FBFDFC", "type": "color" } },
+      "bg":     { "0":   { "value": "#F4F8F7", "type": "color" } },
+      "white":  { "0":   { "value": "#FFFFFF", "type": "color" } },
+      "amber":  { "500": { "value": "#E0A23D", "type": "color" } },
+      "green":  { "500": { "value": "#2E9E6B", "type": "color" } },
+      "red":    { "500": { "value": "#CC5B45", "type": "color" } },
+      "purple": { "500": { "value": "#7C5CFF", "type": "color" } }
+    },
+    "spacing": {
+      "xs": { "value": "4",  "type": "spacing" }, "sm": { "value": "8",  "type": "spacing" },
+      "md": { "value": "12", "type": "spacing" }, "lg": { "value": "16", "type": "spacing" },
+      "xl": { "value": "24", "type": "spacing" }, "2xl": { "value": "32", "type": "spacing" }
+    },
+    "radius": {
+      "sm":   { "value": "8",   "type": "borderRadius" },
+      "md":   { "value": "12",  "type": "borderRadius" },
+      "lg":   { "value": "16",  "type": "borderRadius" },
+      "full": { "value": "999", "type": "borderRadius" }
+    },
+    "typography": {
+      "display": { "value": { "fontFamily": "Georgia", "fontWeight": "Bold", "fontSize": "30", "lineHeight": "120%" }, "type": "typography" },
+      "h2":      { "value": { "fontFamily": "Georgia", "fontWeight": "Bold", "fontSize": "20", "lineHeight": "130%" }, "type": "typography" },
+      "title":   { "value": { "fontFamily": "Arial",   "fontWeight": "Bold", "fontSize": "16", "lineHeight": "140%" }, "type": "typography" },
+      "body":    { "value": { "fontFamily": "Arial",   "fontWeight": "Regular", "fontSize": "14", "lineHeight": "155%" }, "type": "typography" },
+      "small":   { "value": { "fontFamily": "Arial",   "fontWeight": "Regular", "fontSize": "12", "lineHeight": "150%" }, "type": "typography" },
+      "caption": { "value": { "fontFamily": "Arial",   "fontWeight": "Regular", "fontSize": "11", "lineHeight": "150%" }, "type": "typography" }
+    }
+  },
+  "light": {
+    "color": {
+      "accent":        { "value": "{color.teal.500}", "type": "color" },
+      "accent-strong": { "value": "{color.teal.600}", "type": "color" },
+      "bg":            { "value": "{color.bg.0}",     "type": "color" },
+      "surface":       { "value": "{color.surface.0}","type": "color" },
+      "text":          { "value": "{color.ink.900}",  "type": "color" },
+      "text-muted":    { "value": "{color.gray.500}", "type": "color" },
+      "border":        { "value": "{color.gray.200}", "type": "color" },
+      "success":       { "value": "{color.green.500}","type": "color" },
+      "warning":       { "value": "{color.amber.500}","type": "color" },
+      "danger":        { "value": "{color.red.500}",  "type": "color" },
+      "disk":          { "value": "{color.purple.500}","type": "color" }
+    }
+  },
+  "dark": {
+    "color": {
+      "accent":        { "value": "{color.teal.500}", "type": "color" },
+      "accent-strong": { "value": "{color.teal.300}", "type": "color" },
+      "bg":            { "value": "{color.navy.900}", "type": "color" },
+      "surface":       { "value": "{color.navy.700}", "type": "color" },
+      "text":          { "value": "{color.white.0}",  "type": "color" },
+      "text-muted":    { "value": "{color.gray.500}", "type": "color" },
+      "border":        { "value": "{color.navy.700}", "type": "color" },
+      "success":       { "value": "{color.green.500}","type": "color" },
+      "warning":       { "value": "{color.amber.500}","type": "color" },
+      "danger":        { "value": "{color.red.500}",  "type": "color" },
+      "disk":          { "value": "{color.purple.500}","type": "color" }
+    }
+  },
+  "$themes": [
+    { "name": "Light", "selectedTokenSets": { "global": "source", "light": "enabled", "dark": "disabled" } },
+    { "name": "Dark",  "selectedTokenSets": { "global": "source", "dark": "enabled", "light": "disabled" } }
+  ]
+}

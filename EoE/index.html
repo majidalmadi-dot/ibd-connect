@@ -19,7 +19,8 @@
 <meta property="og:description" content="A free, bilingual non-medical companion for eosinophilic esophagitis. By the Saudi Gastroenterology Association.">
 <meta property="og:image" content="https://ibd-connect.vercel.app/EoE/maeen-512.png">
 <meta name="twitter:card" content="summary">
-<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){});});}</script>
+<script>if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').then(function(reg){reg.addEventListener('updatefound',function(){var nw=reg.installing;if(!nw)return;nw.addEventListener('statechange',function(){if(nw.state==='installed'&&navigator.serviceWorker.controller)showUpdBanner(reg);});});}).catch(function(){});var _ur=false;navigator.serviceWorker.addEventListener('controllerchange',function(){if(_ur)return;_ur=true;location.reload();});});}
+function showUpdBanner(reg){if(document.getElementById('updbn'))return;var ar=document.documentElement.dir==='rtl';var b=document.createElement('div');b.id='updbn';b.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:99999;background:var(--accent,#00897b);color:#fff;border-radius:999px;padding:11px 18px;font-weight:800;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.35);display:flex;gap:12px;align-items:center;max-width:92vw';b.innerHTML='<span>✨ '+(ar?'يتوفّر إصدار جديد':'A new version is ready')+'</span><button style="background:#fff;color:#111;border:0;border-radius:999px;padding:6px 14px;font-weight:800;cursor:pointer">'+(ar?'تحديث':'Refresh')+'</button>';b.querySelector('button').onclick=function(){if(reg&&reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(function(){location.reload();},300);};document.body.appendChild(b);}</script>
 <style>
 :root{
   --bg:#0B0F14;--bg2:#0F151D;--card:#141C26;--card2:#1B2530;--line:#243140;
@@ -802,7 +803,7 @@ window.track=track;
 //<<GEN telemetry>>
 /* Crash diagnostics (Sentry) — PII-scrubbed: no user, app state, breadcrumbs, request bodies, or cookies are sent; only the error + stack, tagged app=maeen. Respects Do-Not-Track. Never sends health data, names, doses or values. User can disable via S.prefs.crashReports=false. */
 /* SHARED MODULE — edit shared/telemetry.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
-const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'maeen',release:'maeen-eoe-v23'};
+const TELEMETRY={sentryDsn:'https://528db9a5fbd2268a1c44c0caeccc56d6@o4511601483055104.ingest.de.sentry.io/4511601784586320',app:'maeen',release:'maeen-eoe-v24'};
 function telemetryOn(){try{if(S&&S.prefs&&S.prefs.crashReports===false)return false;}catch(e){}if(navigator.doNotTrack==='1'||window.doNotTrack==='1'||navigator.doNotTrack==='yes')return false;return true;}
 function initTelemetry(){try{if(!telemetryOn()||window.__snLoaded||!TELEMETRY.sentryDsn)return;window.__snLoaded=1;var s=document.createElement('script');s.src='https://browser.sentry-cdn.com/8.0.0/bundle.min.js';s.crossOrigin='anonymous';s.onload=function(){try{Sentry.init({dsn:TELEMETRY.sentryDsn,release:TELEMETRY.release,environment:'production',sampleRate:1.0,tracesSampleRate:0,sendDefaultPii:false,initialScope:{tags:{app:TELEMETRY.app}},beforeSend:function(ev){try{if(ev.request){delete ev.request.data;delete ev.request.cookies;delete ev.request.query_string;}delete ev.user;if(ev.contexts){delete ev.contexts.state;}}catch(e){}return ev;},beforeBreadcrumb:function(){return null;}});}catch(e){}};document.head.appendChild(s);}catch(e){}}
 window.initTelemetry=initTelemetry;

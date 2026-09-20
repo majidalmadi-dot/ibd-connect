@@ -94,6 +94,21 @@ h1 .grad{background:linear-gradient(120deg,var(--accent),var(--accent2));-webkit
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s,transform .6s}
 .reveal.in{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+/* trust badges + full-bleed photo bands */
+.pbadges{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.pbadge{display:inline-flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:12.5px;color:var(--muted);font-weight:600}
+.pbadge svg{width:15px;height:15px;stroke:var(--accent);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.photoband{position:relative;min-height:72vh;display:flex;align-items:center;background-size:cover;background-position:center;overflow:hidden}
+.photoband::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--bg) 3%,color-mix(in srgb,var(--bg) 80%,transparent) 46%,color-mix(in srgb,var(--bg) 28%,transparent) 100%)}
+html[dir=rtl] .photoband::before{background:linear-gradient(270deg,var(--bg) 3%,color-mix(in srgb,var(--bg) 80%,transparent) 46%,color-mix(in srgb,var(--bg) 28%,transparent) 100%)}
+.photoband .wrap{position:relative;z-index:1;width:100%}
+.pb-in{max-width:560px}
+.pb-eye{color:var(--accent);font-weight:800;font-size:12.5px;letter-spacing:1.4px;text-transform:uppercase}
+.pb-in h2{font-size:clamp(28px,4.8vw,46px);font-weight:800;letter-spacing:-1.2px;line-height:1.05;margin:12px 0 0}
+.pb-in p{color:#cdd8e2;font-size:clamp(15px,1.8vw,18px);margin-top:16px;max-width:46ch;line-height:1.6}
+.pb-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+.pb-chip{border:1px solid var(--line);background:color-mix(in srgb,var(--bg) 55%,transparent);border-radius:999px;padding:8px 14px;font-size:13px;color:var(--txt);font-weight:600}
+@media(max-width:840px){.photoband{min-height:56vh}}
 </style>
 </head>
 <body>
@@ -127,6 +142,12 @@ h1 .grad{background:linear-gradient(120deg,var(--accent),var(--accent2));-webkit
         <a class="btn btn-ghost" href="#features" data-en="See features" data-ar="استكشف المزايا">See features</a>
       </div>
       <div class="trust" data-en="Free · Non-medical companion · Private on your device · English &amp; العربية" data-ar="مجاني · رفيق غير طبي · خاص على جهازك · العربية والإنجليزية">Free · Non-medical companion · Private on your device · English &amp; العربية</div>
+      <div class="pbadges reveal">
+        <span class="pbadge"><svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4-3 7-7 9-4-2-7-5-7-9V6z"/></svg><span data-en="Reviewed by clinical experts" data-ar="مراجَع من خبراء سريريين">Reviewed by clinical experts</span></span>
+        <span class="pbadge"><svg viewBox="0 0 24 24"><rect x="6" y="10" width="12" height="10" rx="2"/><path d="M9 10V7a3 3 0 0 1 6 0v3"/></svg><span data-en="100% on your device" data-ar="١٠٠٪ على جهازك">100% on your device</span></span>
+        <span class="pbadge"><svg viewBox="0 0 24 24"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8.5 15a3.5 3.5 0 0 1 7 0"/><circle cx="12" cy="18" r="1"/></svg><span data-en="Works offline" data-ar="يعمل دون اتصال">Works offline</span></span>
+        <span class="pbadge"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/></svg><span data-en="Free" data-ar="مجاني">Free</span></span>
+      </div>
     </div>
     <div class="device"><iframe id="appframe" src="index.html" title="Maeen app" loading="lazy"></iframe></div>
   </div>
@@ -140,6 +161,19 @@ h1 .grad{background:linear-gradient(120deg,var(--accent),var(--accent2));-webkit
     <div><div class="num"><span data-count="100">0</span>%</div><div class="lab" data-en="private — your data stays on your device" data-ar="خصوصية — بياناتك تبقى على جهازك">private — your data stays on your device</div></div>
   </div>
 </div></section>
+
+<section class="photoband" style="background-image:url('https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=1600&q=70&auto=format&fit=crop')">
+  <div class="wrap"><div class="pb-in reveal">
+    <div class="pb-eye" data-en="Swallowing" data-ar="البلع">Swallowing</div>
+    <h2 data-en="Swallow with confidence." data-ar="ابلع بثقة.">Swallow with confidence.</h2>
+    <p data-en="EoE makes eating unpredictable. Maeen tracks dysphagia by food type, logs food-impaction events, and keeps the eating tactics that help you get food down — so mealtimes feel calmer." data-ar="يجعل المرض الأكل غير متوقّع. يتتبّع معين عُسر البلع حسب نوع الطعام، ويسجّل أحداث انحشار الطعام، ويحفظ حيل الأكل التي تساعدك — لتصبح أوقات الوجبات أهدأ.">EoE makes eating unpredictable. Maeen tracks dysphagia by food type, logs food-impaction events, and keeps the eating tactics that help you get food down — so mealtimes feel calmer.</p>
+    <div class="pb-chips">
+      <span class="pb-chip" data-en="Dysphagia by food type" data-ar="عُسر البلع حسب الطعام">Dysphagia by food type</span>
+      <span class="pb-chip" data-en="Food-impaction log" data-ar="سجل انحشار الطعام">Food-impaction log</span>
+      <span class="pb-chip" data-en="Eating tactics" data-ar="حيل الأكل">Eating tactics</span>
+    </div>
+  </div></div>
+</section>
 
 <section class="section" id="features"><div class="wrap">
   <div class="eyebrow reveal" data-en="Everything for living with EoE" data-ar="كل ما تحتاجه للتعايش مع المرض">Everything for living with EoE</div>
@@ -175,6 +209,19 @@ h1 .grad{background:linear-gradient(120deg,var(--accent),var(--accent2));-webkit
     <div class="who" data-en="— A person living with EoE" data-ar="— شخص يتعايش مع المرض">— A person living with EoE</div>
   </div>
 </div></section>
+
+<section class="photoband" style="background-image:url('https://images.unsplash.com/photo-1518495973542-4542c06a5843?w=1600&q=70&auto=format&fit=crop')">
+  <div class="wrap"><div class="pb-in reveal">
+    <div class="pb-eye" data-en="Made for Gulf life" data-ar="مصمّم للحياة الخليجية">Made for Gulf life</div>
+    <h2 data-en="Your food, your triggers, your language." data-ar="طعامك، محفّزاتك، لغتك.">Your food, your triggers, your language.</h2>
+    <p data-en="Elimination diets — six-food, step-up and elemental — mapped onto familiar Gulf dishes, a trigger finder that learns your patterns, and full Arabic with right-to-left. An EoE companion that fits your table." data-ar="حميات الإقصاء — الأطعمة الستة والتدرّج والعنصرية — على أطباق خليجية مألوفة، ومحلّل محفّزات يتعلّم أنماطك، وعربية كاملة من اليمين لليسار. رفيق يناسب مائدتك.">Elimination diets — six-food, step-up and elemental — mapped onto familiar Gulf dishes, a trigger finder that learns your patterns, and full Arabic with right-to-left. An EoE companion that fits your table.</p>
+    <div class="pb-chips">
+      <span class="pb-chip" data-en="Six-food & step-up diets" data-ar="حميات الإقصاء والتدرّج">Six-food &amp; step-up diets</span>
+      <span class="pb-chip" data-en="Trigger finder" data-ar="محلّل المحفّزات">Trigger finder</span>
+      <span class="pb-chip" data-en="Arabic & English" data-ar="عربي وإنجليزي">Arabic &amp; English</span>
+    </div>
+  </div></div>
+</section>
 
 <section class="section"><div class="wrap">
   <div class="ctaband reveal">

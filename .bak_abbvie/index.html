@@ -237,8 +237,7 @@ html[dir=rtl] .chev{transform:scaleX(-1)}
 .splash{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:22px;background:radial-gradient(120% 80% at 50% 0%,#0d2b2a 0%,var(--bg) 55%);text-align:center;padding:30px}
 .logo-mark{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(140deg,#65BF7F,#1B6793);overflow:hidden;box-shadow:0 18px 46px rgba(45,140,140,.34)}
-.markimg{width:62%;height:62%;object-fit:contain;display:block}
+  font-size:46px;background:linear-gradient(140deg,var(--accent),var(--accent2));box-shadow:0 20px 50px rgba(0,224,184,.3)}
 .spin{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--accent);
   border-radius:50%;animation:rot 1s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
@@ -446,7 +445,7 @@ input[type=range]{accent-color:var(--accent)}
     border-bottom:1px solid var(--line)}
   .lbrand{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;color:var(--txt);text-decoration:none;letter-spacing:-.4px}
   .lbrand-mark{width:34px;height:34px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;
-    background:linear-gradient(140deg,#65BF7F,#1B6793);overflow:hidden}
+    background:linear-gradient(140deg,var(--accent),var(--accent2));font-size:18px}
   .llinks{display:flex;gap:26px;margin-inline-start:auto}
   .llinks a{color:var(--muted);text-decoration:none;font-size:14.5px;font-weight:600}
   .llinks a:hover{color:var(--txt)}
@@ -691,14 +690,13 @@ html[dir=rtl] .lhero-sub,html[dir=rtl] .lx-lead,html[dir=rtl] .lcard p,html[dir=
 </style>
 <!-- Set direction/lang before first paint so an ?lang=ar (or saved) Arabic visit never flashes English/LTR -->
 <script>try{var _q=new URLSearchParams(location.search).get('lang');var _l=_q||localStorage.getItem('ibdweb_lang');if(_l==='ar'){document.documentElement.dir='rtl';document.documentElement.lang='ar';}}catch(e){}</script>
-<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "015bd672db874f7daf9dc48f8f1dac3c"}'></script><!-- End Cloudflare Web Analytics -->
 </head>
 <body>
 <!-- Desktop website shell (hidden on phones; app goes full-screen there) -->
 <div id="site">
   <button class="appfull-exit" onclick="exitAppFull()" aria-label="Back to site"><span aria-hidden="true">✕</span> <span data-en="Site" data-ar="الموقع">Site</span></button>
   <header class="lnav">
-    <a class="lbrand" href="#top"><span class="lbrand-mark" style="color:#fff"><img class="markimg" src="logo-glyph.png" alt=""></span><span data-en="Rafeeq" data-ar="رفيق">Rafeeq</span></a>
+    <a class="lbrand" href="#top"><span class="lbrand-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg></span><span data-en="Rafeeq" data-ar="رفيق">Rafeeq</span></a>
     <nav class="llinks">
       <a href="#features" data-en="Features" data-ar="المزايا">Features</a>
       <a href="#gallery" data-en="Living well" data-ar="حياة أفضل">Living well</a>
@@ -798,7 +796,7 @@ html[dir=rtl] .lhero-sub,html[dir=rtl] .lx-lead,html[dir=rtl] .lcard p,html[dir=
   </main>
   <footer class="lfoot" id="about">
     <div class="lfoot-in">
-      <div><span class="lbrand-mark" style="color:#fff"><img class="markimg" src="logo-glyph.png" alt=""></span> <b>Rafeeq</b></div>
+      <div><span class="lbrand-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.3" fill="currentColor" stroke="none"/></svg></span> <b>Rafeeq</b></div>
       <p data-en="Rafeeq is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider." data-ar="«رفيق» هو رفيق صحي غير طبي للتتبّع الذاتي والتثقيف. لا يقدّم نصيحة طبية أو تشخيصًا أو علاجًا وليس بديلًا عن الرعاية المهنية. استشر دائمًا مقدّم الرعاية الصحية.">Rafeeq is a non-medical health companion for personal tracking and education. It does not provide medical advice, diagnosis, or treatment and is not a substitute for professional care. Always consult your healthcare provider.</p>
       <p class="lfoot-sub" data-en="Supported by an unrestricted educational grant from AbbVie. AbbVie had no role in the development, review, or content of Rafeeq, and has no access to user data." data-ar="بدعم من منحة تعليمية غير مشروطة من AbbVie. لم يكن لشركة AbbVie أي دور في تطوير أو مراجعة أو محتوى تطبيق رفيق، ولا تصل إلى أي من بيانات المستخدمين.">Supported by an unrestricted educational grant from AbbVie. AbbVie had no role in the development, review, or content of Rafeeq, and has no access to user data.</p>
       <p class="lfoot-sub">Educational content from the Saudi Gastroenterology Association — IBDguide.net. © <span id="lyear"></span> Rafeeq. · <a href="privacy.html" style="color:inherit;text-decoration:underline" data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</a></p>
@@ -1577,7 +1575,7 @@ function getScale(id){const w=$('#'+id);return w&&w.dataset.val!==undefined?+w.d
 route('splash',(n)=>{
   n.classList.add('splash');
   n.innerHTML=`
-    <div class="logo-mark" style="color:#fff"><img class="markimg" src="logo-glyph.png" alt=""></div>
+    <div class="logo-mark" style="color:#fff"><svg viewBox="0 0 24 24" width="50" height="50" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg></div>
     <div>
       <div style="font-size:30px;font-weight:800;letter-spacing:-.5px">Rafeeq</div>
       <div style="font-size:16px;color:var(--muted);margin-top:6px">رفيق التهاب الأمعاء</div>
@@ -1595,7 +1593,7 @@ route('splash',(n)=>{
 route('lang',(n)=>{
   n.innerHTML=`
     <div style="flex:1;display:flex;flex-direction:column;justify-content:center;padding:30px 22px;gap:26px">
-      <div class="logo-mark" style="width:64px;height:64px;border-radius:20px;color:#fff"><img class="markimg" src="logo-glyph.png" alt=""></div>
+      <div class="logo-mark" style="width:64px;height:64px;border-radius:20px;color:#fff"><svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg></div>
       <div>
         <h1 style="font-size:25px;margin:0 0 6px">Choose your language</h1>
         <div style="font-size:25px;font-weight:800;margin-bottom:8px">اختر لغتك</div>
@@ -1699,7 +1697,7 @@ window.setupNext=()=>{
 route('login',(n)=>{
   n.innerHTML=`
    <div style="padding:calc(30px + env(safe-area-inset-top)) 22px 30px;display:flex;flex-direction:column;min-height:100%">
-     <div class="logo-mark" style="width:60px;height:60px;border-radius:18px;margin-bottom:24px;color:#fff"><img class="markimg" src="logo-glyph.png" alt=""></div>
+     <div class="logo-mark" style="width:60px;height:60px;border-radius:18px;margin-bottom:24px;color:#fff"><svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 5a8.5 8.5 0 1 0 0 14"/><circle cx="13.4" cy="12" r="2.4" fill="currentColor" stroke="none"/></svg></div>
      <h1 style="font-size:26px;margin:0 0 4px">${t('welcome')}</h1>
      <p class="muted" style="margin:0 0 26px">${t('appName')} · ${t('tagline')}</p>
      <div class="field"><label>${t('email')}</label><input class="input" id="liEmail" type="email" placeholder="you@email.com" value="${esc(S.user.email)}"></div>

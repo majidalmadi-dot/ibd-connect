@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rafeeq.saudigastro.com/sitemap.xml

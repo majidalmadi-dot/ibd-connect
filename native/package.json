@@ -1,0 +1,20 @@
+{
+  "name": "rafeeq-native",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Capacitor iOS wrapper for the Rafeeq PWA (ibd-connect.vercel.app)",
+  "scripts": {
+    "init": "cap init Rafeeq com.sga.rafeeq --web-dir www",
+    "add:ios": "cap add ios",
+    "sync": "cap sync ios",
+    "open:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
+    "@capacitor/push-notifications": "^6.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0"
+  }
+}

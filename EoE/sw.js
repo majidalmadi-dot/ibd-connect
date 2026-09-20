@@ -1,9 +1,10 @@
 /* Maeen (EoE) service worker — offline support + fresh-on-deploy. Scope: /EoE/ */
-const CACHE = 'maeen-eoe-v23';
+const CACHE = 'maeen-eoe-v24';
+self.addEventListener('message',function(e){if(e.data&&e.data.type==='SKIP_WAITING')self.skipWaiting();});
 const CORE = ['./', './index.html', './manifest.webmanifest', './maeen-192.png', './maeen-512.png', './maeen-180.png'];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()).catch(() => {}));
+  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).catch(() => {}));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(

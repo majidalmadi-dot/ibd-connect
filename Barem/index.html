@@ -1,0 +1,1311 @@
+<!doctype html>
+<!-- Baraʿem · براعم — bilingual (AR/EN, RTL) NON-MEDICAL pediatric GI companion for parents. Single-file PWA. -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#F39A5A">
+<title>Baraʿem · براعم — pediatric tummy companion</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{
+  --bg:#FBF6F0; --card:#FFFFFF; --line:#EFE3D6; --txt:#2B2019; --muted:#8A7A6C;
+  --accent:#EA8A4E; --accent-strong:#D2703A; --leaf:#3FA972; --sky:#4F9AD6;
+  --good:#3FA972; --warn:#E0A23D; --danger:#D4553C; --disk:#7C5CFF;
+  --radius:16px; --radius-sm:11px; --tap:44px; --fs:1;
+}
+html[data-theme="dark"]{
+  --bg:#171310; --card:#221B15; --line:#33281F; --txt:#F3EAE0; --muted:#A2917F;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--txt);
+  font-family:-apple-system,"Segoe UI",Tahoma,"Noto Naskh Arabic",Arial,sans-serif;
+  font-size:calc(15px * var(--fs));line-height:1.55;-webkit-text-size-adjust:100%}
+h1,h2,h3{font-family:Georgia,"Noto Naskh Arabic",serif;margin:0}
+.app{max-width:520px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;position:relative}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;
+  padding:12px 16px;background:color-mix(in srgb,var(--card) 92%,transparent);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.brandwrap{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px}
+.brandmark{width:30px;height:30px;flex:none}
+.iconbtn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--txt);
+  border-radius:999px;min-height:var(--tap);padding:6px 13px;font-weight:700;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.iconbtn:active{transform:scale(.97)}
+#screens{flex:1;overflow-y:auto;padding:14px 14px 96px;-webkit-overflow-scrolling:touch}
+.screen{animation:fade .28s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(120,80,40,.04)}
+.card h2{font-size:19px}.card h3{font-size:16px;font-family:-apple-system,"Segoe UI",Arial,sans-serif;font-weight:800}
+.muted{color:var(--muted)}.sm{font-size:13px}.xs{font-size:11.5px}
+.row{display:flex;align-items:center;gap:10px}.wrap{flex-wrap:wrap}.between{justify-content:space-between}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn{appearance:none;border:0;border-radius:12px;padding:13px 16px;font-weight:800;cursor:pointer;font-size:15px;min-height:var(--tap);width:100%}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:#fff}.btn-primary:hover{background:var(--accent-strong)}
+.btn-ghost{background:transparent;color:var(--txt);border:1px solid var(--line)}
+.btn-soft{background:color-mix(in srgb,var(--accent) 14%,transparent);color:var(--accent-strong)}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);
+  border-radius:999px;padding:8px 13px;font-size:13px;font-weight:700;cursor:pointer;min-height:38px}
+.chip.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chip.leaf.on{background:var(--leaf);border-color:var(--leaf)}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 10px;font-size:11.5px;font-weight:800}
+.pill.a{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent-strong)}
+.pill.g{background:color-mix(in srgb,var(--good) 16%,transparent);color:var(--good)}
+.pill.d{background:color-mix(in srgb,var(--danger) 15%,transparent);color:var(--danger)}
+.scale{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.scale button{flex:1;min-width:36px;min-height:44px;border:1px solid var(--line);background:transparent;color:var(--txt);border-radius:11px;cursor:pointer;font-weight:800;font-size:15px}
+.scale button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.opt{display:flex;align-items:center;gap:12px;width:100%;text-align:start;border:1px solid var(--line);background:var(--card);color:var(--txt);border-radius:13px;padding:12px 14px;cursor:pointer;margin-bottom:8px;min-height:var(--tap)}
+.opt.on{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
+.opt .em{font-size:24px;flex:none;width:30px;text-align:center}
+label.fld{display:block;font-weight:700;font-size:13px;margin:12px 0 5px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--txt);font-size:15px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);border-color:var(--accent)}
+.tabbar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;display:flex;
+  background:color-mix(in srgb,var(--card) 96%,transparent);backdrop-filter:blur(8px);border-top:1px solid var(--line);z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+.tabbar.hidden{display:none}
+.hidden{display:none!important}
+.tab{flex:1;background:none;border:0;color:var(--muted);padding:9px 0 8px;font-size:10.5px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.tab.on{color:var(--accent)}
+.fab{position:fixed;bottom:78px;inset-inline-end:calc(50% - 260px + 16px);z-index:25;width:56px;height:56px;border-radius:50%;border:0;background:var(--accent);color:#fff;font-size:28px;box-shadow:0 6px 18px rgba(210,112,58,.4);cursor:pointer;display:flex;align-items:center;justify-content:center}
+@media(max-width:540px){.fab{inset-inline-end:18px}}
+.sheet-bd{position:fixed;inset:0;background:rgba(20,12,6,.45);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+.sheet{background:var(--card);width:100%;max-width:520px;max-height:88vh;overflow-y:auto;border-radius:20px 20px 0 0;padding:18px 16px 26px;animation:up .28s ease}
+@keyframes up{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+.grab{width:38px;height:4px;background:var(--line);border-radius:2px;margin:0 auto 12px}
+.alert{border-radius:14px;padding:14px;border:1px solid;margin-bottom:12px}
+.alert.red{background:color-mix(in srgb,var(--danger) 10%,transparent);border-color:color-mix(in srgb,var(--danger) 40%,transparent)}
+.alert.warn{background:color-mix(in srgb,var(--warn) 12%,transparent);border-color:color-mix(in srgb,var(--warn) 40%,transparent)}
+.disc{font-size:11.5px;color:var(--muted);line-height:1.5;margin:14px 2px 2px}
+.avatar{width:40px;height:40px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:16px}
+.seg{display:flex;border:1px solid var(--line);border-radius:11px;overflow:hidden;margin:8px 0}
+.seg button{flex:1;border:0;background:transparent;color:var(--muted);padding:10px 4px;font-weight:800;font-size:13px;cursor:pointer}
+.seg button.on{background:var(--accent);color:#fff}
+.bar{height:9px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--accent);border-radius:6px}
+.list-i{display:flex;gap:11px;padding:11px 0;border-bottom:1px solid var(--line)}
+.list-i:last-child{border-bottom:0}
+.dot{width:9px;height:9px;border-radius:50%;flex:none;margin-top:6px}
+a.link{color:var(--accent-strong);font-weight:700;text-decoration:none}
+.hero{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 20%,var(--card)),var(--card));border:1px solid var(--line)}
+.badge{position:absolute;top:-4px;inset-inline-end:-4px;background:var(--danger);color:#fff;border-radius:999px;font-size:10px;font-weight:800;padding:1px 6px}
+@media print{.tabbar,.fab,.topbar .iconbtn,.noprint{display:none!important}#screens{padding:0}.card{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <span class="brandwrap"><span class="brandmark" id="brandmark"></span><span id="brand">Baraʿem</span></span>
+    <button class="iconbtn noprint" style="margin-inline-start:auto" onclick="toggleLang()" id="langbtn">العربية</button>
+    <button class="iconbtn noprint" onclick="go('safety')" id="sosbtn" title="Warning signs">⚠︎</button>
+  </div>
+  <div id="screens"></div>
+  <button class="fab noprint hidden" id="fab" onclick="openQuickLog()">＋</button>
+  <nav class="tabbar hidden" id="tabbar"></nav>
+</div>
+<script>
+/* ============ STATE (additive-safe) ============ */
+const KEY='barem_v1';
+function blank(){return{
+  lang:null, onboarded:false,
+  children:[], activeChildId:null,
+  logs:[], meds:[], checkins:[],
+  prefs:{theme:'light', textScale:1, remind:true},
+  seenSafety:false
+};}
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));
+  if(!v)return blank();const s=Object.assign(blank(),v);
+  s.prefs=Object.assign(blank().prefs,v.prefs||{});return s;}catch(e){return blank();}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+let S=load();
+const rid=()=>Math.random().toString(36).slice(2,9);
+const nowISO=()=>new Date().toISOString();
+const dayKey=d=>(d?new Date(d):new Date()).toISOString().slice(0,10);
+function activeChild(){return S.children.find(c=>c.id===S.activeChildId)||S.children[0]||null;}
+function childLogs(cid){return S.logs.filter(l=>l.childId===cid);}
+/* age helpers */
+function ageMonths(c){if(!c||!c.birth)return null;const b=new Date(c.birth+'-01');const n=new Date();
+  return (n.getFullYear()-b.getFullYear())*12+(n.getMonth()-b.getMonth());}
+function ageLabel(c){const m=ageMonths(c);if(m==null)return '';
+  if(m<24)return isAr()?`${m} شهرًا`:`${m} mo`;const y=Math.floor(m/12);return isAr()?`${y} سنوات`:`${y} yr`;}
+function isInfant(c){const m=ageMonths(c);return m!=null&&m<18;}
+function isTeen(c){const m=ageMonths(c);return m!=null&&m>=144;} /* 12y+ */
+
+/* ============ i18n + RTL ============ */
+function isAr(){return S.lang==='ar';}
+function L(o){return o?(isAr()?(o.ar||o.en):o.en):'';}
+const T={
+  brand:{en:'Baraʿem',ar:'براعم'},
+  tagline:{en:"Your child's tummy companion",ar:'رفيق صحة أمعاء طفلك'},
+  today:{en:'Today',ar:'اليوم'}, diary:{en:'Diary',ar:'اليوميات'},
+  library:{en:'Library',ar:'المكتبة'}, report:{en:'Report',ar:'التقرير'}, more:{en:'More',ar:'المزيد'},
+  save:{en:'Save',ar:'حفظ'}, cancel:{en:'Cancel',ar:'إلغاء'}, add:{en:'Add',ar:'إضافة'},
+  saved:{en:'Saved ✓',ar:'تم الحفظ ✓'}, back:{en:'Back',ar:'رجوع'}, done:{en:'Done',ar:'تم'},
+  quicklog:{en:'Quick log',ar:'تسجيل سريع'},
+  logstool:{en:'Stool / diaper',ar:'البراز / الحفاض'}, logfeed:{en:'Feed',ar:'الرضعة / الوجبة'},
+  logsym:{en:'Symptom',ar:'عرض'}, logvomit:{en:'Vomit / spit-up',ar:'قيء / ترجيع'},
+  logmed:{en:'Medicine',ar:'دواء'}, loggrowth:{en:'Growth',ar:'النمو'},
+  entriesToday:{en:'entries logged today',ar:'إدخالات اليوم'},
+  noChild:{en:'Add your child to begin',ar:'أضف طفلك للبدء'},
+  addChild:{en:'Add a child',ar:'إضافة طفل'}, childName:{en:'Name or nickname (optional)',ar:'الاسم أو الكنية (اختياري)'},
+  birth:{en:'Birth month',ar:'شهر الميلاد'}, sex:{en:'Sex',ar:'الجنس'},
+  boy:{en:'Boy',ar:'ذكر'}, girl:{en:'Girl',ar:'أنثى'},
+  conditions:{en:'Conditions being followed (optional)',ar:'الحالات المتابَعة (اختياري)'},
+  pickNum:{en:'Please make a selection first',ar:'يرجى الاختيار أولًا'},
+  recent:{en:'Recent entries',ar:'أحدث الإدخالات'}, none:{en:'Nothing logged yet.',ar:'لا توجد إدخالات بعد.'},
+  seekcare:{en:'When to seek urgent care',ar:'متى تطلب رعاية عاجلة'},
+  disc:{en:'Baraʿem is an educational companion for parents — not a medical device. It does not diagnose, rate severity, or advise on treatment or doses. Always discuss your child’s symptoms, tests and medicines with your care team. In an emergency call your local emergency number.',
+        ar:'براعم رفيق تثقيفي للوالدين — وليس جهازًا طبيًا. لا يشخّص ولا يقيّم الشدة ولا ينصح بعلاج أو جرعات. ناقش دائمًا أعراض طفلك وفحوصه وأدويته مع فريق الرعاية. في الطوارئ اتصل برقم الطوارئ المحلي.'},
+  discShort:{en:'Educational only — not a diagnosis. Discuss with your care team.',ar:'للتثقيف فقط — ليس تشخيصًا. ناقش مع فريق الرعاية.'},
+  shareTeam:{en:'This is a summary to share with your care team, not a medical assessment.',ar:'هذا ملخص لمشاركته مع فريق الرعاية، وليس تقييمًا طبيًا.'},
+  bristol:{en:'Stool type (Bristol)',ar:'نوع البراز (بريستول)'},
+  infantStool:{en:'Baby stool',ar:'براز الرضيع'},
+  consistency:{en:'Consistency',ar:'القوام'}, color:{en:'Colour',ar:'اللون'}, amount:{en:'Amount',ar:'الكمية'},
+  blood:{en:'Blood',ar:'دم'}, mucus:{en:'Mucus',ar:'مخاط'}, pain:{en:'Pain when passing',ar:'ألم عند التبرز'},
+  yes:{en:'Yes',ar:'نعم'}, no:{en:'No',ar:'لا'}, note:{en:'Note (optional)',ar:'ملاحظة (اختياري)'},
+  painLevel:{en:'How much pain?',ar:'ما مقدار الألم؟'},
+  where:{en:'Where?',ar:'أين؟'}, symType:{en:'What are you noticing?',ar:'ما الذي تلاحظه؟'},
+  feedType:{en:'Feed type',ar:'نوع التغذية'}, breast:{en:'Breast',ar:'رضاعة طبيعية'},
+  formula:{en:'Formula',ar:'حليب صناعي'}, solids:{en:'Solids',ar:'طعام صلب'}, drink:{en:'Drink',ar:'شراب'},
+  formulaType:{en:'Formula type',ar:'نوع الحليب'},
+  standard:{en:'Standard',ar:'عادي'}, hydro:{en:'Hydrolyzed',ar:'متحلل'}, amino:{en:'Amino-acid',ar:'أحماض أمينية'},
+  newAllergen:{en:'New allergen introduced',ar:'إدخال مُحسِّس جديد'},
+  vomColor:{en:'Colour of vomit',ar:'لون القيء'},
+  clear:{en:'Clear/milky',ar:'صافٍ/حليبي'}, yellow:{en:'Yellow',ar:'أصفر'}, green:{en:'Green (bilious)',ar:'أخضر (صفراوي)'}, bloody:{en:'Bloody',ar:'دموي'},
+  forceful:{en:'Forceful / projectile',ar:'قوي / نافوري'},
+  urgentFlag:{en:'Green or bloody vomit can be urgent — contact your doctor.',ar:'القيء الأخضر أو الدموي قد يكون طارئًا — اتصل بالطبيب.'},
+  medName:{en:'Medicine name',ar:'اسم الدواء'}, dose:{en:'Dose (as prescribed)',ar:'الجرعة (كما وُصفت)'},
+  taken:{en:'Taken',ar:'أُخذت'}, missed:{en:'Missed',ar:'فائتة'},
+  weight:{en:'Weight (kg)',ar:'الوزن (كجم)'}, height:{en:'Length/Height (cm)',ar:'الطول (سم)'}, head:{en:'Head circ. (cm)',ar:'محيط الرأس (سم)'},
+  growthNote:{en:'Your care team plots these on WHO/CDC growth charts.',ar:'يرسم فريق الرعاية هذه القيم على مخططات النمو (WHO/CDC).'},
+  last14:{en:'Last 14 days',ar:'آخر ١٤ يومًا'}, last30:{en:'Last 30 days',ar:'آخر ٣٠ يومًا'},
+  stoolDist:{en:'Stool pattern',ar:'نمط البراز'}, symDays:{en:'Days with symptoms',ar:'أيام بها أعراض'},
+  medAdh:{en:'Medicine log',ar:'سجل الدواء'}, growthLog:{en:'Growth entries',ar:'إدخالات النمو'},
+  print:{en:'Print / Save PDF',ar:'طباعة / حفظ PDF'}, copy:{en:'Copy summary',ar:'نسخ الملخص'},
+  copied:{en:'Copied ✓',ar:'تم النسخ ✓'},
+  checkin:{en:'Symptom check-in',ar:'مراجعة الأعراض'},
+  teen:{en:'Teen & transition',ar:'المراهقون والانتقال'},
+  manageKids:{en:'Children',ar:'الأطفال'}, appearance:{en:'Appearance',ar:'المظهر'},
+  theme:{en:'Dark mode',ar:'الوضع الداكن'}, textSize:{en:'Text size',ar:'حجم الخط'},
+  about:{en:'About & safety',ar:'حول والسلامة'}, remove:{en:'Remove',ar:'حذف'}, edit:{en:'Edit',ar:'تعديل'},
+  catFunctional:{en:'Common & functional',ar:'شائعة ووظيفية'},
+  catChronic:{en:'Ongoing conditions',ar:'حالات مزمنة'},
+  catInfant:{en:'Babies: feeding & growth',ar:'الرضّع: التغذية والنمو'},
+  whatis:{en:'What it is',ar:'ما هي'}, signs:{en:'Signs parents notice',ar:'علامات يلاحظها الوالدان'},
+  triggers:{en:'Triggers & contributors',ar:'المحفزات والمساهمات'},
+  mgmt:{en:'What families often hear',ar:'ما يسمعه الأهل غالبًا'},
+  redflags:{en:'See a doctor if',ar:'راجع الطبيب إذا'},
+  feeding:{en:'Feeding & weaning',ar:'التغذية والفطام'}, saudi:{en:'Gulf foods & Ramadan',ar:'أطعمة الخليج ورمضان'},
+  chooseChild:{en:'Whose diary?',ar:'يوميات مَن؟'},
+  welcome:{en:'Welcome to Baraʿem',ar:'مرحبًا بك في براعم'},
+  welcomeSub:{en:'A calm, private place to note your child’s tummy symptoms, feeds and medicines — and learn what they mean. Everything stays on your device.',ar:'مكان هادئ وخاص لتدوين أعراض أمعاء طفلك ورضعاته وأدويته — وتعلّم معناها. كل شيء يبقى على جهازك.'},
+  getStarted:{en:'Get started',ar:'ابدأ'},
+  langPick:{en:'Choose your language',ar:'اختر لغتك'},
+  privacyLine:{en:'Private on your device · no account needed',ar:'خاص على جهازك · بدون حساب'},
+  transitionTitle:{en:'Growing up with a gut condition',ar:'النمو مع حالة معوية'},
+  traqTitle:{en:'Self-care skills checklist',ar:'قائمة مهارات الرعاية الذاتية'},
+  addToday:{en:'Log something',ar:'سجّل شيئًا'},
+  switchChild:{en:'Switch child',ar:'تبديل الطفل'},
+  tools:{en:'Tools & charts',ar:'الأدوات والمخططات'},
+  growthCharts:{en:'Growth charts',ar:'مخططات النمو'},
+  milestones:{en:'Milestones',ar:'مراحل التطوّر'},
+  feedingGuide:{en:'Feeding by age',ar:'التغذية حسب العمر'},
+  calculators:{en:'Quick calculators',ar:'حاسبات سريعة'},
+  percentile:{en:'percentile',ar:'المئين'},
+  addGrowthFirst:{en:'Log weight/height to see it plotted here.',ar:'سجّل الوزن/الطول لرؤيته مرسومًا هنا.'},
+  ofAge:{en:'of children this age',ar:'من الأطفال بهذا العمر'},
+  hydration:{en:'Hydration',ar:'الترطيب'}, recipes:{en:'Kid recipes',ar:'وصفات للأطفال'},
+  grocery:{en:'Grocery list',ar:'قائمة التسوّق'}, vaccines:{en:'Vaccinations',ar:'التطعيمات'},
+  supplements:{en:'Supplements',ar:'المكمّلات'}, reminders:{en:'Medicine reminders',ar:'تذكير الدواء'},
+  comfort:{en:'Comfort & calm',ar:'الراحة والهدوء'}, careaway:{en:'Care-away kit',ar:'حقيبة السفر والمدرسة'},
+  insights:{en:'Weekly insights',ar:'ملخص الأسبوع'}, triggers:{en:'Trigger finder',ar:'محلّل المحفّزات'},
+  addWater:{en:'Add a drink',ar:'أضف شرابًا'}, remindAt:{en:'Remind at',ar:'ذكّرني الساعة'},
+  addCal:{en:'Add to calendar',ar:'أضف للتقويم'}, copyText:{en:'Copy',ar:'نسخ'},
+  secGrowth:{en:'Growth & development',ar:'النمو والتطوّر'}, secDiet:{en:'Feeding & diet',ar:'التغذية والحمية'},
+  secHealth:{en:'Health maintenance',ar:'المتابعة الصحية'}, secSupport:{en:'Support & planning',ar:'الدعم والتخطيط'},
+  logsleep:{en:'Sleep',ar:'النوم'}, lognurse:{en:'Nursing',ar:'الرضاعة'}, logpump:{en:'Pumping',ar:'الشفط'}, logteeth:{en:'Teething',ar:'التسنين'},
+  babylogs:{en:'Baby logs',ar:'سجلات الرضيع'}, healthRecord:{en:'Health record',ar:'السجل الصحي'},
+  shareTool:{en:'Share with clinic',ar:'مشاركة مع العيادة'}, caregiver:{en:'Caregiver transfer',ar:'نقل لمقدّم رعاية'},
+  vaxCert:{en:'Vaccination card',ar:'بطاقة التطعيم'}, start:{en:'Start',ar:'ابدأ'}, stop:{en:'Stop',ar:'إيقاف'},
+  minutes:{en:'minutes',ar:'دقيقة'}, exportData:{en:'Export data file',ar:'تصدير ملف البيانات'}, importData:{en:'Import data file',ar:'استيراد ملف'},
+  washroom:{en:'Bathroom finder',ar:'أقرب دورة مياه'}, themesT:{en:'Themes & colours',ar:'السمات والألوان'},
+  findNear:{en:'Find nearby',ar:'ابحث قريبًا'}, savedPlaces:{en:'Saved places',ar:'أماكن محفوظة'},
+  customColor:{en:'Custom colour',ar:'لون مخصّص'}, surprise:{en:'Surprise me',ar:'فاجئني'},
+  updateReady:{en:'A new version is ready',ar:'يتوفّر إصدار جديد'}, refresh:{en:'Refresh',ar:'تحديث'}
+};
+function t(k){const e=T[k];return e?(isAr()?e.ar:e.en):k;}
+const THEMES=[
+ {k:'apricot',name:{en:'Apricot',ar:'مشمشي'},a:'#EA8A4E',s:'#D2703A'},
+ {k:'coral',name:{en:'Coral',ar:'مرجاني'},a:'#F2686A',s:'#D94E50'},
+ {k:'berry',name:{en:'Berry',ar:'توتي'},a:'#B85CC9',s:'#9A3FAD'},
+ {k:'sky',name:{en:'Sky',ar:'سماوي'},a:'#4F9AD6',s:'#3579B5'},
+ {k:'mint',name:{en:'Mint',ar:'نعناعي'},a:'#2FB4A0',s:'#1E9285'},
+ {k:'sunny',name:{en:'Sunny',ar:'مشمس'},a:'#E8A93C',s:'#C98A22'},
+ {k:'rose',name:{en:'Rose',ar:'وردي'},a:'#EC6F9B',s:'#D24E7E'},
+ {k:'grape',name:{en:'Grape',ar:'عنبي'},a:'#7C6CF0',s:'#5F4FD6'}
+];
+function applyTheme(){const d=document.documentElement;let a=S.prefs.accent,s=null;
+  if(!a){const th=THEMES.find(x=>x.k===(S.prefs.themeKey||'apricot'))||THEMES[0];a=th.a;s=th.s;}
+  d.style.setProperty('--accent',a);d.style.setProperty('--accent-strong',s||a);}
+function applyDir(){const d=document.documentElement;d.lang=S.lang||'en';d.dir=isAr()?'rtl':'ltr';
+  d.dataset.theme=S.prefs.theme==='dark'?'dark':'light';
+  d.style.setProperty('--fs',S.prefs.textScale||1);applyTheme();
+  const b=document.getElementById('brand');if(b)b.textContent=t('brand');
+  const lb=document.getElementById('langbtn');if(lb)lb.textContent=isAr()?'English':'العربية';
+  const bm=document.getElementById('brandmark');if(bm)bm.innerHTML=brandSVG();}
+function toggleLang(){S.lang=isAr()?'en':'ar';save();render();}
+
+/* ============ ICONS ============ */
+function brandSVG(){return `<svg viewBox="0 0 32 32" width="30" height="30" fill="none">
+ <path d="M16 29c0-7-4-10-9-11 5-1 9 1 9 6" fill="#3FA972"/>
+ <path d="M16 29c0-8 4-11 9-12-5-1-9 1-9 7" fill="#5CC189"/>
+ <path d="M16 30V15" stroke="#8A6A4E" stroke-width="2.4" stroke-linecap="round"/>
+ <circle cx="16" cy="9.5" r="6" fill="var(--accent)"/></svg>`;}
+const IC={
+ home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>',
+ book:'<path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M19 3v16"/>',
+ chart:'<path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/>',
+ dots:'<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
+ pencil:'<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+ baby:'<circle cx="12" cy="7" r="3"/><path d="M6 21c1-4 4-6 6-6s5 2 6 6"/>',
+ heart:'<path d="M12 21s-7-4.5-9.5-9A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 9.5 6C19 16.5 12 21 12 21z"/>'};
+function ic(n,s=22){const p=IC[n];return p?`<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`:'';}
+
+/* ============ UI HELPERS ============ */
+function card(html,cls){return `<div class="card ${cls||''}">${html}</div>`;}
+function topbar(title,sub){return `<div style="margin:2px 0 14px"><h2>${title}</h2>${sub?`<div class="muted sm">${sub}</div>`:''}</div>`;}
+function backbar(title){return `<div class="row" style="margin-bottom:12px"><button class="iconbtn" onclick="goBack()">${isAr()?'→':'←'} ${t('back')}</button><b style="font-size:16px">${title}</b></div>`;}
+function segMonths(){return isAr()?'شهر':'mo';}
+function avatarFor(c){const colors=['#EA8A4E','#4F9AD6','#3FA972','#B57BD6','#E0A23D'];
+  const i=Math.abs((c.id||'x').charCodeAt(0))%colors.length;const ini=(c.name||'👶').slice(0,1).toUpperCase();
+  return `<span class="avatar" style="background:${colors[i]}">${c.name?ini:'👶'}</span>`;}
+function toast(msg){let e=document.createElement('div');e.textContent=msg;
+  e.style.cssText='position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:var(--txt);color:var(--bg);padding:11px 18px;border-radius:999px;font-weight:800;z-index:60;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.25)';
+  document.body.appendChild(e);setTimeout(()=>e.remove(),1500);}
+let SHEET=null;
+function openSheet(html){closeSheet();const bd=document.createElement('div');bd.className='sheet-bd';
+  bd.onclick=e=>{if(e.target===bd)closeSheet();};
+  bd.innerHTML=`<div class="sheet"><div class="grab"></div>${html}</div>`;document.body.appendChild(bd);SHEET=bd;}
+function closeSheet(){if(SHEET){SHEET.remove();SHEET=null;}}
+
+/* generic single-select group used inside sheets */
+function optGroup(id,items){/* items:[{v,em,label}] */
+  return `<div data-grp="${id}">`+items.map(o=>`<button class="opt" data-v="${o.v}" onclick="pickOpt('${id}','${o.v}')">${o.em?`<span class="em">${o.em}</span>`:''}<span>${o.label}</span></button>`).join('')+`</div>`;}
+function pickOpt(id,v){const g=document.querySelector(`[data-grp="${id}"]`);if(!g)return;
+  [...g.children].forEach(b=>b.classList.toggle('on',b.dataset.v===v));g.dataset.val=v;}
+function grpVal(id){const g=document.querySelector(`[data-grp="${id}"]`);return g&&g.dataset.val!=null?g.dataset.val:null;}
+function chipsRow(id,items){/* multi toggle */return `<div class="row wrap" data-chips="${id}">`+items.map(o=>`<button class="chip leaf" data-v="${o.v}" onclick="this.classList.toggle('on')">${o.label}</button>`).join('')+`</div>`;}
+function chipVals(id){const g=document.querySelector(`[data-chips="${id}"]`);return g?[...g.querySelectorAll('.on')].map(b=>b.dataset.v):[];}
+function scaleSel(id,n){let h=`<div class="scale" data-scale="${id}">`;for(let i=0;i<=n;i++)h+=`<button data-v="${i}" onclick="pickScale('${id}',${i})">${i}</button>`;return h+'</div>';}
+function pickScale(id,v){const w=document.querySelector(`[data-scale="${id}"]`);[...w.children].forEach(b=>b.classList.remove('on'));w.querySelector(`[data-v="${v}"]`).classList.add('on');w.dataset.val=v;}
+function scaleVal(id){const w=document.querySelector(`[data-scale="${id}"]`);return w&&w.dataset.val!=null?+w.dataset.val:null;}
+function faces(id){const F=[['😀',0,{en:'No hurt',ar:'لا ألم'}],['🙂',2,{en:'Hurts a little',ar:'قليل'}],['😐',4,{en:'Hurts a bit more',ar:'أكثر قليلًا'}],['😣',6,{en:'Hurts even more',ar:'أكثر'}],['😢',8,{en:'Hurts a lot',ar:'كثير'}],['😭',10,{en:'Hurts worst',ar:'الأشد'}]];
+  return `<div class="row wrap" data-scale="${id}" style="gap:6px">`+F.map(([e,v,l])=>`<button class="opt" style="flex-direction:column;flex:1;min-width:64px;gap:2px" data-v="${v}" onclick="pickScale('${id}',${v})"><span style="font-size:28px">${e}</span><span class="xs">${L(l)}</span></button>`).join('')+`</div>`;}
+
+/* ============ ROUTER ============ */
+const ROUTES={};let CURRENT='today',CURRENT_OPTS={},STACK=[];
+function route(n,fn){ROUTES[n]=fn;}
+function go(n,opts){opts=opts||{};if(!opts.replace&&CURRENT&&CURRENT!==n)STACK.push(CURRENT);CURRENT=n;CURRENT_OPTS=opts;closeSheet();render();window.scrollTo(0,0);}
+function goBack(){if(STACK.length){CURRENT=STACK.pop();CURRENT_OPTS={};closeSheet();render();}else navTab('today');}
+const MAIN_TABS=['today','diary','library','report','more'];
+function navTab(n){STACK=[];CURRENT=n;CURRENT_OPTS={};closeSheet();render();document.getElementById('screens').scrollTo(0,0);}
+function render(){applyDir();
+  if(!S.onboarded){renderOnboard();return;}
+  const host=document.getElementById('screens');host.innerHTML='';
+  const node=document.createElement('div');node.className='screen';
+  (ROUTES[CURRENT]||ROUTES.today)(node,CURRENT_OPTS);host.appendChild(node);
+  const isMain=MAIN_TABS.includes(CURRENT);
+  const tb=document.getElementById('tabbar');tb.classList.toggle('hidden',!isMain);
+  document.getElementById('fab').classList.toggle('hidden',!(isMain&&S.children.length));
+  const items=[['today','home'],['diary','pencil'],['library','book'],['report','chart'],['more','dots']];
+  tb.innerHTML=items.map(([k,i])=>`<button class="tab ${CURRENT===k?'on':''}" onclick="navTab('${k}')">${ic(i,21)}<span>${t(k)}</span></button>`).join('');}
+
+/* ============ ONBOARDING ============ */
+function renderOnboard(){const host=document.getElementById('screens');host.innerHTML='';
+  document.getElementById('tabbar').classList.add('hidden');document.getElementById('fab').classList.add('hidden');
+  const n=document.createElement('div');n.className='screen';
+  if(S.lang==null){
+    n.innerHTML=card(`<div style="text-align:center;padding:14px 4px">
+      <div style="width:64px;height:64px;margin:0 auto 10px">${brandSVG().replace('width="30" height="30"','width="64" height="64"')}</div>
+      <h2>Baraʿem · براعم</h2><div class="muted" style="margin:6px 0 20px">Pediatric tummy companion<br>رفيق صحة أمعاء الطفل</div>
+      <div style="font-weight:800;margin-bottom:10px">${'Choose your language · اختر لغتك'}</div>
+      <button class="btn btn-primary" style="margin-bottom:10px" onclick="setLang('en')">English</button>
+      <button class="btn btn-ghost" onclick="setLang('ar')">العربية</button>
+      <div class="xs muted" style="margin-top:16px">Private on your device · no account needed</div></div>`);
+  }else{
+    n.innerHTML=card(`<div style="text-align:center"><div style="width:56px;height:56px;margin:6px auto">${brandSVG().replace('width="30" height="30"','width="56" height="56"')}</div>
+      <h2>${t('welcome')}</h2><p class="muted" style="margin:8px 4px 14px">${t('welcomeSub')}</p></div>`)
+    + childForm(null,true)
+    + `<p class="disc">${t('disc')}</p>`;
+  }
+  host.appendChild(n);
+}
+function setLang(l){S.lang=l;save();render();}
+
+function conditionPicker(sel){sel=sel||[];
+  const items=CONDITIONS.filter(c=>c.pick).map(c=>({v:c.key,label:L(c.name)}));
+  return chipsRow('kidcond',items).replace('data-chips="kidcond"',`data-chips="kidcond"`)
+    .replace(/class="chip leaf" data-v="([^"]+)"/g,(m,v)=>`class="chip leaf ${sel.includes(v)?'on':''}" data-v="${v}"`);}
+function childForm(c,isFirst){c=c||{};
+  return card(`
+    <label class="fld">${t('childName')}</label><input id="cf_name" value="${c.name||''}" placeholder="${isAr()?'مثال: سارة':'e.g. Sara'}">
+    <label class="fld">${t('birth')}</label><input id="cf_birth" type="month" value="${c.birth||''}" max="${dayKey().slice(0,7)}">
+    <label class="fld">${t('sex')}</label>
+    <div class="seg" data-grp="cf_sex"><button data-v="f" onclick="pickOpt('cf_sex','f')" class="${c.sex==='f'?'on':''}">${t('girl')}</button><button data-v="m" onclick="pickOpt('cf_sex','m')" class="${c.sex==='m'?'on':''}">${t('boy')}</button></div>
+    <label class="fld">${t('conditions')}</label>${conditionPicker(c.conditions)}
+    <button class="btn btn-primary" style="margin-top:16px" onclick="saveChild('${c.id||''}',${!!isFirst})">${isFirst?t('getStarted'):t('save')}</button>
+  `);}
+function saveChild(id,first){
+  const name=(document.getElementById('cf_name').value||'').trim();
+  const birth=document.getElementById('cf_birth').value||'';
+  const sex=grpVal('cf_sex')||'';const conditions=chipVals('kidcond');
+  if(!birth){toast(isAr()?'أدخل شهر الميلاد':'Enter birth month');return;}
+  if(id){const c=S.children.find(x=>x.id===id);if(c){c.name=name;c.birth=birth;c.sex=sex;c.conditions=conditions;}}
+  else{const c={id:rid(),name,birth,sex,conditions};S.children.push(c);S.activeChildId=c.id;}
+  if(first){S.onboarded=true;}save();
+  if(first){go('today',{replace:true});} else goBack();
+}
+
+/* ============ CONDITION LIBRARY DATA ============ */
+/* Educational, non-diagnostic. cat: functional | chronic | infant. pick=selectable at signup. */
+const CONDITIONS=[
+{key:'constipation',cat:'functional',pick:true,name:{en:'Constipation',ar:'الإمساك'},
+ whatis:{en:'Hard, infrequent or painful stools with no underlying disease — the commonest cause in children. A single painful poo can start a “hold-it-in” cycle.',ar:'براز صلب أو نادر أو مؤلم دون مرض كامن — أكثر الأسباب شيوعًا لدى الأطفال. قد يبدأ التبرز المؤلم دورة من "حبس البراز".'},
+ signs:{en:'Fewer than ~3 stools a week, large/hard stools, straining, soiling accidents, hiding or crossing legs, tummy pain, low appetite.',ar:'أقل من ٣ مرات أسبوعيًا، براز كبير/صلب، إجهاد، تسريب لا إرادي، الاختباء أو تقاطع الساقين، ألم بطن، قلة شهية.'},
+ triggers:{en:'Toilet-training struggles, low fibre/fluids, transitions (school, travel), withholding after a painful stool, illness.',ar:'صعوبات التدريب على الحمام، قلة الألياف/السوائل، التغيرات (المدرسة، السفر)، حبس البراز بعد ألم، المرض.'},
+ mgmt:{en:'Families often hear about fibre and fluids, an unhurried toilet routine after meals with gentle rewards, and — under a clinician — osmotic laxatives such as PEG. Consistency over weeks matters.',ar:'يسمع الأهل غالبًا عن الألياف والسوائل، وروتين حمام هادئ بعد الوجبات مع مكافآت لطيفة، و— بإشراف الطبيب — ملينات مثل PEG. الاستمرارية لأسابيع مهمة.'},
+ redflags:{en:'Constipation from the first weeks of life, delayed first stool in a newborn, ribbon-like stools, blood not from a small tear, weight loss, vomiting, or a very swollen belly.',ar:'إمساك منذ الأسابيع الأولى، تأخر أول براز لدى المولود، براز شريطي، دم ليس من شق بسيط، فقدان وزن، قيء، أو انتفاخ بطن شديد.'}},
+{key:'reflux',cat:'functional',pick:true,name:{en:'Reflux & spit-up',ar:'الارتجاع والترجيع'},
+ whatis:{en:'Bringing up milk (“spit-up”) is normal and very common in healthy babies — it peaks around 4 months and usually settles by 12 months. It is only reflux disease (GERD) when it causes distress, poor weight gain or feeding refusal.',ar:'ترجيع الحليب أمر طبيعي وشائع لدى الرضّع الأصحاء — يبلغ ذروته نحو الشهر الرابع ويهدأ عادة بعمر سنة. يُعدّ مرض ارتجاع فقط عندما يسبب انزعاجًا أو ضعف وزن أو رفض رضاعة.'},
+ signs:{en:'Frequent effortless spit-up in a thriving, content baby. Signs that need review: arching/crying with feeds, feed refusal, poor weight gain, persistent cough.',ar:'ترجيع متكرر بلا جهد لدى رضيع ينمو ومرتاح. علامات تستدعي المراجعة: تقوّس/بكاء مع الرضاعة، رفض الرضاعة، ضعف الوزن، سعال مستمر.'},
+ triggers:{en:'Immature valve at the top of the stomach, large or fast feeds, lying flat. In older children: overweight, large late meals, certain foods.',ar:'عدم نضج الصمّام أعلى المعدة، رضعات كبيرة أو سريعة، الاستلقاء. لدى الأكبر سنًا: زيادة الوزن، وجبات كبيرة متأخرة، بعض الأطعمة.'},
+ mgmt:{en:'For simple spit-up: reassurance, smaller more frequent feeds, holding upright after feeds (babies still sleep on their back). Acid medicines are only for diagnosed GERD, under a clinician — not for happy spitters.',ar:'للترجيع البسيط: الطمأنة، رضعات أصغر وأكثر، حمل الطفل منتصبًا بعد الرضاعة (ينام على ظهره). أدوية الحموضة فقط لمرض الارتجاع المُشخَّص وبإشراف طبيب.'},
+ redflags:{en:'Green or blood-stained vomit, forceful/projectile vomiting, poor weight gain, choking or breathing pauses, or onset after 6 months / lasting past 12–18 months.',ar:'قيء أخضر أو مدمّى، قيء نافوري قوي، ضعف الوزن، اختناق أو توقف تنفّس، أو بدء بعد ٦ أشهر / استمرار بعد ١٢–١٨ شهرًا.'}},
+{key:'colic',cat:'functional',pick:true,name:{en:'Colic',ar:'المغص'},
+ whatis:{en:'Long bouts of crying and fussing in an otherwise healthy, well-fed baby under about 5 months, with no illness found. It is self-limited and eases by 3–4 months.',ar:'نوبات بكاء وتضايق طويلة لدى رضيع سليم جيّد التغذية دون ٥ أشهر، دون مرض. حالة محدودة ذاتيًا تخفّ بعمر ٣–٤ أشهر.'},
+ signs:{en:'Intense hard-to-soothe crying (often evening), clenched fists, drawn-up legs, red face — yet the baby feeds and grows well between bouts.',ar:'بكاء شديد يصعب تهدئته (غالبًا مساءً)، قبضتان مشدودتان، ساقان مرفوعتان، وجه محمرّ — لكنه يرضع وينمو جيدًا بين النوبات.'},
+ triggers:{en:'Often none identifiable; overtiredness, overstimulation, normal gut and nervous-system immaturity; sometimes overlaps with cow’s-milk allergy or reflux.',ar:'غالبًا بلا سبب واضح؛ الإرهاق، فرط التنبيه، عدم نضج الجهاز الهضمي والعصبي؛ قد يتداخل مع حساسية حليب البقر أو الارتجاع.'},
+ mgmt:{en:'Reassurance that it passes; soothing (holding, motion, white noise, a dummy); caregivers taking turns and breaks. Some probiotics may help breastfed babies. Medicines rarely help.',ar:'الطمأنة بأنها تزول؛ التهدئة (الحمل، الحركة، الضجيج الأبيض، اللهاية)؛ تناوب مقدّمي الرعاية وأخذ فترات راحة. قد تفيد بعض البروبيوتيك للرضّع الطبيعيين. نادرًا ما تنفع الأدوية.'},
+ redflags:{en:'Fever, poor feeding, vomiting (especially green), blood in stool, poor weight gain, floppiness — or if you ever feel overwhelmed or unsafe.',ar:'حمّى، ضعف رضاعة، قيء (خاصة أخضر)، دم في البراز، ضعف وزن، ارتخاء — أو إذا شعرت بالإرهاق أو الخطر.'}},
+{key:'abdopain',cat:'functional',pick:true,name:{en:'Tummy pain & IBS',ar:'ألم البطن والقولون العصبي'},
+ whatis:{en:'Recurrent belly pain with no structural disease — real pain linked to a sensitive gut–brain connection. Common in school-age children and teens. IBS links the pain to bowel habit.',ar:'ألم بطن متكرر دون مرض بنيوي — ألم حقيقي مرتبط بحساسية محور الأمعاء–الدماغ. شائع لدى أطفال المدارس والمراهقين. القولون العصبي يربط الألم بعادة التبرّز.'},
+ signs:{en:'Recurrent pain around the belly button, sometimes bloating; with IBS the pain eases or worsens with pooping and stool changes.',ar:'ألم متكرر حول السرّة، أحيانًا انتفاخ؛ مع القولون العصبي يتحسّن الألم أو يسوء مع التبرّز وتغيّر البراز.'},
+ triggers:{en:'Stress and anxiety, school pressures, poor sleep, certain foods (excess juice/sorbitol, some high-FODMAP foods), a past gut infection.',ar:'التوتر والقلق، ضغوط المدرسة، قلة النوم، بعض الأطعمة (كثرة العصائر/السوربيتول، أطعمة FODMAP)، عدوى معوية سابقة.'},
+ mgmt:{en:'Reassurance it is real but not dangerous; regular routines, sleep and activity; easing stressors; sometimes dietary changes or talking therapies (CBT, gut-directed hypnotherapy) — discuss with your team.',ar:'الطمأنة بأنه حقيقي لكنه غير خطير؛ روتين منتظم ونوم ونشاط؛ تقليل الضغوط؛ أحيانًا تعديلات غذائية أو علاجات نفسية (CBT، التنويم الموجّه) — ناقشها مع فريقك.'},
+ redflags:{en:'Weight loss, pain that wakes the child at night, blood in stool, persistent vomiting, fever, joint pain/rash, pain far from the belly button, or a family history of IBD/coeliac.',ar:'فقدان وزن، ألم يوقظ الطفل ليلًا، دم في البراز، قيء مستمر، حمّى، ألم مفاصل/طفح، ألم بعيد عن السرّة، أو تاريخ عائلي لالتهاب الأمعاء/الداء الزلاقي.'}},
+{key:'cvs',cat:'functional',pick:false,name:{en:'Cyclic vomiting',ar:'القيء الدوري'},
+ whatis:{en:'Recurring “attacks” of intense nausea and repeated vomiting, with a complete return to normal in between. It is closely linked to migraine.',ar:'نوبات متكررة من الغثيان الشديد والقيء المتكرر، مع عودة كاملة للوضع الطبيعي بينها. ترتبط ارتباطًا وثيقًا بالصداع النصفي.'},
+ signs:{en:'Sudden severe vomiting (often early morning), paleness, lethargy, tummy pain — in a predictable pattern; the child is well between episodes.',ar:'قيء شديد مفاجئ (غالبًا صباحًا باكرًا)، شحوب، خمول، ألم بطن — بنمط متوقّع؛ الطفل بخير بين النوبات.'},
+ triggers:{en:'Excitement or stress, infections, missed sleep, skipped meals/fasting, some foods; a personal or family history of migraine.',ar:'الإثارة أو التوتر، العدوى، قلة النوم، تفويت الوجبات/الصيام، بعض الأطعمة؛ تاريخ شخصي أو عائلي للصداع النصفي.'},
+ mgmt:{en:'Between attacks: regular meals and sleep, avoiding triggers; specialists sometimes discuss preventives. During an attack: rest, hydration and anti-sickness care, sometimes in hospital. All medicines via a specialist.',ar:'بين النوبات: وجبات ونوم منتظم وتجنّب المحفّزات؛ يناقش المختص أحيانًا الوقاية. أثناء النوبة: راحة وترطيب وعلاج للغثيان، أحيانًا بالمستشفى. كل الأدوية عبر المختص.'},
+ redflags:{en:'Green (bilious) vomit, blood in vomit, severe dehydration, severe or one-sided tummy pain, or a first severe episode.',ar:'قيء أخضر (صفراوي)، دم في القيء، جفاف شديد، ألم بطن شديد أو أحادي الجانب، أو أول نوبة شديدة.'}},
+{key:'ibd',cat:'chronic',pick:true,name:{en:'IBD (Crohn’s & colitis)',ar:'التهاب الأمعاء (كرون والتقرحي)'},
+ whatis:{en:'Long-term immune inflammation of the gut. Crohn’s can affect anywhere from mouth to bottom; ulcerative colitis affects the large-bowel lining. It is not caused by anything a parent did.',ar:'التهاب مناعي مزمن للأمعاء. قد يصيب كرون أي مكان من الفم إلى الشرج؛ ويصيب التهاب القولون التقرحي بطانة القولون. لا ينتج عن أي خطأ من الوالدين.'},
+ signs:{en:'Persistent diarrhoea (often bloody in colitis), tummy pain, weight loss, poor growth or delayed puberty, tiredness, mouth ulcers, fevers, sometimes joint/skin/eye symptoms.',ar:'إسهال مستمر (غالبًا مدمّى في التقرحي)، ألم بطن، فقدان وزن، ضعف نمو أو تأخر بلوغ، إرهاق، تقرّحات فم، حمّى، وأحيانًا أعراض مفاصل/جلد/عين.'},
+ triggers:{en:'Genetic tendency plus gut-bacteria and environment. Flares can follow illness, missed medicine or (in some) certain painkillers.',ar:'استعداد وراثي مع بكتيريا الأمعاء والبيئة. قد تلي الانتكاسات مرضًا أو نسيان الدواء أو (لدى البعض) بعض المسكّنات.'},
+ mgmt:{en:'Long-term treatment to reach and keep remission and protect growth — families hear about aminosalicylates, short steroid courses, immune-modulators, exclusive liquid nutrition (often for Crohn’s), and biologics. Adherence, nutrition, bone health and vaccines matter.',ar:'علاج طويل الأمد لبلوغ الهدأة والحفاظ عليها وحماية النمو — يسمع الأهل عن الأمينوساليسيلات، وكورسات ستيرويد قصيرة، ومعدّلات مناعة، والتغذية السائلة الحصرية (غالبًا لكرون)، والبيولوجيّات. الالتزام والتغذية وصحة العظام واللقاحات مهمة.'},
+ redflags:{en:'Heavy rectal bleeding, severe tummy pain or swelling, high fever, persistent vomiting, dehydration, or rapid weight loss.',ar:'نزيف شرجي غزير، ألم أو انتفاخ بطن شديد، حمّى عالية، قيء مستمر، جفاف، أو فقدان وزن سريع.'}},
+{key:'coeliac',cat:'chronic',pick:true,name:{en:'Coeliac disease',ar:'الداء الزلاقي'},
+ whatis:{en:'An immune reaction to gluten (wheat, barley, rye) that damages the small-bowel lining in genetically prone children. It is lifelong and managed by diet.',ar:'تفاعل مناعي مع الغلوتين (القمح والشعير والجاودار) يُتلف بطانة الأمعاء الدقيقة لدى الأطفال المهيّئين وراثيًا. حالة مدى الحياة تُدار بالحمية.'},
+ signs:{en:'Very variable: poor growth, diarrhoea or constipation, tummy pain and bloating, low iron, tiredness, mouth ulcers, delayed puberty — many children have few or no symptoms and are found by screening.',ar:'متغيّرة جدًا: ضعف نمو، إسهال أو إمساك، ألم بطن وانتفاخ، نقص حديد، إرهاق، تقرّحات فم، تأخر بلوغ — كثيرون بلا أعراض تقريبًا ويُكتشفون بالفحص.'},
+ triggers:{en:'Gluten in a genetically susceptible child. Higher risk with a first-degree relative, type-1 diabetes, or certain genetic conditions.',ar:'الغلوتين لدى طفل مهيّأ وراثيًا. الخطر أعلى مع قريب من الدرجة الأولى أو السكري النوع الأول أو بعض الحالات الوراثية.'},
+ mgmt:{en:'A strict lifelong gluten-free diet heals the gut and resolves symptoms — with label-reading, avoiding cross-contact, a dietitian, and monitoring. Testing should be done BEFORE removing gluten so results stay accurate.',ar:'حمية خالية من الغلوتين صارمة مدى الحياة تشفي الأمعاء وتزيل الأعراض — مع قراءة الملصقات وتجنّب التلوّث المتبادل وأخصائي تغذية والمتابعة. يجب الفحص قبل إيقاف الغلوتين ليبقى دقيقًا.'},
+ redflags:{en:'Do not remove gluten before testing. See the team for poor growth, ongoing symptoms, or nutrient deficiencies.',ar:'لا توقف الغلوتين قبل الفحص. راجع الفريق عند ضعف النمو أو استمرار الأعراض أو نقص المغذيات.'}},
+{key:'eoe',cat:'chronic',pick:true,name:{en:'Eosinophilic esophagitis (EoE)',ar:'التهاب المريء اليوزيني'},
+ whatis:{en:'A chronic, allergy-driven inflammation of the food pipe where immune cells build up in response to foods, making it swollen and stiff over time.',ar:'التهاب مزمن للمريء بدافع الحساسية، تتراكم فيه خلايا مناعية استجابةً للأطعمة فيصبح متورّمًا ومتيبّسًا مع الوقت.'},
+ signs:{en:'Babies/toddlers: feeding trouble, food refusal, slow eating, vomiting, poor growth. Older children: trouble swallowing, food sticking, chest/tummy pain, drinking lots with meals, avoiding textures.',ar:'الرضّع/الدارجون: صعوبة تغذية، رفض طعام، أكل بطيء، قيء، ضعف نمو. الأكبر سنًا: صعوبة بلع، انحشار طعام، ألم صدر/بطن، شرب كثير مع الأكل، تجنّب القوام.'},
+ triggers:{en:'Food allergens (often milk, wheat, egg, soy). Strong link with eczema, asthma and hay fever.',ar:'مُحسِّسات غذائية (غالبًا الحليب والقمح والبيض والصويا). ارتباط قوي بالإكزيما والربو وحمى القش.'},
+ mgmt:{en:'Specialist-led “3 Ds”: Drugs (swallowed steroids, acid medicines), Diet (removing trigger foods, or an amino-acid formula) and Dilation of a narrowed pipe in older patients, with endoscopy to monitor.',ar:'"العناصر الثلاثة" بإشراف مختص: الأدوية (ستيرويد يُبلع، أدوية الحموضة)، والحمية (إزالة الأطعمة المحفّزة أو حليب الأحماض الأمينية)، وتوسيع المريء الضيّق لدى الأكبر، مع تنظير للمتابعة.'},
+ redflags:{en:'Food stuck in the throat or chest that will not pass is an emergency. Also persistent vomiting, weight loss, feeding refusal or new swallowing trouble.',ar:'انحشار طعام في الحلق أو الصدر لا يمرّ حالة طارئة. وكذلك قيء مستمر، فقدان وزن، رفض تغذية، أو صعوبة بلع جديدة.'}},
+{key:'allergy',cat:'chronic',pick:true,name:{en:'Food allergy & CMPA',ar:'حساسية الطعام وحساسية حليب البقر'},
+ whatis:{en:'An immune reaction to a food. Fast (IgE) reactions come within minutes and can be severe; delayed (non-IgE) reactions cause gut symptoms over hours–days. Cow’s-milk allergy is the commonest in babies.',ar:'تفاعل مناعي مع طعام. التفاعلات السريعة (IgE) تحدث خلال دقائق وقد تكون شديدة؛ والمتأخرة (غير IgE) تسبب أعراضًا معوية خلال ساعات–أيام. حساسية حليب البقر أكثرها لدى الرضّع.'},
+ signs:{en:'Fast: hives, swelling, vomiting, wheeze, rarely anaphylaxis after eating. Delayed: reflux, vomiting, diarrhoea or constipation, blood/mucus in a well-looking baby’s stool, eczema flares, poor growth.',ar:'سريعة: شرى، تورّم، قيء، أزيز، ونادرًا تأق بعد الأكل. متأخرة: ارتجاع، قيء، إسهال أو إمساك، دم/مخاط في براز رضيع يبدو بخير، اشتداد إكزيما، ضعف نمو.'},
+ triggers:{en:'Common foods: milk, egg, peanut, tree nuts, wheat, soy, fish, shellfish, sesame. A family history of allergy raises risk.',ar:'أطعمة شائعة: الحليب، البيض، الفول السوداني، المكسرات، القمح، الصويا، السمك، المحار، السمسم. التاريخ العائلي يزيد الخطر.'},
+ mgmt:{en:'Avoiding the food under guidance; for milk allergy a special hydrolyzed/amino-acid formula, or a dairy-free trial for breastfeeding mothers. Many children outgrow milk/egg allergy; structured reintroduction (a “milk/egg ladder”) is done WITH the team, never self-started for fast allergies.',ar:'تجنّب الطعام بإرشاد؛ ولحساسية الحليب حليب متحلّل/أحماض أمينية خاص، أو تجربة خالية من الألبان للأم المرضعة. كثيرون يتخطّون حساسية الحليب/البيض؛ وتُجرى إعادة الإدخال المتدرّجة ("سُلّم الحليب/البيض") مع الفريق، ولا تُبدأ ذاتيًا في الحساسية السريعة.'},
+ redflags:{en:'Trouble breathing, swelling of lips/tongue/throat, widespread hives, or floppiness/paleness after a food = possible anaphylaxis — call emergency services. Also blood in stool or poor weight gain.',ar:'صعوبة تنفّس، تورّم الشفتين/اللسان/الحلق، شرى منتشر، أو ارتخاء/شحوب بعد طعام = تأق محتمل — اتصل بالطوارئ. وكذلك دم في البراز أو ضعف نمو.'}},
+{key:'infstool',cat:'infant',pick:false,name:{en:'Normal baby stools',ar:'براز الرضيع الطبيعي'},
+ whatis:{en:'Newborns pass dark sticky meconium for 1–2 days, then green, then yellow. Breastfed babies often have soft, seedy, mustard-yellow stools; formula stools are firmer and tan. Frequency varies hugely and can be normal.',ar:'يخرج المولود العِقْي الأسود اللاصق ١–٢ يومًا، ثم أخضر، ثم أصفر. براز الرضيع الطبيعي غالبًا ليّن مصفرّ محبّب؛ وبراز الحليب الصناعي أكثر تماسكًا وبنيًّا. يتفاوت التكرار كثيرًا وقد يكون طبيعيًا.'},
+ signs:{en:'Wide normal range of colour and frequency — from after every feed to once every few days while soft.',ar:'مدى طبيعي واسع للّون والتكرار — من بعد كل رضعة إلى مرة كل بضعة أيام ما دام ليّنًا.'},
+ triggers:{en:'Diet (breast vs formula, starting solids) naturally changes colour and firmness.',ar:'يغيّر النظام الغذائي (طبيعي/صناعي، بدء الطعام الصلب) اللون والقوام طبيعيًا.'},
+ mgmt:{en:'Mostly reassurance and tracking what is usual for your baby, so changes are easy to spot.',ar:'غالبًا طمأنة ومتابعة المعتاد لطفلك حتى يسهل ملاحظة التغيّرات.'},
+ redflags:{en:'Red (blood), black (after meconium), or pale/white “chalky” stools are not normal and need a doctor.',ar:'البراز الأحمر (دم) أو الأسود (بعد العِقْي) أو الشاحب/الأبيض "الطباشيري" غير طبيعي ويستدعي الطبيب.'}},
+{key:'weaning',cat:'infant',pick:false,name:{en:'Weaning & solids',ar:'الفطام والطعام الصلب'},
+ whatis:{en:'Starting solid foods, usually around 6 months (not before 4 months) when your baby can hold their head steady, sit with support and shows interest in food.',ar:'بدء الأطعمة الصلبة، غالبًا نحو ٦ أشهر (وليس قبل ٤)، عندما يثبّت الطفل رأسه ويجلس بمساعدة ويُبدي اهتمامًا بالطعام.'},
+ signs:{en:'Readiness cues: good head control, sitting with support, bringing things to the mouth, watching you eat.',ar:'علامات الجاهزية: تحكّم جيّد بالرأس، الجلوس بمساعدة، إدخال الأشياء للفم، مراقبتك تأكل.'},
+ triggers:{en:'Start smooth then lumpy textures and finger foods; offer iron-rich foods; keep milk feeds alongside.',ar:'ابدأ بقوام ناعم ثم مكتّل وأطعمة تُمسك باليد؛ قدّم أطعمة غنية بالحديد؛ واستمر برضعات الحليب.'},
+ mgmt:{en:'Common allergens (well-cooked egg, smooth peanut in safe forms) can be introduced from ~6 months one at a time — delaying them does not prevent allergy. Log any reaction.',ar:'يمكن إدخال المُحسِّسات الشائعة (بيض مطهو جيدًا، فول سوداني ناعم بشكل آمن) من ~٦ أشهر واحدًا تلو الآخر — تأخيرها لا يمنع الحساسية. سجّل أي تفاعل.'},
+ redflags:{en:'Choking (different from gagging), an allergic reaction, ongoing refusal or poor weight gain — speak to your team.',ar:'الاختناق (يختلف عن الغثيان)، تفاعل تحسّسي، رفض مستمر أو ضعف نمو — راجع فريقك.'}},
+{key:'growth',cat:'infant',pick:false,name:{en:'Weight gain & growth',ar:'زيادة الوزن والنمو'},
+ whatis:{en:'Growth is followed over time on charts rather than by a single weight. “Faltering growth” means weight or weight-for-length is tracking below expected or crossing down over weeks.',ar:'يُتابع النمو عبر الزمن على المخططات لا بوزن واحد. "تعثّر النمو" يعني أن الوزن أو الوزن مقابل الطول أدنى من المتوقع أو يعبر لأسفل خلال أسابيع.'},
+ signs:{en:'Slow weight gain, clothes fitting for a long time, feeding difficulty or refusal, low energy.',ar:'زيادة وزن بطيئة، بقاء الملابس مناسبة طويلًا، صعوبة أو رفض تغذية، قلة طاقة.'},
+ triggers:{en:'Most often not enough intake; sometimes poor absorption or higher needs from an illness.',ar:'غالبًا قلة المدخول؛ أحيانًا سوء امتصاص أو زيادة الحاجة بسبب مرض.'},
+ mgmt:{en:'A feeding assessment, boosting calories and nutrients, treating any cause, and dietitian support — always interpreted on growth charts by your team.',ar:'تقييم التغذية، وزيادة السعرات والمغذيات، وعلاج أي سبب، ودعم أخصائي التغذية — ويُفسَّر دائمًا على مخططات النمو عبر فريقك.'},
+ redflags:{en:'Weight crossing down two major chart lines, feeding refusal, vomiting/diarrhoea, or developmental concerns.',ar:'عبور الوزن خطّين رئيسيّين لأسفل، رفض تغذية، قيء/إسهال، أو مخاوف تطوّرية.'}}
+];
+function condsFor(cat){return CONDITIONS.filter(c=>c.cat===cat);}
+
+/* ============ TODAY ============ */
+route('today',(n)=>{
+  const c=activeChild();if(!c){n.innerHTML=emptyState();return;}
+  const tl=childLogs(c.id).filter(l=>l.t.slice(0,10)===dayKey());
+  const hour=new Date().getHours();const greet=hour<12?{en:'Good morning',ar:'صباح الخير'}:hour<18?{en:'Good afternoon',ar:'مساء الخير'}:{en:'Good evening',ar:'مساء الخير'};
+  const dueMeds=S.meds.filter(m=>m.childId===c.id);
+  n.innerHTML=
+    childBar(c)+
+    card(`<div class="row between"><div><div class="muted sm">${L(greet)}</div><h2 style="margin-top:2px">${c.name?c.name:(isAr()?'طفلك':'Your little one')}</h2><div class="muted sm">${ageLabel(c)} ${c.conditions&&c.conditions.length?'· '+c.conditions.map(k=>L((CONDITIONS.find(x=>x.key===k)||{}).name)).filter(Boolean).slice(0,2).join('، '):''}</div></div><div style="text-align:center"><div style="font-size:30px;font-weight:800;color:var(--accent)">${tl.length}</div><div class="xs muted">${t('entriesToday')}</div></div></div>`,'hero')+
+    card(`<h3 style="margin-bottom:10px">${t('addToday')}</h3><div class="grid2">${quickBtns(c)}</div>`)+
+    (dueMeds.length?card(`<h3 style="margin-bottom:8px">${isAr()?'أدوية مسجّلة':'Saved medicines'}</h3>`+dueMeds.map(m=>`<div class="row between" style="padding:6px 0"><span>💊 ${m.name}${m.dose?` · <span class="muted sm">${m.dose}</span>`:''}</span><button class="chip on" onclick="quickMedTaken('${m.id}')">${t('taken')} ✓</button></div>`).join('')):'')+
+    card(`<div class="row between" style="margin-bottom:10px"><b>${t('tools')}</b><a class="link" onclick="go('tools')">${isAr()?'الكل':'All'} →</a></div><div class="grid2"><button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:13px 6px" onclick="go('gchart')"><span style="font-size:22px">📈</span><span class="sm">${t('growthCharts')}</span></button><button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:13px 6px" onclick="go('milestones')"><span style="font-size:22px">⭐</span><span class="sm">${t('milestones')}</span></button></div>`)+
+    card(`<div class="row between"><b>${t('recent')}</b><a class="link" onclick="navTab('diary')">${isAr()?'الكل':'All'} →</a></div>`+recentList(c,4))+
+    safetyCard(true)+
+    `<p class="disc">${t('disc')}</p>`;
+});
+function emptyState(){return card(`<div style="text-align:center;padding:20px 6px">
+  <div style="font-size:40px">👶</div><h3 style="margin:8px 0">${t('noChild')}</h3>
+  <button class="btn btn-primary" style="margin-top:10px" onclick="go('editChild')">${t('addChild')}</button></div>`);}
+function childBar(c){if(S.children.length<=1)return '';
+  return `<div class="row wrap" style="margin-bottom:12px;gap:8px">`+S.children.map(k=>`<button class="chip ${k.id===c.id?'on':''}" onclick="setActive('${k.id}')">${k.name||'👶'} · ${ageLabel(k)}</button>`).join('')+`</div>`;}
+function setActive(id){S.activeChildId=id;save();render();}
+function quickBtns(c){const inf=isInfant(c);
+  const b=[['stool','💩',t('logstool')],[inf?'feed':'sym','🍼',inf?t('logfeed'):t('logsym')],['vomit','🤢',t('logvomit')],['growth','📏',t('loggrowth')]];
+  if(!inf)b[1]=['sym','🩹',t('logsym')];
+  return b.map(([k,e,l])=>`<button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:14px 6px" onclick="logSheet('${k}')"><span style="font-size:24px">${e}</span><span style="font-size:13px">${l}</span></button>`).join('');}
+function recentList(c,lim){const ls=childLogs(c.id).slice().reverse().slice(0,lim||6);
+  if(!ls.length)return `<div class="muted sm" style="padding:10px 0">${t('none')}</div>`;
+  return ls.map(l=>{const m=logMeta(l);return `<div class="list-i"><span class="dot" style="background:${m.color}"></span><div style="flex:1"><div style="font-weight:700">${m.title}</div><div class="muted xs">${m.sub}</div></div><div class="muted xs">${timeAgo(l.t)}</div></div>`;}).join('');}
+function timeAgo(iso){const d=(Date.now()-new Date(iso))/6e4;if(d<60)return isAr()?`قبل ${Math.max(1,Math.round(d))} د`:`${Math.max(1,Math.round(d))}m ago`;
+  const h=d/60;if(h<24)return isAr()?`قبل ${Math.round(h)} س`:`${Math.round(h)}h ago`;const dd=Math.round(h/24);return isAr()?`قبل ${dd} ي`:`${dd}d ago`;}
+
+/* ============ DIARY ============ */
+route('diary',(n)=>{const c=activeChild();if(!c){n.innerHTML=emptyState();return;}
+  n.innerHTML=childBar(c)+topbar(t('diary'),c.name?`${c.name} · ${ageLabel(c)}`:ageLabel(c))+
+  card(`<h3 style="margin-bottom:10px">${t('quicklog')}</h3><div class="grid2">${quickBtns(c)}<button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:14px 6px" onclick="logSheet('med')"><span style="font-size:24px">💊</span><span style="font-size:13px">${t('logmed')}</span></button><button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:14px 6px" onclick="go('checkin')"><span style="font-size:24px">📝</span><span style="font-size:13px">${t('checkin')}</span></button></div>`)+
+  card(`<b>${t('recent')}</b>`+recentList(c,40))+
+  `<p class="disc">${t('discShort')}</p>`;
+});
+
+/* ============ LOG SHEETS ============ */
+function logSheet(kind){const c=activeChild();if(!c)return;const inf=isInfant(c);
+  let body='',title='';
+  if(kind==='stool'){title=inf?t('infantStool'):t('bristol');
+    if(inf){body=`<label class="fld">${t('consistency')}</label>${optGroup('st_c',[{v:'watery',em:'💧',label:isAr()?'مائي':'Watery'},{v:'soft',em:'🟡',label:isAr()?'ليّن':'Soft'},{v:'formed',em:'🟤',label:isAr()?'متماسك':'Formed'},{v:'hard',em:'🟫',label:isAr()?'صلب':'Hard'}])}
+      <label class="fld">${t('color')}</label>${optGroup('st_col',[{v:'yellow',em:'🟡',label:isAr()?'أصفر':'Yellow'},{v:'green',em:'🟢',label:isAr()?'أخضر':'Green'},{v:'brown',em:'🟤',label:isAr()?'بنّي':'Brown'},{v:'black',em:'⚫',label:isAr()?'أسود':'Black'},{v:'red',em:'🔴',label:isAr()?'أحمر':'Red-tinged'},{v:'pale',em:'⚪',label:isAr()?'شاحب/أبيض':'Pale/white'}])}`;
+    }else{const BR=[[1,'🪨',{en:'Hard pebbles',ar:'حصى صلبة'}],[2,'🥔',{en:'Lumpy log',ar:'قالب متكتّل'}],[3,'🌭',{en:'Cracked sausage',ar:'نقانق متشقّقة'}],[4,'🐍',{en:'Smooth & soft (ideal)',ar:'ناعم وليّن (مثالي)'}],[5,'🫧',{en:'Soft blobs',ar:'كتل ليّنة'}],[6,'🌫️',{en:'Mushy',ar:'مهروس'}],[7,'💧',{en:'All liquid',ar:'سائل'}]];
+      body=`<label class="fld">${t('bristol')}</label>`+optGroup('st_b',BR.map(([v,e,l])=>({v:String(v),em:e,label:`${isAr()?'نوع':'Type'} ${v} · ${L(l)}`})));}
+    body+=`<div class="grid2" style="margin-top:6px"><div><label class="fld">${t('blood')}</label>${yesno('st_blood')}</div><div><label class="fld">${t('mucus')}</label>${yesno('st_mucus')}</div></div>`;
+    if(!inf)body+=`<label class="fld">${t('pain')}</label>${yesno('st_pain')}`;
+    body+=noteField('st_note')+saveBtn(`saveStool('${kind}')`);
+  }
+  else if(kind==='feed'){title=t('logfeed');
+    body=`<label class="fld">${t('feedType')}</label>${optGroup('fd_t',[{v:'breast',em:'🤱',label:t('breast')},{v:'formula',em:'🍼',label:t('formula')},{v:'solids',em:'🥣',label:t('solids')},{v:'drink',em:'🥤',label:t('drink')}])}
+    <div id="fd_extra"></div>
+    <label class="fld">${isAr()?'ماذا / كم (اختياري)':'What / how much (optional)'}</label><input id="fd_amt" placeholder="${isAr()?'مثال: ١٢٠ مل، أرز وعدس':'e.g. 120ml, rice & lentils'}">
+    <label class="row" style="gap:8px;margin-top:12px;font-weight:700"><input type="checkbox" id="fd_allerg" style="width:auto" onchange="document.getElementById('fd_ab').style.display=this.checked?'block':'none'"> ${t('newAllergen')}</label>
+    <div id="fd_ab" style="display:none"><input id="fd_allergName" placeholder="${isAr()?'اسم الطعام + أي تفاعل':'Food + any reaction'}" style="margin-top:6px"></div>
+    <label class="fld">${isAr()?'أطعمة رئيسية (لمحلّل المحفّزات)':'Key foods (for trigger finder)'}</label>${chipsRow('fd_foods',TRIGGER_FOODS.map(f=>({v:f.key,label:L(f.name)})))}
+    ${noteField('fd_note')}${saveBtn("saveFeed()")}`;
+  }
+  else if(kind==='sym'){title=t('logsym');
+    body=`<label class="fld">${t('symType')}</label>${chipsRow('sy_t',[{v:'pain',label:isAr()?'ألم بطن':'Tummy pain'},{v:'bloat',label:isAr()?'انتفاخ':'Bloating'},{v:'nausea',label:isAr()?'غثيان':'Nausea'},{v:'reflux',label:isAr()?'ارتجاع':'Reflux'},{v:'appetite',label:isAr()?'قلة شهية':'Low appetite'},{v:'gas',label:isAr()?'غازات':'Gas'},{v:'swallow',label:isAr()?'صعوبة بلع':'Trouble swallowing'},{v:'fatigue',label:isAr()?'إرهاق':'Tired'}])}
+    <label class="fld">${t('painLevel')}</label>${faces('sy_pain')}
+    ${noteField('sy_note')}${saveBtn("saveSym()")}`;
+  }
+  else if(kind==='vomit'){title=t('logvomit');
+    body=`<label class="fld">${t('vomColor')}</label>${optGroup('vo_c',[{v:'clear',em:'💧',label:t('clear')},{v:'yellow',em:'🟡',label:t('yellow')},{v:'green',em:'🟢',label:t('green')},{v:'bloody',em:'🔴',label:t('bloody')}])}
+    <label class="fld">${isAr()?'قوة القيء':'How forceful'}</label>${optGroup('vo_f',[{v:'spit',label:isAr()?'ترجيع بسيط':'Small spit-up'},{v:'moderate',label:isAr()?'متوسط':'Moderate'},{v:'forceful',label:t('forceful')}])}
+    ${noteField('vo_note')}${saveBtn("saveVomit()")}`;
+  }
+  else if(kind==='med'){title=t('logmed');
+    body=`<label class="fld">${t('medName')}</label>${medPicker()}
+    <input id="md_name" placeholder="${isAr()?'أو اكتب الاسم':'or type a name'}" style="margin-top:6px">
+    <label class="fld">${t('dose')}</label><input id="md_dose" placeholder="${isAr()?'كما وصفها الطبيب':'as your doctor prescribed'}">
+    <label class="fld">${isAr()?'الحالة':'Status'}</label><div class="seg" data-grp="md_s"><button data-v="taken" class="on" onclick="pickOpt('md_s','taken')">${t('taken')}</button><button data-v="missed" onclick="pickOpt('md_s','missed')">${t('missed')}</button></div>
+    <label class="row" style="gap:8px;margin-top:10px;font-weight:700"><input type="checkbox" id="md_keep" style="width:auto" checked> ${isAr()?'احفظه للتذكير':'Keep for reminders'}</label>
+    ${saveBtn("saveMed()")}`;
+  }
+  else if(kind==='growth'){title=t('loggrowth');
+    body=`<div class="grid2"><div><label class="fld">${t('weight')}</label><input id="gr_w" type="number" step="0.01" inputmode="decimal"></div><div><label class="fld">${t('height')}</label><input id="gr_h" type="number" step="0.1" inputmode="decimal"></div></div>
+    ${inf?`<label class="fld">${t('head')}</label><input id="gr_hc" type="number" step="0.1" inputmode="decimal">`:''}
+    <div class="alert warn" style="margin-top:12px"><span class="sm">${t('growthNote')}</span></div>${saveBtn("saveGrowth()")}`;
+  }
+  else if(kind==='sleep'){title=t('logsleep');
+    body=`<div id="tmr_sleep" class="tmrbox">${timerUI('sleep')}</div>
+    <label class="fld">${isAr()?'أو أدخل المدة (دقائق)':'Or enter duration (minutes)'}</label><input id="sl_min" type="number" inputmode="numeric" placeholder="${t('minutes')}">
+    ${noteField('sl_note')}${saveBtn("saveSleep()")}`;
+  }
+  else if(kind==='nurse'){title=t('lognurse');
+    body=`<label class="fld">${isAr()?'الجانب':'Side'}</label>${optGroup('nu_s',[{v:'L',em:'⬅️',label:isAr()?'يسار':'Left'},{v:'R',em:'➡️',label:isAr()?'يمين':'Right'},{v:'both',em:'🤱',label:isAr()?'كلاهما':'Both'}])}
+    <div id="tmr_nurse" class="tmrbox">${timerUI('nurse')}</div>
+    <label class="fld">${isAr()?'أو المدة (دقائق)':'Or duration (minutes)'}</label><input id="nu_min" type="number" inputmode="numeric" placeholder="${t('minutes')}">
+    ${saveBtn("saveNurse()")}`;
+  }
+  else if(kind==='pump'){title=t('logpump');
+    body=`<label class="fld">${isAr()?'الكمية (مل)':'Amount (mL)'}</label><input id="pu_ml" type="number" inputmode="numeric" placeholder="mL">
+    <label class="fld">${isAr()?'الجانب':'Side'}</label>${optGroup('pu_s',[{v:'L',label:isAr()?'يسار':'Left'},{v:'R',label:isAr()?'يمين':'Right'},{v:'both',label:isAr()?'كلاهما':'Both'}])}
+    ${noteField('pu_note')}${saveBtn("savePump()")}`;
+  }
+  else if(kind==='teeth'){title=t('logteeth');
+    body=`<label class="fld">${isAr()?'ما الذي تلاحظه؟':'What are you noticing?'}</label>${chipsRow('te_s',[{v:'newtooth',label:isAr()?'سن جديد':'New tooth'},{v:'drool',label:isAr()?'سيلان لعاب':'Drooling'},{v:'irritable',label:isAr()?'تهيّج':'Irritable'},{v:'gums',label:isAr()?'لثة منتفخة':'Swollen gums'},{v:'sleep',label:isAr()?'نوم مضطرب':'Poor sleep'},{v:'chewing',label:isAr()?'عضّ':'Chewing'}])}
+    ${noteField('te_note')}${saveBtn("saveTeeth()")}`;
+  }
+  openSheet(`<h3 style="margin-bottom:4px">${title}</h3><div class="muted xs" style="margin-bottom:10px">${c.name||''} · ${ageLabel(c)}</div>${body}`);
+}
+/* live timer used by sleep & nursing */
+const TIMERS={};
+function timerUI(key){return `<button class="btn btn-soft" id="tb_${key}" onclick="toggleTimer('${key}')">${t('start')} ⏱</button><div id="tt_${key}" class="muted sm" style="text-align:center;margin-top:6px"></div>`;}
+function toggleTimer(key){const btn=document.getElementById('tb_'+key),out=document.getElementById('tt_'+key);
+  if(TIMERS[key]){clearInterval(TIMERS[key].iv);const mins=Math.max(1,Math.round((Date.now()-TIMERS[key].start)/6e4));
+    const inp=document.getElementById(key==='sleep'?'sl_min':'nu_min');if(inp)inp.value=mins;TIMERS[key]=null;btn.textContent=t('start')+' ⏱';btn.classList.remove('on');out.textContent=mins+' '+t('minutes');return;}
+  TIMERS[key]={start:Date.now(),iv:setInterval(()=>{const s=Math.round((Date.now()-TIMERS[key].start)/1000);out.textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');},1000)};
+  btn.textContent=t('stop')+' ⏱';btn.classList.add('on');}
+function saveSleep(){const m=+val('sl_min');if(!m){toast(t('pickNum'));return;}addLog({type:'sleep',mins:m,note:val('sl_note')});afterSave();}
+function saveNurse(){const m=+val('nu_min');addLog({type:'nurse',side:grpVal('nu_s'),mins:m||null});afterSave();}
+function savePump(){const ml=+val('pu_ml');if(!ml){toast(t('pickNum'));return;}addLog({type:'pump',ml,side:grpVal('pu_s'),note:val('pu_note')});afterSave();}
+function saveTeeth(){addLog({type:'teeth',signs:chipVals('te_s'),note:val('te_note')});afterSave();}
+function yesno(id){return `<div class="seg" data-grp="${id}"><button data-v="no" class="on" onclick="pickOpt('${id}','no')">${t('no')}</button><button data-v="yes" onclick="pickOpt('${id}','yes')">${t('yes')}</button></div>`;}
+function noteField(id){return `<label class="fld">${t('note')}</label><textarea id="${id}" rows="2" placeholder="${isAr()?'أي تفاصيل لمشاركتها مع الطبيب':'anything to share with your doctor'}"></textarea>`;}
+function saveBtn(fn){return `<button class="btn btn-primary" style="margin-top:16px" onclick="${fn}">${t('save')}</button>`;}
+function medPicker(){const meds=[['PEG / laxative',{en:'Laxative (PEG)',ar:'مليّن (PEG)'}],['PPI',{en:'Acid medicine (PPI)',ar:'دواء حموضة (PPI)'}],['Iron',{en:'Iron',ar:'حديد'}],['Vitamin D',{en:'Vitamin D',ar:'فيتامين د'}],['Probiotic',{en:'Probiotic',ar:'بروبيوتيك'}],['Biologic',{en:'Biologic (IBD)',ar:'بيولوجي (IBD)'}],['Antihistamine',{en:'Antihistamine',ar:'مضاد هيستامين'}]];
+  return chipsRow('md_pick',meds.map(([v,l])=>({v,label:L(l)}))).replace('data-chips="md_pick"','data-chips="md_pick"');}
+function addLog(o){o.id=rid();o.t=nowISO();o.childId=activeChild().id;S.logs.push(o);save();}
+function afterSave(){closeSheet();toast(t('saved'));render();}
+function saveStool(){const inf=isInfant(activeChild());const o={type:'stool',infant:inf,
+  blood:grpVal('st_blood'),mucus:grpVal('st_mucus'),pain:grpVal('st_pain'),note:val('st_note')};
+  if(inf){o.consist=grpVal('st_c');o.color=grpVal('st_col');}else{o.bristol=grpVal('st_b');}
+  addLog(o);afterSave();}
+function saveFeed(){addLog({type:'feed',feed:grpVal('fd_t'),amt:val('fd_amt'),foods:chipVals('fd_foods'),
+  allergen:document.getElementById('fd_allerg').checked?val('fd_allergName'):'',note:val('fd_note')});afterSave();}
+function saveSym(){addLog({type:'sym',syms:chipVals('sy_t'),pain:scaleVal('sy_pain'),note:val('sy_note')});afterSave();}
+function saveVomit(){const col=grpVal('vo_c');addLog({type:'vomit',color:col,force:grpVal('vo_f'),note:val('vo_note')});
+  closeSheet();if(col==='green'||col==='bloody'){setTimeout(()=>alert(t('urgentFlag')),50);}toast(t('saved'));render();}
+function saveMed(){const name=(chipVals('md_pick')[0]||'')||val('md_name');if(!name){toast(t('pickNum'));return;}
+  const dose=val('md_dose'),status=grpVal('md_s')||'taken';
+  addLog({type:'med',name,dose,status});
+  if(document.getElementById('md_keep').checked&&!S.meds.find(m=>m.childId===activeChild().id&&m.name===name)){S.meds.push({id:rid(),childId:activeChild().id,name,dose});}
+  save();afterSave();}
+function saveGrowth(){const w=val('gr_w'),h=val('gr_h'),hc=val('gr_hc');if(!w&&!h&&!hc){toast(t('pickNum'));return;}
+  addLog({type:'growth',w,h,hc});afterSave();}
+function quickMedTaken(mid){const m=S.meds.find(x=>x.id===mid);if(!m)return;addLog({type:'med',name:m.name,dose:m.dose,status:'taken'});toast(t('saved'));}
+function val(id){const e=document.getElementById(id);return e?(e.value||'').trim():'';}
+function logMeta(l){const inf=l.infant;
+  if(l.type==='stool'){const desc=inf?[l.consist,l.color].filter(Boolean).join(' · '):(l.bristol?`${isAr()?'نوع':'Type'} ${l.bristol}`:'');
+    const flag=(l.blood==='yes'||l.color==='red'||l.color==='black'||l.color==='pale');
+    return{title:`💩 ${isAr()?'براز':'Stool'}`,sub:desc+(l.blood==='yes'?` · ${isAr()?'دم':'blood'}`:''),color:flag?'var(--danger)':'var(--leaf)'};}
+  if(l.type==='feed')return{title:`🍼 ${L({en:{breast:'Breastfed',formula:'Formula',solids:'Solids',drink:'Drink'}[l.feed]||'Feed',ar:{breast:'رضاعة',formula:'حليب صناعي',solids:'طعام صلب',drink:'شراب'}[l.feed]||'رضعة'})}`,sub:(l.amt||'')+(l.allergen?` · ⚠︎ ${l.allergen}`:''),color:'var(--sky)'};
+  if(l.type==='sym'){const names={pain:{en:'pain',ar:'ألم'},bloat:{en:'bloating',ar:'انتفاخ'},nausea:{en:'nausea',ar:'غثيان'},reflux:{en:'reflux',ar:'ارتجاع'},appetite:{en:'low appetite',ar:'قلة شهية'},gas:{en:'gas',ar:'غازات'},swallow:{en:'swallowing',ar:'بلع'},fatigue:{en:'tired',ar:'إرهاق'}};
+    return{title:`🩹 ${isAr()?'أعراض':'Symptom'}`,sub:(l.syms||[]).map(s=>L(names[s])).join('، ')+(l.pain!=null?` · ${isAr()?'ألم':'pain'} ${l.pain}/10`:''),color:'var(--warn)'};}
+  if(l.type==='vomit'){const flag=(l.color==='green'||l.color==='bloody');return{title:`🤢 ${isAr()?'قيء':'Vomit'}`,sub:L({en:{clear:'clear',yellow:'yellow',green:'green (bilious)',bloody:'bloody'}[l.color]||'',ar:{clear:'صافٍ',yellow:'أصفر',green:'أخضر',bloody:'دموي'}[l.color]||''}),color:flag?'var(--danger)':'var(--warn)'};}
+  if(l.type==='med')return{title:`💊 ${l.name}`,sub:(l.dose||'')+' · '+(l.status==='missed'?t('missed'):t('taken')),color:l.status==='missed'?'var(--warn)':'var(--good)'};
+  if(l.type==='growth')return{title:`📏 ${isAr()?'النمو':'Growth'}`,sub:[l.w?`${l.w}kg`:'',l.h?`${l.h}cm`:'',l.hc?`HC ${l.hc}`:''].filter(Boolean).join(' · '),color:'var(--disk)'};
+  if(l.type==='water')return{title:`💧 ${isAr()?'شراب':'Drink'}`,sub:`${l.ml} ${isAr()?'مل':'mL'}`,color:'var(--sky)'};
+  if(l.type==='supp')return{title:`🧴 ${l.name}`,sub:isAr()?'أُخذ':'taken',color:'var(--good)'};
+  if(l.type==='sleep')return{title:`😴 ${isAr()?'نوم':'Sleep'}`,sub:`${l.mins} ${isAr()?'دقيقة':'min'}`,color:'var(--disk)'};
+  if(l.type==='nurse')return{title:`🤱 ${isAr()?'رضاعة':'Nursing'}`,sub:[{L:isAr()?'يسار':'Left',R:isAr()?'يمين':'Right',both:isAr()?'كلاهما':'Both'}[l.side]||'',l.mins?l.mins+(isAr()?' د':'m'):''].filter(Boolean).join(' · '),color:'var(--sky)'};
+  if(l.type==='pump')return{title:`🍼 ${isAr()?'شفط':'Pumping'}`,sub:`${l.ml} ${isAr()?'مل':'mL'}`,color:'var(--sky)'};
+  if(l.type==='teeth')return{title:`🦷 ${isAr()?'تسنين':'Teething'}`,sub:(l.signs||[]).length+(isAr()?' علامات':' signs'),color:'var(--warn)'};
+  return{title:l.type,sub:'',color:'var(--muted)'};}
+
+/* ============ QUICK LOG (FAB) ============ */
+function openQuickLog(){const c=activeChild();if(!c){go('editChild');return;}const inf=isInfant(c);
+  const opts=[['stool','💩',t('logstool')],['feed','🍼',t('logfeed')],['sym','🩹',t('logsym')],['vomit','🤢',t('logvomit')],['med','💊',t('logmed')],['growth','📏',t('loggrowth')]];
+  if(inf)opts.push(['sleep','😴',t('logsleep')],['nurse','🤱',t('lognurse')],['pump','🍼',t('logpump')],['teeth','🦷',t('logteeth')]);
+  openSheet(`<h3 style="margin-bottom:10px">${t('quicklog')} · ${c.name||ageLabel(c)}</h3><div class="grid2">`+
+    opts.map(([k,e,l])=>`<button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:16px 6px" onclick="logSheet('${k}')"><span style="font-size:26px">${e}</span><span>${l}</span></button>`).join('')+`</div>`);
+}
+
+/* ============ LIBRARY ============ */
+route('library',(n)=>{
+  const cats=[['functional',t('catFunctional')],['chronic',t('catChronic')],['infant',t('catInfant')]];
+  n.innerHTML=topbar(t('library'),isAr()?'محتوى تثقيفي موثوق للوالدين':'Trusted, plain-language guides for parents')+
+    cats.map(([cat,label])=>card(`<h3 style="margin-bottom:10px">${label}</h3>`+condsFor(cat).map(c=>libRow(c)).join(''))).join('')+
+    card(`<h3 style="margin-bottom:8px">${isAr()?'مواضيع أخرى':'More topics'}</h3>
+      ${libLink('feeding','🥣',t('feeding'))}${libLink('saudi','🌙',t('saudi'))}${libLink('teen','🧑‍🎓',t('teen'))}${libLink('safety','⚠︎',t('seekcare'))}`)+
+    `<p class="disc">${t('disc')}</p>`;
+});
+function libRow(c){return `<button class="opt" onclick="go('cond',{key:'${c.key}'})"><span style="flex:1">${L(c.name)}</span><span class="muted">${isAr()?'‹':'›'}</span></button>`;}
+function libLink(route,em,label){return `<button class="opt" onclick="go('${route}')"><span class="em">${em}</span><span style="flex:1">${label}</span><span class="muted">${isAr()?'‹':'›'}</span></button>`;}
+route('cond',(n)=>{const c=CONDITIONS.find(x=>x.key===(CURRENT_OPTS&&CURRENT_OPTS.key));if(!c){navTab('library');return;}
+  const sec=(icon,label,body,danger)=>`<div class="card" ${danger?'style="border-color:color-mix(in srgb,var(--danger) 35%,var(--line))"':''}><h3 style="margin-bottom:6px">${icon} ${label}</h3><div>${body}</div></div>`;
+  n.innerHTML=backbar(L(c.name))+
+    sec('📖',t('whatis'),L(c.whatis))+
+    sec('👀',t('signs'),L(c.signs))+
+    sec('🔎',t('triggers'),L(c.triggers))+
+    sec('💬',t('mgmt'),L(c.mgmt))+
+    sec('🚑',t('redflags'),L(c.redflags),true)+
+    card(`<div class="row between"><button class="btn btn-soft" onclick="go('safety')">⚠︎ ${t('seekcare')}</button></div>`)+
+    `<p class="disc">${t('disc')}</p>`;
+});
+
+/* ---- FEEDING & WEANING ---- */
+route('feeding',(n)=>{
+  const rows=[
+   [{en:'0–6 months',ar:'٠–٦ أشهر'},{en:'Breastmilk or formula only.',ar:'حليب الأم أو الصناعي فقط.'}],
+   [{en:'~6 months',ar:'~٦ أشهر'},{en:'Start smooth purées when ready (not before 4 months). Offer iron-rich foods; keep milk feeds.',ar:'ابدأ بالمهروس الناعم عند الجاهزية (وليس قبل ٤ أشهر). قدّم أطعمة غنية بالحديد؛ واستمر بالحليب.'}],
+   [{en:'Allergens',ar:'المُحسِّسات'},{en:'Introduce well-cooked egg and smooth peanut (safe forms) from ~6 months, one at a time. Delaying does not prevent allergy.',ar:'أدخل البيض المطهو جيدًا والفول السوداني الناعم (بشكل آمن) من ~٦ أشهر واحدًا تلو الآخر. التأخير لا يمنع الحساسية.'}],
+   [{en:'7–9 months',ar:'٧–٩ أشهر'},{en:'Mashed and lumpy textures, finger foods, more variety.',ar:'قوام مهروس ومكتّل، أطعمة تُمسك باليد، تنويع أكثر.'}],
+   [{en:'12 months+',ar:'١٢ شهرًا+'},{en:'Family foods; whole cow’s milk as a main drink can start at ~12 months.',ar:'طعام العائلة؛ يمكن بدء حليب البقر كامل الدسم كمشروب رئيسي نحو ١٢ شهرًا.'}]
+  ];
+  n.innerHTML=backbar(t('feeding'))+
+    card(`<h3 style="margin-bottom:8px">${isAr()?'خط زمني للفطام':'Weaning timeline'}</h3>`+rows.map(([a,b])=>`<div class="list-i"><b style="min-width:96px">${L(a)}</b><span class="sm">${L(b)}</span></div>`).join(''))+
+    card(`<h3 style="margin-bottom:6px">${isAr()?'ألياف للإمساك':'Fibre for constipation'}</h3><p class="sm">${isAr()?'زد الفواكه والخضار والحبوب الكاملة والبقول تدريجيًا مع سوائل كافية وروتين حمام منتظم. الإمساك الشديد غالبًا يحتاج ملينات بإشراف الطبيب لا الألياف وحدها.':'Gradually add fruit, vegetables, whole grains and legumes with enough fluids and a regular toilet routine. Severe constipation usually needs clinician-guided laxatives, not fibre alone.'}</p>`)+
+    card(`<h3 style="margin-bottom:6px">${isAr()?'السوائل':'Hydration'}</h3><p class="sm">${isAr()?'ماء مناسب للعمر؛ قلّل العصائر (سبب شائع لإسهال الدارجين) والمشروبات الغازية؛ واستخدم محلول الإماهة عند المرض.':'Age-appropriate water; limit fruit juice (a common cause of toddler diarrhoea) and fizzy drinks; use oral rehydration during illness.'}</p>`)+
+    `<p class="disc">${t('disc')}</p>`;
+});
+/* ---- GULF FOODS & RAMADAN ---- */
+route('saudi',(n)=>{
+  n.innerHTML=backbar(t('saudi'))+
+   card(`<h3 style="margin-bottom:8px">${isAr()?'أطعمة خليجية والحمية':'Gulf foods & diets'}</h3>
+     <p class="sm"><b>${isAr()?'غلوتين (الداء الزلاقي):':'Gluten (coeliac):'}</b> ${isAr()?'عجينة السمبوسة، الكبة، الهريس/الجريش، الخبز العربي، الشعيرية، وبعض خلطات الكبسة واللحوم المصنّعة.':'samboosa wrappers, kubbah, harees/jareesh, Arabic bread, vermicelli, some kabsa mixes and processed meats.'}</p>
+     <p class="sm"><b>${isAr()?'ألبان (حساسية الحليب/اللاكتوز):':'Dairy (milk allergy/lactose):'}</b> ${isAr()?'اللبن، اللبنة، الجميد.':'laban, labneh, jameed.'}</p>
+     <p class="sm"><b>${isAr()?'بدائل مألوفة:':'Familiar swaps:'}</b> ${isAr()?'الأرز والعدس واللحوم والأسماك المشوية والخضار والفواكه الطازجة ودقيق خالٍ من الغلوتين.':'rice, lentils, grilled meats and fish, vegetables, fresh fruit, and gluten-free flours.'}</p>`)+
+   card(`<h3 style="margin-bottom:8px">🌙 ${isAr()?'رمضان والصيام':'Ramadan & fasting'}</h3>
+     <p class="sm">${isAr()?'الصيام ليس واجبًا على الأطفال قبل البلوغ، والإسلام يعفي من يضرّه الصيام. المراهقون المصابون بحالة مزمنة (التهاب الأمعاء النشط، الداء الزلاقي، أو من يحتاج أدوية بمواعيد ثابتة أو معرّض للجفاف) ينبغي أن يضعوا خطة فردية مع فريق الرعاية.':'Fasting is not obligatory for children before puberty, and Islam exempts those it would harm. Teens with a chronic condition (active IBD, coeliac, those on time-fixed medicines, or prone to dehydration) should make an individual plan with their care team.'}</p>
+     <p class="sm">${isAr()?'مواضيع عملية: إعطاء أولوية للسحور والترطيب، وتنسيق مواعيد الدواء مع الطبيب، ومراقبة علامات الجفاف أو الانتكاس. كسر الصيام لأجل الصحة جائز شرعًا.':'Practical themes: prioritise suhoor and hydration, time medicines with your clinician, and watch for dehydration or flare signs. Breaking a fast for health is religiously permitted.'}</p>`)+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+/* ---- TEEN & TRANSITION ---- */
+route('teen',(n)=>{
+  const stages=[
+   [{en:'12–14 yrs',ar:'١٢–١٤ سنة'},{en:'Learn your condition’s name and your medicines (what & why). Start speaking a little in appointments. Know your triggers/allergens.',ar:'اعرف اسم حالتك وأدويتك (ماذا ولماذا). ابدأ بالمشاركة قليلًا في المواعيد. اعرف محفّزاتك ومُحسِّساتك.'}],
+   [{en:'15–17 yrs',ar:'١٥–١٧ سنة'},{en:'Build independence: order refills, attend part of visits alone, recognise flare signs, understand tests, manage your diet, know cautions (smoking, alcohol, some painkillers).',ar:'ابنِ الاستقلالية: اطلب صرف الدواء، احضر جزءًا من الزيارة وحدك، تعرّف على علامات الانتكاس، افهم الفحوص، أدر حميتك، واعرف المحاذير (التدخين، الكحول، بعض المسكّنات).'}],
+   [{en:'18+ yrs',ar:'١٨+ سنة'},{en:'Take charge: manage appointments and insurance, carry a medical summary, self-advocate, understand long-term monitoring, and complete the move to an adult GI team.',ar:'تولَّ المسؤولية: أدر المواعيد والتأمين، احمل ملخصًا طبيًا، دافع عن نفسك، افهم المتابعة طويلة الأمد، وأكمل الانتقال إلى فريق البالغين.'}]
+  ];
+  const skills=[{en:'I can name my condition and medicines',ar:'أستطيع تسمية حالتي وأدويتي'},{en:'I book / attend appointments',ar:'أحجز/أحضر المواعيد'},{en:'I order my own refills',ar:'أطلب صرف دوائي'},{en:'I track my symptoms',ar:'أتابع أعراضي'},{en:'I can talk to my doctor on my own',ar:'أستطيع التحدث مع طبيبي وحدي'},{en:'I know my warning signs & when to get help',ar:'أعرف علاماتي التحذيرية ومتى أطلب المساعدة'}];
+  const done=(S.prefs.traq||[]);
+  n.innerHTML=backbar(t('teen'))+
+   card(`<h3 style="margin-bottom:6px">${t('transitionTitle')}</h3><p class="sm muted">${isAr()?'خطوات نحو إدارة الحالة بنفسك مع التقدّم في العمر.':'Steps toward managing your condition yourself as you grow up.'}</p>`)+
+   stages.map(([a,b])=>card(`<b>${L(a)}</b><p class="sm" style="margin-top:6px">${L(b)}</p>`)).join('')+
+   card(`<h3 style="margin-bottom:10px">${t('traqTitle')}</h3>`+skills.map((s,i)=>`<label class="opt ${done.includes(i)?'on':''}"><input type="checkbox" style="width:auto" ${done.includes(i)?'checked':''} onchange="toggleTraq(${i})"><span style="flex:1">${L(s)}</span></label>`).join(''))+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+function toggleTraq(i){const a=S.prefs.traq||[];const x=a.indexOf(i);if(x>=0)a.splice(x,1);else a.push(i);S.prefs.traq=a;save();}
+/* ---- SAFETY / RED FLAGS ---- */
+function safetyCard(link){return `<div class="alert red"><div class="row between"><b>⚠︎ ${t('seekcare')}</b>${link?`<a class="link" onclick="go('safety')">${isAr()?'عرض':'View'} →</a>`:''}</div><div class="sm" style="margin-top:4px">${isAr()?'قيء أخضر · دم في القيء أو البراز · صعوبة تنفّس · جفاف شديد · ألم شديد':'Green vomit · blood in vomit or stool · trouble breathing · severe dehydration · severe pain'}</div></div>`;}
+route('safety',(n)=>{
+  const flags=[
+   {en:'Green (bilious) vomiting',ar:'قيء أخضر (صفراوي)'},
+   {en:'Blood in vomit, or black/bloody stools',ar:'دم في القيء، أو براز أسود/مدمّى'},
+   {en:'Forceful/projectile vomiting in a young baby',ar:'قيء نافوري قوي لدى رضيع صغير'},
+   {en:'Allergic emergency: trouble breathing, swelling of lips/tongue/throat, widespread hives, floppiness after a food',ar:'طارئ تحسّسي: صعوبة تنفّس، تورّم الشفتين/اللسان/الحلق، شرى منتشر، ارتخاء بعد طعام'},
+   {en:'Food stuck in the throat/chest that will not pass',ar:'انحشار طعام في الحلق/الصدر لا يمرّ'},
+   {en:'Severe dehydration: no wet nappy/urine for many hours, no tears, sunken eyes, very drowsy',ar:'جفاف شديد: لا حفاض مبلل/تبوّل لساعات، لا دموع، عيون غائرة، خمول شديد'},
+   {en:'Severe or worsening tummy pain, or a rigid/very swollen belly',ar:'ألم بطن شديد أو متزايد، أو بطن متيبّس/منتفخ جدًا'},
+   {en:'High fever with tummy pain',ar:'حمّى عالية مع ألم بطن'},
+   {en:'Poor feeding or lethargy in a baby, especially under 3 months',ar:'ضعف رضاعة أو خمول لدى رضيع، خاصة دون ٣ أشهر'},
+   {en:'Unexplained weight loss or poor growth',ar:'فقدان وزن غير مبرّر أو ضعف نمو'},
+   {en:'Newborn with pale/white “chalky” stools or lasting yellow skin',ar:'مولود ببراز شاحب/أبيض "طباشيري" أو اصفرار جلد مستمر'}
+  ];
+  n.innerHTML=backbar(t('seekcare'))+
+   `<div class="alert red"><b>${isAr()?'اطلب رعاية عاجلة إذا كان لدى طفلك:':'Seek urgent care if your child has:'}</b></div>`+
+   card(flags.map(f=>`<div class="list-i"><span class="dot" style="background:var(--danger);margin-top:7px"></span><span class="sm">${L(f)}</span></div>`).join(''))+
+   card(`<p class="sm">${isAr()?'هذه علامات تحذيرية عامة للتثقيف — وليست تقييمًا. عند القلق اتصل بطبيب طفلك أو خدمات الطوارئ المحلية.':'These are general warning signs for education — not an assessment. When worried, call your child’s doctor or your local emergency number.'}</p>`)+
+   `<p class="disc">${t('disc')}</p>`;
+});
+/* ---- SYMPTOM CHECK-IN (structured, non-scoring) ---- */
+route('checkin',(n)=>{const c=activeChild();if(!c){navTab('today');return;}
+  const q=[
+   {k:'pain',q:{en:'Tummy pain today',ar:'ألم البطن اليوم'}},
+   {k:'stools',q:{en:'Number of stools in 24h',ar:'عدد مرات التبرّز خلال ٢٤ ساعة'}},
+   {k:'blood',q:{en:'Blood with stool',ar:'دم مع البراز'}},
+   {k:'activity',q:{en:'Activity / energy level',ar:'النشاط / مستوى الطاقة'}},
+   {k:'appetite',q:{en:'Appetite',ar:'الشهية'}}
+  ];
+  n.innerHTML=backbar(t('checkin'))+
+   card(`<p class="sm muted">${isAr()?'مراجعة سريعة لتدوين ومشاركة كيف كان يوم طفلك. لا يحسب التطبيق أي درجة أو حكم على الشدة.':'A quick way to note and share how your child’s day was. The app does not calculate any score or severity verdict.'}</p>`)+
+   q.map(item=>card(`<b>${L(item.q)}</b>${scaleSel('ci_'+item.k,4)}<div class="row between xs muted"><span>${isAr()?'٠ جيد':'0 good'}</span><span>${isAr()?'٤ صعب':'4 hard'}</span></div>`)).join('')+
+   card(`<label class="fld">${t('note')}</label><textarea id="ci_note" rows="2"></textarea><button class="btn btn-primary" style="margin-top:12px" onclick="saveCheckin()">${t('save')}</button>`)+
+   `<div class="alert warn"><span class="sm">${t('shareTeam')}</span></div>`;
+});
+function saveCheckin(){const c=activeChild();const ans={};['pain','stools','blood','activity','appetite'].forEach(k=>ans[k]=scaleVal('ci_'+k));
+  S.checkins.push({id:rid(),childId:c.id,t:nowISO(),ans,note:val('ci_note')});save();toast(t('saved'));goBack();}
+
+/* ============ REPORT ============ */
+route('report',(n)=>{const c=activeChild();if(!c){n.innerHTML=emptyState();return;}
+  const days=(CURRENT_OPTS&&CURRENT_OPTS.days)||14;
+  const since=Date.now()-days*864e5;const ls=childLogs(c.id).filter(l=>new Date(l.t)>=since);
+  const stools=ls.filter(l=>l.type==='stool');const syms=ls.filter(l=>l.type==='sym');
+  const voms=ls.filter(l=>l.type==='vomit');const meds=ls.filter(l=>l.type==='med');const grow=ls.filter(l=>l.type==='growth');
+  const symDays=new Set(syms.map(l=>l.t.slice(0,10))).size;
+  // stool pattern
+  let hard=0,ok=0,loose=0,bloodN=0;stools.forEach(l=>{if(l.infant){if(l.consist==='hard')hard++;else if(l.consist==='watery')loose++;else ok++;}else{const b=+l.bristol;if(b<=2)hard++;else if(b>=6)loose++;else if(b)ok++;}if(l.blood==='yes'||l.color==='red')bloodN++;});
+  const flagV=voms.filter(l=>l.color==='green'||l.color==='bloody').length;
+  n.innerHTML=childBar(c)+topbar(t('report'),c.name?`${c.name} · ${ageLabel(c)}`:ageLabel(c))+
+   `<div class="seg noprint"><button class="${days===14?'on':''}" onclick="go('report',{days:14,replace:true})">${t('last14')}</button><button class="${days===30?'on':''}" onclick="go('report',{days:30,replace:true})">${t('last30')}</button></div>`+
+   card(`<div class="row between"><b>${isAr()?'ملخص':'Summary'}</b><span class="muted xs">${days===14?t('last14'):t('last30')}</span></div>
+     <div class="grid2" style="margin-top:10px">
+       ${stat(stools.length,isAr()?'إدخالات براز':'stool logs')}${stat(symDays,isAr()?'أيام بأعراض':'days w/ symptoms')}
+       ${stat(voms.length,isAr()?'قيء':'vomit logs')}${stat(meds.length,isAr()?'إدخالات دواء':'medicine logs')}</div>`)+
+   (stools.length?card(`<b>${t('stoolDist')}</b>${miniBar(isAr()?'صلب':'Hard',hard,stools.length,'var(--warn)')}${miniBar(isAr()?'ليّن/طبيعي':'Soft/normal',ok,stools.length,'var(--leaf)')}${miniBar(isAr()?'رخو':'Loose',loose,stools.length,'var(--sky)')}${bloodN?`<div class="pill d" style="margin-top:8px">${isAr()?'دم مسجّل':'blood noted'} · ${bloodN}</div>`:''}`):'')+
+   (syms.length?card(`<b>${t('symDays')}</b><div style="font-size:26px;font-weight:800;color:var(--warn);margin-top:4px">${symDays} / ${days}</div>`+symBreakdown(syms)):'')+
+   (flagV?`<div class="alert red"><span class="sm">${isAr()?'سُجِّل قيء أخضر/دموي — أظهره لطبيبك.':'Green/bloody vomit was logged — show this to your doctor.'} (${flagV})</span></div>`:'')+
+   (grow.length?card(`<b>${t('growthLog')}</b>`+grow.slice().reverse().map(l=>`<div class="list-i"><span class="sm" style="flex:1">${new Date(l.t).toLocaleDateString()}</span><span class="sm">${[l.w?`${l.w}kg`:'',l.h?`${l.h}cm`:'',l.hc?`${l.hc}cm HC`:''].filter(Boolean).join(' · ')}</span></div>`).join('')):'')+
+   card(`<div class="alert warn" style="margin:0 0 12px"><span class="sm">${t('shareTeam')}</span></div><div class="grid2 noprint"><button class="btn btn-ghost" onclick="window.print()">🖨️ ${t('print')}</button><button class="btn btn-ghost" onclick="copyReport(${days})">📋 ${t('copy')}</button></div>`)+
+   `<p class="disc">${t('disc')}</p>`;
+});
+function stat(v,l){return `<div class="card" style="margin:0;text-align:center;padding:12px"><div style="font-size:26px;font-weight:800;color:var(--accent)">${v}</div><div class="xs muted">${l}</div></div>`;}
+function miniBar(label,v,total,col){const pct=total?Math.round(v/total*100):0;return `<div style="margin-top:8px"><div class="row between xs"><span>${label}</span><span class="muted">${v} · ${pct}%</span></div><div class="bar"><i style="width:${pct}%;background:${col}"></i></div></div>`;}
+function symBreakdown(syms){const names={pain:{en:'Tummy pain',ar:'ألم بطن'},bloat:{en:'Bloating',ar:'انتفاخ'},nausea:{en:'Nausea',ar:'غثيان'},reflux:{en:'Reflux',ar:'ارتجاع'},appetite:{en:'Low appetite',ar:'قلة شهية'},gas:{en:'Gas',ar:'غازات'},swallow:{en:'Swallowing',ar:'بلع'},fatigue:{en:'Tired',ar:'إرهاق'}};
+  const cnt={};syms.forEach(l=>(l.syms||[]).forEach(s=>cnt[s]=(cnt[s]||0)+1));
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);if(!top.length)return '';
+  const max=top[0][1];return `<div style="margin-top:8px">`+top.map(([k,v])=>miniBar(L(names[k]||{en:k,ar:k}),v,max,'var(--warn)')).join('')+`</div>`;}
+function copyReport(days){const c=activeChild();const since=Date.now()-days*864e5;const ls=childLogs(c.id).filter(l=>new Date(l.t)>=since);
+  let txt=`Baraʿem — ${c.name||'child'} (${ageLabel(c)}) · last ${days} days\n`;
+  txt+=`Stool logs: ${ls.filter(l=>l.type==='stool').length}, Symptom days: ${new Set(ls.filter(l=>l.type==='sym').map(l=>l.t.slice(0,10))).size}, Vomit: ${ls.filter(l=>l.type==='vomit').length}, Medicine logs: ${ls.filter(l=>l.type==='med').length}\n`;
+  const g=ls.filter(l=>l.type==='growth');if(g.length){const last=g[g.length-1];txt+=`Latest growth: ${[last.w?last.w+'kg':'',last.h?last.h+'cm':''].filter(Boolean).join(', ')}\n`;}
+  txt+=`(Educational summary to share with the care team — not a medical assessment.)`;
+  navigator.clipboard&&navigator.clipboard.writeText(txt);toast(t('copied'));}
+
+/* ============ MORE ============ */
+route('more',(n)=>{
+  n.innerHTML=topbar(t('more'))+
+   card(`<div class="row between" style="margin-bottom:10px"><b>${t('manageKids')}</b><button class="chip on" onclick="go('editChild')">+ ${t('add')}</button></div>`+
+     (S.children.length?S.children.map(c=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="row">${avatarFor(c)}<div><div style="font-weight:700">${c.name||(isAr()?'طفل':'Child')}</div><div class="muted xs">${ageLabel(c)}${c.id===S.activeChildId?' · '+(isAr()?'نشط':'active'):''}</div></div></div><div class="row"><button class="chip" onclick="setActive('${c.id}');navTab('today')">${isAr()?'عرض':'View'}</button><button class="chip" onclick="go('editChild',{id:'${c.id}'})">${t('edit')}</button></div></div>`).join(''):`<div class="muted sm">${t('noChild')}</div>`))+
+   card(`<h3 style="margin-bottom:10px">${t('appearance')}</h3>
+     <div class="row between" style="margin-bottom:10px"><span>${t('theme')}</span><button class="chip ${S.prefs.theme==='dark'?'on':''}" onclick="toggleTheme()">${S.prefs.theme==='dark'?'🌙':'☀️'}</button></div>
+     <div class="between row"><span>${t('textSize')}</span><div class="row"><button class="chip" onclick="setText(-1)">A−</button><button class="chip" onclick="setText(1)">A+</button></div></div>`)+
+   card(`${libLink('themes','🎨',t('themesT'))}${libLink('tools','📊',t('tools'))}${libLink('library','📚',t('library'))}${libLink('teen','🧑‍🎓',t('teen'))}${libLink('safety','⚠︎',t('seekcare'))}${libLink('about','ℹ️',t('about'))}`)+
+   `<p class="disc">${t('disc')}</p>`;
+});
+function toggleTheme(){S.prefs.theme=S.prefs.theme==='dark'?'light':'dark';save();render();}
+function setText(d){let v=(S.prefs.textScale||1)+d*0.1;v=Math.max(0.9,Math.min(1.3,+v.toFixed(2)));S.prefs.textScale=v;save();render();}
+route('editChild',(n)=>{const c=CURRENT_OPTS&&CURRENT_OPTS.id?S.children.find(x=>x.id===CURRENT_OPTS.id):null;
+  n.innerHTML=backbar(c?t('edit'):t('addChild'))+childForm(c,false)+(c?card(`<button class="btn btn-ghost" style="color:var(--danger)" onclick="removeChild('${c.id}')">${t('remove')}</button>`):'');
+});
+function removeChild(id){if(!confirm(isAr()?'حذف هذا الطفل وسجلّه؟':'Remove this child and their logs?'))return;
+  S.children=S.children.filter(c=>c.id!==id);S.logs=S.logs.filter(l=>l.childId!==id);S.meds=S.meds.filter(m=>m.childId!==id);S.checkins=S.checkins.filter(x=>x.childId!==id);
+  if(S.activeChildId===id)S.activeChildId=S.children[0]?S.children[0].id:null;save();navTab('more');}
+route('about',(n)=>{
+  n.innerHTML=backbar(t('about'))+
+   card(`<div style="text-align:center"><div style="width:48px;height:48px;margin:4px auto">${brandSVG().replace('width="30" height="30"','width="48" height="48"')}</div><h3>Baraʿem · براعم</h3><div class="muted sm">${t('tagline')}</div></div>`)+
+   card(`<p class="sm">${t('disc')}</p>`)+
+   card(`<h3 style="margin-bottom:6px">${isAr()?'الخصوصية':'Privacy'}</h3><p class="sm">${isAr()?'كل بيانات طفلك تُحفظ على جهازك فقط ولا تُرفع. الأسماء اختيارية. بلا حساب.':'All your child’s data is stored only on this device and never uploaded. Names are optional. No account.'}</p>`)+
+   card(`<h3 style="margin-bottom:6px">${isAr()?'المصادر':'Sources'}</h3><p class="sm muted">${isAr()?'محتوى مبني على مصادر موثوقة (NASPGHAN/GIKids، ESPGHAN، AAP، مؤسسة روما، NHS). للتثقيف فقط.':'Content is based on reputable sources (NASPGHAN/GIKids, ESPGHAN, AAP, Rome Foundation, NHS). For education only.'}</p>`)+
+   card(`<button class="btn btn-ghost" onclick="go('safety')">⚠︎ ${t('seekcare')}</button>`);
+});
+
+/* ============ GROWTH REFERENCE DATA (WHO — official LMS) ============ */
+/* Saudi MOH adopted WHO 2006 standards for under-5. a=months (U5) / years (2007). */
+const WHO_U5_LMS={"wfa":{"m":[{"a":0,"L":0.3487,"M":3.3464,"S":0.14602},{"a":1,"L":0.2297,"M":4.4709,"S":0.13395},{"a":2,"L":0.197,"M":5.5676,"S":0.12385},{"a":3,"L":0.1738,"M":6.3762,"S":0.11727},{"a":4,"L":0.1552,"M":7.0023,"S":0.11316},{"a":6,"L":0.1258,"M":7.9341,"S":0.10958},{"a":9,"L":0.0917,"M":8.9013,"S":0.10881},{"a":12,"L":0.0644,"M":9.6479,"S":0.10925},{"a":15,"L":0.0413,"M":10.3108,"S":0.11008},{"a":18,"L":0.021,"M":10.9385,"S":0.1112},{"a":24,"L":-0.0136,"M":12.1515,"S":0.11426},{"a":36,"L":-0.0689,"M":14.3429,"S":0.12116},{"a":48,"L":-0.1131,"M":16.3489,"S":0.12759},{"a":60,"L":-0.1506,"M":18.3352,"S":0.13517}],"f":[{"a":0,"L":0.3809,"M":3.2322,"S":0.14171},{"a":1,"L":0.1714,"M":4.1873,"S":0.13724},{"a":2,"L":0.0962,"M":5.1282,"S":0.13},{"a":3,"L":0.0402,"M":5.8458,"S":0.12619},{"a":4,"L":-0.005,"M":6.4237,"S":0.12402},{"a":6,"L":-0.0755,"M":7.297,"S":0.12204},{"a":9,"L":-0.1507,"M":8.2254,"S":0.12199},{"a":12,"L":-0.2023,"M":8.948,"S":0.12267},{"a":15,"L":-0.2384,"M":9.6007,"S":0.12299},{"a":18,"L":-0.2637,"M":10.2315,"S":0.12309},{"a":24,"L":-0.2941,"M":11.4775,"S":0.1239},{"a":36,"L":-0.3201,"M":13.8503,"S":0.1292},{"a":48,"L":-0.3361,"M":16.0697,"S":0.13884},{"a":60,"L":-0.3518,"M":18.2179,"S":0.14821}]},"lhfa":{"m":[{"a":0,"L":1,"M":49.8842,"S":0.03795},{"a":1,"L":1,"M":54.7243,"S":0.03557},{"a":2,"L":1,"M":58.4248,"S":0.03423},{"a":3,"L":1,"M":61.4291,"S":0.03328},{"a":4,"L":1,"M":63.8859,"S":0.03257},{"a":6,"L":1,"M":67.6236,"S":0.03165},{"a":9,"L":1,"M":71.9686,"S":0.03117},{"a":12,"L":1,"M":75.7488,"S":0.03137},{"a":15,"L":1,"M":79.1458,"S":0.03197},{"a":18,"L":1,"M":82.2587,"S":0.03279},{"a":24,"L":1,"M":87.466,"S":0.03494},{"a":36,"L":1,"M":96.0835,"S":0.03858},{"a":48,"L":1,"M":103.3273,"S":0.04059},{"a":60,"L":1,"M":109.9593,"S":0.04214}],"f":[{"a":0,"L":1,"M":49.1477,"S":0.0379},{"a":1,"L":1,"M":53.6871,"S":0.0364},{"a":2,"L":1,"M":57.0672,"S":0.03568},{"a":3,"L":1,"M":59.8028,"S":0.0352},{"a":4,"L":1,"M":62.0898,"S":0.03486},{"a":6,"L":1,"M":65.7311,"S":0.03448},{"a":9,"L":1,"M":70.1435,"S":0.03444},{"a":12,"L":1,"M":74.0149,"S":0.03479},{"a":15,"L":1,"M":77.5098,"S":0.03534},{"a":18,"L":1,"M":80.7079,"S":0.03598},{"a":24,"L":1,"M":86.0653,"S":0.03749},{"a":36,"L":1,"M":95.0515,"S":0.04007},{"a":48,"L":1,"M":102.7312,"S":0.04193},{"a":60,"L":1,"M":109.4189,"S":0.04346}]},"hcfa":{"m":[{"a":0,"L":1,"M":34.4618,"S":0.03686},{"a":1,"L":1,"M":37.2757,"S":0.03132},{"a":2,"L":1,"M":39.1285,"S":0.02997},{"a":3,"L":1,"M":40.5135,"S":0.02917},{"a":4,"L":1,"M":41.6317,"S":0.02868},{"a":6,"L":1,"M":43.3306,"S":0.02817},{"a":9,"L":1,"M":44.9998,"S":0.02792},{"a":12,"L":1,"M":46.0661,"S":0.02789},{"a":15,"L":1,"M":46.806,"S":0.02792},{"a":18,"L":1,"M":47.3711,"S":0.028},{"a":24,"L":1,"M":48.2515,"S":0.02821},{"a":36,"L":1,"M":49.4612,"S":0.02871},{"a":48,"L":1,"M":50.2115,"S":0.02912},{"a":60,"L":1,"M":50.7372,"S":0.02945}],"f":[{"a":0,"L":1,"M":33.8787,"S":0.03496},{"a":1,"L":1,"M":36.5462,"S":0.0321},{"a":2,"L":1,"M":38.2521,"S":0.03168},{"a":3,"L":1,"M":39.5328,"S":0.0314},{"a":4,"L":1,"M":40.5817,"S":0.03119},{"a":6,"L":1,"M":42.1995,"S":0.03087},{"a":9,"L":1,"M":43.83,"S":0.03053},{"a":12,"L":1,"M":44.8964,"S":0.03027},{"a":15,"L":1,"M":45.6551,"S":0.03005},{"a":18,"L":1,"M":46.2424,"S":0.02987},{"a":24,"L":1,"M":47.1822,"S":0.02957},{"a":36,"L":1,"M":48.5099,"S":0.02912},{"a":48,"L":1,"M":49.3321,"S":0.02878},{"a":60,"L":1,"M":49.9225,"S":0.0285}]},"bfa":{"m":[{"a":0,"L":-0.3053,"M":13.4069,"S":0.0956},{"a":1,"L":0.2708,"M":14.9438,"S":0.09027},{"a":2,"L":0.1118,"M":16.3195,"S":0.08677},{"a":3,"L":0.0068,"M":16.8987,"S":0.08495},{"a":4,"L":-0.0726,"M":17.1579,"S":0.08379},{"a":6,"L":-0.1913,"M":17.3422,"S":0.08234},{"a":9,"L":-0.3176,"M":17.1661,"S":0.08102},{"a":12,"L":-0.4115,"M":16.7982,"S":0.08009},{"a":15,"L":-0.4864,"M":16.4409,"S":0.07934},{"a":18,"L":-0.5484,"M":16.1392,"S":0.07873},{"a":24,"L":-0.633,"M":15.8773,"S":0.07778},{"a":36,"L":-0.3101,"M":15.5988,"S":0.07931},{"a":48,"L":-0.3622,"M":15.3326,"S":0.08238},{"a":60,"L":-0.6889,"M":15.1917,"S":0.08699}],"f":[{"a":0,"L":-0.0631,"M":13.3363,"S":0.09272},{"a":1,"L":0.3448,"M":14.5676,"S":0.09556},{"a":2,"L":0.1749,"M":15.7679,"S":0.09372},{"a":3,"L":0.0642,"M":16.3574,"S":0.09254},{"a":4,"L":-0.0191,"M":16.6703,"S":0.09166},{"a":6,"L":-0.1429,"M":16.9083,"S":0.09036},{"a":9,"L":-0.2725,"M":16.7406,"S":0.08898},{"a":12,"L":-0.3667,"M":16.3568,"S":0.08797},{"a":15,"L":-0.4407,"M":16.0028,"S":0.08716},{"a":18,"L":-0.5017,"M":15.7263,"S":0.0865},{"a":24,"L":-0.5837,"M":15.5466,"S":0.085},{"a":36,"L":-0.5684,"M":15.3967,"S":0.08535},{"a":48,"L":-0.5684,"M":15.2602,"S":0.09168},{"a":60,"L":-0.5684,"M":15.2747,"S":0.09789}]}};
+const WHO_2007_LMS={"wfa":{"m":[{"a":5,"L":-0.1922,"M":18.3328,"S":0.12947},{"a":6,"L":-0.318,"M":20.5137,"S":0.13372},{"a":7,"L":-0.4402,"M":22.8915,"S":0.13759},{"a":8,"L":-0.5482,"M":25.4163,"S":0.14344},{"a":9,"L":-0.6337,"M":28.1092,"S":0.15233},{"a":10,"L":-0.6764,"M":31.1586,"S":0.16305}],"f":[{"a":5,"L":-0.465,"M":18.0823,"S":0.1424},{"a":6,"L":-0.5013,"M":20.1639,"S":0.149},{"a":7,"L":-0.5347,"M":22.374,"S":0.15556},{"a":8,"L":-0.5627,"M":25.0262,"S":0.16186},{"a":9,"L":-0.5833,"M":28.204,"S":0.16764},{"a":10,"L":-0.5958,"M":31.8578,"S":0.17262}]},"hfa":{"m":[{"a":5,"L":1,"M":109.7265,"S":0.04156},{"a":6,"L":1,"M":115.9509,"S":0.04249},{"a":7,"L":1,"M":121.7338,"S":0.04342},{"a":8,"L":1,"M":127.2651,"S":0.04438},{"a":9,"L":1,"M":132.5652,"S":0.04535},{"a":10,"L":1,"M":137.7795,"S":0.04626},{"a":11,"L":1,"M":143.1126,"S":0.04703},{"a":12,"L":1,"M":149.0807,"S":0.04753},{"a":13,"L":1,"M":156.0426,"S":0.0476},{"a":14,"L":1,"M":163.1816,"S":0.04714},{"a":15,"L":1,"M":168.958,"S":0.04619},{"a":16,"L":1,"M":172.8967,"S":0.04495},{"a":17,"L":1,"M":175.1609,"S":0.04364},{"a":18,"L":1,"M":176.1449,"S":0.04241},{"a":19,"L":1,"M":176.5432,"S":0.04134}],"f":[{"a":5,"L":1,"M":109.0725,"S":0.04346},{"a":6,"L":1,"M":115.1244,"S":0.04447},{"a":7,"L":1,"M":120.8105,"S":0.04525},{"a":8,"L":1,"M":126.5558,"S":0.04581},{"a":9,"L":1,"M":132.4944,"S":0.04612},{"a":10,"L":1,"M":138.6363,"S":0.04614},{"a":11,"L":1,"M":144.9929,"S":0.04584},{"a":12,"L":1,"M":151.2327,"S":0.04523},{"a":13,"L":1,"M":156.3748,"S":0.04439},{"a":14,"L":1,"M":159.789,"S":0.04345},{"a":15,"L":1,"M":161.6692,"S":0.04255},{"a":16,"L":1,"M":162.5156,"S":0.04176},{"a":17,"L":1,"M":162.8545,"S":0.04109},{"a":18,"L":1,"M":163.0595,"S":0.04053},{"a":19,"L":1,"M":163.1548,"S":0.04009}]},"bfa":{"m":[{"a":5,"L":-0.7151,"M":15.2679,"S":0.08366},{"a":6,"L":-0.9921,"M":15.3062,"S":0.08682},{"a":7,"L":-1.246,"M":15.4832,"S":0.09068},{"a":8,"L":-1.4629,"M":15.7368,"S":0.09526},{"a":9,"L":-1.6318,"M":16.049,"S":0.10038},{"a":10,"L":-1.7407,"M":16.4433,"S":0.10566},{"a":11,"L":-1.7862,"M":16.9392,"S":0.1107},{"a":12,"L":-1.7751,"M":17.5334,"S":0.11522},{"a":13,"L":-1.7168,"M":18.233,"S":0.11898},{"a":14,"L":-1.6211,"M":19.005,"S":0.12191},{"a":15,"L":-1.4961,"M":19.7744,"S":0.12412},{"a":16,"L":-1.3529,"M":20.4951,"S":0.12579},{"a":17,"L":-1.1962,"M":21.1423,"S":0.12715},{"a":18,"L":-1.026,"M":21.7077,"S":0.12836},{"a":19,"L":-0.8419,"M":22.1883,"S":0.12948}],"f":[{"a":5,"L":-0.8702,"M":15.2453,"S":0.09646},{"a":6,"L":-1.0794,"M":15.2697,"S":0.10195},{"a":7,"L":-1.2565,"M":15.4036,"S":0.10746},{"a":8,"L":-1.388,"M":15.681,"S":0.11291},{"a":9,"L":-1.465,"M":16.0964,"S":0.11816},{"a":10,"L":-1.4864,"M":16.6133,"S":0.12307},{"a":11,"L":-1.4606,"M":17.2459,"S":0.12748},{"a":12,"L":-1.4006,"M":17.9966,"S":0.13129},{"a":13,"L":-1.3195,"M":18.8012,"S":0.13445},{"a":14,"L":-1.2266,"M":19.5647,"S":0.137},{"a":15,"L":-1.1311,"M":20.2125,"S":0.13904},{"a":16,"L":-1.0368,"M":20.7008,"S":0.1407},{"a":17,"L":-0.9423,"M":21.0367,"S":0.14208},{"a":18,"L":-0.8462,"M":21.2603,"S":0.1433},{"a":19,"L":-0.7496,"M":21.4269,"S":0.14441}]}};
+/* measure map: wt→wfa/wfa, ht→lhfa/hfa, hc→hcfa/(none), bmi→bfa/bfa */
+const MEAS={wt:{u5:'wfa',o5:'wfa',unit:'kg',name:{en:'Weight',ar:'الوزن'}},ht:{u5:'lhfa',o5:'hfa',unit:'cm',name:{en:'Height/Length',ar:'الطول'}},hc:{u5:'hcfa',o5:null,unit:'cm',name:{en:'Head circ.',ar:'محيط الرأس'}},bmi:{u5:'bfa',o5:'bfa',unit:'',name:{en:'BMI',ar:'كتلة الجسم'}}};
+function lmsAt(meas,sex,months){const m=MEAS[meas];let arr,x;
+  if(months<=60){arr=WHO_U5_LMS[m.u5]&&WHO_U5_LMS[m.u5][sex];x=months;}
+  else{if(!m.o5)return null;arr=WHO_2007_LMS[m.o5]&&WHO_2007_LMS[m.o5][sex];x=months/12;if(meas==='wt'&&x>10)return null;}
+  if(!arr)return null;
+  if(x<=arr[0].a)return arr[0];if(x>=arr[arr.length-1].a)return arr[arr.length-1];
+  for(let i=0;i<arr.length-1;i++){if(x>=arr[i].a&&x<=arr[i+1].a){const f=(x-arr[i].a)/(arr[i+1].a-arr[i].a);
+    return{L:arr[i].L+f*(arr[i+1].L-arr[i].L),M:arr[i].M+f*(arr[i+1].M-arr[i].M),S:arr[i].S+f*(arr[i+1].S-arr[i].S)};}}
+  return arr[arr.length-1];}
+function zScore(x,p){return p.L!==0?((Math.pow(x/p.M,p.L)-1)/(p.L*p.S)):Math.log(x/p.M)/p.S;}
+function valAtZ(z,p){return p.L!==0?p.M*Math.pow(1+p.L*p.S*z,1/p.L):p.M*Math.exp(p.S*z);}
+function normCdf(z){const b1=.319381530,b2=-.356563782,b3=1.781477937,b4=-1.821255978,b5=1.330274429,pp=.2316419;
+  const s=z<0?-1:1;z=Math.abs(z)/Math.SQRT2;const tt=1/(1+pp*z);
+  const e=1-(1/Math.sqrt(2*Math.PI))*Math.exp(-z*z/2)*2*(b1*tt+b2*tt*tt+b3*tt**3+b4*tt**4+b5*tt**5);
+  return .5*(1+s*Math.sqrt(1-Math.exp(-z*z)));} /* fallback below uses erf approx */
+function pct(z){/* standard normal cdf via erf approximation */
+  const t=1/(1+.2316419*Math.abs(z));const d=.3989423*Math.exp(-z*z/2);
+  let p=d*t*(.3193815+t*(-.3565638+t*(1.781478+t*(-1.821256+t*1.330274))));
+  p=z>0?1-p:p;return Math.round(p*1000)/10;}
+function ageMonthsAt(birth,when){const b=new Date(birth+'-01');const w=new Date(when);
+  return (w.getFullYear()-b.getFullYear())*12+(w.getMonth()-b.getMonth())+(w.getDate()-b.getDate())/30.4375;}
+
+/* ============ TOOLS HUB ============ */
+route('tools',(n)=>{const c=activeChild();
+  n.innerHTML=(c?childBar(c):'')+topbar(t('tools'),isAr()?'مخططات وأدوات مبنية على معايير منظمة الصحة العالمية':'Charts & tools based on WHO standards')+
+   card(`<div class="xs muted" style="text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:8px">${t('secGrowth')}</div>${libLink('gchart','📈',t('growthCharts'))}${libLink('milestones','⭐',t('milestones'))}${libLink('insights','📅',t('insights'))}`)+
+   card(`<div class="xs muted" style="text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:8px">${t('secDiet')}</div>${libLink('feedguide','🥣',t('feedingGuide'))}${libLink('recipes','🍲',t('recipes'))}${libLink('hydrate','💧',t('hydration'))}${libLink('triggers','🔎',t('triggers'))}`)+
+   card(`<div class="xs muted" style="text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:8px">${t('secHealth')}</div>${libLink('vaccines','💉',t('vaccines'))}${libLink('supps','🧴',t('supplements'))}${libLink('reminders','⏰',t('reminders'))}${libLink('calc','🧮',t('calculators'))}`)+
+   card(`<div class="xs muted" style="text-transform:uppercase;letter-spacing:1px;font-weight:800;margin-bottom:8px">${t('secSupport')}</div>${libLink('washroom','🚻',t('washroom'))}${libLink('record','📋',t('healthRecord'))}${libLink('share','🔗',t('shareTool'))}${libLink('comfort','🫧',t('comfort'))}${libLink('careaway','🧳',t('careaway'))}`)+
+   `<p class="disc">${t('disc')}</p>`;
+});
+
+/* ---- GROWTH CHARTS ---- */
+route('gchart',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('growthCharts'))+emptyState();return;}
+  const meas=(CURRENT_OPTS&&CURRENT_OPTS.meas)||(isInfant(c)?'wt':'bmi');
+  const avail=['wt','ht','hc','bmi'].filter(m=>{if(m==='hc')return isInfant(c);if(m==='wt')return ageMonths(c)<=120;return true;});
+  const gl=childLogs(c.id).filter(l=>l.type==='growth').map(l=>({mo:ageMonthsAt(c.birth,l.t),
+    wt:+l.w||null,ht:+l.h||null,hc:+l.hc||null,bmi:(l.w&&l.h)?+( +l.w/Math.pow(+l.h/100,2)).toFixed(1):null})).filter(p=>p[meas]!=null).sort((a,b)=>a.mo-b.mo);
+  n.innerHTML=backbar(t('growthCharts'))+
+   childBar(c)+
+   card(`<div class="row wrap" style="gap:6px;margin-bottom:4px">`+avail.map(m=>`<button class="chip ${m===meas?'on':''}" onclick="go('gchart',{meas:'${m}',replace:true})">${L(MEAS[m].name)}</button>`).join('')+`</div>`+
+     growthSVG(c,meas,gl)+
+     (gl.length?growthLatest(c,meas,gl):`<div class="muted sm" style="margin-top:10px">${t('addGrowthFirst')}</div>`)+
+     `<button class="btn btn-soft" style="margin-top:12px" onclick="logSheet('growth')">＋ ${t('loggrowth')}</button>`)+
+   card(`<div class="sm muted">${isAr()?'المنحنيات هي مئينات منظمة الصحة العالمية (٣، ١٥، ٥٠، ٨٥، ٩٧). اعتمدت وزارة الصحة السعودية معايير منظمة الصحة العالمية لمن هم دون الخامسة. هذه أداة تعليمية — يفسّر فريق الرعاية النمو.':'Curves are WHO percentiles (3, 15, 50, 85, 97). Saudi MOH adopted WHO standards for under-5s. This is an educational tool — your care team interprets growth.'}</div>`)+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+function growthSVG(c,meas,pts){
+  const nowMo=ageMonths(c)||0;const sex=c.sex==='m'?'m':'f';
+  let xMin,xMax;if(nowMo<=24){xMin=0;xMax=24;}else if(nowMo<=60){xMin=0;xMax=60;}else{xMin=60;xMax=Math.min(228,Math.max(84,Math.ceil((nowMo+6)/12)*12));}
+  if(meas==='hc'){xMin=0;xMax=Math.min(60,Math.max(24,Math.ceil(nowMo)));}
+  if(meas==='wt'&&xMax>120)xMax=120;
+  const W=460,H=300,pl=38,pr=12,pt=12,pb=26;const iw=W-pl-pr,ih=H-pt-pb;
+  const zs=[{z:-1.881,c:'#C9B79E'},{z:-1.036,c:'#B7D0BE'},{z:0,c:'var(--accent)'},{z:1.036,c:'#B7D0BE'},{z:-0,c:''}];
+  const bands=[-1.881,-1.036,0,1.036,1.881];
+  const steps=36;let curves=[];let yMin=1e9,yMax=-1e9;
+  for(const z of bands){const pts2=[];for(let i=0;i<=steps;i++){const mo=xMin+(xMax-xMin)*i/steps;const p=lmsAt(meas,sex,mo);if(!p)continue;const v=valAtZ(z,p);pts2.push([mo,v]);yMin=Math.min(yMin,v);yMax=Math.max(yMax,v);}curves.push(pts2);}
+  pts.forEach(p=>{if(p.mo>=xMin-1&&p.mo<=xMax+1){yMin=Math.min(yMin,p[meas]);yMax=Math.max(yMax,p[meas]);}});
+  const yPad=(yMax-yMin)*0.08||1;yMin-=yPad;yMax+=yPad;
+  const X=mo=>pl+iw*(mo-xMin)/(xMax-xMin);const Y=v=>pt+ih*(1-(v-yMin)/(yMax-yMin));
+  const bc=['#C9B79E','#8FBf9f','var(--accent)','#8FBf9f','#C9B79E'];const bl=['3','15','50','85','97'];
+  let svg=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;margin-top:8px" font-family="inherit">`;
+  // y gridlines
+  for(let g=0;g<=4;g++){const v=yMin+(yMax-yMin)*g/4;const y=Y(v);svg+=`<line x1="${pl}" y1="${y}" x2="${W-pr}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${pl-4}" y="${y+3}" text-anchor="end" font-size="9" fill="var(--muted)">${v.toFixed(v<20?1:0)}</text>`;}
+  // x ticks
+  const xt=xMax<=24?[0,6,12,18,24]:xMax<=60?[0,12,24,36,48,60]:[];
+  const xticks=xt.length?xt:[];const xr=xMax>60;
+  if(xr){for(let y2=Math.ceil(xMin/12);y2<=xMax/12;y2+=(xMax-xMin>72?2:1)){const mo=y2*12;svg+=`<text x="${X(mo)}" y="${H-8}" text-anchor="middle" font-size="9" fill="var(--muted)">${y2}${isAr()?'س':'y'}</text>`;}}
+  else{xticks.forEach(mo=>{svg+=`<text x="${X(mo)}" y="${H-8}" text-anchor="middle" font-size="9" fill="var(--muted)">${mo}${isAr()?'ش':'m'}</text>`;});}
+  // percentile curves
+  curves.forEach((cv,i)=>{if(!cv.length)return;const d=cv.map((p,j)=>`${j?'L':'M'}${X(p[0]).toFixed(1)} ${Y(p[1]).toFixed(1)}`).join(' ');
+    svg+=`<path d="${d}" fill="none" stroke="${bc[i]}" stroke-width="${i===2?2:1.2}" ${i===2?'':'stroke-dasharray="3 3"'} opacity="${i===2?1:.8}"/>`;
+    const last=cv[cv.length-1];svg+=`<text x="${Math.min(W-2,X(last[0])+2)}" y="${Y(last[1])+3}" font-size="8" fill="${bc[i]}">${bl[i]}</text>`;});
+  // child points + line
+  if(pts.length){const dp=pts.map((p,j)=>`${j?'L':'M'}${X(p.mo).toFixed(1)} ${Y(p[meas]).toFixed(1)}`).join(' ');
+    svg+=`<path d="${dp}" fill="none" stroke="var(--disk)" stroke-width="2"/>`;
+    pts.forEach(p=>{svg+=`<circle cx="${X(p.mo).toFixed(1)}" cy="${Y(p[meas]).toFixed(1)}" r="3.4" fill="var(--disk)" stroke="#fff" stroke-width="1.4"/>`;});}
+  svg+=`</svg>`;return svg;}
+function growthLatest(c,meas,pts){const last=pts[pts.length-1];const sex=c.sex==='m'?'m':'f';const p=lmsAt(meas,sex,last.mo);
+  if(!p)return '';const z=zScore(last[meas],p);const pc=pct(z);
+  return `<div class="row between" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--line)"><div><div class="sm muted">${L(MEAS[meas].name)} · ${last[meas]}${MEAS[meas].unit}</div><div class="xs muted">${isAr()?'العمر':'age'} ${Math.round(last.mo)}${isAr()?' ش':'mo'}</div></div><div style="text-align:${isAr()?'left':'right'}"><div style="font-size:22px;font-weight:800;color:var(--disk)">${pc}<span style="font-size:13px">${isAr()?'':'th'}</span></div><div class="xs muted">${t('percentile')}</div></div></div>`;}
+
+/* ---- MILESTONES ---- */
+const MILESTONES=[
+ {mo:2,band:{en:'2 months',ar:'شهران'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Calms when picked up',ar:'يهدأ عند حمله'},{en:'Looks at your face',ar:'ينظر إلى وجهك'},{en:'Smiles when you talk/smile',ar:'يبتسم عند حديثك/ابتسامتك'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Makes cooing sounds',ar:'يصدر أصوات مناغاة'},{en:'Reacts to loud sounds',ar:'يستجيب للأصوات العالية'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Holds head up in tummy time',ar:'يرفع رأسه أثناء الاستلقاء على بطنه'},{en:'Moves both arms and legs',ar:'يحرّك ذراعيه وساقيه'}]}]},
+ {mo:4,band:{en:'4 months',ar:'٤ أشهر'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Smiles to get attention',ar:'يبتسم لجذب الانتباه'},{en:'Chuckles',ar:'يضحك بصوت خافت'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Coos back when you talk',ar:'يناغي ردًّا عليك'},{en:'Turns head toward voices',ar:'يدير رأسه نحو الأصوات'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Holds head steady',ar:'يثبّت رأسه'},{en:'Brings hands to mouth',ar:'يقرّب يديه إلى فمه'},{en:'Pushes up on elbows',ar:'يستند على مرفقيه'}]}]},
+ {mo:6,band:{en:'6 months',ar:'٦ أشهر'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Knows familiar people',ar:'يعرف المألوفين'},{en:'Laughs',ar:'يضحك'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Takes turns making sounds',ar:'يتبادل إصدار الأصوات'},{en:'Squeals, blows raspberries',ar:'يصرخ فرحًا'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Rolls tummy to back',ar:'يتقلّب من بطنه إلى ظهره'},{en:'Leans on hands to sit',ar:'يستند على يديه للجلوس'}]},
+   {d:{en:'Feeding',ar:'التغذية'},i:[{en:'Ready to start solids (see feeding guide)',ar:'جاهز لبدء الطعام (انظر دليل التغذية)'}]}]},
+ {mo:9,band:{en:'9 months',ar:'٩ أشهر'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Looks when you call their name',ar:'ينظر عند مناداة اسمه'},{en:'Shy/clingy with strangers',ar:'يخجل/يتعلّق مع الغرباء'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Makes sounds like "mamama"',ar:'يصدر أصواتًا مثل «مامама»'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Sits without support',ar:'يجلس دون دعم'},{en:'Moves things hand to hand',ar:'ينقل الأشياء بين يديه'}]}]},
+ {mo:12,band:{en:'12 months',ar:'١٢ شهرًا'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Plays games like pat-a-cake',ar:'يلعب ألعابًا كالتصفيق'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Waves bye-bye',ar:'يلوّح للوداع'},{en:'Calls a parent "mama/dada"',ar:'ينادي أحد والديه'},{en:'Understands "no"',ar:'يفهم كلمة «لا»'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Pulls to stand; cruises',ar:'يقف متمسّكًا ويتنقّل'},{en:'Picks up small food (finger-thumb)',ar:'يلتقط طعامًا صغيرًا بأصابعه'}]}]},
+ {mo:15,band:{en:'15 months',ar:'١٥ شهرًا'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Copies other children',ar:'يقلّد الأطفال الآخرين'},{en:'Shows an object to share',ar:'يُري شيئًا ليشارك'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Says 1–2 words besides mama/dada',ar:'يقول ١–٢ كلمة غير ماما/بابا'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Takes a few steps alone',ar:'يخطو خطوات بمفرده'},{en:'Feeds self with fingers',ar:'يطعم نفسه بأصابعه'}]}]},
+ {mo:18,band:{en:'18 months',ar:'١٨ شهرًا'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Points to show you something',ar:'يشير ليريك شيئًا'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Tries to say 3+ words',ar:'يحاول قول ٣ كلمات أو أكثر'},{en:'Follows a one-step direction',ar:'ينفّذ تعليمة من خطوة واحدة'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Walks well; climbs on/off a chair',ar:'يمشي جيدًا ويتسلّق الكرسي'},{en:'Tries a spoon',ar:'يجرّب استخدام الملعقة'}]}]},
+ {mo:24,band:{en:'2 years',ar:'سنتان'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Notices when others are upset',ar:'يلاحظ انزعاج الآخرين'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Says 2+ words together',ar:'يجمع كلمتين معًا'},{en:'Points to things in a book',ar:'يشير إلى أشياء في كتاب'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Kicks a ball; runs',ar:'يركل الكرة ويجري'},{en:'Eats with a spoon',ar:'يأكل بالملعقة'}]}]},
+ {mo:36,band:{en:'3 years',ar:'٣ سنوات'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Joins other children in play',ar:'يشارك الأطفال اللعب'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Understood by others half the time',ar:'يفهمه الآخرون نصف الوقت'},{en:'Says a 2–3 word sentence',ar:'يقول جملة من ٢–٣ كلمات'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Uses a fork',ar:'يستخدم الشوكة'},{en:'Puts on some clothes',ar:'يرتدي بعض ملابسه'}]}]},
+ {mo:48,band:{en:'4 years',ar:'٤ سنوات'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Pretends in play; likes to help',ar:'يتخيّل في اللعب ويحب المساعدة'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Says sentences of 4+ words',ar:'يقول جملًا من ٤ كلمات أو أكثر'},{en:'Answers simple questions',ar:'يجيب على أسئلة بسيطة'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Catches a large ball',ar:'يمسك كرة كبيرة'},{en:'Pours/serves food with help',ar:'يصبّ/يقدّم الطعام بمساعدة'}]}]},
+ {mo:60,band:{en:'5 years',ar:'٥ سنوات'},g:[
+   {d:{en:'Social',ar:'اجتماعي'},i:[{en:'Follows rules / takes turns',ar:'يتبع القواعد ويتناوب'},{en:'Does simple chores',ar:'ينجز مهامًا بسيطة'}]},
+   {d:{en:'Language',ar:'اللغة'},i:[{en:'Tells a story with two events',ar:'يروي قصة بحدثين'},{en:'Keeps a conversation going',ar:'يواصل محادثة'}]},
+   {d:{en:'Movement',ar:'الحركة'},i:[{en:'Hops on one foot',ar:'يقفز على قدم واحدة'},{en:'Buttons some buttons',ar:'يزرّر بعض الأزرار'}]}]}
+];
+route('milestones',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('milestones'))+emptyState();return;}
+  const nowMo=ageMonths(c)||0;
+  let idx=(CURRENT_OPTS&&CURRENT_OPTS.i!=null)?CURRENT_OPTS.i:MILESTONES.reduce((best,m,i)=>m.mo<=nowMo+1?i:best,0);
+  idx=Math.max(0,Math.min(MILESTONES.length-1,idx));const band=MILESTONES[idx];
+  c.msDone=c.msDone||{};
+  n.innerHTML=backbar(t('milestones'))+childBar(c)+
+   card(`<div class="row wrap" style="gap:6px">`+MILESTONES.map((m,i)=>`<button class="chip ${i===idx?'on':''}" onclick="go('milestones',{i:${i},replace:true})">${L(m.band)}</button>`).join('')+`</div>`)+
+   card(`<div class="muted sm" style="margin-bottom:8px">${isAr()?`ما يفعله معظم الأطفال بعمر ${L(band.band)}. علِّم ما أتقنه طفلك. هذه ليست اختبارًا — شارك أي قلق مع طبيبك.`:`What most children do by ${L(band.band)}. Tick what your child has reached. This is not a test — share any concerns with your doctor.`}</div>`+
+     band.g.map((grp,gi)=>`<div style="margin-top:10px"><b class="sm">${L(grp.d)}</b>`+grp.i.map((it,ii)=>{const k=band.mo+'_'+gi+'_'+ii;const on=!!c.msDone[k];
+       return `<label class="opt ${on?'on':''}" style="padding:10px 12px"><input type="checkbox" style="width:auto" ${on?'checked':''} onchange="toggleMs('${k}')"><span style="flex:1" class="sm">${L(it)}</span></label>`;}).join('')+`</div>`).join(''))+
+   `<div class="alert warn"><span class="sm">${isAr()?'يتطوّر الأطفال بوتيرة مختلفة. إذا فاتت عدة مراحل أو فقد طفلك مهارة، تحدّث مع طبيبك.':'Children develop at different rates. If several milestones are missed or your child loses a skill, talk to your doctor.'}</span></div>`;
+});
+function toggleMs(k){const c=activeChild();c.msDone=c.msDone||{};if(c.msDone[k])delete c.msDone[k];else c.msDone[k]=1;save();}
+
+/* ---- FEEDING BY AGE ---- */
+const FEEDING=[
+ {band:{en:'0–6 months',ar:'٠–٦ أشهر'},milk:{en:'Breastmilk or formula only, on demand. Vitamin D 400 IU/day for breastfed babies.',ar:'حليب الأم أو الصناعي فقط عند الطلب. فيتامين د ٤٠٠ وحدة يوميًا للرضّع الطبيعيين.'},solids:{en:'No solids, water or juice needed — breastmilk is ~87% water, enough even in Gulf heat.',ar:'لا حاجة للطعام أو الماء أو العصير — حليب الأم ~٨٧٪ ماء، يكفي حتى في حرّ الخليج.'},tips:{en:'Iron stores are adequate to about 4–6 months.',ar:'مخزون الحديد كافٍ حتى نحو ٤–٦ أشهر.'}},
+ {band:{en:'6–8 months',ar:'٦–٨ أشهر'},milk:{en:'Milk stays the main nutrition (~700–950 mL).',ar:'يبقى الحليب الغذاء الرئيسي (~٧٠٠–٩٥٠ مل).'},solids:{en:'Start smooth purées → mashed. Iron-rich first: fortified cereal, puréed lamb/chicken, mashed lentils (adas), egg yolk.',ar:'ابدأ بالمهروس الناعم ← المهروس. أطعمة غنية بالحديد أولًا: حبوب مدعّمة، لحم/دجاج مهروس، عدس مهروس، صفار البيض.'},tips:{en:'Introduce common allergens (peanut/tahini, egg, dairy in food, wheat, fish) early, one at a time. No honey, no cow’s milk as a drink, no juice before 12 months.',ar:'أدخل المُحسِّسات الشائعة (فول سوداني/طحينة، بيض، ألبان في الطعام، قمح، سمك) مبكرًا واحدًا تلو الآخر. لا عسل ولا حليب بقر كمشروب ولا عصير قبل ١٢ شهرًا.'}},
+ {band:{en:'9–11 months',ar:'٩–١١ شهرًا'},milk:{en:'Breastmilk/formula still primary.',ar:'يبقى حليب الأم/الصناعي أساسيًا.'},solids:{en:'3 meals + snacks; minced and soft chopped finger foods. Meat, fish, egg, legumes daily; pair with vitamin-C foods for iron.',ar:'٣ وجبات + وجبات خفيفة؛ أطعمة مفرومة وقطع طرية تُمسك باليد. لحم وسمك وبيض وبقول يوميًا؛ مع أطعمة غنية بفيتامين C للحديد.'},tips:{en:'Keep offering previously tolerated allergens. Gulf ideas: rice with lentils, shredded chicken, hummus, labneh, soft fruit.',ar:'استمر بتقديم المُحسِّسات المُتحمَّلة. أفكار خليجية: أرز بعدس، دجاج مفروم، حمص، لبنة، فاكهة طرية.'}},
+ {band:{en:'12–24 months',ar:'١٢–٢٤ شهرًا'},milk:{en:'Whole cow’s milk OK (~350–500 mL/day; cap ~470–700 mL to protect iron/appetite).',ar:'حليب بقر كامل الدسم مناسب (~٣٥٠–٥٠٠ مل يوميًا؛ لا تتجاوز ~٤٧٠–٧٠٠ مل لحماية الحديد والشهية).'},solids:{en:'Family foods chopped to safe size; 3 meals + 2 snacks. Expect picky phases — keep offering.',ar:'طعام العائلة مقطّع لحجم آمن؛ ٣ وجبات + وجبتان خفيفتان. توقّع مراحل انتقائية — استمر بالعرض.'},tips:{en:'Water is the main drink; if any juice ≤120 mL/day. Avoid choking hazards (whole grapes, nuts, hard raw carrot).',ar:'الماء المشروب الرئيسي؛ العصير إن وُجد ≤١٢٠ مل يوميًا. تجنّب مخاطر الاختناق (عنب كامل، مكسرات، جزر نيّئ صلب).'}},
+ {band:{en:'2–5 years',ar:'٢–٥ سنوات'},milk:{en:'~2 cups (500 mL) milk/dairy daily; reduced-fat after 2y if advised.',ar:'~كوبان (٥٠٠ مل) حليب/ألبان يوميًا؛ قليل الدسم بعد سنتين إذا نُصح بذلك.'},solids:{en:'Balanced plate: grains (prefer whole), protein, fruit, veg, dairy. Start ~1 tablespoon per year of age per food.',ar:'طبق متوازن: حبوب (يفضّل الكاملة)، بروتين، فاكهة، خضار، ألبان. ابدأ بـ~ملعقة كبيرة لكل سنة من العمر لكل صنف.'},tips:{en:'Water and milk are primary; 100% juice ≤120–180 mL/day. Gulf: grilled meat/fish, rice, salad, fruit, dates, laban.',ar:'الماء والحليب أساسيان؛ عصير ١٠٠٪ ≤١٢٠–١٨٠ مل يوميًا. خليجيًا: لحم/سمك مشوي، أرز، سلطة، فاكهة، تمر، لبن.'}},
+ {band:{en:'School-age (6–12y)',ar:'سن المدرسة (٦–١٢)'},milk:{en:'Dairy/calcium daily; regular breakfast supports learning.',ar:'ألبان/كالسيوم يوميًا؛ الفطور المنتظم يدعم التعلّم.'},solids:{en:'Half the plate fruit/veg, whole grains, lean protein. Limit added sugar, fried foods and sugary drinks (high Gulf childhood obesity).',ar:'نصف الطبق فاكهة/خضار، حبوب كاملة، بروتين قليل الدسم. قلّل السكر المضاف والمقالي والمشروبات المحلاة (ارتفاع سمنة الأطفال في الخليج).'},tips:{en:'Water main drink (~6–8 cups); dates + milk a healthy snack. For older children fasting Ramadan, plan nutrition with the doctor.',ar:'الماء المشروب الرئيسي (~٦–٨ أكواب)؛ التمر مع الحليب وجبة صحية. للأكبر الصائمين في رمضان، خطّط التغذية مع الطبيب.'}}
+];
+route('feedguide',(n)=>{
+  n.innerHTML=backbar(t('feedingGuide'))+
+   FEEDING.map(f=>card(`<h3 style="margin-bottom:8px">${L(f.band)}</h3>
+     <div class="sm"><b>${isAr()?'الحليب:':'Milk:'}</b> ${L(f.milk)}</div>
+     <div class="sm" style="margin-top:6px"><b>${isAr()?'الطعام:':'Food:'}</b> ${L(f.solids)}</div>
+     <div class="sm" style="margin-top:6px"><b>${isAr()?'نصائح:':'Tips:'}</b> ${L(f.tips)}</div>`)).join('')+
+   card(`<button class="btn btn-soft" onclick="go('feeding')">${t('feeding')} · ${isAr()?'الفطام':'weaning'} →</button>`)+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+
+/* ---- CALCULATORS ---- */
+route('calc',(n)=>{const c=activeChild();
+  const lastG=c?childLogs(c.id).filter(l=>l.type==='growth'&&l.w).slice(-1)[0]:null;
+  const w=lastG?(+lastG.w).toFixed(1):'';const yrs=c?Math.floor((ageMonths(c)||0)/12):'';
+  n.innerHTML=backbar(t('calculators'))+
+   card(`<h3 style="margin-bottom:4px">💧 ${isAr()?'احتياج السوائل اليومي':'Daily fluid needs'}</h3><div class="muted xs" style="margin-bottom:8px">${isAr()?'قاعدة هوليداي-سيغار (تقدير للترطيب اليومي المعتاد)':'Holliday-Segar (estimate of usual daily needs)'}</div>
+     <label class="fld">${t('weight')}</label><input id="cf_w" type="number" step="0.1" inputmode="decimal" value="${w}" oninput="calcFluid()" placeholder="kg">
+     <div id="cf_out" class="alert" style="border-color:var(--line);margin-top:10px;display:none"></div>`)+
+   card(`<h3 style="margin-bottom:4px">🥤 ${isAr()?'الإماهة عند المرض (ORS)':'Rehydration when ill (ORS)'}</h3>
+     <div class="sm">${isAr()?'أعطِ محلول الإماهة بجرعات صغيرة متكررة. عوّض بعد كل إسهال/قيء:':'Give ORS in small, frequent sips. Replace after each loose stool/vomit:'}</div>
+     <ul class="sm" style="margin:8px 0 0;padding-inline-start:18px"><li>${isAr()?'رضيع (< ١٠ كجم): ٦٠–١٢٠ مل':'Infant (<10 kg): 60–120 mL'}</li><li>${isAr()?'أكبر (≥ ١٠ كجم): ١٢٠–٢٤٠ مل':'Older (≥10 kg): 120–240 mL'}</li></ul>
+     <div class="alert red" style="margin-top:10px"><span class="sm">${isAr()?'راجع الطبيب عاجلًا: لا تبوّل ٦–٨ ساعات، لا دموع، خمول، قيء مستمر، دم في البراز، أو جفاف شديد.':'See a doctor urgently: no urine 6–8h, no tears, lethargy, ongoing vomiting, blood in stool, or severe dehydration.'}</span></div>`)+
+   card(`<h3 style="margin-bottom:4px">🌾 ${isAr()?'هدف الألياف اليومي':'Daily fibre target'}</h3><div class="muted xs" style="margin-bottom:8px">${isAr()?'قاعدة «العمر + ٥» جرام يوميًا':'"Age + 5" grams per day rule'}</div>
+     <label class="fld">${isAr()?'عمر الطفل (سنوات)':'Child age (years)'}</label><input id="cf_age" type="number" inputmode="numeric" value="${yrs}" oninput="calcFibre()" placeholder="yrs">
+     <div id="cf_fout" class="alert" style="border-color:var(--line);margin-top:10px;display:none"></div>`)+
+   `<p class="disc">${isAr()?'تقديرات تعليمية — اتّبع طبيب طفلك في القرارات الطبية.':'Educational estimates — follow your child’s doctor for medical decisions.'}</p>`;
+  setTimeout(()=>{if(w)calcFluid();if(yrs!=='')calcFibre();},0);
+});
+function calcFluid(){const w=+val('cf_w');const o=document.getElementById('cf_out');if(!w||w<=0){o.style.display='none';return;}
+  let ml;if(w<=10)ml=100*w;else if(w<=20)ml=1000+50*(w-10);else ml=1500+20*(w-20);
+  const hr=Math.round(ml/24);o.style.display='block';
+  o.innerHTML=`<div style="font-size:20px;font-weight:800;color:var(--accent)">${Math.round(ml)} ${isAr()?'مل/يوم':'mL/day'}</div><div class="sm muted">≈ ${hr} ${isAr()?'مل/ساعة':'mL/hr'} · ${isAr()?'احتياج أساسي تقريبي، يزيد مع الحمّى/الحرارة':'approx baseline, more with fever/heat'}</div>`;}
+function calcFibre(){const a=+val('cf_age');const o=document.getElementById('cf_fout');if(a===''||isNaN(a)||a<0){o.style.display='none';return;}
+  o.style.display='block';o.innerHTML=`<div style="font-size:20px;font-weight:800;color:var(--leaf)">${a+5} ${isAr()?'جم/يوم':'g/day'}</div><div class="sm muted">${isAr()?'زدها تدريجيًا مع سوائل كافية. مصادر: فواكه، خضار، بقول، حبوب كاملة، تمر.':'Increase gradually with enough fluids. Sources: fruit, veg, legumes, whole grains, dates.'}</div>`;}
+
+/* ============ CHILD TOOLS (ported & adapted) ============ */
+const TRIGGER_FOODS=[
+ {key:'dairy',name:{en:'Dairy / milk',ar:'ألبان/حليب'}},{key:'gluten',name:{en:'Wheat / gluten',ar:'قمح/غلوتين'}},
+ {key:'egg',name:{en:'Egg',ar:'بيض'}},{key:'juice',name:{en:'Juice / sweet drink',ar:'عصير/محلّى'}},
+ {key:'fried',name:{en:'Fried / fatty',ar:'مقلي/دسم'}},{key:'spicy',name:{en:'Spicy',ar:'حار'}},
+ {key:'legumes',name:{en:'Beans / lentils',ar:'بقول/عدس'}},{key:'choc',name:{en:'Chocolate',ar:'شوكولاتة'}}];
+
+/* ---- HYDRATION ---- */
+function waterGoal(c){const lg=childLogs(c.id).filter(l=>l.type==='growth'&&l.w).slice(-1)[0];
+  const w=lg?+lg.w:null;let ml;if(w){if(w<=10)ml=100*w;else if(w<=20)ml=1000+50*(w-10);else ml=1500+20*(w-20);}
+  else{const m=ageMonths(c)||0;ml=m<12?800:m<36?1300:m<96?1600:2000;}
+  return Math.round(ml/50)*50;}
+route('hydrate',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('hydration'))+emptyState();return;}
+  const today=childLogs(c.id).filter(l=>l.type==='water'&&l.t.slice(0,10)===dayKey());
+  const tot=today.reduce((s,l)=>s+(+l.ml||0),0);const goal=waterGoal(c);const pct=Math.min(100,Math.round(tot/goal*100));
+  const R=52,C=2*Math.PI*R,off=C*(1-pct/100);
+  n.innerHTML=backbar(t('hydration'))+childBar(c)+
+   card(`<div style="text-align:center"><svg viewBox="0 0 130 130" width="150" height="150"><circle cx="65" cy="65" r="${R}" fill="none" stroke="var(--line)" stroke-width="11"/><circle cx="65" cy="65" r="${R}" fill="none" stroke="var(--sky)" stroke-width="11" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}" transform="rotate(-90 65 65)"/><text x="65" y="60" text-anchor="middle" font-size="26" font-weight="800" fill="var(--txt)">${tot}</text><text x="65" y="82" text-anchor="middle" font-size="12" fill="var(--muted)">/ ${goal} ${isAr()?'مل':'mL'}</text></svg>
+     <div class="muted sm">${isAr()?'هدف تقريبي حسب العمر/الوزن — يزيد مع الحرارة والنشاط':'Approx goal by age/weight — more with heat and activity'}</div></div>`)+
+   card(`<h3 style="margin-bottom:10px">${t('addWater')}</h3><div class="grid2">`+[[120,'🥛'],[200,'🥤'],[250,'🍶'],[60,'🧃']].map(([ml,e])=>`<button class="btn btn-soft" onclick="addWater(${ml})">${e} ${ml} ${isAr()?'مل':'mL'}</button>`).join('')+`</div><div class="row" style="gap:8px;margin-top:10px"><input id="wt_c" type="number" inputmode="numeric" placeholder="${isAr()?'مل':'mL'}" style="flex:1"><button class="btn btn-primary" style="width:auto;padding:12px 18px" onclick="addWater(+val('wt_c'))">＋</button></div>`)+
+   (today.length?card(`<b>${isAr()?'اليوم':'Today'}</b>`+today.slice().reverse().map(l=>`<div class="list-i"><span>💧 ${l.ml} ${isAr()?'مل':'mL'}</span><span class="muted xs" style="margin-inline-start:auto">${timeAgo(l.t)}</span></div>`).join('')):'')+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+function addWater(ml){if(!ml||ml<=0)return;addLog({type:'water',ml});toast(t('saved'));render();}
+
+/* ---- TRIGGER FINDER ---- */
+route('triggers',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('triggers'))+emptyState();return;}
+  const ls=childLogs(c.id);const symDays=new Set(ls.filter(l=>l.type==='sym'||(l.type==='stool'&&(l.pain==='yes'||l.blood==='yes'))||l.type==='vomit').map(l=>l.t.slice(0,10)));
+  const feedByDay={};ls.filter(l=>l.type==='feed'&&l.foods&&l.foods.length).forEach(l=>{const d=l.t.slice(0,10);feedByDay[d]=feedByDay[d]||new Set();l.foods.forEach(f=>feedByDay[d].add(f));});
+  const foodDays={};Object.entries(feedByDay).forEach(([d,set])=>set.forEach(f=>{foodDays[f]=foodDays[f]||[];foodDays[f].push(d);}));
+  const results=TRIGGER_FOODS.map(f=>{const days=foodDays[f.key]||[];if(days.length<2)return null;
+    const withSym=days.filter(d=>symDays.has(d)||symDays.has(nextDay(d))).length;
+    return{f,n:days.length,rate:Math.round(withSym/days.length*100)};}).filter(Boolean).sort((a,b)=>b.rate-a.rate);
+  n.innerHTML=backbar(t('triggers'))+childBar(c)+
+   card(`<p class="sm muted">${isAr()?'يقارن الأيام التي سجّلت فيها طعامًا معيّنًا مع ظهور أعراض في نفس اليوم أو اليوم التالي. هذه ملاحظة ارتباط — وليست سببًا مؤكّدًا. سجّل الأطعمة مع الرضعات/الوجبات ليعمل.':'Compares days you logged a food with symptoms the same or next day. This is an association — not a proven cause. Tag foods when you log feeds/meals for this to work.'}</p>`)+
+   (results.length?card(results.map(r=>`<div style="margin-bottom:12px"><div class="row between sm"><b>${L(r.f.name)}</b><span class="muted">${r.rate}% · ${r.n} ${isAr()?'يوم':'days'}</span></div><div class="bar"><i style="width:${r.rate}%;background:${r.rate>=60?'var(--warn)':'var(--leaf)'}"></i></div></div>`).join('')):card(`<div class="muted sm">${isAr()?'لا توجد بيانات كافية بعد. سجّل الأطعمة مع الوجبات لعدة أيام.':'Not enough data yet. Tag foods with meals over a few days.'}</div>`))+
+   `<div class="alert warn"><span class="sm">${isAr()?'شارك أي نمط مع طبيب طفلك قبل حذف أطعمة من نظامه.':'Discuss any pattern with your child’s doctor before removing foods from their diet.'}</span></div>`;
+});
+function nextDay(d){const x=new Date(d);x.setDate(x.getDate()+1);return x.toISOString().slice(0,10);}
+
+/* ---- KID RECIPES + GROCERY ---- */
+const RECIPES=[
+ {id:'r1',tags:['GF','DF'],name:{en:'Mild chicken & rice (kabsa-style)',ar:'دجاج وأرز (كبسة خفيفة)'},ing:[{en:'Rice',ar:'أرز'},{en:'Chicken pieces',ar:'قطع دجاج'},{en:'Carrot',ar:'جزر'},{en:'Mild spices',ar:'بهارات خفيفة'},{en:'Olive oil',ar:'زيت زيتون'}],how:{en:'Sauté chicken, add rice, carrot and water, simmer until soft. Keep spices gentle.',ar:'حمّر الدجاج، أضف الأرز والجزر والماء، واطبخ حتى ينضج. اجعل البهارات خفيفة.'}},
+ {id:'r2',tags:['GF','DF','LF'],name:{en:'Lentil soup (shorbat adas)',ar:'شوربة عدس'},ing:[{en:'Red lentils',ar:'عدس أحمر'},{en:'Carrot',ar:'جزر'},{en:'Potato',ar:'بطاطس'},{en:'Cumin',ar:'كمّون'}],how:{en:'Simmer lentils with carrot and potato until soft, blend smooth. Great first food from 6 months (unsalted).',ar:'اطبخ العدس مع الجزر والبطاطس حتى ينضج، واخلطه ناعمًا. مناسب كأول طعام من ٦ أشهر (بدون ملح).'}},
+ {id:'r3',tags:['GF'],name:{en:'Banana oat pancakes',ar:'فطائر الموز والشوفان'},ing:[{en:'Ripe banana',ar:'موز ناضج'},{en:'Gluten-free oats',ar:'شوفان خالٍ من الغلوتين'},{en:'Egg',ar:'بيض'}],how:{en:'Mash banana, mix with oats and egg, cook small pancakes. Soft finger food.',ar:'اهرس الموز، اخلطه مع الشوفان والبيض، واطبخ فطائر صغيرة. طعام طري يُمسك باليد.'}},
+ {id:'r4',tags:['GF','DF'],name:{en:'Grilled fish & soft potato',ar:'سمك مشوي وبطاطس طرية'},ing:[{en:'White fish fillet',ar:'شريحة سمك أبيض'},{en:'Potato',ar:'بطاطس'},{en:'Olive oil',ar:'زيت زيتون'},{en:'Lemon',ar:'ليمون'}],how:{en:'Grill fish gently, boil and mash potato. Iron- and protein-rich.',ar:'اشوِ السمك بلطف، واسلق البطاطس واهرسها. غني بالحديد والبروتين.'}},
+ {id:'r5',tags:['GF','LF'],name:{en:'Yogurt & date smoothie',ar:'سموذي لبن وتمر'},ing:[{en:'Plain yogurt',ar:'لبن سادة'},{en:'Pitted dates',ar:'تمر منزوع النوى'},{en:'Banana',ar:'موز'}],how:{en:'Blend yogurt, a couple of dates and banana. Calcium + natural sweetness (skip if dairy-free needed).',ar:'اخلط اللبن مع بضع تمرات وموزة. كالسيوم وحلاوة طبيعية (تجنّبه إذا كان يحتاج خاليًا من الألبان).'}},
+ {id:'r6',tags:['GF','LF'],name:{en:'Veggie omelet fingers',ar:'أصابع أومليت الخضار'},ing:[{en:'Egg',ar:'بيض'},{en:'Courgette / spinach',ar:'كوسا/سبانخ'},{en:'Olive oil',ar:'زيت زيتون'}],how:{en:'Whisk egg with grated soft veg, cook flat, cut into strips for self-feeding.',ar:'اخفق البيض مع خضار مبشورة طرية، اطبخه مسطّحًا، وقطّعه أصابع للأكل الذاتي.'}}
+];
+const TAGLBL={GF:{en:'Gluten-free',ar:'خالٍ من الغلوتين'},DF:{en:'Dairy-free',ar:'خالٍ من الألبان'},LF:{en:'Low-FODMAP',ar:'قليل FODMAP'}};
+route('recipes',(n)=>{const filt=(CURRENT_OPTS&&CURRENT_OPTS.tag)||'all';
+  const list=filt==='all'?RECIPES:RECIPES.filter(r=>r.tags.includes(filt));
+  n.innerHTML=backbar(t('recipes'))+
+   card(`<div class="row wrap" style="gap:6px"><button class="chip ${filt==='all'?'on':''}" onclick="go('recipes',{tag:'all',replace:true})">${isAr()?'الكل':'All'}</button>`+Object.keys(TAGLBL).map(k=>`<button class="chip ${filt===k?'on':''}" onclick="go('recipes',{tag:'${k}',replace:true})">${L(TAGLBL[k])}</button>`).join('')+`<button class="chip" onclick="go('grocery')">🛒 ${t('grocery')}${(S.grocery&&S.grocery.length)?' · '+S.grocery.length:''}</button></div>`)+
+   list.map(r=>card(`<div class="row between"><b>${L(r.name)}</b></div><div class="row wrap" style="gap:5px;margin:6px 0">${r.tags.map(tg=>`<span class="pill g">${L(TAGLBL[tg])}</span>`).join('')}</div><p class="sm muted">${L(r.how)}</p><div class="row" style="gap:8px;margin-top:8px"><button class="btn btn-soft" style="width:auto;padding:9px 14px;font-size:13px" onclick="addRecipeGrocery('${r.id}')">🛒 ${isAr()?'أضف للتسوّق':'Add to list'}</button></div>`)).join('')+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+function addRecipeGrocery(id){const r=RECIPES.find(x=>x.id===id);if(!r)return;S.grocery=S.grocery||[];
+  r.ing.forEach(i=>{if(!S.grocery.find(g=>g.en===i.en))S.grocery.push({en:i.en,ar:i.ar,done:false});});save();toast(isAr()?'أُضيف ✓':'Added ✓');}
+route('grocery',(n)=>{S.grocery=S.grocery||[];
+  n.innerHTML=backbar(t('grocery'))+
+   (S.grocery.length?card(S.grocery.map((g,i)=>`<label class="opt ${g.done?'on':''}" style="padding:10px 12px"><input type="checkbox" style="width:auto" ${g.done?'checked':''} onchange="toggleGro(${i})"><span style="flex:1${g.done?';text-decoration:line-through;opacity:.6':''}">${L(g)}</span></label>`).join('')+`<button class="btn btn-ghost" style="margin-top:10px;color:var(--danger)" onclick="clearGro()">${isAr()?'مسح المكتمل':'Clear ticked'}</button>`):card(`<div class="muted sm">${isAr()?'أضف مكوّنات من الوصفات لبناء قائمتك.':'Add ingredients from recipes to build your list.'}</div>`))+
+   `<button class="btn btn-soft" onclick="go('recipes')">← ${t('recipes')}</button>`;
+});
+function toggleGro(i){S.grocery[i].done=!S.grocery[i].done;save();}
+function clearGro(){S.grocery=(S.grocery||[]).filter(g=>!g.done);save();render();}
+
+/* ---- VACCINATIONS (Saudi MOH schedule) ---- */
+const VAX=[
+ {age:{en:'At birth',ar:'عند الولادة'},v:[{a:'Hep B',en:'Hepatitis B',ar:'التهاب الكبد ب'}]},
+ {age:{en:'2 months',ar:'شهران'},v:[{a:'DTaP',en:'Diphtheria-Tetanus-Pertussis',ar:'الثلاثي البكتيري'},{a:'Hib',en:'Hib',ar:'المستدمية ب'},{a:'Hep B',en:'Hepatitis B',ar:'الكبد ب'},{a:'IPV',en:'Polio (injected)',ar:'شلل الأطفال المُعطّل'},{a:'PCV',en:'Pneumococcal',ar:'المكورات الرئوية'},{a:'Rota',en:'Rotavirus',ar:'الروتا'}]},
+ {age:{en:'4 months',ar:'٤ أشهر'},v:[{a:'DTaP',en:'DTaP',ar:'الثلاثي البكتيري'},{a:'Hib',en:'Hib',ar:'المستدمية ب'},{a:'Hep B',en:'Hepatitis B',ar:'الكبد ب'},{a:'IPV',en:'Polio (injected)',ar:'شلل مُعطّل'},{a:'PCV',en:'Pneumococcal',ar:'المكورات'},{a:'Rota',en:'Rotavirus',ar:'الروتا'}]},
+ {age:{en:'6 months',ar:'٦ أشهر'},v:[{a:'BCG',en:'Tuberculosis (BCG)',ar:'الدرن (BCG)'},{a:'DTaP',en:'DTaP',ar:'الثلاثي البكتيري'},{a:'Hib',en:'Hib',ar:'المستدمية ب'},{a:'Hep B',en:'Hepatitis B',ar:'الكبد ب'},{a:'IPV/OPV',en:'Polio',ar:'شلل الأطفال'},{a:'PCV',en:'Pneumococcal',ar:'المكورات'},{a:'Rota',en:'Rotavirus',ar:'الروتا'},{a:'Flu',en:'Seasonal flu (annual)',ar:'إنفلونزا (سنويًا)'}]},
+ {age:{en:'9 months',ar:'٩ أشهر'},v:[{a:'Measles',en:'Measles',ar:'الحصبة'},{a:'MenACWY',en:'Meningococcal ACWY',ar:'السحائي الرباعي'}]},
+ {age:{en:'12 months',ar:'١٢ شهرًا'},v:[{a:'OPV',en:'Polio (oral)',ar:'شلل فموي'},{a:'PCV',en:'Pneumococcal booster',ar:'المكورات (داعمة)'},{a:'MMR',en:'Measles-Mumps-Rubella',ar:'الثلاثي الفيروسي'},{a:'MenACWY',en:'Meningococcal ACWY',ar:'السحائي الرباعي'}]},
+ {age:{en:'18 months',ar:'١٨ شهرًا'},v:[{a:'DTaP',en:'DTaP booster',ar:'الثلاثي البكتيري (داعمة)'},{a:'Hib',en:'Hib booster',ar:'المستدمية (داعمة)'},{a:'OPV',en:'Polio (oral)',ar:'شلل فموي'},{a:'MMR',en:'MMR',ar:'الثلاثي الفيروسي'},{a:'Varicella',en:'Chickenpox',ar:'جدري الماء'},{a:'Hep A',en:'Hepatitis A',ar:'الكبد أ'}]},
+ {age:{en:'24 months',ar:'٢٤ شهرًا'},v:[{a:'Hep A',en:'Hepatitis A (2)',ar:'الكبد أ (٢)'}]},
+ {age:{en:'4–6 years',ar:'٤–٦ سنوات'},v:[{a:'DTaP',en:'DTaP booster',ar:'الثلاثي البكتيري (داعمة)'},{a:'OPV',en:'Polio (oral)',ar:'شلل فموي'},{a:'MMR',en:'MMR',ar:'الثلاثي الفيروسي'},{a:'Varicella',en:'Chickenpox (2)',ar:'جدري الماء (٢)'}]},
+ {age:{en:'~11–12 y (girls, school)',ar:'~١١–١٢ سنة (الفتيات، بالمدرسة)'},v:[{a:'HPV',en:'HPV (2 doses)',ar:'فيروس الورم الحليمي (جرعتان)'}]}
+];
+route('vaccines',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('vaccines'))+emptyState();return;}
+  c.vax=c.vax||{};const nowMo=ageMonths(c)||0;const ageToMo=[0,2,4,6,9,12,18,24,60,138];
+  n.innerHTML=backbar(t('vaccines'))+childBar(c)+
+   card(`<p class="sm muted">${isAr()?'الجدول الوطني السعودي للتطعيمات. علِّم ما أخذه طفلك — المصدر الرسمي هو شهادة التطعيم من وزارة الصحة، ويحدّد الطبيب أي توقيت خاص.':'Saudi national immunization schedule. Tick what your child has had — the official source is the MOH vaccination certificate, and your doctor decides any special timing.'}</p>`)+
+   VAX.map((row,i)=>{const due=nowMo>=ageToMo[i];const key=i;const done=c.vax[key];
+     return card(`<div class="row between"><b>${L(row.age)}</b>${done?`<span class="pill g">✓ ${isAr()?'مكتمل':'done'}</span>`:(due?`<span class="pill a">${isAr()?'مستحق':'due'}</span>`:'')}</div>
+       <div class="row wrap" style="gap:5px;margin:8px 0">${row.v.map(x=>`<span class="chip" style="cursor:default">${L(x)}</span>`).join('')}</div>
+       <label class="opt ${done?'on':''}" style="padding:9px 12px;margin:0"><input type="checkbox" style="width:auto" ${done?'checked':''} onchange="toggleVax(${key})"><span>${isAr()?'أخذ طفلي هذه الزيارة':'My child had this visit'}</span></label>`);
+   }).join('')+
+   card(`<h3 style="margin-bottom:6px">💉 ${isAr()?'الأطفال على أدوية مثبّطة للمناعة (مثل التهاب الأمعاء)':'Children on immune-suppressing medicines (e.g. IBD)'}</h3><p class="sm">${isAr()?'اللقاحات الحيّة (MMR، جدري الماء، الروتا، BCG، رذاذ الإنفلونزا) تُؤجَّل عادة أثناء تثبيط المناعة أو البيولوجيّات؛ واللقاحات غير الحيّة مشجّعة، خاصة إنفلونزا غير حيّة سنويًا والمكورات الرئوية. يُفضّل تحديث اللقاحات الحيّة قبل بدء البيولوجي. ناقش التوقيت مع أخصائي طفلك.':'Live vaccines (MMR, chickenpox, rotavirus, BCG, nasal flu) are usually postponed during immunosuppression or biologics; non-live vaccines are encouraged — especially annual inactivated flu and pneumococcal. Live vaccines are ideally updated before starting a biologic. Discuss timing with your child’s specialist.'}</p></div>`)+
+   `<p class="disc">${t('disc')}</p>`;
+});
+function toggleVax(k){const c=activeChild();c.vax=c.vax||{};if(c.vax[k])delete c.vax[k];else c.vax[k]=1;save();render();}
+
+/* ---- SUPPLEMENTS ---- */
+const SUPP_COMMON=[{en:'Vitamin D',ar:'فيتامين د'},{en:'Iron',ar:'حديد'},{en:'Calcium',ar:'كالسيوم'},{en:'Multivitamin',ar:'فيتامينات متعددة'},{en:'Zinc',ar:'زنك'},{en:'Probiotic',ar:'بروبيوتيك'}];
+route('supps',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('supplements'))+emptyState();return;}
+  c.supps=c.supps||[];const takenToday=new Set(childLogs(c.id).filter(l=>l.type==='supp'&&l.t.slice(0,10)===dayKey()).map(l=>l.name));
+  n.innerHTML=backbar(t('supplements'))+childBar(c)+
+   card(`<p class="sm muted">${isAr()?'تابِع مكمّلات طفلك التي وصفها الطبيب (مثل فيتامين د والحديد). التطبيق يسجّل فقط ولا ينصح بجرعات.':'Track your child’s supplements as advised by the doctor (e.g. vitamin D, iron). The app records only — it does not advise doses.'}</p>`)+
+   (c.supps.length?card(c.supps.map((s,i)=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>${s.name}</b>${s.dose?`<div class="muted xs">${s.dose}</div>`:''}</div><div class="row"><button class="chip ${takenToday.has(s.name)?'on':''}" onclick="suppTaken('${s.name.replace(/'/g,"")}')">${takenToday.has(s.name)?'✓':t('taken')}</button><button class="chip" onclick="rmSupp(${i})">✕</button></div></div>`).join('')):'')+
+   card(`<h3 style="margin-bottom:8px">${t('add')}</h3><div class="row wrap" style="gap:6px;margin-bottom:8px">${SUPP_COMMON.map(s=>`<button class="chip" onclick="document.getElementById('sp_n').value='${L(s)}'">${L(s)}</button>`).join('')}</div><input id="sp_n" placeholder="${isAr()?'اسم المكمّل':'Supplement name'}"><input id="sp_d" placeholder="${t('dose')}" style="margin-top:6px"><button class="btn btn-primary" style="margin-top:10px" onclick="addSupp()">${t('add')}</button>`)+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+function addSupp(){const c=activeChild();const name=val('sp_n');if(!name)return;c.supps=c.supps||[];c.supps.push({name,dose:val('sp_d')});save();render();}
+function rmSupp(i){const c=activeChild();c.supps.splice(i,1);save();render();}
+function suppTaken(name){addLog({type:'supp',name});toast(t('saved'));render();}
+
+/* ---- MEDICATION REMINDERS + ICS ---- */
+route('reminders',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('reminders'))+emptyState();return;}
+  const meds=S.meds.filter(m=>m.childId===c.id);
+  n.innerHTML=backbar(t('reminders'))+childBar(c)+
+   card(`<p class="sm muted">${isAr()?'اضبط وقت تذكير لكل دواء محفوظ، وأضِفه لتقويم هاتفك. سجّل دواءً من اليوميات أولًا ليظهر هنا.':'Set a reminder time for each saved medicine and add it to your phone calendar. Log a medicine from the diary first to see it here.'}</p>`)+
+   (meds.length?meds.map(m=>card(`<div class="row between"><b>💊 ${m.name}</b>${m.dose?`<span class="muted xs">${m.dose}</span>`:''}</div>
+     <div class="row" style="gap:8px;margin-top:10px"><input type="time" id="rm_${m.id}" value="${m.remind||'08:00'}" style="flex:1" onchange="setRemind('${m.id}',this.value)"><button class="btn btn-soft" style="width:auto;padding:11px 14px" onclick="downloadICS('${m.id}')">📅 ${t('addCal')}</button></div>
+     ${m.remind?`<div class="muted xs" style="margin-top:6px">${isAr()?'تذكير يومي الساعة':'Daily reminder at'} ${m.remind}</div>`:''}`)).join(''):card(`<div class="muted sm">${isAr()?'لا أدوية محفوظة بعد.':'No saved medicines yet.'}</div>`)+`<button class="btn btn-soft" style="margin-top:8px" onclick="logSheet('med')">＋ ${t('logmed')}</button>`)+
+   `<div class="alert warn"><span class="sm">${isAr()?'التذكيرات لمساعدتك فقط — اتبع تعليمات طبيب طفلك للجرعات والتوقيت.':'Reminders are a helper only — follow your child’s doctor for doses and timing.'}</span></div>`;
+});
+function setRemind(id,v){const m=S.meds.find(x=>x.id===id);if(m){m.remind=v;save();}}
+function downloadICS(id){const m=S.meds.find(x=>x.id===id);if(!m)return;const time=(m.remind||'08:00').replace(':','')+'00';
+  const dt=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Baraem//EN','BEGIN:VEVENT','UID:'+rid()+'@baraem','DTSTART:'+dt+'T'+time,'RRULE:FREQ=DAILY','SUMMARY:'+(isAr()?'دواء: ':'Medicine: ')+m.name+(m.dose?' ('+m.dose+')':''),'DESCRIPTION:'+(isAr()?'تذكير من براعم':'Baraem reminder'),'END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const b=new Blob([ics],{type:'text/calendar'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=(m.name||'medicine')+'.ics';a.click();setTimeout(()=>URL.revokeObjectURL(u),1500);toast(isAr()?'تم إنشاء الملف':'Calendar file ready');}
+
+/* ---- COMFORT & CALM ---- */
+route('comfort',(n)=>{
+  const tips=[
+   {icon:'🫁',t:{en:'Belly breathing',ar:'تنفّس البطن'},d:{en:'Sit together, hand on tummy. Breathe in slowly for 4, out for 6, and watch the hand rise and fall. A few minutes can ease cramping and worry.',ar:'اجلسا معًا واليد على البطن. شهيق بطيء لـ٤ ثوانٍ، زفير لـ٦، وراقبا ارتفاع اليد وهبوطها. دقائق قليلة تخفّف التقلّص والقلق.'}},
+   {icon:'🧸',t:{en:'Distraction',ar:'الإلهاء'},d:{en:'Pain feels bigger when we focus on it. A story, a favourite show, counting games or a warm cuddle shift attention and genuinely lower pain.',ar:'يكبر الألم حين نركّز عليه. قصة أو برنامج مفضّل أو ألعاب العدّ أو حضن دافئ تحوّل الانتباه وتخفّف الألم فعلًا.'}},
+   {icon:'♨️',t:{en:'Gentle warmth',ar:'دفء لطيف'},d:{en:'A warm (not hot) compress or bath on the tummy can relax the muscles for functional pain. Always check the temperature first.',ar:'كمّادة دافئة (غير ساخنة) أو حمام دافئ على البطن يرخي العضلات في الألم الوظيفي. تحقّق من الحرارة أولًا.'}},
+   {icon:'🕒',t:{en:'Routine & sleep',ar:'الروتين والنوم'},d:{en:'Regular meals, water, movement and sleep calm a sensitive gut over time. Predictable days help more than any single fix.',ar:'الوجبات المنتظمة والماء والحركة والنوم تهدّئ الأمعاء الحساسة مع الوقت. الأيام المتوقّعة تساعد أكثر من أي حل واحد.'}},
+   {icon:'💬',t:{en:'Calm reassurance',ar:'طمأنة هادئة'},d:{en:'Telling your child “this is real, it’s not dangerous, and it will pass” lowers fear — which lowers pain. Stay calm; children borrow our calm.',ar:'قول «هذا حقيقي، غير خطير، وسيمرّ» يقلّل الخوف — فيقلّل الألم. ابقَ هادئًا؛ يستعير الأطفال هدوءنا.'}}
+  ];
+  n.innerHTML=backbar(t('comfort'))+
+   card(`<div style="text-align:center"><div id="breathC" style="width:120px;height:120px;border-radius:50%;margin:8px auto;background:radial-gradient(circle,var(--accent),color-mix(in srgb,var(--accent) 40%,transparent));transition:transform 4s ease-in-out;transform:scale(.6)"></div><div id="breathT" class="muted sm">${isAr()?'اضغط للبدء':'Tap to start'}</div><button class="btn btn-soft" style="margin-top:12px;max-width:200px;margin-inline:auto" onclick="breatheStart()">${isAr()?'تمرين تنفّس':'Breathing exercise'}</button></div>`)+
+   tips.map(x=>card(`<div class="row" style="gap:10px;align-items:flex-start"><span style="font-size:24px">${x.icon}</span><div><b>${L(x.t)}</b><p class="sm muted" style="margin-top:4px">${L(x.d)}</p></div></div>`)).join('')+
+   `<div class="alert warn"><span class="sm">${isAr()?'للألم الوظيفي والتوتّر. إذا كان الألم شديدًا أو مع دم أو قيء أو حمّى أو فقدان وزن، راجع الطبيب.':'For functional pain and stress. If pain is severe or with blood, vomiting, fever or weight loss, see a doctor.'}</span></div>`;
+});
+let breathTimer=null;
+function breatheStart(){const c=document.getElementById('breathC'),tx=document.getElementById('breathT');if(!c)return;
+  if(breathTimer){clearInterval(breathTimer);breathTimer=null;c.style.transform='scale(.6)';tx.textContent=isAr()?'اضغط للبدء':'Tap to start';return;}
+  let inhale=true;const cycle=()=>{c.style.transform=inhale?'scale(1)':'scale(.6)';tx.textContent=inhale?(isAr()?'شهيق…':'Breathe in…'):(isAr()?'زفير…':'Breathe out…');inhale=!inhale;};
+  cycle();breathTimer=setInterval(cycle,4500);}
+
+/* ---- CARE-AWAY KIT (travel / school plan + letter) ---- */
+route('careaway',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('careaway'))+emptyState();return;}
+  const mode=(CURRENT_OPTS&&CURRENT_OPTS.mode)||'travel';
+  const packing=mode==='travel'?[
+   {en:'All medicines in original packaging + extra supply',ar:'كل الأدوية بعبوتها الأصلية + كمية إضافية'},
+   {en:'A copy of prescriptions & this care letter',ar:'نسخة من الوصفات وخطاب الرعاية'},
+   {en:'Cool bag for medicines that need it (e.g. some biologics)',ar:'حقيبة تبريد للأدوية التي تحتاجها (مثل بعض البيولوجيّات)'},
+   {en:'Safe snacks / formula for allergies or coeliac',ar:'وجبات/حليب آمنة للحساسية أو الداء الزلاقي'},
+   {en:'Oral rehydration sachets',ar:'أكياس محلول الإماهة'},
+   {en:'Your doctor’s contact & nearest hospital at destination',ar:'رقم طبيبك وأقرب مستشفى في الوجهة'}
+  ]:[
+   {en:'Care plan shared with the teacher / nurse',ar:'خطة رعاية مشتركة مع المعلّم/الممرضة'},
+   {en:'Toilet-access permission if needed (IBD/constipation)',ar:'إذن دخول الحمّام عند الحاجة (التهاب الأمعاء/الإمساك)'},
+   {en:'Safe foods list & allergy action (if any)',ar:'قائمة الأطعمة الآمنة وخطة الحساسية (إن وُجدت)'},
+   {en:'Any medicine given at school + who gives it',ar:'أي دواء يُعطى بالمدرسة ومن يعطيه'},
+   {en:'Signs that mean “call the parent”',ar:'العلامات التي تعني «اتصلوا بالوالدين»'}
+  ];
+  const conds=(c.conditions||[]).map(k=>L((CONDITIONS.find(x=>x.key===k)||{}).name)).filter(Boolean).join('، ')||(isAr()?'—':'—');
+  const meds=S.meds.filter(m=>m.childId===c.id).map(m=>m.name+(m.dose?' ('+m.dose+')':'')).join('، ')||(isAr()?'لا يوجد':'none');
+  n.innerHTML=backbar(t('careaway'))+childBar(c)+
+   `<div class="seg" data-grp="ca_m"><button class="${mode==='travel'?'on':''}" onclick="go('careaway',{mode:'travel',replace:true})">🧳 ${isAr()?'سفر':'Travel'}</button><button class="${mode==='school'?'on':''}" onclick="go('careaway',{mode:'school',replace:true})">🏫 ${isAr()?'مدرسة':'School'}</button></div>`+
+   card(`<h3 style="margin-bottom:8px">${mode==='travel'?(isAr()?'قائمة السفر':'Travel checklist'):(isAr()?'خطة المدرسة':'School plan')}</h3>`+packing.map(p=>`<div class="list-i"><span class="dot" style="background:var(--accent);margin-top:7px"></span><span class="sm">${L(p)}</span></div>`).join(''))+
+   card(`<h3 style="margin-bottom:8px">✉️ ${isAr()?'خطاب رعاية':'Care letter'}</h3><div class="muted xs" style="margin-bottom:8px">${isAr()?'ملخّص يُشارك مع المعلّم أو أثناء السفر.':'A summary to share with a teacher or while travelling.'}</div><div id="ca_letter" style="background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;font-size:13px;line-height:1.6;white-space:pre-wrap">${careLetter(c,mode,conds,meds)}</div><button class="btn btn-soft" style="margin-top:10px" onclick="copyLetter()">📋 ${t('copyText')}</button>`)+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+function careLetter(c,mode,conds,meds){const nm=c.name||(isAr()?'طفلي':'my child');
+  if(isAr())return `إلى من يهمّه الأمر،\nهذا يخصّ ${nm} (${ageLabel(c)}).\nالحالات المتابَعة: ${conds}.\nالأدوية الحالية: ${meds}.\n${mode==='school'?'يُرجى السماح بدخول الحمّام عند الحاجة وإبلاغنا عند ظهور ألم شديد أو دم أو قيء أو جفاف.':'أثناء السفر نحمل الأدوية والوصفات ووجبات آمنة. عند ظهور علامات خطر نتوجّه لأقرب رعاية.'}\nهذا ملخّص تثقيفي وليس وثيقة طبية.`;
+  return `To whom it may concern,\nThis concerns ${nm} (${ageLabel(c)}).\nConditions followed: ${conds}.\nCurrent medicines: ${meds}.\n${mode==='school'?'Please allow toilet access when needed and contact us if there is severe pain, blood, vomiting or signs of dehydration.':'While travelling we carry medicines, prescriptions and safe foods. If warning signs appear we will seek the nearest care.'}\nThis is an educational summary, not a medical document.`;}
+function copyLetter(){const e=document.getElementById('ca_letter');if(e&&navigator.clipboard){navigator.clipboard.writeText(e.textContent);toast(t('copied'));}}
+
+/* ---- WEEKLY INSIGHTS ---- */
+route('insights',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('insights'))+emptyState();return;}
+  const since=Date.now()-7*864e5;const ls=childLogs(c.id).filter(l=>new Date(l.t)>=since);
+  const symDays=new Set(ls.filter(l=>l.type==='sym').map(l=>l.t.slice(0,10))).size;
+  const stools=ls.filter(l=>l.type==='stool');const waterDays={};ls.filter(l=>l.type==='water').forEach(l=>{const d=l.t.slice(0,10);waterDays[d]=(waterDays[d]||0)+ +l.ml;});
+  const wAvg=Object.keys(waterDays).length?Math.round(Object.values(waterDays).reduce((a,b)=>a+b,0)/Object.keys(waterDays).length):0;
+  const medsTaken=ls.filter(l=>l.type==='med'&&l.status!=='missed').length;const missed=ls.filter(l=>l.type==='med'&&l.status==='missed').length;
+  let msg;if(!ls.length)msg=isAr()?'لا إدخالات هذا الأسبوع — سجّل قليلًا لترى ملخصك.':'No entries this week — log a little to see your recap.';
+  else if(symDays<=1)msg=isAr()?'أسبوع هادئ نسبيًا على مستوى الأعراض. أحسنت المتابعة!':'A relatively calm week for symptoms. Nice tracking!';
+  else msg=isAr()?`سُجّلت أعراض في ${symDays} أيام هذا الأسبوع — قد يفيد عرض هذا على الطبيب.`:`Symptoms were noted on ${symDays} days this week — worth sharing with your doctor.`;
+  n.innerHTML=backbar(t('insights'))+childBar(c)+
+   card(`<b>${isAr()?'آخر ٧ أيام':'Last 7 days'}</b><div class="grid2" style="margin-top:10px">${stat(ls.length,isAr()?'إدخالات':'entries')}${stat(symDays,isAr()?'أيام بأعراض':'symptom days')}${stat(stools.length,isAr()?'إدخالات براز':'stool logs')}${stat(wAvg?wAvg+'mL':'—',isAr()?'متوسط الشرب/يوم':'avg drink/day')}</div>`)+
+   card(`<div class="row" style="gap:10px;align-items:flex-start"><span style="font-size:22px">💡</span><p class="sm" style="margin:0">${msg}</p></div>`)+
+   (medsTaken+missed>0?card(`<b>${isAr()?'الدواء':'Medicine'}</b><div class="sm muted" style="margin-top:6px">${isAr()?'أُخذ':'Taken'}: ${medsTaken} · ${isAr()?'فائت':'missed'}: ${missed}</div>`):'')+
+   card(`<button class="btn btn-soft" onclick="navTab('report')">${t('report')} →</button>`)+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+
+/* ============ HEALTH RECORD (printable) ============ */
+route('record',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('healthRecord'))+emptyState();return;}
+  const conds=(c.conditions||[]).map(k=>L((CONDITIONS.find(x=>x.key===k)||{}).name)).filter(Boolean);
+  const grow=childLogs(c.id).filter(l=>l.type==='growth').slice(-6);
+  const meds=S.meds.filter(m=>m.childId===c.id);const supps=c.supps||[];
+  const allergy=childLogs(c.id).filter(l=>l.type==='feed'&&l.allergen).map(l=>l.allergen);
+  c.vax=c.vax||{};const vaxDone=VAX.filter((_,i)=>c.vax[i]).length;
+  const sex=c.sex==='m'?'m':'f';
+  const growRows=grow.map(l=>{const mo=ageMonthsAt(c.birth,l.t);const pw=l.w?pct(zScore(+l.w,lmsAt('wt',sex,mo)||{L:1,M:1,S:1})):null;
+    return `<tr><td>${new Date(l.t).toLocaleDateString()}</td><td>${l.w?l.w+'kg':'—'}</td><td>${l.h?l.h+'cm':'—'}</td><td>${l.hc?l.hc+'cm':'—'}</td></tr>`;}).join('');
+  n.innerHTML=backbar(t('healthRecord'))+
+   `<div class="card" id="recdoc"><div style="text-align:center;margin-bottom:14px"><div style="width:44px;height:44px;margin:0 auto">${brandSVG().replace('width="30" height="30"','width="44" height="44"')}</div><h2 style="margin-top:6px">${t('healthRecord')}</h2><div class="muted sm">Baraʿem · براعم — ${new Date().toLocaleDateString()}</div></div>
+     <table style="width:100%;font-size:14px;border-collapse:collapse"><tr><td style="padding:4px 0;color:var(--muted);width:40%">${isAr()?'الطفل':'Child'}</td><td><b>${c.name||(isAr()?'—':'—')}</b> · ${ageLabel(c)} · ${c.sex==='m'?(isAr()?'ذكر':'Boy'):(isAr()?'أنثى':'Girl')}</td></tr>
+     <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'تاريخ الميلاد':'Birth month'}</td><td>${c.birth||'—'}</td></tr>
+     <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'الحالات':'Conditions'}</td><td>${conds.join('، ')||'—'}</td></tr>
+     <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'الحساسية المسجّلة':'Noted allergies'}</td><td>${[...new Set(allergy)].join('، ')||'—'}</td></tr>
+     <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'الأدوية':'Medicines'}</td><td>${meds.map(m=>m.name+(m.dose?` (${m.dose})`:'')).join('، ')||'—'}</td></tr>
+     <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'المكمّلات':'Supplements'}</td><td>${supps.map(s=>s.name).join('، ')||'—'}</td></tr>
+     <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'التطعيمات المكتملة':'Vaccine visits done'}</td><td>${vaxDone} / ${VAX.length}</td></tr></table>
+     ${grow.length?`<h3 style="margin:14px 0 6px">${isAr()?'سجل النمو':'Growth history'}</h3><table style="width:100%;font-size:13px;border-collapse:collapse"><tr style="color:var(--muted)"><td>${isAr()?'التاريخ':'Date'}</td><td>${isAr()?'الوزن':'Wt'}</td><td>${isAr()?'الطول':'Ht'}</td><td>${isAr()?'الرأس':'HC'}</td></tr>${growRows}</table>`:''}
+     <p class="disc" style="margin-top:14px">${t('disc')}</p></div>`+
+   `<div class="grid2 noprint"><button class="btn btn-ghost" onclick="window.print()">🖨️ ${t('print')}</button><button class="btn btn-soft" onclick="go('vaxcert')">💉 ${t('vaxCert')}</button></div>`;
+});
+route('vaxcert',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('vaxCert'))+emptyState();return;}
+  c.vax=c.vax||{};
+  n.innerHTML=backbar(t('vaxCert'))+
+   `<div class="card"><div style="text-align:center;margin-bottom:12px"><h2>${t('vaxCert')}</h2><div class="muted sm">${c.name||'—'} · ${ageLabel(c)} · ${isAr()?'الجدول السعودي':'Saudi schedule'}</div></div>`+
+   VAX.map((row,i)=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b class="sm">${L(row.age)}</b><div class="muted xs">${row.v.map(x=>x.a).join(', ')}</div></div><span class="pill ${c.vax[i]?'g':'a'}">${c.vax[i]?'✓':'—'}</span></div>`).join('')+
+   `<p class="disc">${isAr()?'المصدر الرسمي هو شهادة التطعيم من وزارة الصحة.':'The official record is the MOH vaccination certificate.'}</p></div>`+
+   `<button class="btn btn-ghost noprint" onclick="window.print()">🖨️ ${t('print')}</button>`;
+});
+
+/* ============ SHARE + CAREGIVER TRANSFER ============ */
+function b64enc(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))));}
+function b64dec(s){return JSON.parse(decodeURIComponent(escape(atob(s))));}
+function shareSnapshot(c){const since=Date.now()-14*864e5;const ls=childLogs(c.id).filter(l=>new Date(l.t)>=since);
+  const sex=c.sex==='m'?'m':'f';const g=childLogs(c.id).filter(l=>l.type==='growth').slice(-1)[0];
+  let gp=null;if(g&&g.w){const p=lmsAt('wt',sex,ageMonthsAt(c.birth,g.t));if(p)gp=pct(zScore(+g.w,p));}
+  return{n:c.name||'',a:ageLabel(c),cd:(c.conditions||[]).map(k=>L((CONDITIONS.find(x=>x.key===k)||{}).name)).filter(Boolean),
+    g:g?{w:g.w,h:g.h,p:gp}:null,st:ls.filter(l=>l.type==='stool').length,sy:new Set(ls.filter(l=>l.type==='sym').map(l=>l.t.slice(0,10))).size,
+    md:S.meds.filter(m=>m.childId===c.id).map(m=>m.name),d:new Date().toLocaleDateString()};}
+route('share',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('shareTool'))+emptyState();return;}
+  const link=location.origin+location.pathname+'#r='+b64enc(shareSnapshot(c));
+  n.innerHTML=backbar(t('shareTool'))+childBar(c)+
+   card(`<p class="sm muted">${isAr()?'أنشئ رابطًا للقراءة فقط بملخّص آخر أسبوعين لمشاركته مع طبيب طفلك أو مقدّم رعاية. البيانات مضمّنة في الرابط نفسه — لا تُرفع لأي خادم.':'Create a read-only link with a 2-week summary to share with your child’s doctor or a caregiver. The data is inside the link itself — nothing is uploaded to any server.'}</p>
+     <div id="qrbox" style="text-align:center;margin:14px 0"><div class="muted sm">${isAr()?'جارٍ إنشاء رمز QR…':'Generating QR…'}</div></div>
+     <div style="background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:10px;font-size:11px;word-break:break-all;max-height:70px;overflow:auto">${link}</div>
+     <div class="grid2" style="margin-top:10px"><button class="btn btn-soft" onclick="copyShare('${link.replace(/'/g,"\\'")}')">📋 ${t('copyText')}</button><button class="btn btn-soft" onclick="openShareView('${b64enc(shareSnapshot(c))}')">👁 ${isAr()?'معاينة':'Preview'}</button></div>`)+
+   card(`<h3 style="margin-bottom:6px">🔁 ${t('caregiver')}</h3><p class="sm muted" style="margin-bottom:10px">${isAr()?'انقل كل بيانات براعم إلى جهاز آخر (لوالد آخر مثلًا): صدّر ملفًا هنا واستورده على الجهاز الآخر.':'Move all Baraʿem data to another device (e.g. the other parent): export a file here and import it on the other device.'}</p>
+     <div class="grid2"><button class="btn btn-ghost" onclick="exportAll()">⬇️ ${t('exportData')}</button><label class="btn btn-ghost" style="text-align:center;cursor:pointer">⬆️ ${t('importData')}<input type="file" accept="application/json" style="display:none" onchange="importAll(event)"></label></div>`)+
+   `<p class="disc">${t('discShort')}</p>`;
+  loadQR(link);
+});
+function copyShare(l){if(navigator.clipboard)navigator.clipboard.writeText(l);toast(t('copied'));}
+function loadQR(link){const box=document.getElementById('qrbox');if(!box)return;
+  const draw=()=>{try{box.innerHTML='';new QRCode(box,{text:link,width:168,height:168,colorDark:'#2B2019',colorLight:'#ffffff'});}catch(e){box.innerHTML='<div class="muted sm">'+(isAr()?'الرمز يحتاج اتصالًا — انسخ الرابط بدلًا منه.':'QR needs a connection — copy the link instead.')+'</div>';}};
+  if(window.QRCode){draw();return;}
+  const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  s.onload=draw;s.onerror=()=>{box.innerHTML='<div class="muted sm">'+(isAr()?'الرمز يحتاج اتصالًا — انسخ الرابط.':'QR needs a connection — copy the link.')+'</div>';};document.head.appendChild(s);}
+function openShareView(enc){location.hash='r='+enc;renderSharedView();}
+function exportAll(){const b=new Blob([JSON.stringify(S)],{type:'application/json'});const u=URL.createObjectURL(b);
+  const a=document.createElement('a');a.href=u;a.download='baraem-data.json';a.click();setTimeout(()=>URL.revokeObjectURL(u),1500);toast(isAr()?'تم التصدير':'Exported');}
+function importAll(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const d=JSON.parse(r.result);if(!d.children){throw 0;}if(confirm(isAr()?'استبدال بيانات هذا الجهاز بالملف المستورد؟':'Replace this device’s data with the imported file?')){S=Object.assign(blank(),d);S.prefs=Object.assign(blank().prefs,d.prefs||{});save();location.hash='';render();toast(isAr()?'تم الاستيراد ✓':'Imported ✓');}}catch(e){toast(isAr()?'ملف غير صالح':'Invalid file');}};r.readAsText(f);}
+
+/* read-only shared viewer (opened from #r= link) */
+function renderSharedView(){const host=document.getElementById('screens');document.getElementById('tabbar').classList.add('hidden');document.getElementById('fab').classList.add('hidden');
+  let d;try{d=b64dec(location.hash.slice(3));}catch(e){render();return;}applyDir();
+  host.innerHTML=`<div class="screen">${card(`<div style="text-align:center;margin-bottom:10px"><div style="width:40px;height:40px;margin:0 auto">${brandSVG().replace('width="30" height="30"','width="40" height="40"')}</div><b>Baraʿem · براعم</b><div class="muted xs">${isAr()?'ملخّص للقراءة فقط':'Read-only summary'} · ${d.d||''}</div></div>
+     <table style="width:100%;font-size:14px"><tr><td class="muted" style="width:42%;padding:4px 0">${isAr()?'الطفل':'Child'}</td><td><b>${d.n||'—'}</b> · ${d.a||''}</td></tr>
+     <tr><td class="muted" style="padding:4px 0">${isAr()?'الحالات':'Conditions'}</td><td>${(d.cd||[]).join('، ')||'—'}</td></tr>
+     ${d.g?`<tr><td class="muted" style="padding:4px 0">${isAr()?'آخر نمو':'Latest growth'}</td><td>${[d.g.w?d.g.w+'kg':'',d.g.h?d.g.h+'cm':'',d.g.p!=null?`${d.g.p}${isAr()?' مئين':'th pct'}`:''].filter(Boolean).join(' · ')}</td></tr>`:''}
+     <tr><td class="muted" style="padding:4px 0">${isAr()?'آخر ١٤ يومًا':'Last 14 days'}</td><td>${d.st||0} ${isAr()?'إدخالات براز':'stool logs'} · ${d.sy||0} ${isAr()?'أيام بأعراض':'symptom days'}</td></tr>
+     <tr><td class="muted" style="padding:4px 0">${isAr()?'الأدوية':'Medicines'}</td><td>${(d.md||[]).join('، ')||'—'}</td></tr></table>
+     <div class="alert warn" style="margin-top:12px"><span class="sm">${t('shareTeam')}</span></div>`)}
+     <button class="btn btn-primary" onclick="location.hash='';render()">${isAr()?'فتح براعم':'Open Baraʿem'}</button></div>`;}
+
+/* ============ WASHROOM FINDER ============ */
+route('washroom',(n)=>{
+  S.places=S.places||[];
+  const q=(term)=>{const g=S.geo;const base='https://www.google.com/maps/search/';
+    return base+encodeURIComponent(term)+(g?`/@${g.lat},${g.lng},15z`:'');};
+  const finds=[
+   {em:'🚻',term:'public restroom',t:{en:'Public restroom',ar:'دورة مياه عامة'}},
+   {em:'🕌',term:'mosque',t:{en:'Mosque (has washrooms)',ar:'مسجد (به دورات مياه)'}},
+   {em:'🏬',term:'shopping mall',t:{en:'Mall',ar:'مركز تسوّق'}},
+   {em:'⛽',term:'gas station',t:{en:'Petrol station',ar:'محطة وقود'}},
+   {em:'☕',term:'cafe',t:{en:'Café',ar:'مقهى'}}
+  ];
+  n.innerHTML=backbar(t('washroom'))+
+   card(`<p class="sm muted">${isAr()?'ابحث عن أقرب دورة مياه عند الخروج مع طفل يعاني من إلحاح أو إمساك أو التهاب الأمعاء. يفتح الخرائط في متصفّحك.':'Find the nearest bathroom when you’re out with a child who has urgency, constipation or IBD. Opens maps in your browser.'}</p>
+     <button class="btn btn-soft" style="margin-top:10px" onclick="getGeo()">📍 ${S.geo?(isAr()?'تم تحديد موقعك ✓':'Location set ✓'):(isAr()?'استخدم موقعي (اختياري)':'Use my location (optional)')}</button>`)+
+   card(`<h3 style="margin-bottom:10px">${t('findNear')}</h3>`+finds.map(f=>`<a class="opt" href="${q(f.term)}" target="_blank" rel="noopener"><span class="em">${f.em}</span><span style="flex:1">${L(f.t)}</span><span class="muted">↗</span></a>`).join(''))+
+   card(`<div class="row between" style="margin-bottom:8px"><b>${t('savedPlaces')}</b></div><div class="row" style="gap:8px"><input id="pl_n" placeholder="${isAr()?'مثال: دورة مياه المول القريب':'e.g. mall bathroom nearby'}" style="flex:1"><button class="btn btn-primary" style="width:auto;padding:12px 16px" onclick="addPlace()">＋</button></div>`+
+     (S.places.length?`<div style="margin-top:10px">`+S.places.map((p,i)=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><span>📍 ${p}</span><button class="chip" onclick="rmPlace(${i})">✕</button></div>`).join('')+`</div>`:''))+
+   `<p class="disc">${isAr()?'يستخدم خرائط الطرف الثالث. لا يُرسَل موقعك إلى برعم.':'Uses third-party maps. Your location is not sent to Baraʿem.'}</p>`;
+});
+function getGeo(){if(!navigator.geolocation){toast(isAr()?'غير متاح':'Not available');return;}
+  navigator.geolocation.getCurrentPosition(p=>{S.geo={lat:p.coords.latitude.toFixed(5),lng:p.coords.longitude.toFixed(5)};save();toast(isAr()?'تم ✓':'Done ✓');render();},()=>toast(isAr()?'تعذّر تحديد الموقع':'Location unavailable'));}
+function addPlace(){const v=val('pl_n');if(!v)return;S.places=S.places||[];S.places.push(v);save();render();}
+function rmPlace(i){S.places.splice(i,1);save();render();}
+
+/* ============ THEME GALLERY ============ */
+route('themes',(n)=>{
+  const cur=S.prefs.accent?null:(S.prefs.themeKey||'apricot');
+  n.innerHTML=backbar(t('themesT'))+
+   card(`<div class="row between"><span>${t('theme')}</span><button class="chip ${S.prefs.theme==='dark'?'on':''}" onclick="toggleTheme()">${S.prefs.theme==='dark'?'🌙 '+(isAr()?'داكن':'Dark'):'☀️ '+(isAr()?'فاتح':'Light')}</button></div>`)+
+   card(`<h3 style="margin-bottom:12px">${isAr()?'لون التطبيق':'App colour'}</h3><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">`+
+     THEMES.map(th=>`<button onclick="setTheme('${th.k}')" style="border:2px solid ${cur===th.k?'var(--txt)':'transparent'};background:none;border-radius:14px;padding:6px;cursor:pointer;text-align:center"><div style="width:100%;aspect-ratio:1;border-radius:11px;background:linear-gradient(140deg,${th.a},${th.s})"></div><div class="xs" style="margin-top:5px">${L(th.name)}</div></button>`).join('')+`</div>`)+
+   card(`<div class="row between" style="margin-bottom:10px"><span>${t('customColor')}</span><input type="color" value="${S.prefs.accent||'#EA8A4E'}" onchange="setCustom(this.value)" style="width:52px;height:38px;padding:2px;border-radius:10px"></div><button class="btn btn-soft" onclick="surpriseTheme()">🎲 ${t('surprise')}</button>`)+
+   card(`<div class="between row"><span>${t('textSize')}</span><div class="row"><button class="chip" onclick="setText(-1)">A−</button><button class="chip" onclick="setText(1)">A+</button></div></div>`)+
+   `<p class="disc">${t('discShort')}</p>`;
+});
+function setTheme(k){S.prefs.themeKey=k;S.prefs.accent=null;save();render();}
+function setCustom(hex){S.prefs.accent=hex;save();render();}
+function surpriseTheme(){const th=THEMES[Math.floor(Math.random()*THEMES.length)];S.prefs.themeKey=th.k;S.prefs.accent=null;if(Math.random()<0.4)S.prefs.theme=S.prefs.theme==='dark'?'light':'dark';save();render();}
+
+/* ============ AUTO-UPDATE PROMPT ============ */
+function showUpdateBanner(reg){if(document.getElementById('updbn'))return;
+  const b=document.createElement('div');b.id='updbn';
+  b.style.cssText='position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:400;background:var(--accent);color:#fff;border-radius:999px;padding:11px 18px;font-weight:800;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.3);display:flex;gap:12px;align-items:center;max-width:92vw';
+  b.innerHTML=`<span>✨ ${t('updateReady')}</span><button style="background:#fff;color:var(--accent-strong);border:0;border-radius:999px;padding:6px 14px;font-weight:800;cursor:pointer">${t('refresh')}</button>`;
+  b.querySelector('button').onclick=()=>{if(reg&&reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});setTimeout(()=>location.reload(),300);};
+  document.body.appendChild(b);}
+
+/*__SPLIT__*/
+
+/* ============ BOOT ============ */
+if(location.hash.indexOf('#r=')===0){try{renderSharedView();}catch(e){render();}}else{render();}
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    reg.addEventListener('updatefound',()=>{const nw=reg.installing;if(!nw)return;
+      nw.addEventListener('statechange',()=>{if(nw.state==='installed'&&navigator.serviceWorker.controller)showUpdateBanner(reg);});});
+  }).catch(()=>{});
+  let refreshed=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshed)return;refreshed=true;location.reload();});
+}
+</script>
+</body>
+</html>
