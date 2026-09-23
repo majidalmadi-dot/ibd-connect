@@ -5,6 +5,21 @@
   "outputDirectory": ".",
   "redirects": [
     {
+      "source": "/eoe",
+      "destination": "/EoE/",
+      "permanent": true
+    },
+    {
+      "source": "/eoe/:path*",
+      "destination": "/EoE/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/maeen",
+      "destination": "/EoE/website.html",
+      "permanent": false
+    },
+    {
       "source": "/:path*",
       "has": [
         {

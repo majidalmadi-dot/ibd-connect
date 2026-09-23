@@ -1,7 +1,7 @@
 /* Maeen (EoE) service worker — offline support + fresh-on-deploy. Scope: /EoE/ */
-const CACHE = 'maeen-eoe-v24';
+const CACHE = 'maeen-eoe-v25';
 self.addEventListener('message',function(e){if(e.data&&e.data.type==='SKIP_WAITING')self.skipWaiting();});
-const CORE = ['./', './index.html', './manifest.webmanifest', './maeen-192.png', './maeen-512.png', './maeen-180.png'];
+const CORE = ['./', './index.html', './manifest.webmanifest', './maeen-192.png', './maeen-512.png', './maeen-180.png', './maeen-maskable-192.png', './maeen-maskable-512.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).catch(() => {}));
@@ -17,8 +17,8 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then((res) => { const cp = res.clone(); caches.open(CACHE).then((c) => c.put('./index.html', cp)); return res; })
-        .catch(() => caches.match('./index.html').then((c) => c || caches.match('./')))
+      fetch(req).then((res) => { if (res && res.ok) { const cp = res.clone(); caches.open(CACHE).then((c) => c.put(req, cp)); } return res; })
+        .catch(() => caches.match(req).then((c) => c || caches.match('./index.html')).then((c) => c || caches.match('./')))
     );
     return;
   }

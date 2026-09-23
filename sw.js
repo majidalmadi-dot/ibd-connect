@@ -1,6 +1,6 @@
 /* IBD Connect service worker — offline support + fresh-on-deploy.
    Bump CACHE on each release to invalidate old assets. */
-const CACHE = 'ibd-connect-v59';
+const CACHE = 'ibd-connect-v60';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './logo-glyph.png',
   // precache the charting lib so charts work on the very first offline launch
   'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'];
@@ -37,10 +37,12 @@ self.addEventListener('notificationclick', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
+  // Sibling apps (Maeen /EoE/, Qawam /Qawam/, Barem /Barem/) have their own workers — never intercept them.
+  try { const p = new URL(req.url).pathname; if (/^\/(EoE|Qawam|Barem)(\/|$)/i.test(p)) return; } catch (_) {}
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req).then((res) => { const cp = res.clone(); caches.open(CACHE).then((c) => c.put('./index.html', cp)); return res; })
-        .catch(() => caches.match('./index.html').then((c) => c || caches.match('./')))
+      fetch(req).then((res) => { if (res && res.ok) { const cp = res.clone(); caches.open(CACHE).then((c) => c.put(req, cp)); } return res; })
+        .catch(() => caches.match(req).then((c) => c || caches.match('./index.html')).then((c) => c || caches.match('./')))
     );
     return;
   }
