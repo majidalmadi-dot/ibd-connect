@@ -5,6 +5,16 @@
   "outputDirectory": ".",
   "redirects": [
     {
+      "source": "/EoE",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/EoE/",
+      "destination": "/",
+      "permanent": true
+    },
+    {
       "source": "/maeen",
       "destination": "/website.html",
       "permanent": false
