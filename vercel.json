@@ -16,12 +16,12 @@
     },
     {
       "source": "/Maeen",
-      "destination": "/EoE/website.html",
+      "destination": "https://maeen.saudigastro.com/website.html",
       "permanent": false
     },
     {
       "source": "/maeen/",
-      "destination": "/EoE/website.html",
+      "destination": "https://maeen.saudigastro.com/website.html",
       "permanent": false
     },
     {
@@ -31,7 +31,7 @@
     },
     {
       "source": "/maeen",
-      "destination": "/EoE/website.html",
+      "destination": "https://maeen.saudigastro.com/website.html",
       "permanent": false
     },
     {
