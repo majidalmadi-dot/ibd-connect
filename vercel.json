@@ -10,6 +10,21 @@
       "permanent": true
     },
     {
+      "source": "/eoe/",
+      "destination": "/EoE/",
+      "permanent": true
+    },
+    {
+      "source": "/Maeen",
+      "destination": "/EoE/website.html",
+      "permanent": false
+    },
+    {
+      "source": "/maeen/",
+      "destination": "/EoE/website.html",
+      "permanent": false
+    },
+    {
       "source": "/eoe/:path*",
       "destination": "/EoE/:path*",
       "permanent": true
