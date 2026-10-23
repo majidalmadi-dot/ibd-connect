@@ -106,6 +106,7 @@ a.link{color:var(--accent-strong);font-weight:700;text-decoration:none}
   <nav class="tabbar hidden" id="tabbar"></nav>
 </div>
 <script>
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 /* ============ STATE (additive-safe) ============ */
 const KEY='barem_v1';
 function blank(){return{
@@ -280,7 +281,7 @@ function backbar(title){return `<div class="row" style="margin-bottom:12px"><but
 function segMonths(){return isAr()?'شهر':'mo';}
 function avatarFor(c){const colors=['#EA8A4E','#4F9AD6','#3FA972','#B57BD6','#E0A23D'];
   const i=Math.abs((c.id||'x').charCodeAt(0))%colors.length;const ini=(c.name||'👶').slice(0,1).toUpperCase();
-  return `<span class="avatar" style="background:${colors[i]}">${c.name?ini:'👶'}</span>`;}
+  return `<span class="avatar" style="background:${colors[i]}">${c.name?esc(ini):'👶'}</span>`;}
 function toast(msg){let e=document.createElement('div');e.textContent=msg;
   e.style.cssText='position:fixed;bottom:110px;left:50%;transform:translateX(-50%);background:var(--txt);color:var(--bg);padding:11px 18px;border-radius:999px;font-weight:800;z-index:60;font-size:14px;box-shadow:0 4px 16px rgba(0,0,0,.25)';
   document.body.appendChild(e);setTimeout(()=>e.remove(),1500);}
@@ -350,7 +351,7 @@ function conditionPicker(sel){sel=sel||[];
     .replace(/class="chip leaf" data-v="([^"]+)"/g,(m,v)=>`class="chip leaf ${sel.includes(v)?'on':''}" data-v="${v}"`);}
 function childForm(c,isFirst){c=c||{};
   return card(`
-    <label class="fld">${t('childName')}</label><input id="cf_name" value="${c.name||''}" placeholder="${isAr()?'مثال: سارة':'e.g. Sara'}">
+    <label class="fld">${t('childName')}</label><input id="cf_name" value="${esc(c.name||'')}" placeholder="${isAr()?'مثال: سارة':'e.g. Sara'}">
     <label class="fld">${t('birth')}</label><input id="cf_birth" type="month" value="${c.birth||''}" max="${dayKey().slice(0,7)}">
     <label class="fld">${t('sex')}</label>
     <div class="seg" data-grp="cf_sex"><button data-v="f" onclick="pickOpt('cf_sex','f')" class="${c.sex==='f'?'on':''}">${t('girl')}</button><button data-v="m" onclick="pickOpt('cf_sex','m')" class="${c.sex==='m'?'on':''}">${t('boy')}</button></div>
@@ -454,9 +455,9 @@ route('today',(n)=>{
   const dueMeds=S.meds.filter(m=>m.childId===c.id);
   n.innerHTML=
     childBar(c)+
-    card(`<div class="row between"><div><div class="muted sm">${L(greet)}</div><h2 style="margin-top:2px">${c.name?c.name:(isAr()?'طفلك':'Your little one')}</h2><div class="muted sm">${ageLabel(c)} ${c.conditions&&c.conditions.length?'· '+c.conditions.map(k=>L((CONDITIONS.find(x=>x.key===k)||{}).name)).filter(Boolean).slice(0,2).join('، '):''}</div></div><div style="text-align:center"><div style="font-size:30px;font-weight:800;color:var(--accent)">${tl.length}</div><div class="xs muted">${t('entriesToday')}</div></div></div>`,'hero')+
+    card(`<div class="row between"><div><div class="muted sm">${L(greet)}</div><h2 style="margin-top:2px">${c.name?esc(c.name):(isAr()?'طفلك':'Your little one')}</h2><div class="muted sm">${ageLabel(c)} ${c.conditions&&c.conditions.length?'· '+c.conditions.map(k=>L((CONDITIONS.find(x=>x.key===k)||{}).name)).filter(Boolean).slice(0,2).join('، '):''}</div></div><div style="text-align:center"><div style="font-size:30px;font-weight:800;color:var(--accent)">${tl.length}</div><div class="xs muted">${t('entriesToday')}</div></div></div>`,'hero')+
     card(`<h3 style="margin-bottom:10px">${t('addToday')}</h3><div class="grid2">${quickBtns(c)}</div>`)+
-    (dueMeds.length?card(`<h3 style="margin-bottom:8px">${isAr()?'أدوية مسجّلة':'Saved medicines'}</h3>`+dueMeds.map(m=>`<div class="row between" style="padding:6px 0"><span>💊 ${m.name}${m.dose?` · <span class="muted sm">${m.dose}</span>`:''}</span><button class="chip on" onclick="quickMedTaken('${m.id}')">${t('taken')} ✓</button></div>`).join('')):'')+
+    (dueMeds.length?card(`<h3 style="margin-bottom:8px">${isAr()?'أدوية مسجّلة':'Saved medicines'}</h3>`+dueMeds.map(m=>`<div class="row between" style="padding:6px 0"><span>💊 ${esc(m.name)}${m.dose?` · <span class="muted sm">${esc(m.dose)}</span>`:''}</span><button class="chip on" onclick="quickMedTaken('${m.id}')">${t('taken')} ✓</button></div>`).join('')):'')+
     card(`<div class="row between" style="margin-bottom:10px"><b>${t('tools')}</b><a class="link" onclick="go('tools')">${isAr()?'الكل':'All'} →</a></div><div class="grid2"><button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:13px 6px" onclick="go('gchart')"><span style="font-size:22px">📈</span><span class="sm">${t('growthCharts')}</span></button><button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:13px 6px" onclick="go('milestones')"><span style="font-size:22px">⭐</span><span class="sm">${t('milestones')}</span></button></div>`)+
     card(`<div class="row between"><b>${t('recent')}</b><a class="link" onclick="navTab('diary')">${isAr()?'الكل':'All'} →</a></div>`+recentList(c,4))+
     safetyCard(true)+
@@ -466,7 +467,7 @@ function emptyState(){return card(`<div style="text-align:center;padding:20px 6p
   <div style="font-size:40px">👶</div><h3 style="margin:8px 0">${t('noChild')}</h3>
   <button class="btn btn-primary" style="margin-top:10px" onclick="go('editChild')">${t('addChild')}</button></div>`);}
 function childBar(c){if(S.children.length<=1)return '';
-  return `<div class="row wrap" style="margin-bottom:12px;gap:8px">`+S.children.map(k=>`<button class="chip ${k.id===c.id?'on':''}" onclick="setActive('${k.id}')">${k.name||'👶'} · ${ageLabel(k)}</button>`).join('')+`</div>`;}
+  return `<div class="row wrap" style="margin-bottom:12px;gap:8px">`+S.children.map(k=>`<button class="chip ${k.id===c.id?'on':''}" onclick="setActive('${k.id}')">${esc(k.name||'👶')} · ${ageLabel(k)}</button>`).join('')+`</div>`;}
 function setActive(id){S.activeChildId=id;save();render();}
 function quickBtns(c){const inf=isInfant(c);
   const b=[['stool','💩',t('logstool')],[inf?'feed':'sym','🍼',inf?t('logfeed'):t('logsym')],['vomit','🤢',t('logvomit')],['growth','📏',t('loggrowth')]];
@@ -480,7 +481,7 @@ function timeAgo(iso){const d=(Date.now()-new Date(iso))/6e4;if(d<60)return isAr
 
 /* ============ DIARY ============ */
 route('diary',(n)=>{const c=activeChild();if(!c){n.innerHTML=emptyState();return;}
-  n.innerHTML=childBar(c)+topbar(t('diary'),c.name?`${c.name} · ${ageLabel(c)}`:ageLabel(c))+
+  n.innerHTML=childBar(c)+topbar(t('diary'),c.name?`${esc(c.name)} · ${ageLabel(c)}`:ageLabel(c))+
   card(`<h3 style="margin-bottom:10px">${t('quicklog')}</h3><div class="grid2">${quickBtns(c)}<button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:14px 6px" onclick="logSheet('med')"><span style="font-size:24px">💊</span><span style="font-size:13px">${t('logmed')}</span></button><button class="btn btn-soft" style="display:flex;flex-direction:column;gap:4px;padding:14px 6px" onclick="go('checkin')"><span style="font-size:24px">📝</span><span style="font-size:13px">${t('checkin')}</span></button></div>`)+
   card(`<b>${t('recent')}</b>`+recentList(c,40))+
   `<p class="disc">${t('discShort')}</p>`;
@@ -550,7 +551,7 @@ function logSheet(kind){const c=activeChild();if(!c)return;const inf=isInfant(c)
     body=`<label class="fld">${isAr()?'ما الذي تلاحظه؟':'What are you noticing?'}</label>${chipsRow('te_s',[{v:'newtooth',label:isAr()?'سن جديد':'New tooth'},{v:'drool',label:isAr()?'سيلان لعاب':'Drooling'},{v:'irritable',label:isAr()?'تهيّج':'Irritable'},{v:'gums',label:isAr()?'لثة منتفخة':'Swollen gums'},{v:'sleep',label:isAr()?'نوم مضطرب':'Poor sleep'},{v:'chewing',label:isAr()?'عضّ':'Chewing'}])}
     ${noteField('te_note')}${saveBtn("saveTeeth()")}`;
   }
-  openSheet(`<h3 style="margin-bottom:4px">${title}</h3><div class="muted xs" style="margin-bottom:10px">${c.name||''} · ${ageLabel(c)}</div>${body}`);
+  openSheet(`<h3 style="margin-bottom:4px">${title}</h3><div class="muted xs" style="margin-bottom:10px">${esc(c.name||'')} · ${ageLabel(c)}</div>${body}`);
 }
 /* live timer used by sleep & nursing */
 const TIMERS={};
@@ -597,10 +598,10 @@ function logMeta(l){const inf=l.infant;
   if(l.type==='sym'){const names={pain:{en:'pain',ar:'ألم'},bloat:{en:'bloating',ar:'انتفاخ'},nausea:{en:'nausea',ar:'غثيان'},reflux:{en:'reflux',ar:'ارتجاع'},appetite:{en:'low appetite',ar:'قلة شهية'},gas:{en:'gas',ar:'غازات'},swallow:{en:'swallowing',ar:'بلع'},fatigue:{en:'tired',ar:'إرهاق'}};
     return{title:`🩹 ${isAr()?'أعراض':'Symptom'}`,sub:(l.syms||[]).map(s=>L(names[s])).join('، ')+(l.pain!=null?` · ${isAr()?'ألم':'pain'} ${l.pain}/10`:''),color:'var(--warn)'};}
   if(l.type==='vomit'){const flag=(l.color==='green'||l.color==='bloody');return{title:`🤢 ${isAr()?'قيء':'Vomit'}`,sub:L({en:{clear:'clear',yellow:'yellow',green:'green (bilious)',bloody:'bloody'}[l.color]||'',ar:{clear:'صافٍ',yellow:'أصفر',green:'أخضر',bloody:'دموي'}[l.color]||''}),color:flag?'var(--danger)':'var(--warn)'};}
-  if(l.type==='med')return{title:`💊 ${l.name}`,sub:(l.dose||'')+' · '+(l.status==='missed'?t('missed'):t('taken')),color:l.status==='missed'?'var(--warn)':'var(--good)'};
+  if(l.type==='med')return{title:`💊 ${esc(l.name)}`,sub:esc(l.dose||'')+' · '+(l.status==='missed'?t('missed'):t('taken')),color:l.status==='missed'?'var(--warn)':'var(--good)'};
   if(l.type==='growth')return{title:`📏 ${isAr()?'النمو':'Growth'}`,sub:[l.w?`${l.w}kg`:'',l.h?`${l.h}cm`:'',l.hc?`HC ${l.hc}`:''].filter(Boolean).join(' · '),color:'var(--disk)'};
   if(l.type==='water')return{title:`💧 ${isAr()?'شراب':'Drink'}`,sub:`${l.ml} ${isAr()?'مل':'mL'}`,color:'var(--sky)'};
-  if(l.type==='supp')return{title:`🧴 ${l.name}`,sub:isAr()?'أُخذ':'taken',color:'var(--good)'};
+  if(l.type==='supp')return{title:`🧴 ${esc(l.name)}`,sub:isAr()?'أُخذ':'taken',color:'var(--good)'};
   if(l.type==='sleep')return{title:`😴 ${isAr()?'نوم':'Sleep'}`,sub:`${l.mins} ${isAr()?'دقيقة':'min'}`,color:'var(--disk)'};
   if(l.type==='nurse')return{title:`🤱 ${isAr()?'رضاعة':'Nursing'}`,sub:[{L:isAr()?'يسار':'Left',R:isAr()?'يمين':'Right',both:isAr()?'كلاهما':'Both'}[l.side]||'',l.mins?l.mins+(isAr()?' د':'m'):''].filter(Boolean).join(' · '),color:'var(--sky)'};
   if(l.type==='pump')return{title:`🍼 ${isAr()?'شفط':'Pumping'}`,sub:`${l.ml} ${isAr()?'مل':'mL'}`,color:'var(--sky)'};
@@ -731,7 +732,7 @@ route('report',(n)=>{const c=activeChild();if(!c){n.innerHTML=emptyState();retur
   // stool pattern
   let hard=0,ok=0,loose=0,bloodN=0;stools.forEach(l=>{if(l.infant){if(l.consist==='hard')hard++;else if(l.consist==='watery')loose++;else ok++;}else{const b=+l.bristol;if(b<=2)hard++;else if(b>=6)loose++;else if(b)ok++;}if(l.blood==='yes'||l.color==='red')bloodN++;});
   const flagV=voms.filter(l=>l.color==='green'||l.color==='bloody').length;
-  n.innerHTML=childBar(c)+topbar(t('report'),c.name?`${c.name} · ${ageLabel(c)}`:ageLabel(c))+
+  n.innerHTML=childBar(c)+topbar(t('report'),c.name?`${esc(c.name)} · ${ageLabel(c)}`:ageLabel(c))+
    `<div class="seg noprint"><button class="${days===14?'on':''}" onclick="go('report',{days:14,replace:true})">${t('last14')}</button><button class="${days===30?'on':''}" onclick="go('report',{days:30,replace:true})">${t('last30')}</button></div>`+
    card(`<div class="row between"><b>${isAr()?'ملخص':'Summary'}</b><span class="muted xs">${days===14?t('last14'):t('last30')}</span></div>
      <div class="grid2" style="margin-top:10px">
@@ -1078,7 +1079,7 @@ route('supps',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('suppleme
   c.supps=c.supps||[];const takenToday=new Set(childLogs(c.id).filter(l=>l.type==='supp'&&l.t.slice(0,10)===dayKey()).map(l=>l.name));
   n.innerHTML=backbar(t('supplements'))+childBar(c)+
    card(`<p class="sm muted">${isAr()?'تابِع مكمّلات طفلك التي وصفها الطبيب (مثل فيتامين د والحديد). التطبيق يسجّل فقط ولا ينصح بجرعات.':'Track your child’s supplements as advised by the doctor (e.g. vitamin D, iron). The app records only — it does not advise doses.'}</p>`)+
-   (c.supps.length?card(c.supps.map((s,i)=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>${s.name}</b>${s.dose?`<div class="muted xs">${s.dose}</div>`:''}</div><div class="row"><button class="chip ${takenToday.has(s.name)?'on':''}" onclick="suppTaken('${s.name.replace(/'/g,"")}')">${takenToday.has(s.name)?'✓':t('taken')}</button><button class="chip" onclick="rmSupp(${i})">✕</button></div></div>`).join('')):'')+
+   (c.supps.length?card(c.supps.map((s,i)=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>${esc(s.name)}</b>${s.dose?`<div class="muted xs">${esc(s.dose)}</div>`:''}</div><div class="row"><button class="chip ${takenToday.has(s.name)?'on':''}" onclick="suppTaken('${esc(String(s.name).replace(/['"\\<>&]/g,''))}')">${takenToday.has(s.name)?'✓':t('taken')}</button><button class="chip" onclick="rmSupp(${i})">✕</button></div></div>`).join('')):'')+
    card(`<h3 style="margin-bottom:8px">${t('add')}</h3><div class="row wrap" style="gap:6px;margin-bottom:8px">${SUPP_COMMON.map(s=>`<button class="chip" onclick="document.getElementById('sp_n').value='${L(s)}'">${L(s)}</button>`).join('')}</div><input id="sp_n" placeholder="${isAr()?'اسم المكمّل':'Supplement name'}"><input id="sp_d" placeholder="${t('dose')}" style="margin-top:6px"><button class="btn btn-primary" style="margin-top:10px" onclick="addSupp()">${t('add')}</button>`)+
    `<p class="disc">${t('discShort')}</p>`;
 });
@@ -1091,7 +1092,7 @@ route('reminders',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('remi
   const meds=S.meds.filter(m=>m.childId===c.id);
   n.innerHTML=backbar(t('reminders'))+childBar(c)+
    card(`<p class="sm muted">${isAr()?'اضبط وقت تذكير لكل دواء محفوظ، وأضِفه لتقويم هاتفك. سجّل دواءً من اليوميات أولًا ليظهر هنا.':'Set a reminder time for each saved medicine and add it to your phone calendar. Log a medicine from the diary first to see it here.'}</p>`)+
-   (meds.length?meds.map(m=>card(`<div class="row between"><b>💊 ${m.name}</b>${m.dose?`<span class="muted xs">${m.dose}</span>`:''}</div>
+   (meds.length?meds.map(m=>card(`<div class="row between"><b>💊 ${esc(m.name)}</b>${m.dose?`<span class="muted xs">${esc(m.dose)}</span>`:''}</div>
      <div class="row" style="gap:8px;margin-top:10px"><input type="time" id="rm_${m.id}" value="${m.remind||'08:00'}" style="flex:1" onchange="setRemind('${m.id}',this.value)"><button class="btn btn-soft" style="width:auto;padding:11px 14px" onclick="downloadICS('${m.id}')">📅 ${t('addCal')}</button></div>
      ${m.remind?`<div class="muted xs" style="margin-top:6px">${isAr()?'تذكير يومي الساعة':'Daily reminder at'} ${m.remind}</div>`:''}`)).join(''):card(`<div class="muted sm">${isAr()?'لا أدوية محفوظة بعد.':'No saved medicines yet.'}</div>`)+`<button class="btn btn-soft" style="margin-top:8px" onclick="logSheet('med')">＋ ${t('logmed')}</button>`)+
    `<div class="alert warn"><span class="sm">${isAr()?'التذكيرات لمساعدتك فقط — اتبع تعليمات طبيب طفلك للجرعات والتوقيت.':'Reminders are a helper only — follow your child’s doctor for doses and timing.'}</span></div>`;
@@ -1186,7 +1187,7 @@ route('record',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('healthR
      <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'تاريخ الميلاد':'Birth month'}</td><td>${c.birth||'—'}</td></tr>
      <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'الحالات':'Conditions'}</td><td>${conds.join('، ')||'—'}</td></tr>
      <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'الحساسية المسجّلة':'Noted allergies'}</td><td>${[...new Set(allergy)].join('، ')||'—'}</td></tr>
-     <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'الأدوية':'Medicines'}</td><td>${meds.map(m=>m.name+(m.dose?` (${m.dose})`:'')).join('، ')||'—'}</td></tr>
+     <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'الأدوية':'Medicines'}</td><td>${meds.map(m=>m.name+(m.dose?` (${esc(m.dose)})`:'')).join('، ')||'—'}</td></tr>
      <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'المكمّلات':'Supplements'}</td><td>${supps.map(s=>s.name).join('، ')||'—'}</td></tr>
      <tr><td style="padding:4px 0;color:var(--muted)">${isAr()?'التطعيمات المكتملة':'Vaccine visits done'}</td><td>${vaxDone} / ${VAX.length}</td></tr></table>
      ${grow.length?`<h3 style="margin:14px 0 6px">${isAr()?'سجل النمو':'Growth history'}</h3><table style="width:100%;font-size:13px;border-collapse:collapse"><tr style="color:var(--muted)"><td>${isAr()?'التاريخ':'Date'}</td><td>${isAr()?'الوزن':'Wt'}</td><td>${isAr()?'الطول':'Ht'}</td><td>${isAr()?'الرأس':'HC'}</td></tr>${growRows}</table>`:''}
@@ -1196,7 +1197,7 @@ route('record',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('healthR
 route('vaxcert',(n)=>{const c=activeChild();if(!c){n.innerHTML=backbar(t('vaxCert'))+emptyState();return;}
   c.vax=c.vax||{};
   n.innerHTML=backbar(t('vaxCert'))+
-   `<div class="card"><div style="text-align:center;margin-bottom:12px"><h2>${t('vaxCert')}</h2><div class="muted sm">${c.name||'—'} · ${ageLabel(c)} · ${isAr()?'الجدول السعودي':'Saudi schedule'}</div></div>`+
+   `<div class="card"><div style="text-align:center;margin-bottom:12px"><h2>${t('vaxCert')}</h2><div class="muted sm">${esc(c.name||'—')} · ${ageLabel(c)} · ${isAr()?'الجدول السعودي':'Saudi schedule'}</div></div>`+
    VAX.map((row,i)=>`<div class="row between" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b class="sm">${L(row.age)}</b><div class="muted xs">${row.v.map(x=>x.a).join(', ')}</div></div><span class="pill ${c.vax[i]?'g':'a'}">${c.vax[i]?'✓':'—'}</span></div>`).join('')+
    `<p class="disc">${isAr()?'المصدر الرسمي هو شهادة التطعيم من وزارة الصحة.':'The official record is the MOH vaccination certificate.'}</p></div>`+
    `<button class="btn btn-ghost noprint" onclick="window.print()">🖨️ ${t('print')}</button>`;

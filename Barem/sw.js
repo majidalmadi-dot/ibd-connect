@@ -1,5 +1,5 @@
 /* Barʿem service worker — cache-versioned. Bump CACHE on every release. */
-const CACHE = 'barem-v6';
+const CACHE = 'barem-v7';
 self.addEventListener('message', e => { if (e.data && e.data.type === 'SKIP_WAITING') self.skipWaiting(); });
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 self.addEventListener('install', e => {
