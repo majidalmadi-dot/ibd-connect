@@ -66,11 +66,23 @@ if ('serviceWorker' in navigator) {
 }
 window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__deferredInstall = e; });
 </script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link rel="preload" href="fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/inter-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
+<script src="vendor/chart.umd.js"></script>
 <style>
+/* self-hosted fonts (no third-party font host) */
+@font-face{font-family:'Inter';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/inter-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/inter-latin-500-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/inter-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/inter-latin-700-normal.woff2) format('woff2')}
+@font-face{font-family:'Inter';font-style:normal;font-weight:800;font-display:swap;src:url(fonts/inter-latin-800-normal.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:500;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:600;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-arabic-600-normal.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Sans Arabic';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2) format('woff2')}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.limit-hint{margin-top:4px;font-size:12px;color:var(--muted)}.limit-hint.bad{color:var(--bad);font-weight:700}
+
 :root{
   --bg:#0B0F14; --bg2:#0F151D; --card:#141C26; --card2:#1B2530; --line:#243140;
   --txt:#EAF2F8; --muted:#8DA0B2; --faint:#5A6B7B;
@@ -78,6 +90,10 @@ window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault()
   --good:#2BD67B; --warn:#FFB23E; --bad:#FF5C72; --purple:#9B7CFF; --coral:#FF8A6B;
   --r:18px; --rs:12px; --sh:0 10px 30px rgba(0,0,0,.35);
   --maxw:460px;
+  /* Rafeeq brand palette (Visual Identity, Oct 2026) */
+  --leaf:#63BD7F; --teal:#2E7E8D; --lagoon:#1C6992; --mist:#F3F6F4; --mint:#00E0B8; --warm:#FFB23E;
+  --brand-grad:linear-gradient(135deg,var(--leaf),var(--teal) 55%,var(--lagoon));
+  --on-accent:#04221d;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;padding:0;height:100%;background:#05080b;color:var(--txt);
@@ -131,7 +147,7 @@ img{max-width:100%;display:block}
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
   padding:15px;border-radius:14px;font-weight:700;font-size:15.5px;transition:.15s}
 .btn:active{transform:scale(.98)}
-.btn-primary{background:linear-gradient(135deg,var(--accent),#00b89b);color:#04221d}
+.btn-primary{background:linear-gradient(135deg,var(--accent),var(--btn-end,#00b89b));color:var(--on-accent)}
 .btn-ghost{background:var(--card);border:1px solid var(--line);color:var(--txt)}
 .btn-sm{padding:10px 16px;font-size:13.5px;width:auto;border-radius:11px}
 .btn-danger{background:rgba(255,92,114,.14);border:1px solid rgba(255,92,114,.4);color:#ff8b9b}
@@ -192,7 +208,7 @@ textarea.input{resize:vertical;min-height:84px}
 .scale{display:flex;gap:7px}
 .scale button{flex:1;aspect-ratio:1;border-radius:12px;background:var(--bg2);
   border:1px solid var(--line);font-weight:700;font-size:15px;color:var(--muted);transition:.15s}
-.scale button.on{color:#04221d;border-color:transparent}
+.scale button.on{color:var(--on-accent);border-color:transparent}
 .scale button:active{transform:scale(.9)}
 
 /* Modal / sheet */
@@ -237,7 +253,7 @@ html[dir=rtl] .chev{transform:scaleX(-1)}
 .splash{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:22px;background:radial-gradient(120% 80% at 50% 0%,#0d2b2a 0%,var(--bg) 55%);text-align:center;padding:30px}
 .logo-mark{width:96px;height:96px;border-radius:28px;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(140deg,#65BF7F,#1B6793);overflow:hidden;box-shadow:0 18px 46px rgba(45,140,140,.34)}
+  background:var(--brand-grad);overflow:hidden;box-shadow:0 18px 46px rgba(45,140,140,.34)}
 .markimg{width:62%;height:62%;object-fit:contain;display:block}
 .spin{width:30px;height:30px;border:3px solid var(--line);border-top-color:var(--accent);
   border-radius:50%;animation:rot 1s linear infinite}
@@ -283,7 +299,7 @@ th{color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;
 .check.on{border-color:var(--accent)}
 .check .box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex-shrink:0;
   display:flex;align-items:center;justify-content:center;font-size:13px;transition:.15s;margin-top:1px}
-.check.on .box{background:var(--accent);border-color:var(--accent);color:#04221d}
+.check.on .box{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
 .check .t{font-size:13.5px;line-height:1.5}
 
 /* ---- themed glass (works on any accent) ---- */
@@ -297,7 +313,7 @@ th{color:var(--muted);font-weight:600;font-size:11.5px;text-transform:uppercase;
 .theme-card .tprev{height:100%;display:flex;flex-direction:column;padding:10px;gap:6px}
 .theme-card .tbar{height:7px;border-radius:4px}
 .theme-card .tname{position:absolute;bottom:0;left:0;right:0;padding:8px 10px;font-size:12px;font-weight:700;background:linear-gradient(180deg,transparent,rgba(0,0,0,.55));color:#fff}
-.theme-card .tcheck{position:absolute;top:7px;inset-inline-end:7px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#04221d;display:none;align-items:center;justify-content:center;font-size:13px;font-weight:800}
+.theme-card .tcheck{position:absolute;top:7px;inset-inline-end:7px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:none;align-items:center;justify-content:center;font-size:13px;font-weight:800}
 .theme-card.on .tcheck{display:flex}
 
 /* ---- quests ---- */
@@ -423,7 +439,7 @@ input[type=range]{accent-color:var(--accent)}
   display:flex;align-items:center;gap:10px;box-shadow:var(--sh);animation:up .3s ease}
 .updatebar.hidden{display:none}
 .updatebar .ux{flex:1;font-size:13.5px;font-weight:600;color:var(--txt)}
-.updatebar .ubtn{background:var(--accent);color:#04221d;border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px}
+.updatebar .ubtn{background:var(--accent);color:var(--on-accent);border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px}
 [data-mode=light] .updatebar .ubtn{color:#fff}
 
 /* ============================================================
@@ -450,7 +466,7 @@ input[type=range]{accent-color:var(--accent)}
   .llinks{display:flex;gap:26px;margin-inline-start:auto}
   .llinks a{color:var(--muted);text-decoration:none;font-size:14.5px;font-weight:600}
   .llinks a:hover{color:var(--txt)}
-  .lcta{background:linear-gradient(135deg,var(--accent),#00b89b);color:#04221d;text-decoration:none;
+  .lcta{background:linear-gradient(135deg,var(--accent),var(--btn-end,#00b89b));color:var(--on-accent);text-decoration:none;
     padding:10px 18px;border-radius:12px;font-weight:700;font-size:14px;box-shadow:0 6px 18px -6px color-mix(in srgb,var(--accent) 70%,transparent)}
   [data-mode=light] .lcta{color:#fff}
   .lhero{display:grid;grid-template-columns:1fr 430px;gap:56px;align-items:center;
@@ -464,7 +480,7 @@ input[type=range]{accent-color:var(--accent)}
   .lhero-actions{display:flex;gap:14px;flex-wrap:wrap}
   .lbtn{padding:14px 24px;border-radius:14px;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;border:none;transition:.15s}
   .lbtn:active{transform:translateY(1px)}
-  .lbtn-primary{background:linear-gradient(135deg,var(--accent),#00b89b);color:#04221d;box-shadow:0 10px 26px -8px color-mix(in srgb,var(--accent) 70%,transparent)}
+  .lbtn-primary{background:linear-gradient(135deg,var(--accent),var(--btn-end,#00b89b));color:var(--on-accent);box-shadow:0 10px 26px -8px color-mix(in srgb,var(--accent) 70%,transparent)}
   [data-mode=light] .lbtn-primary{color:#fff}
   .lbtn-ghost{background:var(--card);border:1px solid var(--line);color:var(--txt)}
   .ltrust{margin-top:24px;font-size:13px;color:var(--faint)}
@@ -781,6 +797,83 @@ html[dir=rtl] .lhero-sub,html[dir=rtl] .lx-lead,html[dir=rtl] .lcard p,html[dir=
         <div class="who" data-en="— A person living with IBD" data-ar="— شخص يتعايش مع المرض">— A person living with IBD</div>
       </div>
     </div>
+  </section>
+
+  <section class="lx-section" id="qrSection">
+<!-- qrx:start -->
+<style>.qrx{margin:0 0 28px}
+.qrx-card{display:flex;gap:28px;align-items:center;flex-wrap:wrap;justify-content:center;background:var(--card,#161f2a);border:1px solid var(--line,#243140);border-radius:24px;padding:26px 28px}
+.qrx-tile{background:#fff;border-radius:18px;padding:14px;line-height:0;box-shadow:0 14px 34px -18px rgba(0,0,0,.7);flex:none}
+.qrx-tile svg{width:176px;height:176px;display:block}
+.qrx-txt{flex:1 1 260px;min-width:0;max-width:440px}
+.qrx-eyebrow{font-size:12.5px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--accent,#2e9e6b);margin-bottom:8px}
+.qrx-h{font-size:24px;font-weight:800;letter-spacing:-.4px;color:var(--txt,#e8eef4);margin:0 0 8px;line-height:1.2}
+.qrx-p{font-size:15px;line-height:1.6;color:var(--muted,#8da0b2);margin:0 0 16px}
+.qrx-url{font-size:13px;color:var(--faint,#5a6b7b);direction:ltr;unicode-bidi:plaintext;word-break:break-all;margin:-6px 0 16px}
+.qrx-row{display:flex;gap:10px;flex-wrap:wrap}
+.qrx-btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line,#243140);background:var(--card2,#1d2836);color:var(--txt,#e8eef4);padding:11px 16px;border-radius:12px;font-size:14px;font-weight:600;line-height:1;font-family:inherit;cursor:pointer;min-height:44px}
+.qrx-btn:hover{border-color:var(--accent,#2e9e6b)}
+.qrx-btn.pri{background:linear-gradient(135deg,var(--accent,#2e9e6b),var(--accent2,#4fb892));border-color:transparent;color:#fff}
+.qrx-btn:focus-visible{outline:2px solid var(--accent,#2e9e6b);outline-offset:2px}
+.qrx-ov{position:fixed;inset:0;z-index:2147483000;background:#fff;color:#111;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px;text-align:center}
+.qrx-ov.on{display:flex}
+.qrx-ov svg{width:min(78vmin,640px);height:min(78vmin,640px);display:block}
+.qrx-ov .t{font-size:clamp(22px,4.5vmin,40px);font-weight:800;letter-spacing:-.5px}
+.qrx-ov .s{font-size:clamp(14px,2.6vmin,22px);color:#444;direction:ltr;unicode-bidi:plaintext;word-break:break-all}
+.qrx-x{position:absolute;top:16px;inset-inline-end:16px;border:1px solid #ccc;background:#f4f4f4;color:#111;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:600;line-height:1;font-family:inherit;cursor:pointer;min-height:44px}
+@media (max-width:520px){.qrx-card{padding:22px 18px}.qrx-tile svg{width:160px;height:160px}.qrx-h{font-size:21px}}</style>
+<div class="qrx" id="qrx"><div class="qrx-card"><div class="qrx-tile"></div><div class="qrx-txt"><div class="qrx-eyebrow"></div><h2 class="qrx-h"></h2><p class="qrx-p"></p><p class="qrx-url">https://rafeeq.saudigastro.com/</p><div class="qrx-row"><button type="button" class="qrx-btn pri" data-a="fs"></button><button type="button" class="qrx-btn" data-a="dl"></button></div></div></div></div>
+<script>(function(){
+  var D = {"slug": "rafeeq", "url": "https://rafeeq.saudigastro.com/", "n": 29, "d": "M0 0h7v1h-7zM9 0h3v1h-3zM13 0h1v1h-1zM16 0h1v1h-1zM19 0h1v1h-1zM22 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h5v1h-5zM14 1h3v1h-3zM19 1h2v1h-2zM22 1h1v1h-1zM28 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h2v1h-2zM13 2h2v1h-2zM16 2h1v1h-1zM20 2h1v1h-1zM22 2h1v1h-1zM24 2h3v1h-3zM28 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM10 3h6v1h-6zM18 3h2v1h-2zM22 3h1v1h-1zM24 3h3v1h-3zM28 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h3v1h-3zM14 4h1v1h-1zM19 4h1v1h-1zM22 4h1v1h-1zM24 4h3v1h-3zM28 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM12 5h2v1h-2zM17 5h4v1h-4zM22 5h1v1h-1zM28 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h1v1h-1zM20 6h1v1h-1zM22 6h7v1h-7zM9 7h2v1h-2zM13 7h2v1h-2zM16 7h2v1h-2zM20 7h1v1h-1zM0 8h1v1h-1zM2 8h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM9 8h4v1h-4zM14 8h2v1h-2zM17 8h1v1h-1zM20 8h1v1h-1zM24 8h1v1h-1zM27 8h1v1h-1zM1 9h1v1h-1zM3 9h2v1h-2zM7 9h1v1h-1zM9 9h1v1h-1zM12 9h1v1h-1zM14 9h2v1h-2zM17 9h2v1h-2zM20 9h3v1h-3zM25 9h1v1h-1zM28 9h1v1h-1zM3 10h2v1h-2zM6 10h1v1h-1zM8 10h1v1h-1zM11 10h1v1h-1zM13 10h1v1h-1zM17 10h2v1h-2zM21 10h4v1h-4zM26 10h3v1h-3zM0 11h1v1h-1zM5 11h1v1h-1zM7 11h2v1h-2zM12 11h1v1h-1zM15 11h1v1h-1zM17 11h1v1h-1zM19 11h1v1h-1zM27 11h1v1h-1zM0 12h1v1h-1zM3 12h1v1h-1zM6 12h3v1h-3zM11 12h1v1h-1zM16 12h2v1h-2zM19 12h4v1h-4zM25 12h1v1h-1zM27 12h2v1h-2zM0 13h2v1h-2zM3 13h1v1h-1zM5 13h1v1h-1zM7 13h7v1h-7zM15 13h2v1h-2zM20 13h1v1h-1zM22 13h1v1h-1zM25 13h1v1h-1zM28 13h1v1h-1zM2 14h3v1h-3zM6 14h1v1h-1zM8 14h1v1h-1zM10 14h1v1h-1zM14 14h4v1h-4zM20 14h1v1h-1zM22 14h1v1h-1zM25 14h1v1h-1zM27 14h2v1h-2zM1 15h2v1h-2zM8 15h1v1h-1zM13 15h2v1h-2zM16 15h5v1h-5zM25 15h1v1h-1zM27 15h1v1h-1zM4 16h3v1h-3zM10 16h1v1h-1zM14 16h5v1h-5zM20 16h1v1h-1zM22 16h1v1h-1zM25 16h1v1h-1zM27 16h2v1h-2zM3 17h1v1h-1zM5 17h1v1h-1zM8 17h5v1h-5zM14 17h2v1h-2zM20 17h3v1h-3zM25 17h2v1h-2zM28 17h1v1h-1zM0 18h1v1h-1zM2 18h3v1h-3zM6 18h2v1h-2zM11 18h3v1h-3zM16 18h2v1h-2zM21 18h1v1h-1zM23 18h2v1h-2zM27 18h2v1h-2zM1 19h1v1h-1zM3 19h1v1h-1zM5 19h1v1h-1zM7 19h1v1h-1zM9 19h3v1h-3zM15 19h1v1h-1zM17 19h1v1h-1zM19 19h5v1h-5zM25 19h1v1h-1zM27 19h1v1h-1zM0 20h1v1h-1zM3 20h4v1h-4zM8 20h1v1h-1zM10 20h1v1h-1zM16 20h2v1h-2zM20 20h5v1h-5zM8 21h6v1h-6zM15 21h1v1h-1zM17 21h1v1h-1zM20 21h1v1h-1zM24 21h1v1h-1zM26 21h3v1h-3zM0 22h7v1h-7zM9 22h2v1h-2zM14 22h1v1h-1zM17 22h4v1h-4zM22 22h1v1h-1zM24 22h2v1h-2zM27 22h2v1h-2zM0 23h1v1h-1zM6 23h1v1h-1zM9 23h1v1h-1zM12 23h3v1h-3zM16 23h3v1h-3zM20 23h1v1h-1zM24 23h2v1h-2zM28 23h1v1h-1zM0 24h1v1h-1zM2 24h3v1h-3zM6 24h1v1h-1zM8 24h2v1h-2zM11 24h1v1h-1zM14 24h4v1h-4zM20 24h5v1h-5zM27 24h1v1h-1zM0 25h1v1h-1zM2 25h3v1h-3zM6 25h1v1h-1zM10 25h5v1h-5zM23 25h2v1h-2zM26 25h1v1h-1zM0 26h1v1h-1zM2 26h3v1h-3zM6 26h1v1h-1zM8 26h1v1h-1zM12 26h2v1h-2zM17 26h1v1h-1zM20 26h2v1h-2zM23 26h3v1h-3zM28 26h1v1h-1zM0 27h1v1h-1zM6 27h1v1h-1zM9 27h2v1h-2zM13 27h9v1h-9zM23 27h2v1h-2zM27 27h1v1h-1zM0 28h7v1h-7zM8 28h1v1h-1zM11 28h3v1h-3zM15 28h3v1h-3zM19 28h3v1h-3zM24 28h2v1h-2zM27 28h2v1h-2z", "en": "Rafeeq", "ar": "رفيق", "tag_en": "your IBD companion", "tag_ar": "رفيقك مع أمراض الأمعاء الالتهابية"};
+  var root = document.getElementById('qrx'); if(!root) return;
+  var T = {
+    en:{eb:'Scan to share',h:'Scan to open '+D.en,p:'Point a phone camera at this code to open '+D.en+' — handy for clinics, talks and waiting rooms.',fs:'Show full screen',dl:'Download PNG',x:'Close',alt:'QR code to open '+D.en,ot:D.en+' · '+D.tag_en},
+    ar:{eb:'امسح للمشاركة',h:'امسح لفتح '+D.ar,p:'وجّه كاميرا هاتفك نحو الرمز لفتح '+D.ar+' — مناسب للعيادات والمحاضرات وغرف الانتظار.',fs:'عرض بملء الشاشة',dl:'تنزيل PNG',x:'إغلاق',alt:'رمز QR لفتح '+D.ar,ot:D.ar+' · '+D.tag_ar}
+  };
+  function lang(){ var h=document.documentElement; return (h.getAttribute('dir')==='rtl'||(h.getAttribute('lang')||'').indexOf('ar')===0)?'ar':'en'; }
+  function svg(px){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 '+D.n+' '+D.n+'"'+(px?' width="'+px+'" height="'+px+'"':'')+' shape-rendering="crispEdges" role="img"><rect width="'+D.n+'" height="'+D.n+'" fill="#fff"/><path fill="#000" d="'+D.d+'"/></svg>'; }
+  var ov=null;
+  function paint(){
+    var t=T[lang()];
+    root.querySelector('.qrx-tile').innerHTML=svg(); root.querySelector('.qrx-tile svg').setAttribute('aria-label',t.alt);
+    root.querySelector('.qrx-eyebrow').textContent=t.eb; root.querySelector('.qrx-h').textContent=t.h; root.querySelector('.qrx-p').textContent=t.p;
+    root.querySelector('[data-a=fs]').textContent=t.fs; root.querySelector('[data-a=dl]').textContent=t.dl;
+    if(ov){ ov.querySelector('.t').textContent=t.ot; ov.querySelector('.qrx-x').textContent=t.x; ov.setAttribute('dir',lang()==='ar'?'rtl':'ltr'); }
+  }
+  function openFs(){
+    var t=T[lang()];
+    if(!ov){ ov=document.createElement('div'); ov.className='qrx-ov'; ov.setAttribute('role','dialog'); ov.setAttribute('aria-modal','true');
+      ov.innerHTML='<button type="button" class="qrx-x"></button><div class="q"></div><div class="t"></div><div class="s">'+D.url+'</div>';
+      ov.addEventListener('click',function(e){ if(e.target.closest('.q')===null) closeFs(); });
+      ov.querySelector('.qrx-x').addEventListener('click',closeFs);
+      document.body.appendChild(ov); }
+    ov.querySelector('.q').innerHTML=svg();
+    paint(); ov.classList.add('on'); document.documentElement.style.overflow='hidden';
+    ov.querySelector('.qrx-x').focus();
+    try{ if(ov.requestFullscreen && !document.fullscreenElement) ov.requestFullscreen().catch(function(){}); }catch(e){}
+  }
+  function closeFs(){ if(!ov) return; ov.classList.remove('on'); document.documentElement.style.overflow='';
+    try{ if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function(){}); }catch(e){} }
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeFs(); });
+  document.addEventListener('fullscreenchange',function(){ if(!document.fullscreenElement && ov && ov.classList.contains('on')) closeFs(); });
+  function save(blob,name){ var a=document.createElement('a'); var u=URL.createObjectURL(blob); a.href=u; a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){URL.revokeObjectURL(u);},4000); }
+  function downloadPng(){
+    var name='qr-'+D.slug; var S=1024, pad=Math.round(S*4/(D.n+8)); /* 4-module quiet zone */
+    function fallbackSvg(){ save(new Blob([svg(1024)],{type:'image/svg+xml'}),name+'.svg'); }
+    try{
+      var c=document.createElement('canvas'); c.width=c.height=S; var x=c.getContext('2d'); x.fillStyle='#fff'; x.fillRect(0,0,S,S);
+      var im=new Image(); var u=URL.createObjectURL(new Blob([svg(S-2*pad)],{type:'image/svg+xml'}));
+      im.onload=function(){ x.imageSmoothingEnabled=false; x.drawImage(im,pad,pad,S-2*pad,S-2*pad); URL.revokeObjectURL(u);
+        try{ c.toBlob(function(b){ if(b) save(b,name+'.png'); else fallbackSvg(); },'image/png'); }catch(e){ fallbackSvg(); } };
+      im.onerror=function(){ URL.revokeObjectURL(u); fallbackSvg(); };
+      im.src=u;
+    }catch(e){ fallbackSvg(); }
+  }
+  root.addEventListener('click',function(e){ var b=e.target.closest('[data-a]'); if(!b) return; if(b.getAttribute('data-a')==='fs') openFs(); else downloadPng(); });
+  paint();
+  try{ new MutationObserver(paint).observe(document.documentElement,{attributes:true,attributeFilter:['dir','lang']}); }catch(e){}
+})();</script>
+<!-- qrx:end -->
   </section>
 
   <section class="lx-section">
@@ -1389,7 +1482,7 @@ if(!S.lang){try{const _q=new URLSearchParams(location.search).get('lang');const 
 function blank(){return{
   lang:null, onboarded:false, authed:false,
   user:{name:'',email:'',year:'',gender:'',disease:'',diagYear:'',avatar:'🙂',country:'',countryFlag:'',heightCm:''},
-  prefs:{remindDaily:true,remindMed:false,remindContent:true,analytics:false,medTime:'20:00',theme:'whoop',
+  prefs:{remindDaily:true,remindMed:false,remindContent:true,analytics:false,medTime:'20:00',theme:(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'rafeeq':'whoop'),
     stepGoal:8000,activeMinGoal:30,waterGoal:8,nudges:true,nudgeDaily:true,nudgeStreak:true,nudgeHydra:true,seenWelcome:false,
     bigText:false,pushOn:false},
   logs:[], disc:null, discHistory:[], reminders:[],
@@ -1415,7 +1508,8 @@ function deepMerge(base,over){
   }
   return out;
 }
-function load(){try{const v=JSON.parse(localStorage.getItem(KEY));return v?deepMerge(blank(),v):seedDemo(blank());}catch(e){return seedDemo(blank());}}
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY));return v?deepMerge(blank(),v):(RF_DEMO()?seedDemo(blank()):blank());}catch(e){return RF_DEMO()?seedDemo(blank()):blank();}}
+function RF_DEMO(){try{return /[?&]demo=1\b/.test(location.search);}catch(e){return false;}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}try{cloudSchedulePush();}catch(e){}}
 function reset(){S=blank();save();}
 
@@ -1439,6 +1533,7 @@ function seedDemo(s){
 }
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
 function rid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function shareCode(){const b=crypto.getRandomValues(new Uint8Array(16));let s='';for(const x of b)s+=String.fromCharCode(x);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 
 /* ---------- i18n helpers ---------- */
 function t(k){const e=I18N[k];if(!e)return k;return e[S.lang||'en'];}
@@ -1565,7 +1660,7 @@ function topbar(titleK,subK,opts){opts=opts||{};
 function greeting(){const h=new Date().getHours();return h<12?t('goodMorning'):h<18?t('goodAfternoon'):t('goodEvening');}
 const FOCUS=[{id:'symptoms',ic:'🩹',n:['Track symptoms','متابعة الأعراض']},{id:'meds',ic:'💊',n:['Stay on my meds','الالتزام بالدواء']},{id:'diet',ic:'🍽️',n:['Food & triggers','الطعام والمحفزات']},{id:'wellbeing',ic:'🌿',n:['Energy & wellbeing','الطاقة والعافية']}];
 function focusLine(){const ar=isAr();let wk=0;try{wk=weekActiveDays();}catch(e){}const st=streak();const m={symptoms:['Log how you feel today','سجّل شعورك اليوم'],meds:['Keep your treatment on track','حافظ على انتظام علاجك'],diet:['Notice what your body responds to','لاحظ ما يتجاوب معه جسمك'],wellbeing:['A small step for your energy today','خطوة صغيرة لطاقتك اليوم']};if(S.user.focus&&m[S.user.focus])return L(m[S.user.focus]);if(st>1)return ar?`🔥 ${st} أيام متتالية`:`🔥 ${st}-day streak`;return new Date().toLocaleDateString(ar?'ar-SA':'en-GB',{weekday:'long',day:'numeric',month:'long'});}
-function heroToday(){const u=S.user;const nm=u.name?', '+esc(u.name.split(' ')[0]):'';return `<div class="hero"><div class="between" style="align-items:flex-start"><div><div class="hgreet">${greeting()}${nm}</div><div class="hsub">${focusLine()}</div></div><button class="iconbtn hero-gear" onclick="navTab('more')" aria-label="${t('more')||'Settings'}">${u.avatar||'🙂'}</button></div></div>`;}
+function heroToday(){const u=S.user;const nm=u.name?', '+esc(u.name.split(' ')[0]):'';return `<div class="hero"><div class="between" style="align-items:flex-start"><div><div class="hgreet">${greeting()}${nm}</div><div class="hsub">${focusLine()}</div></div><button class="iconbtn hero-gear" onclick="navTab('more')" aria-label="${isAr()?'الإعدادات':'Settings'}">${u.avatar||'🙂'}</button></div></div>`;}
 function scaleSel(id,n,colors,val,start){start=(start==null?1:start);let h='<div class="scale" id="'+id+'">';for(let i=start;i<=n;i++){const c=colors?(colors[i-start]||'var(--accent)'):'var(--accent)';h+=`<button data-v="${i}" class="${val===i?'on':''}" style="${val===i?`background:${c}`:''}" onclick="pickScale('${id}',${i},'${c}')">${i}</button>`;}h+='</div>';return h;}
 window.pickScale=function(id,v,c){const wrap=$('#'+id);[...wrap.children].forEach(b=>{b.classList.remove('on');b.style.background='';});const btn=wrap.querySelector(`[data-v="${v}"]`);btn.classList.add('on');btn.style.background=c;wrap.dataset.val=v;};
 function getScale(id){const w=$('#'+id);return w&&w.dataset.val!==undefined?+w.dataset.val:null;}
@@ -1713,9 +1808,24 @@ route('login',(n)=>{
    </div>`;
 });
 window.toggleLangQuick=()=>{S.lang=isAr()?'en':'ar';save();render();};
-window.doLogin=()=>{
+/* local password check: PBKDF2-SHA256 hash + salt kept on this device only (never sent anywhere) */
+async function rfPwHash(pw,saltB64){
+  const enc=new TextEncoder();
+  const salt=saltB64?Uint8Array.from(atob(saltB64),c=>c.charCodeAt(0)):crypto.getRandomValues(new Uint8Array(16));
+  const km=await crypto.subtle.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt,iterations:200000,hash:'SHA-256'},km,256);
+  const b64=a=>btoa(String.fromCharCode.apply(null,Array.from(a)));
+  return {salt:b64(salt),hash:b64(new Uint8Array(bits))};
+}
+window.doLogin=async()=>{
   const email=$('#liEmail').value.trim(),pw=$('#liPw').value;
   if(!email||pw.length<6)return toast(t('fillFields'));
+  try{
+    if(S.user.pwHash&&S.user.pwSalt){
+      const r=await rfPwHash(pw,S.user.pwSalt);
+      if(r.hash!==S.user.pwHash||(S.user.email&&S.user.email.toLowerCase()!==email.toLowerCase()))return toast(isAr()?'البريد أو كلمة المرور غير صحيحة':'Email or password is incorrect');
+    }else{ const r=await rfPwHash(pw); S.user.pwSalt=r.salt; S.user.pwHash=r.hash; }
+  }catch(e){ /* WebCrypto unavailable: keep the previous behaviour rather than lock the user out */ }
   S.user.email=email;S.authed=true;save();enterAppFull();
   if(!S.user.name)go('setup',{replace:true});else navTab('today');
 };
@@ -1738,11 +1848,12 @@ route('signup',(n)=>{
    </div>`;
 });
 window.stashSignupGoCountry=function(){const e=$('#suEmail'),p=$('#suPw');if(e)S.user.email=e.value.trim();if(p)suPwTmp=p.value;save();go('country');};
-window.doSignup=()=>{
+window.doSignup=async()=>{
   const email=$('#suEmail').value.trim(),pw=$('#suPw').value,pw2=$('#suPw2').value;
   if(!email)return toast(t('fillFields'));
   if(pw.length<6)return toast(t('pwShort'));
   if(pw!==pw2)return toast(t('pwMatch'));
+  try{ const r=await rfPwHash(pw); S.user.pwSalt=r.salt; S.user.pwHash=r.hash; }catch(e){}
   S.user.email=email;S.authed=true;suPwTmp='';save();enterAppFull();
   checkBadges();navTab('today');
 };
@@ -1750,12 +1861,12 @@ window.doSignup=()=>{
 route('reset',(n)=>{
   n.innerHTML=`${topbar('resetT','resetSub',{back:true})}
    <div class="content">
-     <div style="font-size:42px">📧</div>
-     <div class="field"><label>${t('email')}</label><input class="input" id="rsEmail" type="email" placeholder="you@email.com"></div>
-     <button class="btn btn-primary" onclick="doReset()">${t('sendLink')}</button>
+     <p style="line-height:1.7">${isAr()?'رفيق يحفظ ملفك وبياناتك على هذا الجهاز فقط، لذلك لا يمكن إرسال رابط إعادة تعيين بالبريد، ولا يمكننا استعادة كلمة المرور.':'Rafeeq keeps your profile and data on this device only, so no reset email can be sent and we cannot recover your password.'}</p>
+     <p class="muted" style="line-height:1.7">${isAr()?'إن كانت لديك نسخة احتياطية فاحتفظ بها، ثم يمكنك مسح بيانات هذا الجهاز والبدء من جديد واستعادة النسخة.':'If you have a backup file, keep it. You can then erase the data on this device, start again and restore the backup.'}</p>
+     <button class="btn btn-ghost" style="border-color:var(--bad);color:var(--bad)" onclick="rfEraseLocal()">${isAr()?'مسح بيانات هذا الجهاز':'Erase data on this device'}</button>
    </div>`;
 });
-window.doReset=()=>{if(!$('#rsEmail').value.trim())return toast(t('fillFields'));toast(t('resetSent'));setTimeout(()=>go('login'),900);};
+window.rfEraseLocal=()=>{if(!confirm(isAr()?'سيتم مسح كل بيانات رفيق على هذا الجهاز نهائيًا. هل تريد المتابعة؟':'This permanently erases all Rafeeq data on this device. Continue?'))return;try{localStorage.removeItem(KEY);}catch(e){}location.reload();};
 
 /* ============================================================
    SCREENS — Today Dashboard
@@ -1997,34 +2108,37 @@ route('rewards',(n)=>{
    THEMES — iOS-style appearance picker
    ============================================================ */
 const THEMES=[
-  {id:'whoop',en:'Midnight',ar:'منتصف الليل',like:'WHOOP',mode:'dark',
+  {id:'rafeeq',en:'Rafeeq Light',ar:'رفيق فاتح',like:'Rafeeq',mode:'light',
+   vars:{'--bg':'#F3F6F4','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E7EDEA','--line':'#D3DCD8','--txt':'#0B0F14','--muted':'#4F5D69','--faint':'#5E6B77','--accent':'#1C6992','--accent2':'#63BD7F','--purple':'#6B5BD6','--warn':'#8A5A00','--bad':'#B3341F','--good':'#23744A','--accent-d':'#DCE9F0','--nav':'rgba(255,255,255,.88)','--on-accent':'#FFFFFF','--btn-end':'#1C6992'},
+   wall:'linear-gradient(180deg,#E3EEF0 0%,#F3F6F4 38%)'},
+  {id:'whoop',en:'Rafeeq Night',ar:'رفيق ليلي',like:'Rafeeq',mode:'dark',
    vars:{'--bg':'#0B0F14','--bg2':'#0F151D','--card':'#141C26','--card2':'#1B2530','--line':'#243140','--txt':'#EAF2F8','--muted':'#8DA0B2','--faint':'#5A6B7B','--accent':'#00E0B8','--accent2':'#19A0FF','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#2BD67B','--accent-d':'#0B3B36','--nav':'rgba(15,21,29,.9)'},
    wall:'radial-gradient(120% 80% at 50% -10%,#0d2b2a 0%,#0B0F14 55%)'},
-  {id:'oura',en:'Aura',ar:'الهالة',like:'Oura',mode:'dark',
+  {id:'oura',en:'Aura',ar:'الهالة',like:'',mode:'dark',
    vars:{'--bg':'#0E0D12','--bg2':'#15131C','--card':'#1C1926','--card2':'#262232','--line':'#332D42','--txt':'#F1ECF6','--muted':'#A89CB8','--faint':'#6E6480','--accent':'#E8B07A','--accent2':'#C58BF2','--purple':'#C58BF2','--warn':'#F2C24B','--bad':'#FF6B8A','--good':'#7FD1A6','--accent-d':'#2A2030','--nav':'rgba(21,19,28,.92)'},
    wall:'radial-gradient(120% 90% at 80% -10%,#3a2a1a 0%,#0E0D12 55%)'},
-  {id:'calm',en:'Deep Calm',ar:'هدوء عميق',like:'Calm',mode:'dark',
+  {id:'calm',en:'Deep Calm',ar:'هدوء عميق',like:'',mode:'dark',
    vars:{'--bg':'#0A1730','--bg2':'#0E1F40','--card':'#13294F','--card2':'#1B3361','--line':'#274377','--txt':'#E7F0FF','--muted':'#93AAD0','--faint':'#5E769E','--accent':'#4FA8FF','--accent2':'#7BD8FF','--purple':'#9BA8FF','--warn':'#FFC061','--bad':'#FF7C92','--good':'#5FD0C0','--accent-d':'#10294F','--nav':'rgba(14,31,64,.92)'},
    wall:'radial-gradient(120% 90% at 50% -10%,#123a6b 0%,#0A1730 55%)'},
-  {id:'forest',en:'Forest',ar:'الغابة',like:'Fitbit',mode:'dark',
+  {id:'forest',en:'Forest',ar:'الغابة',like:'',mode:'dark',
    vars:{'--bg':'#0A1410','--bg2':'#0F1D17','--card':'#14271E','--card2':'#1D3528','--line':'#274A37','--txt':'#E8F5EC','--muted':'#8FB6A0','--faint':'#5C7E6A','--accent':'#46D08A','--accent2':'#8FD14F','--purple':'#9B7CFF','--warn':'#FFB23E','--bad':'#FF5C72','--good':'#46D08A','--accent-d':'#12271C','--nav':'rgba(15,29,23,.92)'},
    wall:'radial-gradient(120% 90% at 50% -10%,#103a26 0%,#0A1410 55%)'},
-  {id:'apple',en:'Clean',ar:'نظيف',like:'Apple Health',mode:'light',
+  {id:'apple',en:'Clean',ar:'نظيف',like:'',mode:'light',
    vars:{'--bg':'#F2F4F8','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#EDF1F6','--line':'#DCE3EC','--txt':'#0F1722','--muted':'#5C6B7D','--faint':'#6E7A88','--accent':'#0A84FF','--accent2':'#30C758','--purple':'#7C5CFF','--warn':'#FF9F0A','--bad':'#FF3B30','--good':'#30C758','--accent-d':'#DCEBFF','--nav':'rgba(255,255,255,.82)'},
    wall:'linear-gradient(180deg,#E4EEFB 0%,#F2F4F8 40%)'},
-  {id:'headspace',en:'Sunshine',ar:'إشراق',like:'Headspace',mode:'light',
+  {id:'headspace',en:'Sunshine',ar:'إشراق',like:'',mode:'light',
    vars:{'--bg':'#FFF7EC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FBEFDD','--line':'#F0E2CC','--txt':'#2A2014','--muted':'#6E5C44','--faint':'#897962','--accent':'#E0691E','--accent2':'#4F86FF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FFE6D2','--nav':'rgba(255,255,255,.82)'},
    wall:'linear-gradient(180deg,#FFEAD2 0%,#FFF7EC 40%)'},
-  {id:'flo',en:'Blossom',ar:'زهر',like:'Flo',mode:'light',
+  {id:'flo',en:'Blossom',ar:'زهر',like:'',mode:'light',
    vars:{'--bg':'#FFF0F5','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#FCE6EF','--line':'#F3D7E3','--txt':'#2A1620','--muted':'#7E5868','--faint':'#9A7A8A','--accent':'#F0468A','--accent2':'#9B7CFF','--purple':'#9B7CFF','--warn':'#F2A93B','--bad':'#F0563B','--good':'#3FB984','--accent-d':'#FCE0EC','--nav':'rgba(255,255,255,.82)'},
    wall:'radial-gradient(120% 80% at 80% -10%,#ffd6e6 0%,#FFF0F5 55%)'},
-  {id:'mint',en:'Fresh Mint',ar:'نعناع',like:'Clue',mode:'light',
+  {id:'mint',en:'Fresh Mint',ar:'نعناع',like:'',mode:'light',
    vars:{'--bg':'#ECF7F0','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E3F2E9','--line':'#D3EADC','--txt':'#0F2418','--muted':'#4E6B5A','--faint':'#6E9080','--accent':'#1FA85F','--accent2':'#0AAFA0','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#1FA85F','--accent-d':'#D6F1E1','--nav':'rgba(255,255,255,.82)'},
    wall:'linear-gradient(180deg,#D9F2E3 0%,#ECF7F0 40%)'},
-  {id:'nebula',en:'Nebula',ar:'سديم',like:'Samsung Health',mode:'dark',
+  {id:'nebula',en:'Nebula',ar:'سديم',like:'',mode:'dark',
    vars:{'--bg':'#0C0A1A','--bg2':'#131029','--card':'#1A1636','--card2':'#241E47','--line':'#332A5C','--txt':'#EFEAFB','--muted':'#AA9CCC','--faint':'#75699B','--accent':'#A78BFA','--accent2':'#5EB0FF','--purple':'#C58BF2','--warn':'#FFC061','--bad':'#FF6B8A','--good':'#5FD0A0','--accent-d':'#241B45','--nav':'rgba(19,16,41,.92)'},
    wall:'radial-gradient(120% 90% at 50% -10%,#2a1d5a 0%,#0C0A1A 55%)'},
-  {id:'sandstone',en:'Sandstone',ar:'حجر رملي',like:'Vision 2030',mode:'light',
+  {id:'sandstone',en:'Sandstone',ar:'حجر رملي',like:'',mode:'light',
    vars:{'--bg':'#F6F1E9','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#F1E8D9','--line':'#E6DAC6','--txt':'#241B12','--muted':'#6B5C49','--faint':'#8A7A64','--accent':'#9A6620','--accent2':'#2F8F77','--purple':'#7C5CFF','--warn':'#C9831F','--bad':'#C24A33','--good':'#2F8F77','--accent-d':'#F0E2C9','--nav':'rgba(255,255,255,.82)'},
    wall:'linear-gradient(180deg,#EFE4D0 0%,#F6F1E9 40%)'},
   /* ===== Illustrated / personality themes (original art — no third-party IP) ===== */
@@ -2055,7 +2169,7 @@ const THEMES=[
   {id:'dune',en:'Desert Dune',ar:'كثبان الصحراء',like:'Seasonal',mode:'light',cat:'seasonal',
    vars:{'--bg':'#F6EAD4','--bg2':'#FFFDF7','--card':'#FFFDF7','--card2':'#F2E6CE','--line':'#E6D6B6','--txt':'#2A2012','--muted':'#6E5C40','--faint':'#8C7A5C','--accent':'#C07A28','--accent2':'#2F8F77','--purple':'#7C5CFF','--warn':'#C9831F','--bad':'#C24A33','--good':'#2F8F77','--accent-d':'#F0E0C0','--nav':'rgba(255,253,247,.82)'},
    art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCE7C0"/><stop offset=".5" stop-color="#F7D8A6"/><stop offset="1" stop-color="#EBC38A"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><circle cx="120" cy="150" r="50" fill="#FFF1D6" opacity="0.9"/><path d="M0 470c120-50 220 20 400-20v380H0z" fill="#E0AE6E" opacity="0.65"/><path d="M0 570c140-40 260 30 400-10v280H0z" fill="#CE945A" opacity="0.7"/><path d="M0 670c120-30 260 20 400-6v166H0z" fill="#B87C46" opacity="0.75"/></svg>`},
-  {id:'cloudnine',en:'Cloud Nine',ar:'سحابة هادئة',like:'Calm',mode:'light',cat:'calm',
+  {id:'cloudnine',en:'Cloud Nine',ar:'سحابة هادئة',like:'',mode:'light',cat:'calm',
    vars:{'--bg':'#EEF5FC','--bg2':'#FFFFFF','--card':'#FFFFFF','--card2':'#E8F0F8','--line':'#DAE6F0','--txt':'#1A2733','--muted':'#54677A','--faint':'#74889A','--accent':'#4F9CE8','--accent2':'#6BD0C8','--purple':'#7C5CFF','--warn':'#E0962A','--bad':'#E2483C','--good':'#2FA86A','--accent-d':'#DCEBFB','--nav':'rgba(255,255,255,.82)'},
    art:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 800" preserveAspectRatio="xMidYMin slice"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#CFE6FF"/><stop offset="1" stop-color="#EEF5FC"/></linearGradient></defs><rect width="400" height="800" fill="url(#g)"/><g fill="#FFFFFF" opacity="0.9"><ellipse cx="110" cy="150" rx="70" ry="34"/><ellipse cx="160" cy="165" rx="54" ry="28"/><ellipse cx="300" cy="270" rx="66" ry="32"/><ellipse cx="250" cy="285" rx="48" ry="24"/><ellipse cx="80" cy="380" rx="50" ry="24" opacity="0.7"/></g></svg>`},
   {id:'vapor',en:'Vaporwave',ar:'فيبورويف',like:'Retro',mode:'dark',cat:'retro',
@@ -2074,12 +2188,12 @@ const THEMES=[
   {id:'flowsunset',en:'Sunset Drift',ar:'انسياب الغروب',like:'Live',mode:'dark',cat:'seasonal',flow:true,vars:{'--bg':'#221636','--bg2':'#2a1c42','--card':'#32224e','--card2':'#3e2a60','--line':'#4c3673','--txt':'#F6ECFF','--muted':'#C0A6E0','--faint':'#8E74B8','--accent':'#FF7A4D','--accent2':'#FF5FA2','--purple':'#B36BFF','--warn':'#FFC061','--bad':'#FF6B6B','--good':'#37D9A0','--accent-d':'#3a2740','--nav':'rgba(42,28,66,.9)'},wall:'linear-gradient(125deg,#241a46,#5a2e5e,#8a3a4e,#c85a2e,#241a46)'},
   {id:'flowocean',en:'Deep Current',ar:'تيار عميق',like:'Live',mode:'dark',cat:'nature',flow:true,vars:{'--bg':'#062033','--bg2':'#0a2c44','--card':'#0e3752','--card2':'#154865','--line':'#245f80','--txt':'#E4F3FA','--muted':'#8FBAD0','--faint':'#5E8AA2','--accent':'#2FC9E0','--accent2':'#37E0B0','--purple':'#8FA8FF','--warn':'#FFC061','--bad':'#FF6B7E','--good':'#37E0B0','--accent-d':'#123c50','--nav':'rgba(10,44,68,.9)'},wall:'linear-gradient(125deg,#062033,#0a3a54,#0e5a6e,#123a6b,#062033)'},
 ];
-const CATMAP={whoop:'brand',nebula:'brand',calm:'calm',apple:'calm',mint:'calm',forest:'nature',sandstone:'seasonal',headspace:'more',flo:'more',oura:'more'};
+const CATMAP={rafeeq:'brand',whoop:'brand',nebula:'brand',calm:'calm',apple:'calm',mint:'calm',forest:'nature',sandstone:'seasonal',headspace:'more',flo:'more',oura:'more'};
 const CAT_ORDER=[['brand',['Brand & signature','السمة والهوية'],'🩵'],['anime',['Anime & vibrant','أنمي وحيوية'],'✨'],['nature',['Nature','الطبيعة'],'🌿'],['seasonal',['Seasonal & Saudi','مواسم وسعودية'],'🌙'],['retro',['Bold & retro','جريء وكلاسيكي'],'🕹️'],['calm',['Calm & minimal','هدوء وبساطة'],'☁️'],['more',['More looks','مظاهر أخرى'],'🎨']];
 function themeCat(th){return th.cat||CATMAP[th.id]||'more';}
 function wallCss(th){ if(th.art){return 'url("data:image/svg+xml,'+encodeURIComponent(th.art)+'") center top / cover no-repeat, '+(th.base||th.vars['--bg']); } return th.wall||th.vars['--bg']; }
 function applyTheme(){const th=THEMES.find(x=>x.id===(S.prefs.theme||'whoop'))||THEMES[0];
-  const r=document.documentElement;Object.entries(th.vars).forEach(([k,v])=>r.style.setProperty(k,v));
+  const r=document.documentElement;['--on-accent','--btn-end'].forEach(k=>{if(!(k in th.vars))r.style.removeProperty(k);});Object.entries(th.vars).forEach(([k,v])=>r.style.setProperty(k,v));
   const app=$('#app');const cw=S.prefs&&S.prefs.customWall;if(app){app.style.background=cw?('url("'+cw+'") center center / cover no-repeat'):(th.flow?th.wall:wallCss(th));app.classList.toggle('flowbg',!cw&&!!th.flow);}r.setAttribute('data-wall',cw?'custom':'');
   const m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',th.vars['--bg']);
   if(S.prefs&&S.prefs.accent){r.style.setProperty('--accent',S.prefs.accent);r.style.setProperty('--accent-d','color-mix(in srgb, '+S.prefs.accent+' 15%, var(--card))');}
@@ -2458,6 +2572,7 @@ window.openAddMed=function(){
 window.__medKind=(v)=>{$('#mOral').style.display=v==='oral'?'':'none';$('#mBio').style.display=v==='biologic'?'':'none';};
 window.saveMed=function(){const kind=$('#mKind').value;const name=($('#mName').value||'').trim();
   const dose=($('#mDose').value||'').trim();const since=$('#mSince').value||todayKey();
+  if(!name)return toast(t('fillFields'));
   const m={id:rid(),name,kind,dose,since,log:[],history:[{date:since,type:'start',dose,note:(isAr()?'بدء العلاج':'Started treatment')}]};
   if(kind==='biologic'){m.interval=parseInt($('#mInt').value)||56;m.start=$('#mStart').value||todayKey();}
   else{m.time=$('#mTime').value||'20:00';}
@@ -3041,7 +3156,7 @@ window.__mkShare=async function(){
   const sum=clinSummary();let url;
   if(cloudOn()){
     const sb=await loadSupabase();
-    if(sb){const code=rid()+rid();const expires=new Date(Date.now()+7*864e5).toISOString();
+    if(sb){const code=shareCode();const expires=new Date(Date.now()+7*864e5).toISOString();
       const {error}=await sb.from('shared_reports').insert({code,data:sum,expires_at:expires});
       url=location.origin+location.pathname+'#clin=live:'+code;
       if(error)url=location.origin+location.pathname+'#clin='+b64e(sum);
@@ -3090,7 +3205,7 @@ async function checkClinHash(){
   const h=location.hash||'';
   const m=h.match(/#clin=(.+)$/);if(!m)return false;
   let payload=null;const raw=decodeURIComponent(m[1]);
-  if(raw.startsWith('live:')){const sb=await loadSupabase();if(sb){try{const {data}=await sb.from('shared_reports').select('data').eq('code',raw.slice(5)).single();payload=data&&data.data;}catch(e){}}}
+  if(raw.startsWith('live:')){const sb=await loadSupabase();if(sb){try{const {data}=await sb.rpc('get_shared_report',{p_code:raw.slice(5)});payload=data||null;}catch(e){}}}
   else payload=b64d(raw);
   if(payload){renderClinician(payload);return true;}
   return false;
@@ -4229,7 +4344,7 @@ function learnRowsHtml(){
   const q=learnSearch.trim().toLowerCase();
   const items=S.learn.filter(a=>learnMatch(a)&&(!q||(((a.en||[]).join(' ')+' '+(a.ar||[]).join(' ')).toLowerCase().includes(q))));
   if(!items.length)return `<div class="card center" style="padding:26px"><p class="muted">${isAr()?'لا توجد نتائج':'No results'}</p></div>`;
-  return `<div class="card">${items.map(a=>`<div class="li" onclick="openArticle('${a.id}')"><div class="ic" style="color:var(--accent)">${gicon(a.icon,22)}</div><div class="tx"><b>${L(a[S.lang])}${a.new?` <span class="badge accent" style="font-size:10px">${t('newBadge')}</span>`:''}</b><small>${a.min} ${t('minRead')} · ${CAT_LABEL[a.cat]?CAT_LABEL[a.cat][S.lang]:''}${a.source==='SGA'?' · SGA':''}</small></div><div class="chev">${isAr()?'‹':'›'}</div></div>`).join('')}</div>`;
+  return `<div class="card">${items.map(a=>`<div class="li" onclick="openArticle('${a.id}')"><div class="ic" style="color:var(--accent)">${gicon(a.icon,22)}</div><div class="tx"><b>${((a[S.lang]||a.en||[''])[0])}${a.new?` <span class="badge accent" style="font-size:10px">${t('newBadge')}</span>`:''}</b><small>${a.min} ${t('minRead')} · ${CAT_LABEL[a.cat]?CAT_LABEL[a.cat][S.lang]:''}${a.source==='SGA'?' · SGA':''}</small></div><div class="chev">${isAr()?'‹':'›'}</div></div>`).join('')}</div>`;
 }
 window.rerenderLearnList=function(){const el=document.getElementById('learnList');if(el)el.innerHTML=learnRowsHtml();};
 route('learn',(n)=>{
@@ -4247,7 +4362,7 @@ route('learn',(n)=>{
      <input class="input" id="learnSearch" placeholder="${isAr()?'🔍 ابحث في المقالات':'🔍 Search articles'}" value="${esc(learnSearch)}" oninput="learnSearch=this.value;rerenderLearnList()">
      <div class="chips" style="overflow-x:auto;flex-wrap:nowrap">${cats.map(c=>`<button class="chip ${learnCat===c?'on':''}" style="white-space:nowrap" onclick="setLearnCat('${c}')">${CAT_LABEL[c][S.lang]}</button>`).join('')}</div>
      ${learnCat==='all'&&sugg.length?`<div class="section-title">${t('forYou')}</div>
-       <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px">${sugg.map(a=>`<button class="card tap" style="min-width:210px;text-align:start" onclick="openArticle('${a.id}')"><div style="color:var(--accent)">${gicon(a.icon,28)}</div><b style="font-size:14.5px;display:block;margin-top:8px;line-height:1.3">${L(a[S.lang])}</b><div class="row" style="gap:6px;margin-top:8px"><span class="badge accent">${a.min} ${t('minRead')}</span>${a.source==='SGA'?'<span class="badge" style="background:color-mix(in srgb,var(--accent2) 18%,transparent);color:var(--accent2)">SGA</span>':''}</div></button>`).join('')}</div>`:''}
+       <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px">${sugg.map(a=>`<button class="card tap" style="min-width:210px;text-align:start" onclick="openArticle('${a.id}')"><div style="color:var(--accent)">${gicon(a.icon,28)}</div><b style="font-size:14.5px;display:block;margin-top:8px;line-height:1.3">${((a[S.lang]||a.en||[''])[0])}</b><div class="row" style="gap:6px;margin-top:8px"><span class="badge accent">${a.min} ${t('minRead')}</span>${a.source==='SGA'?'<span class="badge" style="background:color-mix(in srgb,var(--accent2) 18%,transparent);color:var(--accent2)">SGA</span>':''}</div></button>`).join('')}</div>`:''}
      <div class="section-title">${learnCat==='sga'?(isAr()?'دليل IBD':'IBD Guide'):t('allArticles')}</div>
      <div id="learnList">${learnRowsHtml()}</div>
    </div>`;
@@ -5226,6 +5341,114 @@ try{ track('app_open'); }catch(e){}
 (async()=>{ if(/#clin=/.test(location.hash)){ const ok=await checkClinHash(); if(ok)return; } go('splash',{replace:true}); })();
 window.addEventListener('hashchange',()=>{ if(/#clin=/.test(location.hash)) checkClinHash(); });
 
+</script>
+<script id="rf-safety">
+/* ===== Rafeeq safety layer (Oct 2026): hard input limits ===== */
+(function(){
+'use strict';
+var YEAR=new Date().getFullYear();
+var KG={min:20,max:300,dec:1,u:'kg'}, CM={min:100,max:230,dec:0,u:'cm'};
+var LIMITS={
+  bW:KG,cW:KG,hW:KG,fW:KG,pW:KG,flW:KG,buW:KG,wkIn:KG,
+  bH:CM,cH:CM,iH:CM,wH:CM,fH:CM,epHeight:CM,
+  wWaist:{min:40,max:250,dec:0,u:'cm'},
+  cA:{min:5,max:110,dec:0,u:'yr'},fA:{min:5,max:110,dec:0,u:'yr'},hrA:{min:5,max:110,dec:0,u:'yr'},
+  buS:{min:0,max:100000,dec:0,u:''},stIn:{min:1,max:100000,dec:0,u:''},
+  acMins:{min:1,max:600,dec:0,u:'min'},amIn:{min:1,max:600,dec:0,u:'min'},
+  mInt:{min:1,max:365,dec:0,u:'days'},
+  suYear:{min:1900,max:YEAR,dec:0,u:''},suDiag:{min:1900,max:YEAR,dec:0,u:''}
+};
+/* per-test limits for lab values (the unit comes from the selected test) */
+var LAB={calpro:{min:0,max:10000,dec:0},crp:{min:0,max:600,dec:1},hb:{min:3,max:25,dec:1},ferritin:{min:1,max:10000,dec:0},albumin:{min:10,max:60,dec:1},esr:{min:0,max:150,dec:0},plt:{min:10,max:1500,dec:0},wbc:{min:0.5,max:100,dec:1}};
+var AR={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9','٫':'.','،':'.',',':'.'};
+function ar(){ try{ return isAr(); }catch(e){ return false; } }
+function limitOf(el){
+  if(!el||!el.id) return null;
+  if(el.id==='lbVal'){ var s=document.getElementById('lbType'); var l=s&&LAB[s.value]; return l?{min:l.min,max:l.max,dec:l.dec,u:''}:{min:0,max:100000,dec:3,u:''}; }
+  return LIMITS[el.id]||null;
+}
+function clean(raw,lim){
+  var s=String(raw).replace(/[٠-٩۰-۹٫،,]/g,function(c){return AR[c];}).replace(/[^0-9.]/g,'');
+  if(lim.dec===0) s=s.replace(/\./g,''); else { var p=s.split('.'); s=p[0]+(p.length>1?'.'+p.slice(1).join('').slice(0,lim.dec):''); }
+  return s.replace(/^0+(?=\d)/,'');
+}
+function hintText(lim){ return (ar()?'المسموح: ':'Allowed: ')+lim.min+' – '+lim.max+(lim.u?' '+lim.u:''); }
+function hintEl(el){ var n=el.nextElementSibling; return n&&n.classList&&n.classList.contains('limit-hint')?n:null; }
+function flash(el){ var h=hintEl(el); if(h){ h.classList.add('bad'); clearTimeout(h.__t); h.__t=setTimeout(function(){h.classList.remove('bad');},1800); } }
+document.addEventListener('input',function(e){
+  var el=e.target, lim=limitOf(el); if(!lim) return;
+  var raw=el.value, v=clean(raw,lim);
+  if(v!==''&&v!=='.'&&parseFloat(v)>lim.max){ v=el.dataset.prev||''; flash(el); }
+  else if(v!==raw.replace(/[٠-٩۰-۹]/g,function(c){return AR[c];})) flash(el);
+  if(v!==el.value) el.value=v; el.dataset.prev=v;
+},true);
+document.addEventListener('paste',function(e){
+  var el=e.target, lim=limitOf(el); if(!lim) return; e.preventDefault();
+  var v=clean((e.clipboardData||window.clipboardData).getData('text'),lim);
+  if(v===''||parseFloat(v)>lim.max){ flash(el); return; }
+  el.value=v; el.dataset.prev=v; el.dispatchEvent(new Event('input',{bubbles:true}));
+},true);
+function enforce(el){
+  var lim=limitOf(el); if(!lim||el.value==='') return true;
+  var n=parseFloat(el.value);
+  if(isNaN(n)||n<lim.min||n>lim.max){ el.value=''; el.dataset.prev=''; flash(el); return false; }
+  return true;
+}
+function enforceAll(){ var bad=false; document.querySelectorAll('input[data-lim]').forEach(function(i){ if(!enforce(i)) bad=true; }); return !bad; }
+document.addEventListener('focusout',function(e){ if(e.target&&e.target.dataset&&e.target.dataset.lim) enforce(e.target); },true);
+document.addEventListener('change',function(e){
+  var el=e.target; if(el&&el.id==='lbType'){ var v=document.getElementById('lbVal'); if(v){ v.value=''; v.dataset.prev=''; var h=hintEl(v); if(h) h.textContent=hintText(limitOf(v)); } }
+  else if(el&&el.dataset&&el.dataset.lim) enforce(el);
+},true);
+/* any button press: drop out-of-range values first, and say so */
+document.addEventListener('click',function(e){
+  var b=e.target.closest&&e.target.closest('button,[onclick]'); if(!b) return;
+  if(!enforceAll()){ try{ toast(ar()?'كانت إحدى القيم خارج النطاق المسموح وتم مسحها.':'A value was outside the allowed range and was cleared.'); }catch(x){} }
+},true);
+function apply(){
+  document.querySelectorAll('input[id]').forEach(function(el){
+    if(el.dataset.lim) return; var lim=limitOf(el); if(!lim) return; el.dataset.lim='1';
+    if(el.type==='number') el.type='text';
+    el.setAttribute('inputmode',lim.dec>0?'decimal':'numeric'); el.setAttribute('autocomplete','off');
+    el.setAttribute('maxlength',String(String(lim.max).length+(lim.dec?lim.dec+1:0)));
+    el.dataset.prev=el.value||''; el.setAttribute('aria-describedby',el.id+'_hint');
+    var h=document.createElement('div'); h.className='limit-hint'; h.id=el.id+'_hint'; h.textContent=hintText(lim); el.insertAdjacentElement('afterend',h);
+    if(el.value!==''&&!enforce(el)){ /* stale stored value outside range is dropped */ }
+  });
+}
+var r0=window.render; if(typeof r0==='function') window.render=function(){ var x=r0.apply(this,arguments); apply(); return x; };
+var o0=window.openSheet; if(typeof o0==='function') window.openSheet=function(){ var x=o0.apply(this,arguments); apply(); return x; };
+new MutationObserver(function(){ apply(); }).observe(document.body,{childList:true,subtree:true});
+
+/* ===== accessibility pass: labels, switches, icon buttons, headings ===== */
+var A11Y_T=null;
+function a11y(){
+  try{
+    var uid=0;
+    document.querySelectorAll('.field').forEach(function(f){
+      var l=f.querySelector('label'); var c=f.querySelector('input:not([type=hidden]),select,textarea'); if(!l||!c) return;
+      if(c.getAttribute('aria-label')||c.getAttribute('aria-labelledby')||(c.id&&document.querySelector('label[for="'+c.id+'"]'))) return;
+      if(!l.id) l.id='fl'+(++uid)+'_'+Math.random().toString(36).slice(2,6); c.setAttribute('aria-labelledby',l.id);
+    });
+    document.querySelectorAll('input[type=file]').forEach(function(i){ if(!i.getAttribute('aria-label')&&!(i.id&&document.querySelector('label[for="'+i.id+'"]'))) i.setAttribute('aria-label',ar()?'اختيار ملف':'Choose a file'); });
+    document.querySelectorAll('button.toggle').forEach(function(b){
+      b.setAttribute('role','switch'); b.setAttribute('aria-checked',b.classList.contains('on')?'true':'false');
+      if(!b.getAttribute('aria-label')){ var row=b.closest('.li,.row,.card,div'); var tx=row&&(row.querySelector('b,.tx b,strong')||row.firstElementChild); var name=tx&&tx!==b?tx.textContent.trim():''; b.setAttribute('aria-label',name||(ar()?'تبديل':'Toggle')); }
+    });
+    document.querySelectorAll('button').forEach(function(b){
+      if(b.textContent.trim()||b.getAttribute('aria-label')||b.getAttribute('title')||b.getAttribute('aria-labelledby')) return;
+      var oc=b.getAttribute('onclick')||''; var m=ar();
+      var lab=/voice/i.test(oc)?(m?'تسجيل صوتي':'Voice log'):/Add|add/.test(oc)?(m?'إضافة':'Add'):/close|Close|back|Back/.test(oc)?(m?'رجوع':'Back'):(m?'زر':'Button');
+      b.setAttribute('aria-label',lab);
+    });
+    document.querySelectorAll('th').forEach(function(t){ if(!t.textContent.trim()&&!t.getAttribute('aria-label')) t.setAttribute('aria-label',ar()?'العنصر':'Item'); });
+    var app=document.getElementById('app'); if(app&&!app.querySelector('h1')&&!document.getElementById('rfH1')){ var h=document.createElement('h1'); h.id='rfH1'; h.className='sr-only'; h.textContent='Rafeeq · رفيق'; app.insertBefore(h,app.firstChild); }
+    else if(app&&app.querySelector('h1:not(#rfH1)')){ var x=document.getElementById('rfH1'); if(x) x.remove(); }
+  }catch(e){}
+}
+var mo=new MutationObserver(function(){ clearTimeout(A11Y_T); A11Y_T=setTimeout(a11y,60); }); mo.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class']}); a11y();
+window.RF_LIMITS=LIMITS; window.rfEnforceAll=enforceAll;
+})();
 </script>
 </body>
 </html>

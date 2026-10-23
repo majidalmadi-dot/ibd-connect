@@ -1,9 +1,10 @@
 /* IBD Connect service worker — offline support + fresh-on-deploy.
    Bump CACHE on each release to invalidate old assets. */
-const CACHE = 'ibd-connect-v60';
+const CACHE = 'ibd-connect-v63';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './logo-glyph.png',
-  // precache the charting lib so charts work on the very first offline launch
-  'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'];
+  // self-hosted charting lib + fonts so charts and type work on the very first offline launch
+  './vendor/chart.umd.js', './fonts/inter-latin-400-normal.woff2', './fonts/inter-latin-500-normal.woff2', './fonts/inter-latin-600-normal.woff2', './fonts/inter-latin-700-normal.woff2', './fonts/inter-latin-800-normal.woff2',
+  './fonts/ibm-plex-sans-arabic-arabic-400-normal.woff2', './fonts/ibm-plex-sans-arabic-arabic-500-normal.woff2', './fonts/ibm-plex-sans-arabic-arabic-600-normal.woff2', './fonts/ibm-plex-sans-arabic-arabic-700-normal.woff2'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).then(() => self.skipWaiting()).catch(() => {}));
