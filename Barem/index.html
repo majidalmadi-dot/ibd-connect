@@ -1228,7 +1228,7 @@ function copyShare(l){if(navigator.clipboard)navigator.clipboard.writeText(l);to
 function loadQR(link){const box=document.getElementById('qrbox');if(!box)return;
   const draw=()=>{try{box.innerHTML='';new QRCode(box,{text:link,width:168,height:168,colorDark:'#2B2019',colorLight:'#ffffff'});}catch(e){box.innerHTML='<div class="muted sm">'+(isAr()?'الرمز يحتاج اتصالًا — انسخ الرابط بدلًا منه.':'QR needs a connection — copy the link instead.')+'</div>';}};
   if(window.QRCode){draw();return;}
-  const s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';
+  const s=document.createElement('script');s.src='vendor/qrcode.min.js';
   s.onload=draw;s.onerror=()=>{box.innerHTML='<div class="muted sm">'+(isAr()?'الرمز يحتاج اتصالًا — انسخ الرابط.':'QR needs a connection — copy the link.')+'</div>';};document.head.appendChild(s);}
 function openShareView(enc){location.hash='r='+enc;renderSharedView();}
 function exportAll(){const b=new Blob([JSON.stringify(S)],{type:'application/json'});const u=URL.createObjectURL(b);
