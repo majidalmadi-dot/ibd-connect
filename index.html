@@ -4763,10 +4763,15 @@ route('adminLogin',(n)=>{
      <div class="field"><label>${t('password')}</label><input class="input" type="password" id="adPw" placeholder="••••••••"></div>
      <div class="field"><label>${t('adminRole')}</label><select class="input" id="adRole"><option value="superAdmin">${t('superAdmin')}</option><option value="contentEditor">${t('contentEditor')}</option><option value="analyst">${t('analyst')}</option></select></div>
      <button class="btn btn-primary" onclick="adminEnter()">${t('signIn')}</button>
-     <p class="faint center" style="font-size:12px">${isAr()?'تجريبي: أي بريد/كلمة مرور للدخول':'Demo: any email / password works'}</p>
+     <p class="faint center" style="font-size:12px">${isAr()?'أدخل مفتاح المشرف في حقل كلمة المرور':'Enter the admin key in the password field'}</p>
    </div>`;
 });
-window.adminEnter=()=>{if(!$('#adEmail').value.trim()||$('#adPw').value.length<1)return toast(t('fillFields'));adminRole=$('#adRole').value;adminTab='dashboard';go('admin',{replace:true});};
+let adminKey='';
+window.adminEnter=async()=>{const k=$('#adPw').value.trim();if(!k)return toast(t('fillFields'));
+  if(!cloudOn())return toast(isAr()?'الخادم غير مُهيّأ':'Backend not configured');
+  const sb=await loadSupabase();if(!sb)return toast(isAr()?'تعذّر الاتصال':'Could not connect');
+  try{const r=await sb.rpc('event_summary',{days:1,p_key:k});if(r.error)return toast(isAr()?'مفتاح غير صحيح':'Invalid admin key');}catch(e){return toast(isAr()?'تعذّر الاتصال':'Could not connect');}
+  adminKey=k;adminRole=$('#adRole').value;adminTab='dashboard';go('admin',{replace:true});};
 
 route('admin',(n)=>{
   n.classList.add('admin-wrap');
@@ -4788,7 +4793,7 @@ async function loadUsage(host){
   const sb=await loadSupabase();
   if(!sb){host.innerHTML=`<div class="card"><p class="muted">${ar?'تعذّر الاتصال.':'Could not connect.'}</p></div>`;return;}
   let sum=[],daily=[];
-  try{const a=await sb.rpc('event_summary',{days:30});sum=a.data||[];const b=await sb.rpc('event_daily',{days:14});daily=b.data||[];}catch(e){}
+  try{const a=await sb.rpc('event_summary',{days:30,p_key:adminKey});sum=a.data||[];const b=await sb.rpc('event_daily',{days:14,p_key:adminKey});daily=b.data||[];}catch(e){}
   const total=sum.reduce((a,b)=>a+Number(b.n),0);
   const L={view:ar?'مشاهدات الشاشات':'Screen views',log:ar?'تسجيلات':'Entries logged',share_report:ar?'مشاركة تقرير':'Reports shared',enable_push:ar?'تفعيل الإشعارات':'Notifications enabled',read_article:ar?'قراءة مقال':'Articles read'};
   const max=Math.max(1,...sum.map(r=>Number(r.n)));
