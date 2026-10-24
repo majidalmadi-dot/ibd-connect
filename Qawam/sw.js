@@ -1,5 +1,5 @@
 /* Qawam (weight management) service worker — offline support + fresh-on-deploy. Scope: /Qawam/ */
-const CACHE = 'qawam-v27';
+const CACHE = 'qawam-v29';
 self.addEventListener('message',function(e){if(e.data&&e.data.type==='SKIP_WAITING')self.skipWaiting();});
 const CORE = ['./', './index.html', './manifest.webmanifest', './qawam-192.png', './qawam-512.png', './qawam-180.png'];
 
