@@ -1532,7 +1532,8 @@ function seedDemo(s){
   return s;
 }
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
-function rid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function cr36(n){try{var a=new Uint8Array(n);crypto.getRandomValues(a);var o='';for(var i=0;i<n;i++)o+=(a[i]%36).toString(36);return o;}catch(e){return Math.random().toString(36).slice(2,2+n);}}
+function rid(){return Date.now().toString(36)+cr36(5);}
 function shareCode(){const b=crypto.getRandomValues(new Uint8Array(16));let s='';for(const x of b)s+=String.fromCharCode(x);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 
 /* ---------- i18n helpers ---------- */
@@ -2858,7 +2859,7 @@ function recordEvent(ev,props){
     if(!S.metrics)S.metrics={firstSeen:null,anonId:null,ev:[]};
     const m=S.metrics;
     if(!m.firstSeen)m.firstSeen=new Date().toISOString();
-    if(!m.anonId)m.anonId='r_'+Math.random().toString(36).slice(2,10);
+    if(!m.anonId)m.anonId='r_'+cr36(8);
     // store only the event name + a whitelisted, non-PII prop (e.g. log type / screen id)
     let p=null;
     if(props){const k=props.type||props.r||props.id;if(k)p=String(k).slice(0,24);}
@@ -2939,7 +2940,7 @@ window.exportEvidence=function(){
 };
 window.enrollResearch=function(){
   const ar=isAr();S.research=S.research||{};S.research.enrolled=true;
-  S.research.pid=S.research.pid||('P-'+Math.random().toString(36).slice(2,8).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase());
+  S.research.pid=S.research.pid||('P-'+cr36(6).toUpperCase()+cr36(4).toUpperCase());
   S.research.consentAt=new Date().toISOString();if(!S.research.baselineAt)S.research.baselineAt=S.research.consentAt;
   const sc=document.getElementById('siteCode');if(sc&&sc.value.trim())S.research.siteCode=sc.value.trim().toUpperCase();
   save();track('research_enroll');try{closeSheet();}catch(e){}toast(ar?'✓ شكرًا لمساهمتك':'✓ Thank you for contributing');render();

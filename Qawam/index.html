@@ -219,7 +219,8 @@ html[data-anim="off"] #app.flowbg{animation:none}
 const $=(s,r)=>(r||document).querySelector(s);
 const el=(h)=>{const d=document.createElement('div');d.innerHTML=h.trim();return d.firstElementChild;};
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function rid(){return Math.random().toString(36).slice(2,10);}
+function cr36(n){try{var a=new Uint8Array(n);crypto.getRandomValues(a);var o='';for(var i=0;i<n;i++)o+=(a[i]%36).toString(36);return o;}catch(e){return Math.random().toString(36).slice(2,2+n);}}
+function rid(){return cr36(8);}
 const KEY='qawam_v1';
 
 /* ---------- i18n ---------- */
@@ -1202,7 +1203,7 @@ function loadSupabase(){ if(__sb)return Promise.resolve(__sb); if(!cloudOn())ret
 let _mSave=0;
 function recordEvent(ev,props){try{
   if(!S.metrics)S.metrics={firstSeen:null,anonId:null,ev:[]};const m=S.metrics;
-  if(!m.firstSeen)m.firstSeen=new Date().toISOString();if(!m.anonId)m.anonId='q_'+Math.random().toString(36).slice(2,10);
+  if(!m.firstSeen)m.firstSeen=new Date().toISOString();if(!m.anonId)m.anonId='q_'+cr36(8);
   let p=null;if(props){const k=props.type||props.r||props.id;if(k)p=String(k).slice(0,24);}
   m.ev.push({e:String(ev).slice(0,40),t:Date.now(),p});if(m.ev.length>800)m.ev=m.ev.slice(-800);
   const now=Date.now();if(now-_mSave>3500){_mSave=now;save();}
@@ -1318,7 +1319,7 @@ window.exportEvidence=function(){const ar=isAr();const rec=buildEvidenceRecord()
   const txt=JSON.stringify(rec,null,2);try{navigator.clipboard&&navigator.clipboard.writeText(txt);}catch(x){}
   try{const b=new Blob([txt],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='qawam-evidence-'+rec.participantId+'.json';document.body.appendChild(a);a.click();a.remove();}catch(x){}
   track('export_evidence');toast(ar?'✓ نُسخت بياناتك مجهولة الهوية':'✓ De-identified data copied & downloaded');};
-window.enrollResearch=function(){const ar=isAr();S.research=S.research||{};S.research.enrolled=true;S.research.pid=S.research.pid||('P-'+Math.random().toString(36).slice(2,8).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase());S.research.consentAt=new Date().toISOString();if(!S.research.baselineAt)S.research.baselineAt=S.research.consentAt;const sc=document.getElementById('siteCode');if(sc&&sc.value.trim())S.research.siteCode=sc.value.trim().toUpperCase();save();track('research_enroll');try{closeSheet();}catch(e){}toast(ar?'✓ شكرًا لمساهمتك':'✓ Thank you for contributing');render();};
+window.enrollResearch=function(){const ar=isAr();S.research=S.research||{};S.research.enrolled=true;S.research.pid=S.research.pid||('P-'+cr36(6).toUpperCase()+cr36(4).toUpperCase());S.research.consentAt=new Date().toISOString();if(!S.research.baselineAt)S.research.baselineAt=S.research.consentAt;const sc=document.getElementById('siteCode');if(sc&&sc.value.trim())S.research.siteCode=sc.value.trim().toUpperCase();save();track('research_enroll');try{closeSheet();}catch(e){}toast(ar?'✓ شكرًا لمساهمتك':'✓ Thank you for contributing');render();};
 window.withdrawResearch=function(){const ar=isAr();S.research={enrolled:false,pid:null,consentAt:null,siteCode:null,baselineAt:null};save();track('research_withdraw');toast(ar?'تم الانسحاب':'Withdrawn');render();};
 window.openEnroll=function(){const ar=isAr();openSheet(`<h2 style="margin:4px 0 8px">${ar?'الانضمام لبرنامج التحسين':'Join the improvement programme'}</h2><p class="muted" style="font-size:13px;line-height:1.6;margin:0 0 12px">${ar?'برنامج اختياري لقياس ما إذا كان التطبيق يساعد. تُصدَّر بياناتك مجهولة الهوية (بلا اسم أو ملاحظات) وتشاركها أنت. تبقى على جهازك ما لم تشاركها.':'Optional programme to measure whether the app helps. Your data is exported de-identified (no name or notes) and you share it. It stays on your device unless you share it.'}</p><div class="field"><label>${ar?'رمز الموقع (اختياري)':'Site code (optional)'}</label><input class="input" id="siteCode" placeholder="${ar?'مثال: KSU':'e.g. KSU'}" style="text-transform:uppercase" value="${esc((S.research&&S.research.siteCode)||'')}"></div><button class="btn btn-primary" onclick="enrollResearch()">${ar?'أوافق وأنضم':'I consent & join'}</button><p class="muted" style="font-size:11px;margin-top:10px">${ar?'يمكنك الانسحاب في أي وقت. أداة غير طبية.':'You can withdraw anytime. Non-medical tool.'}</p>`);};
 route('research',(n)=>{const ar=isAr();const r=S.research||{};const on=!!r.enrolled;const rec=on?buildEvidenceRecord():null;
