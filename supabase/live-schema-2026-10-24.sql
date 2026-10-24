@@ -1,0 +1,15 @@
+-- RECORD of the deployed schema (project "rafeeq", read 2026-10-24). Do not run; see migrations_README.md.
+-- Tables (RLS enabled on all): snapshots(sync_id text pk, blob text, schema int, updated_at), events(id, ev, props jsonb, day, created_at),
+--   registry(id, dx, age_band, region, sym, bow, adh, disc, ctrl, gen, created_at), shared_reports(code, data jsonb, created_at, expires_at),
+--   push_subscriptions(endpoint, p256dh, auth, med_time, lang, created_at), admin_keys(key_hash ...), immune360_* (8 tables).
+-- Policies (anon INSERT only; no SELECT/UPDATE/DELETE policies for anon):
+--   events "anon insert event": check char_length(ev) between 1 and 40
+--   push_subscriptions "anon insert sub": char_length(endpoint)>20, p256dh>10, auth>5
+--   registry "anon contribute": disc,ctrl in 0..100; sym in 0..10; bow in 0..50; adh in 0..100
+--   shared_reports "anon create share": char_length(code)>=12, expires_at > now() and < now()+30 days
+-- snapshots and admin_keys: RLS on, no policies (deny by default); access only through SECURITY DEFINER functions below.
+-- Functions (SECURITY DEFINER, search_path=public, executable by anon and authenticated):
+--   snapshot_put(p_sync_id, p_blob, p_schema): sync id length 16..200, blob length <= 5,000,000, upsert by sync_id
+--   snapshot_get(p_sync_id): returns blob, schema, updated_at for that sync id
+--   get_shared_report(p_code): returns data where code matches and not expired
+--   event_summary(days, p_key), event_daily(days, p_key): raise 'forbidden' unless sha256(p_key) is in admin_keys

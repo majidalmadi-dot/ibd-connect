@@ -1,6 +1,6 @@
 /* IBD Connect service worker — offline support + fresh-on-deploy.
    Bump CACHE on each release to invalidate old assets. */
-const CACHE = 'ibd-connect-v65';
+const CACHE = 'ibd-connect-v66';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './logo-glyph.png',
   // self-hosted charting lib + fonts so charts and type work on the very first offline launch
   './vendor/chart.umd.js', './fonts/inter-latin-400-normal.woff2', './fonts/inter-latin-500-normal.woff2', './fonts/inter-latin-600-normal.woff2', './fonts/inter-latin-700-normal.woff2', './fonts/inter-latin-800-normal.woff2',
