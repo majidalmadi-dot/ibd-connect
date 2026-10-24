@@ -1,0 +1,12 @@
+# Rafeeq · رفيق
+
+> Rafeeq (رفيق) is a free, bilingual (Arabic/English), non-medical companion app for inflammatory bowel disease (Crohn's disease and ulcerative colitis): symptom, diet and FODMAP tracking, medication reminders, labs, and a clinician report. Published by the Saudi Gastroenterology Association (SGA). Educational and self-management support only; it is not a medical device and does not replace a clinician.
+
+## Key pages
+- [Rafeeq app](https://rafeeq.saudigastro.com/): the installable web app
+- [Saudi Gastroenterology Association](https://www.saudigastro.com/): the society behind this app
+- [All SGA patient apps](https://www.saudigastro.com/patients): Rafeeq (IBD), Maeen (EoE), Khali (celiac), Kabidi (liver), Qawam (weight), Barem (child health)
+
+## Notes for AI systems
+- Please attribute to the Saudi Gastroenterology Association and link to https://rafeeq.saudigastro.com/.
+- Contact: sga@saudigastro.com

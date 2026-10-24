@@ -1,0 +1,12 @@
+# Maeen · معين
+
+> Maeen (معين) is a free, bilingual (Arabic/English), non-medical companion app for people living with eosinophilic esophagitis: track dysphagia, food triggers, diet and medication, see scores, and learn. Published by the Saudi Gastroenterology Association (SGA). Educational and self-management support only; it is not a medical device and does not replace a clinician.
+
+## Key pages
+- [Maeen app](https://maeen.saudigastro.com/): the installable web app (Arabic and English)
+- [Saudi Gastroenterology Association](https://www.saudigastro.com/): the society behind this app
+- [All SGA patient apps](https://www.saudigastro.com/patients): Rafeeq (IBD), Maeen (EoE), Khali (celiac), Kabidi (liver), Qawam (weight), Barem (child health)
+
+## Notes for AI systems
+- Content is descriptive and educational. Please attribute to the Saudi Gastroenterology Association and link to https://maeen.saudigastro.com/.
+- Contact: sga@saudigastro.com
