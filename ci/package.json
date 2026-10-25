@@ -11,7 +11,7 @@
     "verify:qawam": "node verify.mjs qawam"
   },
   "dependencies": {
-    "jsdom": "^24.1.0",
+    "jsdom": "^30.1.3",
     "puppeteer-core": "^25.3.0"
   }
 }
