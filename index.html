@@ -1532,7 +1532,8 @@ function seedDemo(s){
   return s;
 }
 function pick(a){return a[Math.floor(Math.random()*a.length)];}
-function rid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function cr36(n){try{var a=new Uint8Array(n);crypto.getRandomValues(a);var o='';for(var i=0;i<n;i++)o+=(a[i]%36).toString(36);return o;}catch(e){return Math.random().toString(36).slice(2,2+n);}}
+function rid(){return Date.now().toString(36)+cr36(5);}
 function shareCode(){const b=crypto.getRandomValues(new Uint8Array(16));let s='';for(const x of b)s+=String.fromCharCode(x);return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');}
 
 /* ---------- i18n helpers ---------- */
@@ -2840,7 +2841,7 @@ function initTelemetry(){
       s.src='https://plausible.io/js/script.js'; document.head.appendChild(s); }
     // Error monitoring (Sentry) — scrubbed: no request bodies, cookies, user, or app state
     if(TELEMETRY.sentryDsn && !window.__snLoaded){ window.__snLoaded=1;
-      const s=document.createElement('script'); s.src='https://browser.sentry-cdn.com/8.0.0/bundle.min.js'; s.crossOrigin='anonymous';
+      const s=document.createElement('script'); s.src='https://browser.sentry-cdn.com/8.0.0/bundle.min.js'; s.crossOrigin='anonymous'; s.integrity='sha384-KgfNZ/yPJH4C25ELk249/OmtPWiqwJxTf/Z5CMlCvdas3BGPSktVyCyXMGXg8vg5';
       s.onload=()=>{ try{ Sentry.init({ dsn:TELEMETRY.sentryDsn, sampleRate:1.0, tracesSampleRate:0, sendDefaultPii:false,
         beforeSend(ev){ try{ if(ev.request){ delete ev.request.data; delete ev.request.cookies; delete ev.request.query_string; }
           delete ev.user; if(ev.contexts){ delete ev.contexts.state; } }catch(e){} return ev; },
@@ -2858,7 +2859,7 @@ function recordEvent(ev,props){
     if(!S.metrics)S.metrics={firstSeen:null,anonId:null,ev:[]};
     const m=S.metrics;
     if(!m.firstSeen)m.firstSeen=new Date().toISOString();
-    if(!m.anonId)m.anonId='r_'+Math.random().toString(36).slice(2,10);
+    if(!m.anonId)m.anonId='r_'+cr36(8);
     // store only the event name + a whitelisted, non-PII prop (e.g. log type / screen id)
     let p=null;
     if(props){const k=props.type||props.r||props.id;if(k)p=String(k).slice(0,24);}
@@ -2939,7 +2940,7 @@ window.exportEvidence=function(){
 };
 window.enrollResearch=function(){
   const ar=isAr();S.research=S.research||{};S.research.enrolled=true;
-  S.research.pid=S.research.pid||('P-'+Math.random().toString(36).slice(2,8).toUpperCase()+Math.random().toString(36).slice(2,6).toUpperCase());
+  S.research.pid=S.research.pid||('P-'+cr36(6).toUpperCase()+cr36(4).toUpperCase());
   S.research.consentAt=new Date().toISOString();if(!S.research.baselineAt)S.research.baselineAt=S.research.consentAt;
   const sc=document.getElementById('siteCode');if(sc&&sc.value.trim())S.research.siteCode=sc.value.trim().toUpperCase();
   save();track('research_enroll');try{closeSheet();}catch(e){}toast(ar?'✓ شكرًا لمساهمتك':'✓ Thank you for contributing');render();
@@ -3031,23 +3032,27 @@ function _unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0));}
 function _pbBase(code){return crypto.subtle.importKey('raw',new TextEncoder().encode(code),'PBKDF2',false,['deriveKey','deriveBits']);}
 //<<GEN backup-crypto>>
 /* SHARED MODULE — edit shared/backup-crypto.js, then run `node build.mjs`. Do not edit the generated copy inside an app file. */
-/* E2E backup crypto: PBKDF2-SHA256 (120k) → AES-GCM-256. Per-app salts keep the three apps' backups isolated
+/* E2E backup crypto: AES-GCM-256 with PBKDF2-SHA256 keys. v1 = 120k iterations (legacy, decrypt only), v2 = 600k iterations, blob prefixed 'v2:' (all new backups). The sync-id derivation is unchanged so existing cloud backups stay reachable. Per-app salts keep the three apps' backups isolated
    (same recovery code yields a different key + sync-id per app). rafeeq is substituted at build time — the salt
    strings must stay byte-identical to what shipped, or existing user backups become unreadable. */
 async function deriveEncKey(code){const b=await _pbBase(code);return crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode('rafeeq-sync-enc-v1'),iterations:120000,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
 async function deriveSyncId(code){const b=await _pbBase(code);const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:new TextEncoder().encode('rafeeq-sync-id-v1'),iterations:120000,hash:'SHA-256'},b,256);return Array.from(new Uint8Array(bits)).map(x=>x.toString(16).padStart(2,'0')).join('');}
 async function encBlob(obj,key){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(obj)));return _sb64(iv)+'.'+_sb64(ct);}
 async function decBlob(blob,key){const p=blob.split('.');const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:_unb64(p[0])},key,_unb64(p[1]));return JSON.parse(new TextDecoder().decode(pt));}
+var _encKeyV2={};
+function deriveEncKeyV2(code){if(!_encKeyV2[code]){_encKeyV2[code]=_pbBase(code).then(b=>crypto.subtle.deriveKey({name:'PBKDF2',salt:new TextEncoder().encode('rafeeq-sync-enc-v2'),iterations:600000,hash:'SHA-256'},b,{name:'AES-GCM',length:256},false,['encrypt','decrypt']));}return _encKeyV2[code];}
+async function encBlobSecure(obj,code){return 'v2:'+await encBlob(obj,await deriveEncKeyV2(code));}
+async function decBlobAuto(blob,code){if(blob.indexOf('v2:')===0)return decBlob(blob.slice(3),await deriveEncKeyV2(code));return decBlob(blob,await deriveEncKey(code));}
 //<</GEN backup-crypto>>
-function genRecoveryCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const out=[];for(let g=0;g<6;g++){let s='';for(let i=0;i<4;i++)s+=A[Math.floor(Math.random()*A.length)];out.push(s);}return out.join('-');}
+function genRecoveryCode(){const A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';const r=crypto.getRandomValues(new Uint8Array(24));const out=[];for(let g=0;g<6;g++){let s='';for(let i=0;i<4;i++)s+=A[r[g*4+i]&31];out.push(s);}return out.join('-');}
 function cloudSnapshot(){const c=Object.assign({},S);delete c.cloud;return c;}
 let _cloudTimer=null,_cloudBusy=false;
 async function cloudPush(silent){
   try{
     if(!S.cloud||!S.cloud.enabled||!S.cloud.code||!cryptoReady()||!cloudOn())return false;
     if(_cloudBusy)return false;_cloudBusy=true;
-    const key=await deriveEncKey(S.cloud.code);const sid=S.cloud.syncId||await deriveSyncId(S.cloud.code);S.cloud.syncId=sid;
-    const blob=await encBlob(cloudSnapshot(),key);
+    const sid=S.cloud.syncId||await deriveSyncId(S.cloud.code);S.cloud.syncId=sid;
+    const blob=await encBlobSecure(cloudSnapshot(),S.cloud.code);
     const sb=await loadSupabase();if(!sb){_cloudBusy=false;return false;}
     const r=await sb.rpc('snapshot_put',{p_sync_id:sid,p_blob:blob,p_schema:1});
     _cloudBusy=false;
@@ -3065,12 +3070,12 @@ async function cloudRestore(code){
   if(!cryptoReady()||!cloudOn())return toast(isAr()?'غير متاح':'Not available here');
   toast(isAr()?'جارٍ الاسترداد…':'Restoring…');
   try{
-    const key=await deriveEncKey(code);const sid=await deriveSyncId(code);
+    const sid=await deriveSyncId(code);
     const sb=await loadSupabase();if(!sb)return toast(isAr()?'تعذّر الاتصال':'Could not connect');
     const r=await sb.rpc('snapshot_get',{p_sync_id:sid});
     if(r&&r.error)return toast(isAr()?'تعذّر الاسترداد':'Restore failed');
     const data=r&&r.data;if(!data||!data.length)return toast(isAr()?'لا توجد نسخة لهذا الرمز':'No backup found for that code');
-    const obj=await decBlob(data[0].blob,key);
+    const obj=await decBlobAuto(data[0].blob,code);
     S=deepMerge(S,obj);
     S.cloud=Object.assign({},S.cloud,{enabled:true,code:code,syncId:sid,lastSync:new Date().toISOString()});
     save();closeSheet();toast(isAr()?'✓ تمّ استرداد بياناتك':'✓ Your data was restored');navTab('today');
